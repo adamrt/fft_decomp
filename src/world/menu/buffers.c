@@ -40,7 +40,7 @@ void menu_gfx_present_frame(s32 first_otag, s32 draw_otag) {
     g_menu_gfx_draw_mode_count = 0;
     GetDrawEnv(envp);
     g_menu_screen_draw_buffer_clip_y = envp->clip.y;
-    while (DrawSync(1) != 0) { }
+    while (DrawSync(1)) { }
     VSync(g_menu_event_speed);
     context = g_menu_screen_packet_buffers;
     if (g_menu_gfx_context == context) {

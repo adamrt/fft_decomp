@@ -122,11 +122,11 @@ static s32 get_birthday_zodiac(s32 month, s32 day) {
  * hatch range comes from its offspring entry, and its level is based on a
  * random non-egg roster member. */
 void breeding_update(s32 unused) {
-    u8 monsters[0x18];
-    u8 levels[0x18];
+    u8 monsters[24];
+    u8 levels[24];
     s32 monster_count = 0;
     s32 unit_count = 0;
-    s32 i = 0;
+    s32 i;
     /* The original reused two scalar temporaries throughout; splitting them
      * into typed locals changes the callee-saved allocation (n holds the
      * egg counter, month index, rarity class, offspring job and new slot;
@@ -141,7 +141,7 @@ void breeding_update(s32 unused) {
 
     srand(g_save_play_time_frames * 100 + g_save_play_time_seconds * 10 + g_save_play_time_minutes
         + g_save_play_time_hours + g_save_play_time_frames);
-    do {
+    for (i = 0; i < PARTY_ROSTER_SLOT_COUNT; i++) {
         unit = party_unit_get(i);
         if (unit->party_id != PARTY_ID_NONE) {
             if (unit->gender_flags & UNIT_FLAG_EGG) {
@@ -169,8 +169,7 @@ void breeding_update(s32 unused) {
                 }
             }
         }
-        i++;
-    } while (i < PARTY_ROSTER_SLOT_COUNT);
+    }
 
     if (monster_count == 0) {
         return;
@@ -179,10 +178,12 @@ void breeding_update(s32 unused) {
     value = rand() & 0xFF;
     if (value < 6) {
         n = BREEDING_RARITY_RARE;
-    } else if (value < 0x10) {
+    } else if (value < 16) {
         n = BREEDING_RARITY_UNCOMMON;
+    } else if (value < 32) {
+        n = BREEDING_RARITY_COMMON;
     } else {
-        n = value < 0x20; /* COMMON or NONE */
+        n = BREEDING_RARITY_NONE;
     }
     if (n == BREEDING_RARITY_NONE) {
         return;
@@ -200,7 +201,7 @@ void breeding_update(s32 unused) {
     name_buffer = &g_text_section_pointers[TEXT_SECTION_ROSTER_UNIT_NAMES];
     value = (s32)*name_buffer;
     *name_buffer = g_text_section_pointers[TEXT_SECTION_UNIT_NAMES];
-    n = party_create_monster_egg(n, i + i * 0x10, rand() % 4);
+    n = party_create_monster_egg(n, i + i * 16, rand() % 4);
     *name_buffer = (u8*)value;
     if (n != -1) {
         unit = party_unit_get(n);

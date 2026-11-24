@@ -40,7 +40,7 @@ s32 item_list_update(void) {
     s32 busy;
     s32 unused[6]; /* never referenced; reproduces the 0x48 frame */
 
-    if (g_formation_item_submenu_initialized == 0) {
+    if (!g_formation_item_submenu_initialized) {
         g_formation_item_submenu_initialized = 1;
         g_menu_selected_slot = menu_selection_set_value(MENU_SCREEN_CURSOR_ITEM_TAB, 0);
         thread_suspend(MENU_SCREEN_THREAD_SLOT_UPPER_MENU);
@@ -70,7 +70,7 @@ s32 item_list_update(void) {
     } else if (g_formation_item_menu_mode == MENU_ITEM_LIST_STATE_REARRANGE) {
         g_formation_item_menu_mode = item_list_update_rearrange_mode();
     } else if (g_formation_item_menu_mode == MENU_ITEM_LIST_STATE_ACTION) {
-        g_formation_cursor_ot_override = 0x3C;
+        g_formation_cursor_ot_override = 60;
         g_formation_item_menu_mode = item_list_update_action_menu();
     } else if (g_formation_item_menu_mode == MENU_ITEM_LIST_STATE_SORT_ORDER) {
         g_formation_item_menu_mode = item_list_update_sort_menu();
@@ -89,11 +89,11 @@ s32 item_list_update(void) {
     } else {
         g_menu_screen_prompt_active = 1;
     }
-    disabled = menu_screen_check_busy() != 0 || g_formation_item_menu_mode != MENU_ITEM_LIST_STATE_BROWSE
+    disabled = menu_screen_check_busy() || g_formation_item_menu_mode != MENU_ITEM_LIST_STATE_BROWSE
         || item_get_equipped_count(g_item_list_entries[g_menu_list_selected_index]) == 0;
-    menu_draw_pressable_button(MENU_PRESSABLE_BUTTON_ITEM_LIST_TRIANGLE, 0xB8, 0x3C,
+    menu_draw_pressable_button(MENU_PRESSABLE_BUTTON_ITEM_LIST_TRIANGLE, 184, 60,
         g_menu_input_primary_repeat & PSX_PAD_TRIANGLE, disabled, SOUND_SFX_CONFIRM);
-    busy = menu_input_get_lock_mode(0) != 0 || thread_is_running(THREAD_SCREEN_SLOT_MENU_CHILD) != 0;
+    busy = menu_input_get_lock_mode(0) || thread_is_running(THREAD_SCREEN_SLOT_MENU_CHILD);
     menu_script_run_with_palette_mode(g_formation_item_list_window_script, input, busy);
     item_list_draw_tabs(0, g_menu_selected_slot, busy);
     if (g_menu_list_entry_count != 0) {
@@ -122,7 +122,7 @@ s32 item_list_update_browse_state(void) {
     s32 slot;
     s32 description;
 
-    if (g_formation_item_category_menu_initialized == 0) {
+    if (!g_formation_item_category_menu_initialized) {
         g_formation_item_category_menu_initialized = 1;
         menu_set_event_speed(2);
         s_formation_item_category_previewed_cursor = -1;

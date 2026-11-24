@@ -3,6 +3,7 @@
 #include "fft/game/battle_unit.h"
 #include "fft/game/item.h"
 #include "fft/party/equipment.h"
+#include "fft/party/item_list.h"
 #include "psx/types.h"
 
 /* Returns 1 when the unit holds a single weapon in two hands: exactly one of
@@ -15,16 +16,16 @@ s32 equipment_is_two_handing_weapon(const s16* slots, s32 two_hands_support) {
 
     if (slots[0] != 0) {
         if (slots[1] == 0) {
-            item_id = slots[0] & 0x3FF;
+            item_id = slots[0] & ITEM_ENTRY_ID_MASK;
         }
     } else if (slots[1] != 0) {
-        item_id = slots[1] & 0x3FF;
+        item_id = slots[1] & ITEM_ENTRY_ID_MASK;
     }
     if (item_id != 0 && item_id < ITEM_ID_THROWABLE_FIRST) {
         u8 flags = g_item_weapon_data[item_id].flags;
         if (flags & WEAPON_FLAG_FORCED_TWO_HANDS) {
             result = 1;
-        } else if (two_hands_support != 0 && (flags & WEAPON_FLAG_TWO_HANDS_COMPATIBLE)) {
+        } else if (two_hands_support && (flags & WEAPON_FLAG_TWO_HANDS_COMPATIBLE)) {
             result = 1;
         }
     }

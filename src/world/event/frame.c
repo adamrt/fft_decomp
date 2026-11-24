@@ -115,7 +115,7 @@ void script_route_event_input(void) {
             s_script_secondary_repeat_counter++;
             if (counter >= repeat_delay) {
                 s_script_repeat_counter = 0;
-                if ((input & PSX_PAD_SQUARE) != 0) {
+                if (input & PSX_PAD_SQUARE) {
                     g_script_event_input = input & (PSX_PAD_RIGHT | PSX_PAD_LEFT);
                 } else {
                     g_script_event_input = input & PSX_PAD_DPAD_MASK;
@@ -124,7 +124,7 @@ void script_route_event_input(void) {
             secondary_repeat_delay = g_input_secondary_repeat_period / g_script_event_speed;
             if (s_script_secondary_repeat_counter >= secondary_repeat_delay) {
                 s_script_secondary_repeat_counter = 0;
-                if ((s_script_current_input & PSX_PAD_SQUARE) != 0) {
+                if (s_script_current_input & PSX_PAD_SQUARE) {
                     g_script_event_input
                         |= s_script_current_input & (PSX_PAD_L1 | PSX_PAD_R1 | PSX_PAD_UP | PSX_PAD_DOWN);
                 } else {
@@ -158,12 +158,12 @@ s32 script_update_event_frame(u32* ot, u32 buttons) {
     g_event_work = (event_work_t*)g_ai_workspace;
     /* While an END graphic is up (immediate drawing), reload its image from the high
      * overlay area into the frame buffer every frame. */
-    if (g_gfx_draw_primitives_immediately != 0) {
+    if (g_gfx_draw_primitives_immediately) {
         DrawSync(0);
-        rect.w = 0x100;
+        rect.w = 256;
         rect.x = 0;
-        rect.h = 0xF0;
-        rect.y = (g_gfx_screen_polarity & 1) * 0xF0;
+        rect.h = 240;
+        rect.y = (g_gfx_screen_polarity & 1) * 240;
         LoadImage(&rect, (u32*)g_heap_high_overlay_load_address);
     }
     g_gfx_current_otag_entry = ot;
@@ -171,16 +171,16 @@ s32 script_update_event_frame(u32* ot, u32 buttons) {
     camera_store_state_to_script_variables();
     menu_draw_active_window_frames();
 
-    if (g_script_threads_idle != 0) {
+    if (g_script_threads_idle) {
         for (i = 1; i < VARIANT_THREAD_TABLE_SLOT_COUNT; i++) {
-            if (thread_is_running_asm(i) != 0) {
+            if (thread_is_running_asm(i)) {
                 break;
             }
         }
         if (i == VARIANT_THREAD_TABLE_SLOT_COUNT) {
             finish_op = scenario_get_finish_operation();
             if (finish_op != 0) {
-                if (script_variable_get(EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS) != 0) {
+                if (script_variable_get(EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS)) {
                     g_script_threads_idle = 0;
                     script_variable_set(EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS, 0);
                     return SCRIPT_EVENT_FRAME_TO_WORLD;
@@ -252,7 +252,7 @@ s32 script_update_event_frame(u32* ot, u32 buttons) {
         ordering_table = jobstts_entrypoint(g_unit_panel_selected_unit.battle_unit_id, 0);
         g_overlay_companion_overlay_primitives = (s32)ordering_table;
         if (ordering_table != 0) {
-            AddPrims(g_gfx_current_otag_entry, ordering_table, &ordering_table[0x3f]);
+            AddPrims(g_gfx_current_otag_entry, ordering_table, &ordering_table[63]);
         } else {
             g_overlay_companion_overlay_state = COMPANION_OVERLAY_STATE_IDLE;
         }
@@ -270,7 +270,7 @@ s32 script_update_event_frame(u32* ot, u32 buttons) {
     script_load_event_input_state((menu_input_state_t*)&g_script_event_input);
     /* A press other than Select alone, or a thread starting or stopping while the threads
      * run (thread_yield), restarts the five-frame input suppression. */
-    if (tutorial_is_current_event() == 0 && g_script_event_input != PSX_PAD_SELECT && g_script_event_input != 0) {
+    if (!tutorial_is_current_event() && g_script_event_input != PSX_PAD_SELECT && g_script_event_input != 0) {
         g_script_input_suppression_frames = 5;
     }
     for (i = 1; i < THREAD_ID_COUNT; i++) {
@@ -329,7 +329,7 @@ s32 script_update_event_frame(u32* ot, u32 buttons) {
 
     /* Once every thread has stopped, the next frame reports the scenario finish. */
     for (i = 1; i < VARIANT_THREAD_TABLE_SLOT_COUNT; i++) {
-        if (thread_is_running_asm(i) != 0) {
+        if (thread_is_running_asm(i)) {
             break;
         }
     }
@@ -351,7 +351,7 @@ void script_set_current_otag_entry_and_update_input(u32* entry, s32 input) {
  * This program's empty request hook does not advance it further. */
 void script_signal_map_destruction(void) {
     if (g_map_destruction_wait_state == 1) {
-        g_map_destruction_wait_state = g_map_destruction_wait_state + 1;
+        g_map_destruction_wait_state++;
     }
 }
 

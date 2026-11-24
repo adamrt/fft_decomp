@@ -845,11 +845,9 @@ static u8 s_screen_text_shop_dialogue_data[2936] = { 254, 236, 114, 227, 8, 28, 
     54, 55, 40, 53, 227, 0, 248, 12, 43, 36, 49, 42, 40, 250, 58, 43, 44, 38, 43, 250, 48, 50, 49, 54, 55, 40, 53, 217,
     193, 54, 250, 49, 36, 48, 40, 217, 201, 254, 236, 24, 27, 40, 44, 54, 248, 217, 182, 217, 182, 217, 182, 16, 53, 53,
     53, 217, 182, 217, 182, 217, 182, 254, 0, 0 };
-static u8* s_screen_text_resident_data[9]
-    = { (u8*)&s_screen_text_skillset_names_data, (u8*)&s_screen_text_job_names_data,
-          (u8*)&s_screen_text_ability_names_data, (u8*)&s_screen_text_formation_messages_data,
-          (u8*)&s_screen_text_dismiss_unit_replies_data, (u8*)&s_screen_text_job_descriptions_data, 0,
-          (u8*)&s_screen_text_name_entry_keyboard_data, (u8*)&s_screen_text_shop_dialogue_data };
+static u8* s_screen_text_resident_data[9] = { s_screen_text_skillset_names_data, s_screen_text_job_names_data,
+    s_screen_text_ability_names_data, s_screen_text_formation_messages_data, s_screen_text_dismiss_unit_replies_data,
+    s_screen_text_job_descriptions_data, 0, s_screen_text_name_entry_keyboard_data, s_screen_text_shop_dialogue_data };
 
 /* Sector and size pairs; flat 32-bit value access preserves the original addressing. */
 static s32 s_tutorial_message_files[TUTORIAL_FORMATION_COUNT * 2]
@@ -862,7 +860,7 @@ static s32 s_tutorial_script_files[TUTORIAL_FORMATION_COUNT * 2]
  * and a size per image. */
 u32* shop_load_background(s32 index) {
     return file_load_into_heap_checked(
-        s_shop_background_tim_files[index * 2], s_shop_background_tim_files[(index * 2) + 1]);
+        s_shop_background_tim_files[index * 2], s_shop_background_tim_files[index * 2 + 1]);
 }
 
 /* Points one of the text section pointers at its resident text data.
@@ -909,7 +907,7 @@ void tutorial_load_files(s32 index, tutorial_state_t* record) {
     s32 slot = index - 1;
 
     record->messages
-        = file_load_into_heap_checked(s_tutorial_message_files[slot * 2], s_tutorial_message_files[(slot * 2) + 1]);
+        = file_load_into_heap_checked(s_tutorial_message_files[slot * 2], s_tutorial_message_files[slot * 2 + 1]);
     record->script
-        = file_load_into_heap_checked(s_tutorial_script_files[slot * 2], s_tutorial_script_files[(slot * 2) + 1]);
+        = file_load_into_heap_checked(s_tutorial_script_files[slot * 2], s_tutorial_script_files[slot * 2 + 1]);
 }

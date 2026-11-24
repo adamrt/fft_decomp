@@ -36,9 +36,9 @@ extern s16 g_menu_screen_grid_cell_23_text_offset;
 extern s16 g_menu_screen_grid_cell_24_text_offset;
 
 /* Open the pending menu description in a Help dialog at the requested position.
- * Grid-menu ids above 0x1ffff are latched without opening a text thread. */
+ * Grid-menu ids above 0x1FFFF are latched without opening a text thread. */
 void help_start_text(s32 position) {
-    if (g_help_message_text_id > 0x1ffff) {
+    if (g_help_message_text_id > 0x1FFFF) {
         g_menu_screen_grid_id = g_help_message_text_id;
         return;
     }
@@ -65,8 +65,8 @@ void menu_screen_update_grid_cursor(s16 alternate) {
     s32 text_id;
     u32 input;
 
-    if (g_menu_screen_grid_initialized == 0) {
-        if (alternate == 0) {
+    if (!g_menu_screen_grid_initialized) {
+        if (!alternate) {
             g_menu_screen_grid_cell_23_text_offset = (s16)HELP_TEXT_ID_SKILLSET_BASE;
             g_menu_screen_grid_cell_24_text_offset = (s16)HELP_TEXT_ID_SKILLSET_BASE;
         } else {
@@ -85,7 +85,7 @@ void menu_screen_update_grid_cursor(s16 alternate) {
         }
     }
     busy = thread_is_running(THREAD_SCREEN_SLOT_TEXT);
-    if (busy == 0) {
+    if (!busy) {
         input = g_menu_screen_input_primary_repeat_latched;
         cell = s_menu_screen_grid_selected_cell;
         if (input & PSX_PAD_CROSS) {
@@ -97,7 +97,7 @@ void menu_screen_update_grid_cursor(s16 alternate) {
         } else if (input & PSX_PAD_CIRCLE) {
             text_id
                 = s_menu_screen_grid_active_cells[cell].value != 0 ? *s_menu_screen_grid_active_cells[cell].value : 0;
-            if (s_menu_screen_grid_selected_cell < 0x12 || s_menu_screen_grid_selected_cell >= 0x1C || text_id != 0) {
+            if (s_menu_screen_grid_selected_cell < 18 || s_menu_screen_grid_selected_cell >= 28 || text_id != 0) {
                 /* This grid adds the base as an unsigned 16-bit text ID. */
                 g_help_message_text_id
                     = text_id + (u16)s_menu_screen_grid_active_cells[s_menu_screen_grid_selected_cell].help_base;
@@ -128,8 +128,8 @@ void menu_screen_update_grid_cursor(s16 alternate) {
     }
     cursor.x = s_menu_screen_grid_active_cells[s_menu_screen_grid_selected_cell].x;
     cursor.y = s_menu_screen_grid_active_cells[s_menu_screen_grid_selected_cell].y;
-    gfx_set_otag_index(0x3C);
-    if (s_menu_screen_grid_active_cells[s_menu_screen_grid_selected_cell].vertical_cursor != 0) {
+    gfx_set_otag_index(60);
+    if (s_menu_screen_grid_active_cells[s_menu_screen_grid_selected_cell].vertical_cursor) {
         cursor.y++;
         menu_draw_bouncing_cursor(&cursor, &g_menu_screen_grid_cursor_anim, busy);
     } else {
@@ -155,7 +155,7 @@ s32 formation_banner_countdown(s32 message_id, s32 frames) {
     current = s_formation_banner_state;
     if (current == 1) {
         menu_thread_request_stop(THREAD_SCREEN_SLOT_MENU);
-        if (thread_is_running(THREAD_SCREEN_SLOT_MENU) == 0) {
+        if (!thread_is_running(THREAD_SCREEN_SLOT_MENU)) {
             g_formation_banner_active = 0;
             s_formation_banner_state = 0;
             return 0;

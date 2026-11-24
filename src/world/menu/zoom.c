@@ -47,7 +47,7 @@ void menu_screen_build_scaled_draw_area_packets(
     pair->rects[0].y = h / 2 + pair->rects[0].y - crop;
     pair->rects[0].w = (pair->rects[0].w * percent) / 100;
     pair->rects[0].h = (pair->rects[0].h * percent) / 100;
-    if (upper_half != 0) {
+    if (upper_half) {
         pair->rects[1].y = 0;
     } else {
         pair->rects[1].y = 0xF0;

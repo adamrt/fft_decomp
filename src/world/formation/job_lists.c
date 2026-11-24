@@ -63,11 +63,11 @@ static s32 no_unit_has_unlocked(s16 job_id) {
     s32 i;
 
     for (i = 0; i < g_formation_unit_count; i++) {
-        if (job_is_special_monster(g_formation_unit_pointers[i]->identity.job_id) == 0) {
+        if (!job_is_special_monster(g_formation_unit_pointers[i]->identity.job_id)) {
             /* One bit per generic job, Squire first: skip to this job's bit. */
             bits_secondary_init_reader(g_formation_unit_pointers[i]->unlocked_jobs);
             bits_secondary_read(job_id - JOB_ID_SQUIRE);
-            if (bits_secondary_read(1) != 0) {
+            if (bits_secondary_read(1)) {
                 return 0;
             }
         }
@@ -110,7 +110,7 @@ s32 job_list_build(u8 unit_index, s16* jobs, s32 mode) {
     }
     jobs[count++] = job;
     if (job_is_special_monster(g_formation_unit_pointers[unit_index]->identity.job_id) == 0
-        && g_formation_unit_pointers[unit_index]->detail.uses_monster_skillset == 0) {
+        && !g_formation_unit_pointers[unit_index]->detail.uses_monster_skillset) {
         /* Skip Squire's bit: the base job above takes Squire's place. */
         bits_primary_read(1);
         for (i = 1; i < JOB_ID_GENERIC_COUNT; i++) {
@@ -127,7 +127,7 @@ s32 job_list_build(u8 unit_index, s16* jobs, s32 mode) {
                 jobs[count++] = job | FORMATION_JOB_LIST_ENTRY_UNAVAILABLE;
             } else if (unlocked != 0) {
                 jobs[count++] = job;
-            } else if (mode == FORMATION_JOB_LIST_MODE_INCLUDE_OTHER_UNIT_UNLOCKS && no_unit_has_unlocked(job) == 0) {
+            } else if (mode == FORMATION_JOB_LIST_MODE_INCLUDE_OTHER_UNIT_UNLOCKS && !no_unit_has_unlocked(job)) {
                 jobs[count++] = job + FORMATION_JOB_LIST_ENTRY_UNAVAILABLE;
             }
         }
@@ -246,9 +246,9 @@ s32 ability_list_build(s16 unit_index, s16 job, menu_ability_category_e ability_
     jp = g_formation_unit_pointers[unit_index]->job_points.current.values[generic];
     bits_primary_init_reader(g_formation_unit_pointers[unit_index]->learned_abilities[generic]);
     for (i = 0; i < SKILLSET_ABILITY_LIST_COUNT; i++) {
-        if (job_is_special_monster(g_formation_unit_pointers[unit_index]->identity.job_id) != 0) {
+        if (job_is_special_monster(g_formation_unit_pointers[unit_index]->identity.job_id)) {
             learned = 1;
-        } else if (g_formation_unit_pointers[unit_index]->detail.uses_monster_skillset != 0) {
+        } else if (g_formation_unit_pointers[unit_index]->detail.uses_monster_skillset) {
             if (i >= 3) {
                 break;
             }
@@ -329,6 +329,7 @@ s32 formation_ability_build_rsm_list(s16 unit_index, s32 slot, s16* out) {
     }
 
     for (n = count - 1; n > 0; n--) {
+        /* The bytes need this guarded do-while; a for loop allocates registers differently. */
         i = 0;
         if (n > 0) {
             do {

@@ -49,7 +49,7 @@ void item_list_sort(s32 mode, s16* list) {
 
     count = 0;
     while (list[count] != -1) {
-        id = list[count] & 0x3ff;
+        id = list[count] & ITEM_ENTRY_ID_MASK;
         if (id == 0 || id >= ITEM_ID_END) {
             j = count;
             while ((list[j] = list[j + 1]) != -1) {
@@ -78,8 +78,8 @@ void item_list_sort(s32 mode, s16* list) {
     for (; passes > 0; passes--) {
         for (j = 0; j < passes; j++) {
             k = 0;
-            item_a = list[j] & 0x3ff;
-            item_b = list[j + 1] & 0x3ff;
+            item_a = list[j] & ITEM_ENTRY_ID_MASK;
+            item_b = list[j + 1] & ITEM_ENTRY_ID_MASK;
             criterion = criteria[k];
 
             while (criterion >= 0) {
@@ -248,6 +248,7 @@ void formation_roster_sort(s32 index) {
     for (i = 0; i < count; i++) {
         j = 0;
         swap = egg_indices[i];
+        /* The bytes test inside the loop; a `while` condition is rotated to the bottom. */
         while (1) {
             if (g_formation_record_order[j] == swap) {
                 break;

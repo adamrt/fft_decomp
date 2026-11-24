@@ -25,9 +25,8 @@ s32 menu_text_render_glyph_to_4bpp_image(s32 glyph, u8* image, const text_image_
     /* The font pointer goes through a local for the exact match. */
     font = g_text_glyph_bitmap_data;
     bits_primary_init_reader(font + glyph * TEXT_GLYPH_BYTES);
-    row = 0;
     if ((target->x & 1) == 0) {
-        for (; row < 14; row++) {
+        for (row = 0; row < 14; row++) {
             dst = image + (target->row_stride << 1) * (target->y + row) + (target->x >> 1);
             for (col = 0; col < 5; col++) {
                 pixel = bits_primary_read(2);
@@ -44,7 +43,7 @@ s32 menu_text_render_glyph_to_4bpp_image(s32 glyph, u8* image, const text_image_
             }
         }
     } else {
-        for (; row < 14; row++) {
+        for (row = 0; row < 14; row++) {
             dst = image + (target->row_stride << 1) * (target->y + row) + (target->x >> 1);
             pixel = bits_primary_read(2);
             if (pixel != 0) {

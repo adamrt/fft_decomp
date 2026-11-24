@@ -286,7 +286,8 @@ static void load_portraits(void) {
  * Load the common menu images, palettes, and optional extra image pages.
  *
  * The first resource is cached across calls. Each temporary allocation stays
- * alive until its queued VRAM transfers finish.
+ * alive until its queued VRAM transfers finish. Each file goes through
+ * `resource` before its typed view; the original copies the pointer.
  */
 static void load_graphics(s32 load_extra_pages) {
     void* resource;
@@ -369,10 +370,6 @@ void menu_screen_init_open_text(void) {
  */
 void menu_screen_init_world_resources(void) {
     s32 i;
-    s32 value;
-    u8* base;
-    u32* src;
-    u8** dst;
 
     menu_init_subsystem_pointers();
     load_graphics(1);
@@ -382,16 +379,9 @@ void menu_screen_init_world_resources(void) {
     menu_subsystems_reset();
     script_variable_set(EVENT_SCRIPT_VAR_WORLD_DEBUG_BATTLE_STYLE, 0);
     g_menu_thread_menu_data = g_menu_screen_default_entries;
-    i = 0;
-    src = s_menu_text_file_buffer;
-    base = (u8*)&src[TEXT_SECTION_COUNT];
-    dst = g_text_section_pointers;
-    do {
-        value = *src++;
-        /* Byte-pointer addition reverses the target's final addu operands. */
-        *dst++ = (u8*)(value + (s32)base);
-        i++;
-    } while (i < TEXT_SECTION_COUNT);
+    for (i = 0; i < TEXT_SECTION_COUNT; i++) {
+        g_text_section_pointers[i] = s_menu_text_file_buffer[i] + (u8*)&s_menu_text_file_buffer[TEXT_SECTION_COUNT];
+    }
     g_text_section_pointers[TEXT_SECTION_LOCATION_NAMES] = g_world_map_location_names;
     script_variable_set(EVENT_SCRIPT_VAR_RAMZA_MANDATORY_IN_SQUAD, 0);
     script_variable_set(EVENT_SCRIPT_VAR_DEPLOYMENT_SQUAD_COUNT, 1);
@@ -410,10 +400,6 @@ void menu_screen_init_world_resources(void) {
  */
 void menu_screen_init_world_text(void) {
     s32 i;
-    s32 value;
-    u8* base;
-    u32* src;
-    u8** dst;
 
     g_thread_current_id = THREAD_SLOT_MAIN;
     menu_init_subsystem_pointers();
@@ -423,16 +409,9 @@ void menu_screen_init_world_text(void) {
     menu_subsystems_reset();
     script_variable_set(EVENT_SCRIPT_VAR_WORLD_DEBUG_BATTLE_STYLE, 0);
     g_menu_thread_menu_data = g_menu_screen_default_entries;
-    i = 0;
-    src = s_menu_text_file_buffer;
-    base = (u8*)&src[TEXT_SECTION_COUNT];
-    dst = g_text_section_pointers;
-    do {
-        value = *src++;
-        /* Byte-pointer addition reverses the target's final addu operands. */
-        *dst++ = (u8*)(value + (s32)base);
-        i++;
-    } while (i < TEXT_SECTION_COUNT);
+    for (i = 0; i < TEXT_SECTION_COUNT; i++) {
+        g_text_section_pointers[i] = s_menu_text_file_buffer[i] + (u8*)&s_menu_text_file_buffer[TEXT_SECTION_COUNT];
+    }
     g_text_section_pointers[TEXT_SECTION_LOCATION_NAMES] = g_world_map_location_names;
     script_variable_set(EVENT_SCRIPT_VAR_RAMZA_MANDATORY_IN_SQUAD, 0);
     script_variable_set(EVENT_SCRIPT_VAR_DEPLOYMENT_SQUAD_COUNT, 1);
@@ -580,7 +559,7 @@ void menu_screen_set_brightness(s32 red, s32 green, s32 blue) {
 /* Main menu text window thread:
  * sizes the entry's window to its text, clamps it on screen, redraws the text
  * image every 32 frames and, while it runs as the menu group's second window
- * (THREAD_TASK_MENU_GROUP_SECOND_WINDOW) and the main menu scrolls past 0x28,
+ * (THREAD_TASK_MENU_GROUP_SECOND_WINDOW) and the main menu scrolls past 40,
  * slides the window in 8-pixel steps to the left edge (positive scroll
  * direction) or the right edge (otherwise). */
 void world_map_menu_text_window_thread(void) {
@@ -604,16 +583,17 @@ void world_map_menu_text_window_thread(void) {
     gfx_set_draw_mode_for_texture_page(&record->frame_draw_mode, MENU_TEXTURE_PAGE_FRAME);
     build_entry_frame_sprites(entry, record->frame_sprites, 0);
     mem_copy_bytes_nonempty(s_saved_text_values, g_text_substitution_values, sizeof(s_saved_text_values));
+    /* entry->value is read again for the second value, as the original reloads it after the store. */
     text_values = entry->value;
     g_text_substitution_values[0] = text_values[0];
     text_values = entry->value;
     g_text_substitution_values[1] = text_values[1];
     text_measure(&width, &height, text_find_entry(entry->text_id));
     mem_copy_bytes_nonempty(g_text_substitution_values, s_saved_text_values, sizeof(g_text_substitution_values));
-    /* 10-pixel columns plus a 0x18 border, rounded up past the next multiple of four. */
+    /* 10-pixel columns plus a 24-pixel border, rounded up past the next multiple of four. */
     x = width * 10;
     pad = ((x & 2) == 0) * 4;
-    x += 0x18;
+    x += 24;
     width = x + (x & 3) + pad;
     height = height * 16 + 16;
     entry->inner_width = width;
@@ -623,15 +603,15 @@ void world_map_menu_text_window_thread(void) {
     entry->window.h = height;
     entry->text_image.source.h = height;
     /* Keep the window on screen; menu windows use centered coordinates (x and y about 0). */
-    if (entry->window.x + width > 0x80) {
-        entry->window.x = 0x78 - width;
-    } else if (entry->window.x < -0x80) {
-        entry->window.x = -0x78;
+    if (entry->window.x + width > 128) {
+        entry->window.x = 120 - width;
+    } else if (entry->window.x < -128) {
+        entry->window.x = -120;
     }
-    if (entry->window.y + height > 0x78) {
-        entry->window.y = 0x68 - height;
-    } else if (entry->window.y < -0x78) {
-        entry->window.y = -0x68;
+    if (entry->window.y + height > 120) {
+        entry->window.y = 104 - height;
+    } else if (entry->window.y < -120) {
+        entry->window.y = -104;
     }
     init_entry_text_sprite(&rect, entry, &record->text_sprite);
     SetSemiTrans(&record->text_sprite, 1);
@@ -642,7 +622,7 @@ void world_map_menu_text_window_thread(void) {
     target = 0;
     for (i = 0;; i++) {
         record = &records[i & 1];
-        phase = i & 0x1F;
+        phase = i & 31;
         if (phase == 0) {
             buffer = menu_build_and_upload_window_frame_image(
                 entry->inner_width, entry->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
@@ -674,13 +654,13 @@ void world_map_menu_text_window_thread(void) {
             record->frame_sprites[0].clut = 0x7CBC;
         }
         if (g_threads[g_thread_current_id].task_id == THREAD_TASK_MENU_GROUP_SECOND_WINDOW) {
-            if (g_world_map_menu_scroll_threshold > 0x28 && target == 0) {
+            if (g_world_map_menu_scroll_threshold > 40 && target == 0) {
                 if (g_world_map_menu_scroll_direction > 0) {
-                    if (entry->window.x >= -0x3F) {
-                        target = -0x78;
+                    if (entry->window.x >= -63) {
+                        target = -120;
                     }
-                } else if (entry->window.x < -0x3F) {
-                    target = 0x78 - width;
+                } else if (entry->window.x < -63) {
+                    target = 120 - width;
                 }
             }
             if (target != 0) {
@@ -721,11 +701,8 @@ static void options_thread(void) {
 /* Runs the game options thread in the slot below the current thread,
  * handing it this thread's first parameter, then waits for it and stops. */
 void option_open_game_options_in_previous_thread(void) {
-    s32 thread_id;
-
     thread_start(g_thread_current_id - 1, options_thread);
-    thread_id = g_thread_current_id;
-    thread_set_parameters(thread_id - 1, g_threads[thread_id].function_parameter_1, 0, 0);
+    thread_set_parameters(g_thread_current_id - 1, g_threads[g_thread_current_id].function_parameter_1, 0, 0);
     thread_wait_inactive(g_thread_current_id - 1);
     thread_current_exit();
 }
@@ -856,7 +833,7 @@ static void update_formation_request(void) {
         menu_screen_set_brightness(0, 0, 0);
         return;
     }
-    if (state < 8) {
+    if (state < WORLD_MAP_REQUEST_START_FADE_IN) {
         s_formation_open_request_state = state + 1;
         return;
     }
@@ -916,6 +893,7 @@ static void update_tutorial_request(void) {
 static void update_variable_list_request(void) {
     s32 state = s_world_map_debug_variable_list_request_state;
 
+    /* The redundant zero test is in the original; dropping it changes the branches. */
     if (state != 0 && state == 1) {
         g_world_map_screen_request = 1;
         menu_screen_reset_context();
@@ -930,6 +908,7 @@ static void update_variable_list_request(void) {
 static void update_party_number_request(void) {
     s32 state = s_world_map_debug_party_number_request_state;
 
+    /* The redundant zero test is in the original; dropping it changes the branches. */
     if (state != 0 && state == 1) {
         g_world_map_screen_request = 1;
         menu_screen_reset_context();
@@ -988,7 +967,7 @@ static void update_save_request(void) {
         menu_screen_set_brightness(0, 0, 0);
         return;
     }
-    if (state < 8) {
+    if (state < WORLD_MAP_REQUEST_START_FADE_IN) {
         s_save_menu_request_state = state + 1;
         return;
     }
@@ -1142,27 +1121,25 @@ static void build_entry_frame_sprites(menu_entry_t* entry, SPRT sprite[2], s32 u
         mode = (u16)entry->window.y;
         sprite->u0 = 0xA8;
         sprite->v0 = 0x88;
-        sprite->w = 0x28;
+        sprite->w = 40;
         sprite->h = 8;
         mode -= 1;
         sprite->y0 = mode;
-    } else {
-        if (mode == 2) {
-            x = entry->window.x;
-            sprite->x0 = x - 6;
-            mode = (u16)entry->window.y;
-            sprite->u0 = 0xA8;
-            sprite->v0 = 0x78;
-            sprite->w = 0x28;
-            sprite->h = 0x10;
-            mode -= 6;
-            sprite->y0 = mode;
-        }
+    } else if (mode == 2) {
+        x = entry->window.x;
+        sprite->x0 = x - 6;
+        mode = (u16)entry->window.y;
+        sprite->u0 = 0xA8;
+        sprite->v0 = 0x78;
+        sprite->w = 40;
+        sprite->h = 16;
+        mode -= 6;
+        sprite->y0 = mode;
     }
     sprite++;
     menu_init_sprt(sprite);
-    sprite->w = 0x10;
-    sprite->h = 0x10;
+    sprite->w = 16;
+    sprite->h = 16;
     sprite->clut = 0x7D7C;
 }
 
@@ -1221,7 +1198,7 @@ s16 menu_screen_update_menu_frame(u32* otag, u32 input) {
             g_menu_screen_secondary_repeat_counter++;
             if (counter >= repeat_delay) {
                 g_menu_screen_repeat_counter = 0;
-                if ((input & PSX_PAD_SQUARE) != 0) {
+                if (input & PSX_PAD_SQUARE) {
                     g_menu_screen_new_buttons = input & (PSX_PAD_RIGHT | PSX_PAD_LEFT);
                 } else {
                     g_menu_screen_new_buttons = input & PSX_PAD_DPAD_MASK;
@@ -1230,7 +1207,7 @@ s16 menu_screen_update_menu_frame(u32* otag, u32 input) {
             secondary_delay = g_input_secondary_repeat_period / g_script_event_speed;
             if (g_menu_screen_secondary_repeat_counter >= secondary_delay) {
                 g_menu_screen_secondary_repeat_counter = 0;
-                if ((g_menu_screen_current_input & PSX_PAD_SQUARE) != 0) {
+                if (g_menu_screen_current_input & PSX_PAD_SQUARE) {
                     g_menu_screen_new_buttons
                         |= g_menu_screen_current_input & (PSX_PAD_L1 | PSX_PAD_R1 | PSX_PAD_UP | PSX_PAD_DOWN);
                 } else {
@@ -1311,14 +1288,15 @@ s16 menu_screen_update_menu_frame(u32* otag, u32 input) {
 }
 
 /* Opens menu entry `index` in THREAD_SLOT_MENU, first placing its window at the default
- * origin (-0x70, -0x50; the x and y arguments are ignored) and clamping that origin so the
+ * origin (-112, -80; the x and y arguments are ignored) and clamping that origin so the
  * window stays on screen. Does nothing while that slot runs. */
 void menu_screen_open_entry_window(s32 index, s32 unused_x, s32 unused_y) {
     menu_entry_t* entry;
     s32 x;
     s32 y;
-    s32 initial_x = -0x70;
-    s32 initial_y = -0x50;
+    /* The origin goes through locals; constant stores schedule differently. */
+    s32 initial_x = -112;
+    s32 initial_y = -80;
 
     if (g_threads[THREAD_SLOT_MENU].is_running == 0) {
         entry = &g_menu_screen_default_entries[index];
@@ -1327,16 +1305,16 @@ void menu_screen_open_entry_window(s32 index, s32 unused_x, s32 unused_y) {
         entry->window.y = initial_y;
         x = entry->window.x;
         g_menu_screen_open_entry_index = index;
-        if (x + entry->window.w >= 0x81) {
-            entry->window.x = 0x78 - entry->window.w;
-        } else if (x < -0x80) {
-            entry->window.x = -0x78;
+        if (x + entry->window.w > 128) {
+            entry->window.x = 120 - entry->window.w;
+        } else if (x < -128) {
+            entry->window.x = -120;
         }
         y = entry->window.y;
-        if (y + entry->window.h >= 0x79) {
-            entry->window.y = 0x70 - entry->window.h;
-        } else if (y < -0x78) {
-            entry->window.y = -0x70;
+        if (y + entry->window.h > 120) {
+            entry->window.y = 112 - entry->window.h;
+        } else if (y < -120) {
+            entry->window.y = -112;
         }
         thread_start(THREAD_SLOT_MENU, g_menu_thread_menu_data[index].thread_entry);
         thread_set_parameters(THREAD_SLOT_MENU, (s32)&g_menu_thread_menu_data[index], 0, 0);
@@ -1372,6 +1350,7 @@ s32 menu_screen_build_window_frame_image(s32 w, s32 h, u16* dst) {
                 src_index = (((i - 8) & 0xF) + 8) << 6;
             }
         }
+        /* `first` is always 0, but the original computes the row from it. */
         row = base + (i - first) * words;
         row[words - 1] = src[src_index + 9];
         row[words - 2] = src[src_index + 8];

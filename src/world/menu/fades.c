@@ -22,16 +22,16 @@ static RECT s_screen_fade_tile_rect = { 0, 0, 256, 240 };
 /* Return the active WORLD fades as SCREEN_FADE_STATE bits (decreasing 1, increasing 2), or none
  * while fades are disabled. */
 s32 fade_menu_get_state(void) {
-    if (s_fade_disabled != 0) {
+    if (s_fade_disabled) {
         return FADE_MENU_STATE_NONE;
     }
-    return s_fade_in_active + (s_fade_out_active * FADE_MENU_STATE_INCREASING);
+    return s_fade_in_active + s_fade_out_active * FADE_MENU_STATE_INCREASING;
 }
 
 /* Start the fade from intensity 240 down to zero (the screen fades in),
  * unless fades are disabled. */
 void fade_menu_start_in(void) {
-    if (s_fade_disabled == 0) {
+    if (!s_fade_disabled) {
         s_fade_in_active = 1;
         s_fade_out_active = 0;
         s_screen_fade_intensity = 240;
@@ -41,7 +41,7 @@ void fade_menu_start_in(void) {
 /* Start the fade from intensity 0 up to full (the screen fades out), unless
  * fades are disabled. */
 void fade_menu_start_out(void) {
-    if (s_fade_disabled == 0) {
+    if (!s_fade_disabled) {
         s_fade_in_active = 0;
         s_fade_out_active = 1;
         s_screen_fade_intensity = 0;
@@ -59,11 +59,11 @@ void fade_menu_start_out(void) {
 s32 fade_menu_update_in(void) {
     s32 running = 1;
 
-    if (s_fade_disabled != 0) {
+    if (s_fade_disabled) {
         return 0;
     }
-    if (s_fade_in_active != 0) {
-        s_screen_fade_intensity -= menu_get_event_speed() * 0x10;
+    if (s_fade_in_active) {
+        s_screen_fade_intensity -= menu_get_event_speed() * 16;
         if (s_screen_fade_intensity <= 0) {
             s_fade_in_active = 0;
             running = 0;
@@ -77,21 +77,21 @@ s32 fade_menu_update_in(void) {
 
 /* Sibling of fade_menu_update_in. Steps the subtractive fade level
  * up (the screen darkens) and draws the full-screen fade tile, ending clamped
- * at 0xFF. Returns 0 on the completion step or while disabled; otherwise 1,
+ * at 255. Returns 0 on the completion step or while disabled; otherwise 1,
  * including calls when this fade direction is inactive. */
 s32 fade_menu_update_out(void) {
     s32 running = 1;
     s32 unused[4]; /* target frame is 0x10 larger than the live locals need */
 
-    if (s_fade_disabled != 0) {
+    if (s_fade_disabled) {
         return 0;
     }
-    if (s_fade_out_active != 0) {
-        s_screen_fade_intensity += menu_get_event_speed() * 0x10;
-        if (s_screen_fade_intensity >= 0x100) {
+    if (s_fade_out_active) {
+        s_screen_fade_intensity += menu_get_event_speed() * 16;
+        if (s_screen_fade_intensity >= 256) {
             running = 0;
             s_fade_out_active = 0;
-            s_screen_fade_intensity = 0xFF;
+            s_screen_fade_intensity = 255;
         }
         menu_gfx_enqueue_draw_mode(0, 0, GetTPage(0, 2, 0x100, 0), 0, g_menu_screen_ot_length - 2);
         g_fade_menu_tile_color.r = g_fade_menu_tile_color.g = g_fade_menu_tile_color.b = s_screen_fade_intensity;
@@ -101,7 +101,7 @@ s32 fade_menu_update_out(void) {
 }
 
 /* When set, the fade helpers in this file all bail out immediately, leaving
- * g_screen_fade_intensity untouched. */
+ * s_screen_fade_intensity untouched. */
 void fade_menu_set_disabled(u8 disabled) {
     s_fade_disabled = disabled;
 }

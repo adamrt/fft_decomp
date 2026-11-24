@@ -79,39 +79,39 @@ static RECT s_formation_comparison_unit_portrait_rect = { 32, 510, 16, 1 };
  */
 void unit_panel_banner_thread(void) {
     RECT rects[6];
-    s32 anim_state;
+    s32 fade_step;
     s32 cur_unit;
     s32 prev_unit;
 
-    u8* number_pixels;                              /* sp60 */
-    menu_status_panel_editor_packet_t* editor_base; /* sp68 */
-    menu_number_entry_t* number_entries;            /* sp70 */
-    unit_panel_summary_t* state;                    /* sp78 */
-    s32 portrait_arg;                               /* sp80 */
-    const RECT* transition;                         /* sp88 */
-    palette_t* portrait_palettes;                   /* sp90 */
-    menu_unit_number_images_t* number_images;       /* sp98 */
-    u8* name_image;                                 /* spA0 */
-    menu_status_panel_packet_t* panel_base;         /* spA8 */
-    menu_unit_status_identity_t* identity;          /* spB0 */
-    unit_panel_thread_t* thread;                    /* spB8 */
-    s32 frame;                                      /* spC0 */
-    s32 shake;                                      /* spC8 */
-    s32 dimmed;                                     /* spD0 */
-    s32 suppress;                                   /* spD8 */
+    u8* number_pixels;
+    menu_status_panel_editor_packet_t* editor_base;
+    menu_number_entry_t* number_entries;
+    unit_panel_summary_t* state;
+    s32 portrait_arg;
+    const RECT* transition;
+    palette_t* portrait_palettes;
+    menu_unit_number_images_t* number_images;
+    u8* name_image;
+    menu_status_panel_packet_t* panel_base;
+    menu_unit_status_identity_t* identity;
+    unit_panel_thread_t* thread;
+    s32 frame;
+    s32 slide_step;
+    s32 dimmed;
+    s32 portrait_hidden;
 
     s32 thread_id;
     s32 i;
     s32 draw_x;
     s32 draw_y;
-    s16 cell;
+    s16 zodiac;
     menu_status_panel_packet_t* panel;
     menu_status_panel_editor_packet_t* editor;
     u32* input;
     u8* stat_image_upper;
     POLY_FT4* panel_portrait;
 
-    suppress = 0;
+    portrait_hidden = 0;
     thread_current_set_task(THREAD_TASK_UNIT_STATUS_BANNER);
     input = script_get_controller_input_pointer(0);
     thread_id = g_thread_current_id;
@@ -145,7 +145,7 @@ void unit_panel_banner_thread(void) {
         editor_base = editor;
         portrait_palettes = s_formation_comparison_unit_portrait_palettes;
     }
-    shake = 0;
+    slide_step = 0;
 
     /* Build the summary packets once, then copy them for the second frame buffer. */
     unit_panel_init_numeric_frame(&g_menu_portrait_origin, &editor->numeric_frame);
@@ -205,7 +205,7 @@ void unit_panel_banner_thread(void) {
     mem_copy_bytes_nonempty(panel + 1, panel, sizeof(menu_status_panel_packet_t));
 
     frame = 0;
-    anim_state = 0;
+    fade_step = 0;
     prev_unit = state->unit_index;
     cur_unit = state->unit_index;
     for (;;) {
@@ -258,7 +258,7 @@ void unit_panel_banner_thread(void) {
         if (dimmed != 0) {
             unit_panel_set_numeric_frame_dimmed_colors(&editor->numeric_frame);
             unit_panel_set_numeric_frame_dimmed_colors(&panel->numeric_frame);
-            if ((anim_state - 4) < 6U) {
+            if (fade_step >= 4 && fade_step < 10) {
                 setRGB0(&editor->portrait[0], 0x20, 0x28, 0x38);
             } else {
                 setRGB0(&editor->portrait[0], 0x40, 0x50, 0x70);
@@ -267,18 +267,16 @@ void unit_panel_banner_thread(void) {
             setRGB0(&editor->portrait[2], 0x20, 0x28, 0x38);
             setRGB0(&editor->portrait[3], 0x20, 0x28, 0x38);
         } else {
-            s32 shade;
             unit_panel_set_numeric_frame_normal_colors(&editor->numeric_frame);
             unit_panel_set_numeric_frame_normal_colors(&panel->numeric_frame);
-            if ((anim_state - 4) >= 6U) {
+            if (fade_step < 4 || fade_step >= 10) {
                 setRGB0(&editor->portrait[0], 0x80, 0x80, 0x80);
             } else {
                 setRGB0(&editor->portrait[0], 0x40, 0x40, 0x40);
             }
-            shade = 0x40;
-            setRGB0(&editor->portrait[1], shade, shade, shade);
-            setRGB0(&editor->portrait[2], shade, shade, shade);
-            setRGB0(&editor->portrait[3], shade, shade, shade);
+            setRGB0(&editor->portrait[1], 0x40, 0x40, 0x40);
+            setRGB0(&editor->portrait[2], 0x40, 0x40, 0x40);
+            setRGB0(&editor->portrait[3], 0x40, 0x40, 0x40);
         }
         if (dimmed != 0) {
             setRGB0(&panel->portrait, 0x40, 0x40, 0x60);
@@ -286,36 +284,34 @@ void unit_panel_banner_thread(void) {
             setRGB0(&panel->portrait, 0x80, 0x80, 0x80);
         }
 
-        g_gfx_draw_offset_y = (g_menu_framebuffer_y != 0xF0) ? 0xF0 : 0;
+        g_gfx_draw_offset_y = g_menu_framebuffer_y != 240 ? 240 : 0;
 
         /* Slide down through steps 1-6 or up through 11-16, one step every two frames, then keep
          * only the hidden flag. */
-        if ((thread->flags & MENU_STATUS_PANEL_SLIDE_DOWN) && (shake == 0)) {
-            shake = 1;
+        if ((thread->flags & MENU_STATUS_PANEL_SLIDE_DOWN) && slide_step == 0) {
+            slide_step = 1;
         }
-        if (thread->flags & MENU_STATUS_PANEL_SLIDE_UP) {
-            if (shake == 0) {
-                shake = 0xB;
-            }
+        if ((thread->flags & MENU_STATUS_PANEL_SLIDE_UP) && slide_step == 0) {
+            slide_step = 11;
         }
-        if (shake != 0) {
-            if (shake < 0xA) {
-                thread->position.y = g_unit_panel_slide_y[0][shake - 1];
+        if (slide_step != 0) {
+            if (slide_step < 10) {
+                thread->position.y = g_unit_panel_slide_y[0][slide_step - 1];
                 if (frame & 1) {
-                    shake += 1;
+                    slide_step++;
                 }
-                if (shake >= 7) {
-                    shake = 0;
-                    thread->flags = thread->flags & MENU_STATUS_PANEL_HIDDEN;
+                if (slide_step >= 7) {
+                    slide_step = 0;
+                    thread->flags &= MENU_STATUS_PANEL_HIDDEN;
                 }
-            } else if (shake >= 0xB) {
-                thread->position.y = g_unit_panel_slide_y[1][shake - 11];
+            } else if (slide_step >= 11) {
+                thread->position.y = g_unit_panel_slide_y[1][slide_step - 11];
                 if (frame & 1) {
-                    shake += 1;
+                    slide_step++;
                 }
-                if (shake >= 0x11) {
-                    shake = 0;
-                    thread->flags = thread->flags & MENU_STATUS_PANEL_HIDDEN;
+                if (slide_step >= 17) {
+                    slide_step = 0;
+                    thread->flags &= MENU_STATUS_PANEL_HIDDEN;
                 }
             }
         }
@@ -339,30 +335,29 @@ void unit_panel_banner_thread(void) {
 
         /* A finished cross-fade (step 10) settles on the new unit; a changed unit, or a redraw
          * request arriving mid-fade, (re)starts the fade at step 2. */
-        if (anim_state >= 0xA) {
-            anim_state = 0;
+        if (fade_step >= 10) {
+            fade_step = 0;
             prev_unit = cur_unit;
-            suppress = thread->flags & MENU_STATUS_PANEL_HIDDEN;
+            portrait_hidden = thread->flags & MENU_STATUS_PANEL_HIDDEN;
         }
+        /* Both arms repeat the three stores; sharing them changes the code. */
         if (thread->redraw_request != 0) {
-            if (anim_state == 0) {
+            if (fade_step == 0) {
                 prev_unit = cur_unit;
                 portrait_arg = thread->redraw_request;
                 cur_unit = state->unit_index;
             } else {
-                anim_state = 2;
+                fade_step = 2;
                 prev_unit = cur_unit;
                 portrait_arg = thread->redraw_request;
                 cur_unit = state->unit_index;
             }
         }
-        if (cur_unit != prev_unit) {
-            if (anim_state == 0) {
-                anim_state = 2;
-            }
+        if (cur_unit != prev_unit && fade_step == 0) {
+            fade_step = 2;
         }
         portrait_build_transition(
-            transition, &anim_state, &cur_unit, &prev_unit, portrait_palettes, &editor->portrait[0], portrait_arg);
+            transition, &fade_step, &cur_unit, &prev_unit, portrait_palettes, &editor->portrait[0], portrait_arg);
 
         /* The three gauge bars have a fixed width and a 3-pixel slant; dimming halves red and green. */
         {
@@ -408,14 +403,14 @@ void unit_panel_banner_thread(void) {
             }
         }
 
-        /* Zodiac icons sit 7 to a row, each 0x18 by 0x14. */
-        panel->sprites[6].u0 = (identity->zodiac % 7) * 0x18;
-        cell = identity->zodiac;
-        panel->sprites[6].w = 0x18;
-        panel->sprites[6].h = 0x14;
-        panel->sprites[6].v0 = (cell / 7) * 0x14 + 0x2A;
+        /* Zodiac icons sit 7 to a row, each 24 by 20. */
+        panel->sprites[6].u0 = (identity->zodiac % 7) * 24;
+        zodiac = identity->zodiac;
+        panel->sprites[6].w = 24;
+        panel->sprites[6].h = 20;
+        panel->sprites[6].v0 = (zodiac / 7) * 20 + 42;
 
-        if ((frame == 0) || (thread->redraw_request != 0)) {
+        if (frame == 0 || thread->redraw_request != 0) {
             /* WORLD keeps its identity view (unit index, roster slot) in the shared record. */
             unit_panel_copy_billboard_in(&g_unit_panel_selected_unit_stat_summary,
                 (const unit_panel_unit_t*)&g_formation_selected_unit_identity, &g_formation_selected_unit_stat_detail);
@@ -425,17 +420,15 @@ void unit_panel_banner_thread(void) {
                 number_entries[6].format = 2;
             }
             mem_zero_words(number_pixels, 0x700);
-            {
-                g_menu_window_text_pen.stride = 0x38;
-                if (g_formation_preview_stats_window_active == 0) {
-                    text_draw_number_entries(number_pixels, number_entries, &g_menu_window_text_pen, 6);
-                } else {
-                    menu_text_render_decimal_entry_list(number_pixels, &number_entries[10], &g_menu_window_text_pen, 1);
-                    menu_text_render_decimal_entry_list(number_pixels, &number_entries[12], &g_menu_window_text_pen, 1);
-                    text_draw_number_entries(number_pixels, &number_entries[11], &g_menu_window_text_pen, 1);
-                    text_draw_number_entries(number_pixels, &number_entries[13], &g_menu_window_text_pen, 1);
-                    text_draw_number_entries(number_pixels, &number_entries[4], &g_menu_window_text_pen, 2);
-                }
+            g_menu_window_text_pen.stride = 0x38;
+            if (g_formation_preview_stats_window_active == 0) {
+                text_draw_number_entries(number_pixels, number_entries, &g_menu_window_text_pen, 6);
+            } else {
+                menu_text_render_decimal_entry_list(number_pixels, &number_entries[10], &g_menu_window_text_pen, 1);
+                menu_text_render_decimal_entry_list(number_pixels, &number_entries[12], &g_menu_window_text_pen, 1);
+                text_draw_number_entries(number_pixels, &number_entries[11], &g_menu_window_text_pen, 1);
+                text_draw_number_entries(number_pixels, &number_entries[13], &g_menu_window_text_pen, 1);
+                text_draw_number_entries(number_pixels, &number_entries[4], &g_menu_window_text_pen, 2);
             }
             LoadImage(&rects[0], (u32*)number_pixels);
             stat_image_upper = number_pixels + 0x400;
@@ -464,7 +457,8 @@ void unit_panel_banner_thread(void) {
             text_draw_small_number_glyphs(
                 identity->faith, SMALL_NUMBER_WIDEN_FOR_100 | 2, number_images->faith, &g_menu_window_text_pen);
             LoadImage(&rects[4], (u32*)number_images->faith);
-            /* The unit-join screen uploads the roster number image cleared. */
+            /* The unit-join screen uploads the roster number image cleared. Each arm makes its own
+             * upload call; one shared call changes the code. */
             if (g_menu_post_battle_unit_changes_active == 0) {
                 menu_text_set_origin(0, 0);
                 text_draw_small_number_glyphs(
@@ -491,8 +485,8 @@ void unit_panel_banner_thread(void) {
                 gfx_draw_or_append_gpu_primitive(&editor->label_sprites[i]);
             }
             gfx_draw_or_append_gpu_primitive(&editor->draw_mode_b);
-            if (suppress == 0) {
-                if (anim_state >= 5) {
+            if (portrait_hidden == 0) {
+                if (fade_step >= 5) {
                     gfx_draw_or_append_gpu_primitive(&editor->portrait[2]);
                     gfx_draw_or_append_gpu_primitive(&editor->portrait[3]);
                     gfx_draw_or_append_gpu_primitive(&editor->portrait[1]);
@@ -521,7 +515,7 @@ void unit_panel_banner_thread(void) {
         if (thread_current_get_parameter_3() != 0) {
             break;
         }
-        frame += 1;
+        frame++;
     }
 
     /* Parameter 3 ends the thread: free the six text images. */

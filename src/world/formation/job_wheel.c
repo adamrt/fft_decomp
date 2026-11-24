@@ -353,26 +353,24 @@ void formation_job_update_menu(void) {
                         }
                     }
 
-                    if (g_menu_input_secondary_repeat & PSX_PAD_SELECT) {
-                        if (g_formation_job_wheel_job_count >= 2) {
-                            i = get_job_text_index(job & FORMATION_JOB_LIST_ENTRY_ID_MASK);
-                            if (i >= 0) {
-                                message_box_show_with_sound(i + TEXT_ID_FORMATION_TEXT_BASE, SOUND_SFX_WINDOW_OPEN);
-                                g_unit_panel_status_display_thread_params.style = 1;
-                            }
+                    if ((g_menu_input_secondary_repeat & PSX_PAD_SELECT) && g_formation_job_wheel_job_count >= 2) {
+                        i = get_job_text_index(job & FORMATION_JOB_LIST_ENTRY_ID_MASK);
+                        if (i >= 0) {
+                            message_box_show_with_sound(i + TEXT_ID_FORMATION_TEXT_BASE, SOUND_SFX_WINDOW_OPEN);
+                            g_unit_panel_status_display_thread_params.style = 1;
                         }
                     }
                 }
             } else {
                 /* A spin moves one job per 36 progress units; small wheels turn more slowly. */
+                /* pad is reused for the job count, as the original's register allocation requires. */
                 pad = g_formation_job_wheel_job_count;
                 if ((s32)pad < 4) {
                     g_formation_job_wheel_spin_progress += 2;
-                }
-                if ((s32)pad >= 4) {
+                } else {
                     g_formation_job_wheel_spin_progress += 3;
                 }
-                if (g_formation_job_wheel_spin_progress >= 0x24) {
+                if (g_formation_job_wheel_spin_progress >= 36) {
                     g_formation_job_wheel_spin_progress = 0;
                     g_formation_job_wheel_cursor_index += g_formation_job_wheel_spin_direction;
                     if (g_formation_job_wheel_cursor_index < 0) {
@@ -623,7 +621,7 @@ static void update_wheel_close(void) {
     pos = s_formation_job_wheel_close_frame * 0x140 + ONE;
     draw_wheel_sprites(((s_formation_job_wheel_close_frame + 1) << 10) / 20, pos, pos);
     s_formation_job_wheel_close_frame++;
-    if (s_formation_job_wheel_close_frame >= 0x14) {
+    if (s_formation_job_wheel_close_frame >= 20) {
         s_formation_job_wheel_closing = 0;
         g_formation_current_menu = FORMATION_MENU_JOB_WHEEL_OPENING;
     }
@@ -663,7 +661,7 @@ static void build_wheel_choices(void) {
         g_formation_current_menu = FORMATION_MENU_JOB_WHEEL;
         return;
     }
-    s_formation_job_wheel_open_frame = 0x14;
+    s_formation_job_wheel_open_frame = 20;
     s_formation_job_wheel_opening = 1;
 }
 
@@ -699,19 +697,17 @@ static void refresh_wheel(void) {
         g_formation_current_menu = FORMATION_MENU_JOB_WHEEL_OPENING;
         s_formation_job_wheel_closing = 0;
         g_formation_job_wheel_unit_index = g_unit_selected_index;
-    } else {
-        if (s_formation_job_wheel_opening != 0) {
-            step = s_formation_job_wheel_open_frame;
-            g_formation_job_wheel_unit_index = g_unit_selected_index;
-            build_wheel_choices();
-            s_formation_job_wheel_open_frame = step + g_input_secondary_repeat_period / menu_get_event_speed();
-            if (s_formation_job_wheel_open_frame >= 0x11) {
-                s_formation_job_wheel_open_frame = 0x10;
-            }
-            g_formation_current_menu = FORMATION_MENU_JOB_WHEEL_OPENING;
-        } else {
-            g_formation_current_menu = FORMATION_MENU_JOB_WHEEL_CLOSING;
+    } else if (s_formation_job_wheel_opening != 0) {
+        step = s_formation_job_wheel_open_frame;
+        g_formation_job_wheel_unit_index = g_unit_selected_index;
+        build_wheel_choices();
+        s_formation_job_wheel_open_frame = step + g_input_secondary_repeat_period / menu_get_event_speed();
+        if (s_formation_job_wheel_open_frame > 16) {
+            s_formation_job_wheel_open_frame = 16;
         }
+        g_formation_current_menu = FORMATION_MENU_JOB_WHEEL_OPENING;
+    } else {
+        g_formation_current_menu = FORMATION_MENU_JOB_WHEEL_CLOSING;
     }
     prepare_wheel_sprite();
 }
@@ -815,7 +811,7 @@ static void draw_mastered_star(s32 x, s32 y, s32 otag_index, s32 value) {
     }
     sprite = &s_formation_job_wheel_mastered_icon_sprite;
     sprite->position.x = x + 7;
-    s_formation_job_wheel_mastered_icon_sprite.position.y = y - 0xC;
-    s_formation_job_wheel_mastered_icon_sprite.source.u = level * 10 + 0x24;
+    sprite->position.y = y - 12;
+    sprite->source.u = level * 10 + 0x24;
     menu_gfx_enqueue_oriented_textured_quad(sprite, 0, TEXTURE_UV_FLIP_NONE, 0, otag_index);
 }

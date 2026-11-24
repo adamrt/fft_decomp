@@ -48,7 +48,7 @@ void menu_input_update_controller(void) {
     secondary_repeat_period = g_input_secondary_repeat_period / speed;
     current_input = read_pad_buttons(0);
     if (current_input & PSX_PAD_TRIANGLE) {
-        if (g_menu_screen_input_triangle_latch != 0) {
+        if (g_menu_screen_input_triangle_latch) {
             menu_input_clear_state();
         } else {
             g_menu_screen_input_triangle_latch = 1;
@@ -124,10 +124,10 @@ void menu_input_update_controller(void) {
                 filtered_input &= ~(1U << index);
             }
         }
-        current_input &= 0xf00ff00f;
-        filtered_input &= 0xf00ff00f;
-        current_input |= g_menu_input_newly_pressed & 0x0ff0;
-        filtered_input |= g_menu_input_newly_pressed & 0x0ff0;
+        current_input &= 0xF00FF00F;
+        filtered_input &= 0xF00FF00F;
+        current_input |= g_menu_input_newly_pressed & 0x0FF0;
+        filtered_input |= g_menu_input_newly_pressed & 0x0FF0;
         g_menu_input_primary_repeat = current_input;
         g_menu_input_secondary_repeat = filtered_input;
     }

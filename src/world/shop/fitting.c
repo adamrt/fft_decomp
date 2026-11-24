@@ -95,7 +95,7 @@ static void commit_fitting_purchase(void);
 /* Menu callback: add `delta` to the fitting room's running cost and return
  * the new total. */
 static s32 add_fitting_cost(s32 delta) {
-    return g_shop_fitting_cost = delta + g_shop_fitting_cost;
+    return g_shop_fitting_cost += delta;
 }
 
 /* Menu callback: no marker (-1) for any unit. */
@@ -335,7 +335,7 @@ void shop_fitting_update_equipment_menu(void) {
         menu_selection_set_record(slot, g_menu_list_selected_index, g_menu_scroll_base_index, g_item_list_entries);
     }
 
-    g_shop_fitting_slot_cursor_point.y = g_shop_fitting_equip_slot * 16 + 0x90;
+    g_shop_fitting_slot_cursor_point.y = g_shop_fitting_equip_slot * 16 + 144;
     gfx_set_otag_index(0x3d);
     menu_draw_sliding_cursor(&g_shop_fitting_slot_cursor_point, &g_shop_fitting_slot_cursor_anim,
         g_shop_fitting_item_list_open != 0 || g_menu_input_lock_mode != 0);
@@ -424,7 +424,7 @@ void shop_fitting_update_remove_menu(void) {
         value = -1;
     }
     g_help_message_text_id = value;
-    g_shop_fitting_remove_cursor_point.y = (u8)slot * 16 + 0x90;
+    g_shop_fitting_remove_cursor_point.y = (u8)slot * 16 + 144;
     gfx_set_otag_index(0x3D);
     menu_draw_sliding_cursor(
         &g_shop_fitting_remove_cursor_point, &g_shop_fitting_remove_cursor_anim, menu_input_get_lock_mode(0));
@@ -577,7 +577,6 @@ static s32 update_checkout_prompt(void) {
     if (g_menu_screen_selection_results[MENU_SCREEN_SELECTION_PROMPT_RESULT] != 1) {
         if (g_shop_fitting_checkout_prompt_result != 0) {
             undo_fitting();
-            return SHOP_FITTING_CHECKOUT_DONE;
         }
         return SHOP_FITTING_CHECKOUT_DONE;
     }
@@ -844,7 +843,7 @@ void shop_fitting_update_equipped_sale(void) {
             g_shop_menu_step = SHOP_STEP_FITTING_ROOM;
             thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, -1, 0);
         }
-        g_shop_fitting_sell_equipped_cursor_point.y = g_shop_fitting_sell_equipped_slot * 16 + 0x90;
+        g_shop_fitting_sell_equipped_cursor_point.y = g_shop_fitting_sell_equipped_slot * 16 + 144;
         gfx_set_otag_index(0x3d);
         menu_draw_sliding_cursor(&g_shop_fitting_sell_equipped_cursor_point, &g_shop_fitting_sell_equipped_cursor_anim,
             menu_input_get_lock_mode(0));
@@ -908,10 +907,11 @@ static void return_equipped_item(s16 unit_index, s16 equipment_index) {
     s32 equipped_item = g_formation_unit_pointers[unit_index]->detail.equipment[equipment_index];
 
     if (equipped_item != ITEM_ID_NOTHING) {
-        if ((equipped_item >> 15) == 0)
+        if ((equipped_item >> 15) == 0) {
             g_shop_fitting_items[unit_index][equipment_index] = equipped_item;
-        else
+        } else {
             add_fitting_cost(-shop_get_item_price(equipped_item & ITEM_ENTRY_ID_MASK));
+        }
         g_formation_unit_pointers[unit_index]->detail.equipment[equipment_index] = ITEM_ID_NOTHING;
     }
 }

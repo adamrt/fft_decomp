@@ -153,7 +153,7 @@ static void place_digit_cursor(menu_entry_t* entry, POLY_FT4* quad, POLY_FT4* sh
         }
         if (thread_is_previous_running() == 0 && g_menu_input_lock_mode == 0) {
             if (thread->task_words[MENU_CURSOR_THREAD_WORD_BOB_ACTIVE] != 0
-                && thread->task_words[MENU_CURSOR_THREAD_WORD_BOB_TIMER] >= 0x1B) {
+                && thread->task_words[MENU_CURSOR_THREAD_WORD_BOB_TIMER] >= 27) {
                 thread->task_words[MENU_CURSOR_THREAD_WORD_BOB_ACTIVE] = 0;
                 thread->task_words[MENU_CURSOR_THREAD_WORD_BOB_TIMER] = 0;
             }
@@ -168,15 +168,15 @@ static void place_digit_cursor(menu_entry_t* entry, POLY_FT4* quad, POLY_FT4* sh
         }
         thread->task_words[MENU_CURSOR_THREAD_WORD_BOB_TIMER] += g_script_event_speed;
         x = -(cursor + 1) * 6;
-        y -= 0x17;
-        setXY4(quad, entry->window.x + (entry->inner_width + x) - 0x13, entry->window.y - y + 4,
+        y -= 23;
+        setXY4(quad, entry->window.x + (entry->inner_width + x) - 19, entry->window.y - y + 4,
             entry->window.x + (entry->inner_width + x) - 3, entry->window.y - y + 4,
-            entry->window.x + (entry->inner_width + x) - 0x13, entry->window.y - y + 0x14,
-            entry->window.x + (entry->inner_width + x) - 3, entry->window.y - y + 0x14);
-        setXY4(shadow, entry->window.x + (entry->inner_width + x) - 0x11, entry->window.y - y + 6,
+            entry->window.x + (entry->inner_width + x) - 19, entry->window.y - y + 20,
+            entry->window.x + (entry->inner_width + x) - 3, entry->window.y - y + 20);
+        setXY4(shadow, entry->window.x + (entry->inner_width + x) - 17, entry->window.y - y + 6,
             entry->window.x + (entry->inner_width + x) - 1, entry->window.y - y + 6,
-            entry->window.x + (entry->inner_width + x) - 0x11, entry->window.y - y + 0x16,
-            entry->window.x + (entry->inner_width + x) - 1, entry->window.y - y + 0x16);
+            entry->window.x + (entry->inner_width + x) - 17, entry->window.y - y + 22,
+            entry->window.x + (entry->inner_width + x) - 1, entry->window.y - y + 22);
     }
 }
 
@@ -214,6 +214,7 @@ void menu_screen_number_entry_thread(void) {
     /* A direct pen pointer folds both member-address adjustments and changes scheduling. */
     stride = &g_menu_window_text_pen.stride;
     thread = &g_threads[g_thread_current_id];
+    /* Reading the entry through a parameter pointer keeps the original load order. */
     parameter = &thread->function_parameter_1;
     param = (menu_entry_t*)*parameter;
     range = param->context;
@@ -267,7 +268,7 @@ void menu_screen_number_entry_thread(void) {
         param->inner_width, param->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
     *stride = param->inner_width;
     menu_text_set_origin(8, 9);
-    menu_text_set_origin(param->inner_width - digits * 6 - 0x10, 9);
+    menu_text_set_origin(param->inner_width - digits * 6 - 16, 9);
     draw_signed_number(value, digits, buffer, (glyph_blit_t*)((u8*)stride - offsetof(glyph_blit_t, stride)));
     LoadImage(&rect, buffer);
     redraw = 1;
@@ -300,6 +301,7 @@ void menu_screen_number_entry_thread(void) {
             } else {
                 menu_screen_number_range_t* current_range;
 
+                /* The original reloads the range from the entry here. */
                 *result = value;
                 current_range = param->context;
                 current_range->on_confirm();
@@ -337,7 +339,7 @@ void menu_screen_number_entry_thread(void) {
             buffer = menu_build_and_upload_window_frame_image(
                 param->inner_width, param->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
             *stride = param->inner_width;
-            menu_text_set_origin(param->inner_width - digits * 6 - 0x10, 9);
+            menu_text_set_origin(param->inner_width - digits * 6 - 16, 9);
             draw_signed_number(value, digits, buffer, (glyph_blit_t*)((u8*)stride - offsetof(glyph_blit_t, stride)));
             LoadImage(&rect, buffer);
         }
@@ -455,7 +457,7 @@ void menu_screen_labeled_number_entry_thread(void) {
     menu_text_set_origin(8, 9);
     text_render_entry_to_image(param->text_id, buffer, &g_menu_window_text_pen);
     menu_text_set_origin((u16)label_size.width + 8, 9);
-    menu_text_set_origin(param->inner_width - digits * 6 - 0x10, 9);
+    menu_text_set_origin(param->inner_width - digits * 6 - 16, 9);
     draw_signed_number(value, digits, buffer, &g_menu_window_text_pen);
     LoadImage(&rect, buffer);
     redraw = 1;
@@ -487,6 +489,7 @@ void menu_screen_labeled_number_entry_thread(void) {
             } else {
                 menu_screen_number_range_t* current_range;
 
+                /* The original reloads the range from the entry here. */
                 *result = value;
                 current_range = param->context;
                 current_range->on_confirm();
@@ -529,7 +532,7 @@ void menu_screen_labeled_number_entry_thread(void) {
             menu_text_set_origin(8, 9);
             text_render_entry_to_image(param->text_id, buffer, &g_menu_window_text_pen);
             menu_text_set_origin((u16)label_size.width * 6 + 8, 9);
-            menu_text_set_origin(param->inner_width - digits * 6 - 0x10, 9);
+            menu_text_set_origin(param->inner_width - digits * 6 - 16, 9);
             draw_signed_number(value, digits, buffer, &g_menu_window_text_pen);
             LoadImage(&rect, buffer);
         }
@@ -614,7 +617,7 @@ void menu_screen_text_entry_thread(void) {
     menu_entry_t* entry = (menu_entry_t*)thread->function_parameter_1;
     menu_text_binding_t* binding;
     s32 text_thread;
-    u16 second;
+    u16 header_id;
     s32 speaker_id;
     u16 text_id;
     menu_text_binding_t* prepare_binding;
@@ -623,12 +626,12 @@ void menu_screen_text_entry_thread(void) {
     prepare_binding->prepare();
     s_screen_list_controller_input = script_get_controller_input_pointer(0);
     text_id = entry->text_id;
-    second = entry->header_id;
+    header_id = entry->header_id;
     binding = entry->context;
     text_thread = binding->text_thread_id;
     speaker_id = binding->speaker_id;
     thread_start(text_thread, message_dialog_thread);
-    thread_set_parameters(text_thread, second, text_id, speaker_id);
+    thread_set_parameters(text_thread, header_id, text_id, speaker_id);
     thread_wait_inactive(text_thread);
     *s_screen_list_controller_input = PSX_PAD_CIRCLE;
     while (1) {
@@ -636,7 +639,7 @@ void menu_screen_text_entry_thread(void) {
         if (menu_should_close_thread(s_screen_list_controller_input) != 0) {
             break;
         }
-        if ((thread - 1)->function_parameter_3 != 0) {
+        if (thread[-1].function_parameter_3 != 0) {
             break;
         }
         thread_wait_frames(1);
@@ -661,7 +664,7 @@ void menu_screen_fit_child_entry_to_digits(void) {
          * stale $a0. Nothing calls this function. */
         digits = text_count_decimal_digits(value);
         width = digits * 6;
-        margin = (digits & 1) * 2 + 0x18;
+        margin = (digits & 1) * 2 + 24;
         width += margin;
         old_width = entry->inner_width;
         entry->inner_width = width;

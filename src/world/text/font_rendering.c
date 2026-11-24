@@ -126,10 +126,10 @@ void menu_screen_upload_font_glyph(u16 code, s32 x, s32 y, s32 style) {
     rect.x = 0;
     rect.y = 0;
     rect.w = 3;
-    rect.h = 0x10;
-    if (code > 0xcfff) {
-        glyph = (code >> 8) & 0xf;
-        glyph = glyph * TEXT_GLYPHS_PER_PREFIX + (code & 0xff);
+    rect.h = 16;
+    if (code > 0xCFFF) {
+        glyph = (code >> 8) & 0xF;
+        glyph = glyph * TEXT_GLYPHS_PER_PREFIX + (code & 0xFF);
     } else {
         if (code >= TEXT_EXTENDED_GLYPH_PREFIX_FIRST) {
             return;
@@ -141,7 +141,7 @@ void menu_screen_upload_font_glyph(u16 code, s32 x, s32 y, s32 style) {
     rect.x = x;
     rect.y = y;
     LoadImage(&rect, image);
-    while (DrawSync(1) != 0) { }
+    while (DrawSync(1)) { }
 }
 
 /* Advance over count characters of a 0xFE-terminated text entry; bytes

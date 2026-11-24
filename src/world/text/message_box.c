@@ -150,7 +150,8 @@ static void draw_box_glyph(s32 x, s32 y, s32 wait) {
         s_message_box_vram_rect.w = 3;
     }
 
-    /* At phase 2 the first word is shared with the previous glyph: carry its byte over. */
+    /* At phase 2 the first word is shared with the previous glyph: carry its byte over. Here and
+     * below, offsetting the pointer before indexing keeps the original address arithmetic. */
     if (phase == 2) {
         for (i = 0; i < 14; i++) {
             s_message_box_column_scratch[i]
@@ -471,33 +472,33 @@ void message_box_thread(void) {
     text = text_find_entry(thread_current_get_parameter_2());
     base_entry = text_find_entry(thread_current_get_parameter_2() & 0xF800);
 
-    /* Unlike a dialog, the box has a fixed size: 3 lines of 0x12 cells with a portrait, else 2 of 0x14. */
+    /* Unlike a dialog, the box has a fixed size: 3 lines of 18 cells with a portrait, else 2 of 20. */
     if (rec.box_type == DIALOG_BOX_TYPE_PORTRAIT) {
-        rec.mark = 0x12;
+        rec.mark = 18;
         rec.lines = 3;
     } else {
-        rec.mark = 0x14;
+        rec.mark = 20;
         rec.lines = 2;
     }
     rec.height = rec.lines * 16 + 16;
-    rec.width = rec.mark * 10 + 0x18;
+    rec.width = rec.mark * 10 + 24;
     if (rec.box_type == DIALOG_BOX_TYPE_PORTRAIT) {
-        rec.width = rec.mark * 10 + 0x40;
+        rec.width = rec.mark * 10 + 64;
     }
 
     /* Center horizontally; positions 1, 2 and 3 are the top, bottom and middle. */
     rec.tail_offset = 0;
     half_w = rec.width >> 1;
-    x = (0x100 - half_w) & ~1;
+    x = (256 - half_w) & ~1;
     half_h = rec.height >> 1;
     if (rec.position == 1) {
-        y = 0xC;
+        y = 12;
     }
     if (rec.position == 2) {
-        y = 0xE4 - rec.height;
+        y = 228 - rec.height;
     }
     if (rec.position == 3) {
-        y = (0x78 - half_h) & ~1;
+        y = (120 - half_h) & ~1;
     }
     right = x + half_w - 6;
     bottom = y + half_h - 2;
@@ -527,12 +528,12 @@ void message_box_thread(void) {
         menu_build_and_upload_window_frame_image(rec.width, rec.height, &rec.rect, MENU_WINDOW_FRAME_UPLOAD);
     }
 
-    /* The formation screen shifts its boxes by (-0x100, -0x78). */
+    /* The formation screen shifts its boxes by (-256, -120). */
     if (g_formation_screen_active != 0) {
-        x -= 0x100;
-        y -= 0x78;
-        right -= 0x100;
-        bottom -= 0x78;
+        x -= 256;
+        y -= 120;
+        right -= 256;
+        bottom -= 120;
     }
 
     /* Both quads start collapsed at the open point; the portrait sits at the left (flipped) in a top box. */
@@ -545,14 +546,14 @@ void message_box_thread(void) {
     if (rec.position == 1) {
         to.x = x + 8;
         to.y = y + 7;
-        to.w = 0x1F;
-        to.h = 0x30;
+        to.w = 31;
+        to.h = 48;
         flip_box_quad(&win->quads[1], -1);
     } else {
-        to.x = x + rec.width - 0x30;
+        to.x = x + rec.width - 48;
         to.y = y + 8;
-        to.w = 0x1F;
-        to.h = 0x30;
+        to.w = 31;
+        to.h = 48;
     }
 
     /* The pair's two buffers alternate by frame, so the second starts as a copy of the first. */
@@ -569,7 +570,7 @@ void message_box_thread(void) {
     x = win->quads[0].u0 + 8;
     y = win->quads[0].v0 + 8;
     if (rec.box_type == DIALOG_BOX_TYPE_PORTRAIT && rec.position == 1) {
-        x = win->quads[0].u0 + 0x30;
+        x = win->quads[0].u0 + 48;
     }
 
     delay = 1;
@@ -647,6 +648,7 @@ void message_box_thread(void) {
                     saved = (u8*)-1;
                     continue;
                 }
+                /* A break loop: a `while` is rotated to test at the bottom. */
                 while (1) {
                     if (column >= rec.lines) {
                         break;
@@ -740,13 +742,13 @@ void message_box_thread(void) {
                     menu_build_and_upload_window_frame_image(
                         rec.width, rec.height, &rec.rect, MENU_WINDOW_FRAME_UPLOAD);
                 }
-                cursor_y = y - 0x10;
+                cursor_y = y - 16;
                 thread_yield();
             }
 
             no_wait = 0;
             cursor_x = x;
-            cursor_y += 0x10;
+            cursor_y += 16;
         } else if (code == TEXT_CHOICE_MARK) {
             rec.mark = column;
             NEXT();
@@ -843,6 +845,7 @@ void message_box_thread(void) {
             } else if ((code & 0xF0) == TEXT_BACKREFERENCE_PREFIX_FIRST && (code & 0xF) < 4) {
                 /* Compressed text: replay `repeat` bytes from earlier in the entry, then resume at `saved`. */
                 saved = text + 3;
+                /* Built up one step at a time; the combined expressions are reassociated. */
                 value = (text[0] & 3) * 8;
                 repeat = text[1] >> 5;
                 repeat += value;
@@ -858,7 +861,7 @@ void message_box_thread(void) {
                     /* A two-byte glyph: the prefix's low nibble selects a page of glyphs. */
                     code = (*text & 0xF) * TEXT_GLYPHS_PER_PREFIX;
                     NEXT();
-                    code = code + *text;
+                    code += *text;
                 }
 
                 g_message_box_glyph.glyph = code;

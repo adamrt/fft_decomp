@@ -270,7 +270,7 @@ s32 menu_screen_filter_buttons(void) {
  */
 static void update_selection_slide(void) {
     if (g_formation_unit_slide_frame < 9) {
-        g_formation_unit_slide_frame = g_formation_unit_slide_frame + 1;
+        g_formation_unit_slide_frame++;
         g_unit_panel_status_display_thread_params.redraw_request = 0;
     } else {
         g_formation_unit_slide_frame = 0;
@@ -310,16 +310,16 @@ void formation_run_screen(s32 tutorial, s32 unused) {
     s32 i;
     u8 last_menu;
 
-    g_menu_screen_ot_length = 0x40;
-    g_menu_screen_textured_quad_capacity = 0x1F4;
-    g_menu_screen_gradient_quad_capacity = 0x5A;
-    g_menu_screen_textured_gradient_quad_capacity = 0x3C;
-    g_menu_screen_flat_line_capacity = 0xA;
-    g_menu_screen_gradient_line_capacity = 0x82;
-    g_gfx_tile_capacity = 0x1E;
-    g_menu_screen_draw_move_capacity = 0x1E;
-    g_menu_screen_draw_area_capacity = 0x1E;
-    g_gfx_draw_mode_capacity = 0x1E;
+    g_menu_screen_ot_length = 64;
+    g_menu_screen_textured_quad_capacity = 500;
+    g_menu_screen_gradient_quad_capacity = 90;
+    g_menu_screen_textured_gradient_quad_capacity = 60;
+    g_menu_screen_flat_line_capacity = 10;
+    g_menu_screen_gradient_line_capacity = 130;
+    g_gfx_tile_capacity = 30;
+    g_menu_screen_draw_move_capacity = 30;
+    g_menu_screen_draw_area_capacity = 30;
+    g_gfx_draw_mode_capacity = 30;
 
     menu_gfx_init_contexts(buffers, otags, 0, 0, 0, textured_quads, 0, 0, gradient_quads, textured_gradient_quads,
         flat_lines, 0, 0, gradient_lines, 0, 0, tiles, 0, 0, 0, 0, 0, 0, draw_moves, draw_areas, draw_modes);
@@ -335,101 +335,99 @@ void formation_run_screen(s32 tutorial, s32 unused) {
         music_switch_track(g_menu_screen_music_slot, 0x7F, 0);
     }
 
-    if (g_formation_screen_running != 0) {
-        do {
-            menu_gfx_present_frame(0, 0);
-            if (tutorial_update() == 0) {
-                break;
-            }
-            menu_input_update_message_state();
-            if (g_formation_banner_active != 0) {
-                formation_banner_countdown(0, 0);
-                menu_input_clear_state();
-            }
-            menu_screen_update_input_lockout();
-            fade_menu_update_in();
-            if (g_menu_input_primary_repeat & PSX_PAD_SELECT) {
-                help_start_text(DIALOG_POSITION_CENTER);
-            }
-            if (g_menu_screen_grid_id != MENU_GRID_HELP_NONE) {
-                menu_screen_update_grid_cursor(
-                    g_formation_unit_pointers[g_unit_selected_index]->detail.uses_monster_skillset);
-            }
-            menu_palette_set_mode(g_menu_input_lock_mode);
+    while (g_formation_screen_running != 0) {
+        menu_gfx_present_frame(0, 0);
+        if (tutorial_update() == 0) {
+            break;
+        }
+        menu_input_update_message_state();
+        if (g_formation_banner_active != 0) {
+            formation_banner_countdown(0, 0);
+            menu_input_clear_state();
+        }
+        menu_screen_update_input_lockout();
+        fade_menu_update_in();
+        if (g_menu_input_primary_repeat & PSX_PAD_SELECT) {
+            help_start_text(DIALOG_POSITION_CENTER);
+        }
+        if (g_menu_screen_grid_id != MENU_GRID_HELP_NONE) {
+            menu_screen_update_grid_cursor(
+                g_formation_unit_pointers[g_unit_selected_index]->detail.uses_monster_skillset);
+        }
+        menu_palette_set_mode(g_menu_input_lock_mode);
 
-            g_formation_menu_handlers[g_formation_current_menu]();
-            if (g_formation_current_menu == FORMATION_MENU_UNIT_GRID
-                || g_formation_current_menu == FORMATION_MENU_DISMISS_UNIT
-                || g_formation_current_menu == FORMATION_MENU_ORDER_UNIT) {
-                unit_grid_update(1, g_formation_current_menu == FORMATION_MENU_UNIT_GRID,
-                    g_formation_current_menu == FORMATION_MENU_UNIT_GRID,
-                    g_formation_triangle_menu_open + g_menu_screen_grid_id != 0
-                        ? 0
-                        : g_menu_screen_input_secondary_repeat_latched,
-                    menu_screen_check_busy(), 0, 0);
-            } else {
-                unit_grid_draw_background(g_formation_scroll_position + g_formation_scroll_velocity, 0);
-            }
+        g_formation_menu_handlers[g_formation_current_menu]();
+        if (g_formation_current_menu == FORMATION_MENU_UNIT_GRID
+            || g_formation_current_menu == FORMATION_MENU_DISMISS_UNIT
+            || g_formation_current_menu == FORMATION_MENU_ORDER_UNIT) {
+            unit_grid_update(1, g_formation_current_menu == FORMATION_MENU_UNIT_GRID,
+                g_formation_current_menu == FORMATION_MENU_UNIT_GRID,
+                g_formation_triangle_menu_open + g_menu_screen_grid_id != 0
+                    ? 0
+                    : g_menu_screen_input_secondary_repeat_latched,
+                menu_screen_check_busy(), 0, 0);
+        } else {
+            unit_grid_draw_background(g_formation_scroll_position + g_formation_scroll_velocity, 0);
+        }
 
-            /* L1/R1 cycle units; i is the buttons' disabled flag here. */
-            i = 0;
-            if (g_formation_unit_cycle_mode != 0 || g_formation_unit_browse_enabled != 0) {
-                if (g_menu_input_lock_mode != 0 || g_menu_screen_grid_id != MENU_GRID_HELP_NONE
-                    || g_formation_unit_cycle_mode == 1 || g_formation_triangle_menu_running != 0) {
-                    i = 1;
-                }
-                buttons = 0;
-                if (g_formation_current_menu == FORMATION_MENU_DISMISS_UNIT) {
-                    i = 1;
-                }
-                if (i == 0) {
-                    buttons = g_menu_input_secondary_repeat;
-                }
-                formation_cycle_selected_unit(buttons);
-                menu_draw_pressable_button(
-                    MENU_PRESSABLE_BUTTON_L1, 0xC, 0xE, buttons & PSX_PAD_L1, i, SOUND_SFX_PAGE_SWITCH);
-                menu_draw_pressable_button(
-                    MENU_PRESSABLE_BUTTON_R1, 0xE0, 0xE, buttons & PSX_PAD_R1, i, SOUND_SFX_PAGE_SWITCH);
+        /* L1/R1 cycle units; i is the buttons' disabled flag here. */
+        i = 0;
+        if (g_formation_unit_cycle_mode != 0 || g_formation_unit_browse_enabled != 0) {
+            if (g_menu_input_lock_mode != 0 || g_menu_screen_grid_id != MENU_GRID_HELP_NONE
+                || g_formation_unit_cycle_mode == 1 || g_formation_triangle_menu_running != 0) {
+                i = 1;
             }
+            buttons = 0;
+            if (g_formation_current_menu == FORMATION_MENU_DISMISS_UNIT) {
+                i = 1;
+            }
+            if (i == 0) {
+                buttons = g_menu_input_secondary_repeat;
+            }
+            formation_cycle_selected_unit(buttons);
+            menu_draw_pressable_button(
+                MENU_PRESSABLE_BUTTON_L1, 0xC, 0xE, buttons & PSX_PAD_L1, i, SOUND_SFX_PAGE_SWITCH);
+            menu_draw_pressable_button(
+                MENU_PRESSABLE_BUTTON_R1, 0xE0, 0xE, buttons & PSX_PAD_R1, i, SOUND_SFX_PAGE_SWITCH);
+        }
 
-            if (g_formation_current_menu != FORMATION_MENU_ITEM_REMOVE) {
-                unit_grid_update_selection();
-            }
-            if (g_formation_unit_slide_pending != 0) {
-                update_selection_slide();
-            }
+        if (g_formation_current_menu != FORMATION_MENU_ITEM_REMOVE) {
+            unit_grid_update_selection();
+        }
+        if (g_formation_unit_slide_pending != 0) {
+            update_selection_slide();
+        }
 
-            /* The event layer goes to OT 0x3E over the item list, the job wheel and the transitions (14 and up). */
-            g_gfx_current_otag_entry = g_menu_gfx_context->otag + 63;
-            menu_draw_active_window_frames();
-            if (g_formation_current_menu == FORMATION_MENU_ITEM_LIST
-                || g_formation_current_menu >= FORMATION_MENU_JOB_WHEEL_ENTER
-                || g_formation_current_menu == FORMATION_MENU_JOB_WHEEL) {
-                i = 0x3E;
-            } else {
-                i = 9;
-            }
-            if (g_menu_screen_grid_id != MENU_GRID_HELP_NONE) {
-                i = 9;
-            }
-            if (g_formation_cursor_ot_override != 0) {
-                i = g_formation_cursor_ot_override;
-            }
-            menu_input_update_event_state(g_menu_gfx_context->otag + i, menu_screen_filter_buttons(),
-                g_menu_screen_draw_buffer_clip_y == 0 ? 0xF0 : 0);
+        /* The event layer goes to OT 0x3E over the item list, the job wheel and the transitions (14 and up). */
+        g_gfx_current_otag_entry = g_menu_gfx_context->otag + 63;
+        menu_draw_active_window_frames();
+        if (g_formation_current_menu == FORMATION_MENU_ITEM_LIST
+            || g_formation_current_menu >= FORMATION_MENU_JOB_WHEEL_ENTER
+            || g_formation_current_menu == FORMATION_MENU_JOB_WHEEL) {
+            i = 0x3E;
+        } else {
+            i = 9;
+        }
+        if (g_menu_screen_grid_id != MENU_GRID_HELP_NONE) {
+            i = 9;
+        }
+        if (g_formation_cursor_ot_override != 0) {
+            i = g_formation_cursor_ot_override;
+        }
+        menu_input_update_event_state(g_menu_gfx_context->otag + i, menu_screen_filter_buttons(),
+            g_menu_screen_draw_buffer_clip_y == 0 ? 0xF0 : 0);
 
-            /* Entering a new menu resets the per-menu state. */
-            if (g_formation_current_menu != last_menu) {
-                g_formation_cursor_ot_override = 0;
-                g_formation_unit_cycle_mode = 0;
-                menu_set_event_speed(0);
-                g_help_message_text_id = 0;
-                menu_screen_reset_selection_results();
-                last_menu = g_formation_current_menu;
-            }
-            menu_screen_update_sound_effect();
-            music_update_tunes();
-        } while (g_formation_screen_running != 0);
+        /* Entering a new menu resets the per-menu state. */
+        if (g_formation_current_menu != last_menu) {
+            g_formation_cursor_ot_override = 0;
+            g_formation_unit_cycle_mode = 0;
+            menu_set_event_speed(0);
+            g_help_message_text_id = 0;
+            menu_screen_reset_selection_results();
+            last_menu = g_formation_current_menu;
+        }
+        menu_screen_update_sound_effect();
+        music_update_tunes();
     }
 
     /* Stop every menu thread and let the tutorial text finish; buttons flags one still running. */
@@ -739,9 +737,9 @@ void unit_grid_update_selection(void) {
                 g_unit_panel_comparison_display_thread_params.flags = saved;
                 g_formation_unit_banner_at_bottom_latch = g_formation_unit_banner_at_bottom;
                 if (g_formation_banner_slide_step < 0) {
-                    g_formation_banner_slide_step += 0x10;
+                    g_formation_banner_slide_step += 16;
                 } else if (g_formation_banner_slide_step > 0) {
-                    g_formation_banner_slide_step -= 0x10;
+                    g_formation_banner_slide_step -= 16;
                 } else if (g_formation_unit_banner_at_bottom != 0) {
                     g_formation_banner_slide_step = -1;
                 } else {
@@ -797,7 +795,7 @@ void unit_grid_update_selection(void) {
         g_unit_panel_status_display_thread_params.position.y = g_formation_banner_slide_step * 8 + 0x108;
         g_unit_panel_comparison_display_thread_params.position.y = g_formation_banner_slide_step * 8;
         g_formation_banner_slide_step--;
-        if (g_formation_banner_slide_step < -0xf) {
+        if (g_formation_banner_slide_step < -15) {
             g_formation_banner_slide_step = 0;
             menu_thread_request_stop(THREAD_SCREEN_SLOT_COMPARISON_STATUS);
         }
@@ -805,7 +803,7 @@ void unit_grid_update_selection(void) {
         g_unit_panel_status_display_thread_params.position.y = g_formation_banner_slide_step * 8 - 0x78;
         g_unit_panel_comparison_display_thread_params.position.y = g_formation_banner_slide_step * 8 + 0x90;
         g_formation_banner_slide_step++;
-        if (g_formation_banner_slide_step >= 0x10) {
+        if (g_formation_banner_slide_step >= 16) {
             g_formation_banner_slide_step = 0;
             menu_thread_request_stop(THREAD_SCREEN_SLOT_COMPARISON_STATUS);
         }
@@ -868,8 +866,8 @@ void formation_update_selection_stage(void) {
     if (g_unit_selected_index != g_formation_selected_unit_index_latch) {
         if (g_formation_unit_banner_enabled != 0) {
             if (g_formation_unit_banner_at_bottom_latch != g_formation_unit_banner_at_bottom) {
-                bcopy(g_formation_unit_pointers[g_formation_selected_unit_index_latch],
-                    &g_formation_comparison_unit_stat_summary, 0x22);
+                bcopy(&g_formation_unit_pointers[g_formation_selected_unit_index_latch]->status,
+                    &g_formation_comparison_unit_stat_summary, sizeof(unit_panel_summary_t));
                 bcopy(&g_formation_unit_pointers[g_formation_selected_unit_index_latch]->identity,
                     &g_formation_comparison_unit_identity, sizeof(menu_unit_status_identity_t));
                 unit_panel_toggle_comparison_thread(1);
@@ -905,23 +903,21 @@ void formation_update_selection_stage(void) {
         } else {
             g_unit_panel_status_display_thread_params.redraw_request = previous < g_unit_selected_index ? 1 : 2;
         }
-    } else {
-        if (g_formation_unit_banner_at_bottom_latch != g_formation_unit_banner_at_bottom
-            && g_formation_banner_slide_step == 0) {
-            g_formation_unit_banner_at_bottom_latch = g_formation_unit_banner_at_bottom;
-            if (g_formation_unit_banner_enabled != 0) {
-                if (g_formation_unit_banner_at_bottom != 0) {
-                    flags = &g_unit_panel_status_display_thread_params.flags;
-                    *flags |= MENU_STATUS_PANEL_SLIDE_DOWN;
-                } else {
-                    flags = &g_unit_panel_status_display_thread_params.flags;
-                    *flags |= MENU_STATUS_PANEL_SLIDE_UP;
-                }
-            } else if (g_formation_unit_banner_at_bottom != 0) {
-                g_unit_panel_status_display_thread_params.position.y = 0x90;
+    } else if (g_formation_unit_banner_at_bottom_latch != g_formation_unit_banner_at_bottom
+        && g_formation_banner_slide_step == 0) {
+        g_formation_unit_banner_at_bottom_latch = g_formation_unit_banner_at_bottom;
+        if (g_formation_unit_banner_enabled != 0) {
+            if (g_formation_unit_banner_at_bottom != 0) {
+                flags = &g_unit_panel_status_display_thread_params.flags;
+                *flags |= MENU_STATUS_PANEL_SLIDE_DOWN;
             } else {
-                g_unit_panel_status_display_thread_params.position.y = 0;
+                flags = &g_unit_panel_status_display_thread_params.flags;
+                *flags |= MENU_STATUS_PANEL_SLIDE_UP;
             }
+        } else if (g_formation_unit_banner_at_bottom != 0) {
+            g_unit_panel_status_display_thread_params.position.y = 0x90;
+        } else {
+            g_unit_panel_status_display_thread_params.position.y = 0;
         }
     }
     if (g_shop_menu_step >= SHOP_STEP_SOLDIER_MENU) {

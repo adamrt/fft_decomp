@@ -146,12 +146,10 @@ void formation_ability_update_menu(void) {
         g_formation_ability_menu_unit_index = g_unit_selected_index;
         if (value == FORMATION_UNIT_LOCK_MIME) {
             g_formation_ability_menu.text_id = FORMATION_ABILITY_MENU_TEXT_MIME;
+        } else if (value == FORMATION_UNIT_UNLOCKED) {
+            g_formation_ability_menu.text_id = FORMATION_ABILITY_MENU_TEXT_UNLOCKED;
         } else {
-            if (value == FORMATION_UNIT_UNLOCKED) {
-                g_formation_ability_menu.text_id = FORMATION_ABILITY_MENU_TEXT_UNLOCKED;
-            } else {
-                g_formation_ability_menu.text_id = FORMATION_ABILITY_MENU_TEXT_LOCKED;
-            }
+            g_formation_ability_menu.text_id = FORMATION_ABILITY_MENU_TEXT_LOCKED;
         }
         g_menu_screen_text_redraw_request = 1;
     }
@@ -612,12 +610,15 @@ static s32 update_learn_menu(void) {
  * eight equip-type supports, Martial Arts, Two Hands and Two Swords can
  * invalidate the current loadout. */
 static s32 check_equipment_support_change(s16 unit_id, s16 ability_id) {
-    if (unit_id == FORMATION_PREVIEW_UNIT_INDEX || g_game_options.fields.max_equip_at_job_change != GAME_OPTION_ON)
+    if (unit_id == FORMATION_PREVIEW_UNIT_INDEX || g_game_options.fields.max_equip_at_job_change != GAME_OPTION_ON) {
         return 0;
-    if (ability_id >= ABILITY_ID_SUPPORT_EQUIP_ARMOR && ability_id < ABILITY_ID_SUPPORT_EQUIP_ARMOR + 8)
+    }
+    if (ability_id >= ABILITY_ID_SUPPORT_EQUIP_ARMOR && ability_id < ABILITY_ID_SUPPORT_EQUIP_ARMOR + 8) {
         return 1;
-    if (ability_id == ABILITY_ID_SUPPORT_MARTIAL_ARTS || ability_id == ABILITY_ID_SUPPORT_TWO_HANDS)
+    }
+    if (ability_id == ABILITY_ID_SUPPORT_MARTIAL_ARTS || ability_id == ABILITY_ID_SUPPORT_TWO_HANDS) {
         return 1;
+    }
     return ability_id == ABILITY_ID_SUPPORT_TWO_SWORDS;
 }
 

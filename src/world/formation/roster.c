@@ -18,8 +18,9 @@ s32 formation_can_dismiss(s16 formation_idx) {
     s32 sprite_set = unit->sprite_set;
     s32 roster_slot = unit->identity.roster_slot;
 
-    if (sprite_set <= CHARACTER_IDENTITY_RAMZA_CHAPTER_4)
+    if (sprite_set <= CHARACTER_IDENTITY_RAMZA_CHAPTER_4) {
         return 0;
+    }
     return roster_slot < PARTY_GUEST_SLOT_FIRST;
 }
 

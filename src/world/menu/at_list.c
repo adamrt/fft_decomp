@@ -75,16 +75,16 @@ void at_list_run(void) {
 
     entry = (menu_entry_t*)thread_current_get_parameter_1();
     layout = entry->context;
-    entry->window.h = layout->row_count * 16 + 0x1C;
-    entry->inner_height = layout->row_count * 16 + 0x1C;
-    entry->text_image.source.h = layout->row_count * 16 + 0x1C;
+    entry->window.h = layout->row_count * 16 + 28;
+    entry->inner_height = layout->row_count * 16 + 28;
+    entry->text_image.source.h = layout->row_count * 16 + 28;
 
     image_parameters.source.x = 0;
     image_parameters.source.y = 0x7E;
     image_parameters.x_screen_offset = 8;
-    image_parameters.y_screen_offset = 0xC;
-    image_parameters.source.w = entry->window.w - 0x12;
-    image_parameters.source.h = entry->window.h - 0x1A;
+    image_parameters.y_screen_offset = 12;
+    image_parameters.source.w = entry->window.w - 18;
+    image_parameters.source.h = entry->window.h - 26;
 
     gfx_set_draw_mode_for_texture_page(&page->icon_mode, MENU_TEXTURE_PAGE_FRAME);
     texture_window.x = 0;
@@ -107,11 +107,11 @@ void at_list_run(void) {
         menu_init_sprt(&page->arrows[i]);
         page->arrows[i].clut = 0x7D7C;
         page->arrows[i].w = 8;
-        page->arrows[i].h = 0x10;
+        page->arrows[i].h = 16;
         page->arrows[i].u0 = arrow_u;
         page->arrows[i].v0 = 0;
-        page->arrows[i].x0 = entry->window.x + entry->window.w - 0xF;
-        arrow_y = i * (entry->window.h - 0x32) + 0x10;
+        page->arrows[i].x0 = entry->window.x + entry->window.w - 15;
+        arrow_y = i * (entry->window.h - 50) + 16;
         page->arrows[i].y0 = entry->window.y + arrow_y;
         arrow_u += 8;
     }
@@ -127,7 +127,7 @@ void at_list_run(void) {
 
     menu_init_sprite_array(page->arrow_marks, 2, MENU_CLUT_NORMAL);
     page->arrow_marks[0].w = 6;
-    page->arrow_marks[0].h = 0xC;
+    page->arrow_marks[0].h = 12;
     page->arrow_marks[1].w = 4;
     page->arrow_marks[1].h = 4;
     page->arrow_marks[0].u0 = 0xE8;
@@ -137,7 +137,7 @@ void at_list_run(void) {
     page->arrow_marks[0].y0 = page->arrows[0].y0 + 3;
     page->arrow_marks[1].v0 = 0xC;
     page->arrow_marks[1].x0 = page->arrows[1].x0;
-    page->arrow_marks[1].y0 = page->arrows[1].y0 + 0xE;
+    page->arrow_marks[1].y0 = page->arrows[1].y0 + 14;
 
     buffer = g_menu_render_buffer;
     mem_zero_words(buffer, entry->inner_width * entry->inner_height / 2);
@@ -171,9 +171,8 @@ void at_list_run(void) {
     delta = 0;
     accum = 0;
     *input = 0;
-    i = 0;
     *input2 = 0;
-    for (;;) {
+    for (i = 0;; i++) {
         page = &g_at_list_pages[i & 1];
         frame = &page->frame;
 
@@ -230,7 +229,7 @@ void at_list_run(void) {
                 } else {
                     image_rect.y = (((ring - 1) * 16) & 0xFF) + entry->vram_origin.y;
                 }
-                image_rect.h = 0x10;
+                image_rect.h = 16;
                 buffer = g_menu_render_buffer;
                 mem_zero_words(buffer, 0x800);
                 g_menu_window_text_pen.stride = entry->inner_width;
@@ -298,7 +297,7 @@ void at_list_run(void) {
 
         /* A whole 16-pixel row has scrolled: commit it. A direction held past the initial repeat
          * delay is fed back into the input so the scroll keeps going. */
-        if (accum < -0xF || accum > 0xF) {
+        if (accum <= -16 || accum >= 16) {
             ring += delta;
             row_offset += delta;
             repeat = script_get_event_initial_repeat_counter();
@@ -347,7 +346,6 @@ void at_list_run(void) {
 
         menu_select_icon_cluts(&page->icons.base);
         menu_update_icon_cursor_sprites(entry, &page->icons.base, i, cursor);
-        i++;
         /* An x of 1000 keeps icon sprite 0 off screen. */
         page->icons.base.sprites[0].x0 = 1000;
         page->icons.base.sprites[1].y0 += 4;

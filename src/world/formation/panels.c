@@ -303,6 +303,7 @@ void unit_panel_ability_thread(void) {
                 if (state->generic_monster != 0) {
                     id = state->ability_ids[i] + TEXT_ID_ABILITY_NAME_BASE;
                 }
+                /* Each arm advances the pen; one shared advance, as in the loop below, changes the code. */
                 if ((u16)state->ability_ids[i] == MENU_STATUS_PANEL_LABEL_NONE) {
                     g_menu_window_text_pen.rect.y += 0x10;
                 } else {

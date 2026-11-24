@@ -67,7 +67,7 @@ menu_vertical_scroll_direction_e menu_input_read_page_scroll_direction(void) {
     s32 repeat;
     u16 counter;
 
-    if (g_menu_screen_prompt_active == 0 && g_menu_input_lock_mode == 0 && g_tutorial_id == 0) {
+    if (!g_menu_screen_prompt_active && !g_menu_input_lock_mode && g_tutorial_id == 0) {
         value = menu_screen_read_buttons(0);
         if ((value & PSX_PAD_UP) && (value & PSX_PAD_SQUARE)) {
             g_menu_screen_scroll_hold_counter++;

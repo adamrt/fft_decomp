@@ -30,19 +30,11 @@ extern RECT g_menu_screen_panel_texture_windows[7];
  * menu_screen_thin_window_frame_thread does) and its own texture-window table. */
 void menu_screen_window_frame_thread(void) {
     RECT texture;
-    /* The stride pointers are locals because the target keeps each one live
-     * and re-derives the descriptor base from it (addiu -8) for the glyph
-     * calls. Unlike the OPTION and event-library twins, this copy needs no register
-     * bindings or tied asm to match. */
     menu_panel_frame_t* prim = g_menu_scratch_buffer.panel_frames;
-    s32* source_stride = &g_text_glyph_source.stride;
-    s32* dest_stride = &g_text_glyph_dest.stride;
     urect16_t* menu;
     u8* pixels;
     s32 texture_u;
     s32 texture_v;
-    s32 border_wide;
-    s32 border_thin;
     s32 span;
     s32 index;
     s32 frame;
@@ -54,8 +46,8 @@ void menu_screen_window_frame_thread(void) {
     texture.w = 0x80;
     texture.h = 0x10;
     gfx_alloc_texture_rect(&texture, &prim->texture_prim, (u32*)-1);
-    *source_stride = 0x100;
-    *dest_stride = 0x80;
+    g_text_glyph_source.stride = 0x100;
+    g_text_glyph_dest.stride = 0x80;
 
     /* Copy the border pieces from the menu glyph sheet into one 128x16 image and upload it. */
     text_set_blit_source_rect(8, 8, 0x20, 0x10);
@@ -89,60 +81,59 @@ void menu_screen_window_frame_thread(void) {
 
     /* Sprite 0 fills the interior and sprites 1-4 are the right, left, top and bottom edges;
      * each tiles its piece through its own texture window. */
-    border_wide = 0x10;
-    border_thin = 8;
     prim->sprites[0].x0 = menu->x + 8;
-    prim->sprites[0].y0 = menu->y + 0x10;
-    span = menu->w - 0x18;
+    prim->sprites[0].y0 = menu->y + 16;
+    /* Each span goes through `span`; direct stores schedule differently. */
+    span = menu->w - 24;
     prim->sprites[0].w = span;
-    span = menu->h - 0x20;
+    span = menu->h - 32;
     prim->sprites[0].h = span;
-    prim->sprites[1].x0 = menu->x + menu->w - 0x10;
-    prim->sprites[1].y0 = menu->y + 0x10;
-    prim->sprites[1].w = border_wide;
-    span = menu->h - 0x20;
+    prim->sprites[1].x0 = menu->x + menu->w - 16;
+    prim->sprites[1].y0 = menu->y + 16;
+    prim->sprites[1].w = 16;
+    span = menu->h - 32;
     prim->sprites[1].h = span;
     prim->sprites[2].x0 = menu->x;
-    prim->sprites[2].y0 = menu->y + 0x10;
-    prim->sprites[2].w = border_thin;
-    span = menu->h - 0x20;
+    prim->sprites[2].y0 = menu->y + 16;
+    prim->sprites[2].w = 8;
+    span = menu->h - 32;
     prim->sprites[2].h = span;
     prim->sprites[3].x0 = menu->x + 8;
     prim->sprites[3].y0 = menu->y;
-    span = menu->w - 0x18;
+    span = menu->w - 24;
     prim->sprites[3].w = span;
-    prim->sprites[3].h = border_wide;
+    prim->sprites[3].h = 16;
     prim->sprites[4].x0 = menu->x + 8;
-    prim->sprites[4].y0 = menu->y + menu->h - 0x10;
-    span = menu->w - 0x18;
+    prim->sprites[4].y0 = menu->y + menu->h - 16;
+    span = menu->w - 24;
     prim->sprites[4].w = span;
-    prim->sprites[4].h = border_wide;
+    prim->sprites[4].h = 16;
 
     /* Sprites 5-8 are the corners, cut from the corner pieces of the uploaded image. */
     prim->sprites[5].x0 = menu->x;
     prim->sprites[5].y0 = menu->y;
-    prim->sprites[5].u0 = texture_u + 0x28;
+    prim->sprites[5].u0 = texture_u + 40;
     prim->sprites[5].v0 = texture_v;
-    prim->sprites[5].w = border_thin;
-    prim->sprites[5].h = border_wide;
+    prim->sprites[5].w = 8;
+    prim->sprites[5].h = 16;
     prim->sprites[6].x0 = menu->x;
-    prim->sprites[6].y0 = menu->y + menu->h - 0x10;
-    prim->sprites[6].u0 = texture_u + 0x58;
+    prim->sprites[6].y0 = menu->y + menu->h - 16;
+    prim->sprites[6].u0 = texture_u + 88;
     prim->sprites[6].v0 = texture_v;
-    prim->sprites[6].w = border_thin;
-    prim->sprites[6].h = border_wide;
-    prim->sprites[7].x0 = menu->x + menu->w - 0x10;
+    prim->sprites[6].w = 8;
+    prim->sprites[6].h = 16;
+    prim->sprites[7].x0 = menu->x + menu->w - 16;
     prim->sprites[7].y0 = menu->y;
-    prim->sprites[7].u0 = texture_u + 0x40;
+    prim->sprites[7].u0 = texture_u + 64;
     prim->sprites[7].v0 = texture_v;
-    prim->sprites[7].w = border_thin;
-    prim->sprites[7].h = border_wide;
-    prim->sprites[8].x0 = menu->x + menu->w - 0x10;
-    prim->sprites[8].y0 = menu->y + menu->h - 0x10;
-    prim->sprites[8].u0 = texture_u + 0x70;
+    prim->sprites[7].w = 8;
+    prim->sprites[7].h = 16;
+    prim->sprites[8].x0 = menu->x + menu->w - 16;
+    prim->sprites[8].y0 = menu->y + menu->h - 16;
+    prim->sprites[8].u0 = texture_u + 112;
     prim->sprites[8].v0 = texture_v;
-    prim->sprites[8].w = border_thin;
-    prim->sprites[8].h = border_wide;
+    prim->sprites[8].w = 8;
+    prim->sprites[8].h = 16;
 
     menu_init_scaled_draw_area_packets(&prim->draw_areas);
     mem_copy_bytes_nonempty(

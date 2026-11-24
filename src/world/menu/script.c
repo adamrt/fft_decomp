@@ -87,7 +87,7 @@ menu_instruction_t* menu_opcode_01_if_group(menu_instruction_t* script) {
     s32 count = instruction->conditional.count;
     s32 arg;
 
-    if (g_menu_screen_use_scroll_position == 0) {
+    if (!g_menu_screen_use_scroll_position) {
         arg = instruction->conditional.value;
     } else {
         arg = g_menu_scroll_base_index + g_menu_screen_scroll_row_offset;
@@ -96,7 +96,7 @@ menu_instruction_t* menu_opcode_01_if_group(menu_instruction_t* script) {
         }
     }
     instruction = menu_next_instruction(instruction);
-    if (predicate(arg) == 0) {
+    if (!predicate(arg)) {
         count -= 1;
         while (count != -1) {
             instruction = menu_next_instruction(instruction);
@@ -120,7 +120,7 @@ menu_instruction_t* menu_opcode_02_if_else_group(menu_instruction_t* instruction
     s32 count_false = instruction->if_else.count_false;
     s32 arg;
 
-    if (g_menu_screen_use_scroll_position == 0) {
+    if (!g_menu_screen_use_scroll_position) {
         arg = instruction->if_else.value;
     } else {
         arg = g_menu_scroll_base_index + g_menu_screen_scroll_row_offset;
@@ -129,7 +129,7 @@ menu_instruction_t* menu_opcode_02_if_else_group(menu_instruction_t* instruction
         }
     }
     instruction = menu_next_instruction(instruction);
-    if (predicate(arg) != 0) {
+    if (predicate(arg)) {
         count_true -= 1;
         while (count_true != -1) {
             instruction = g_menu_opcode_handlers[instruction->header.opcode](instruction);
@@ -163,7 +163,7 @@ menu_instruction_t* menu_opcode_03_draw_tile(menu_instruction_t* instruction) {
     s32 y;
     s16 step;
 
-    if (g_menu_screen_use_scroll_position == 0) {
+    if (!g_menu_screen_use_scroll_position) {
         y = instruction->tile.y;
     } else {
         step = g_menu_screen_row_height;
@@ -190,7 +190,7 @@ menu_instruction_t* menu_opcode_04_draw_textured_quad(menu_instruction_t* instru
     s16 step;
     rgb24_t* color;
 
-    if (g_menu_screen_use_scroll_position == 0) {
+    if (!g_menu_screen_use_scroll_position) {
         y = instruction->sprite.sprite.y;
     } else {
         step = g_menu_screen_row_height;
@@ -233,7 +233,7 @@ menu_instruction_t* menu_opcode_06_draw_callback_quad(menu_instruction_t* instru
     s32 index;
 
     handler = g_menu_row_callbacks[instruction->callback_sprite.callback_index].icon;
-    if (g_menu_screen_use_scroll_position == 0) {
+    if (!g_menu_screen_use_scroll_position) {
         index = instruction->callback_sprite.row;
     } else {
         index = g_menu_scroll_base_index + g_menu_screen_scroll_row_offset;
@@ -242,7 +242,7 @@ menu_instruction_t* menu_opcode_06_draw_callback_quad(menu_instruction_t* instru
         }
     }
     entry = handler(index);
-    if (entry != 0) {
+    if (entry) {
         s_screen_script_sprite_command.sprite.x = instruction->callback_sprite.x;
         s_screen_script_sprite_command.sprite.y = instruction->callback_sprite.y;
         /* The icon source stores 16-bit values; the menu script copies their low bytes. */
@@ -543,7 +543,7 @@ menu_instruction_t* menu_opcode_09_set_fixed_clut(menu_instruction_t* instructio
  * resulting CLUT id. Advances by the instruction length (byte 1), like
  * menu_opcode_0c_set_texture_page. */
 menu_instruction_t* menu_opcode_0a_set_clut(menu_instruction_t* instruction) {
-    if (g_menu_screen_use_alternate_palette != 0) {
+    if (g_menu_screen_use_alternate_palette) {
         s_screen_clut = GetClut(instruction->clut.alternate_x_div_16 << 4,
             instruction->clut.alternate_y_low + (instruction->clut.alternate_y_high << 8));
     } else {
@@ -580,13 +580,13 @@ menu_instruction_t* menu_opcode_18_add_blend_draw_mode(menu_instruction_t* instr
  *
  * The palette selector chooses bytes 5..7 instead of the normal bytes 2..4. */
 menu_instruction_t* menu_opcode_0b_set_draw_color(menu_instruction_t* instruction) {
-    if (g_menu_screen_use_alternate_palette != 0) {
-        g_menu_screen_sprite_color.r = instruction->sprite_color.alternate.r,
-        g_menu_screen_sprite_color.g = instruction->sprite_color.alternate.g,
+    if (g_menu_screen_use_alternate_palette) {
+        g_menu_screen_sprite_color.r = instruction->sprite_color.alternate.r;
+        g_menu_screen_sprite_color.g = instruction->sprite_color.alternate.g;
         g_menu_screen_sprite_color.b = instruction->sprite_color.alternate.b;
     } else {
-        g_menu_screen_sprite_color.r = instruction->sprite_color.normal.r,
-        g_menu_screen_sprite_color.g = instruction->sprite_color.normal.g,
+        g_menu_screen_sprite_color.r = instruction->sprite_color.normal.r;
+        g_menu_screen_sprite_color.g = instruction->sprite_color.normal.g;
         g_menu_screen_sprite_color.b = instruction->sprite_color.normal.b;
     }
     return menu_next_instruction(instruction);
@@ -624,7 +624,7 @@ menu_instruction_t* menu_opcode_0d_draw_formatted_number(menu_instruction_t* com
     u16 clut;
 
     getter = g_menu_row_callbacks[command->number.getter].value;
-    if (g_menu_screen_use_scroll_position == 0) {
+    if (!g_menu_screen_use_scroll_position) {
         row = command->number.value;
         y = command->number.y;
     } else {
@@ -637,7 +637,7 @@ menu_instruction_t* menu_opcode_0d_draw_formatted_number(menu_instruction_t* com
         }
     }
     negative = 0;
-    if (getter != 0) {
+    if (getter) {
         value = getter(row);
     } else {
         value = row;
@@ -652,7 +652,7 @@ menu_instruction_t* menu_opcode_0d_draw_formatted_number(menu_instruction_t* com
     } else {
         color = 0;
     }
-    if (command->number.alternate_palette != 0) {
+    if (command->number.alternate_palette) {
         clut = g_menu_screen_alternate_number_clut;
     } else {
         clut = g_menu_palette_clut;
@@ -665,17 +665,17 @@ menu_instruction_t* menu_opcode_0d_draw_formatted_number(menu_instruction_t* com
         glyph.x = 0x78;
         glyph.y = 1;
         glyph.w = 8;
-        glyph.h = 0xE;
+        glyph.h = 14;
     } else if (command->number.style == 0) {
         glyph.x = 0x78;
         glyph.y = 0x10;
         glyph.w = 6;
-        glyph.h = 0xB;
+        glyph.h = 11;
     } else {
         glyph.x = 0x20;
         glyph.y = 0;
-        glyph.w = 0xA;
-        glyph.h = 0x10;
+        glyph.w = 10;
+        glyph.h = 16;
     }
     if (value & MENU_NUMBER_VALUE_DASHES) {
         for (value = command->number.width; value > 0; value--) {
@@ -694,11 +694,11 @@ menu_instruction_t* menu_opcode_0d_draw_formatted_number(menu_instruction_t* com
             rect.y = y;
             rect.w = glyph.w;
             rect.h = glyph.h;
-            if (negative != 0) {
+            if (negative) {
                 minus_rect.x = rect.x - 6;
                 minus_rect.y = y + 2;
                 minus_rect.w = 6;
-                minus_rect.h = 0xB;
+                minus_rect.h = 11;
                 if (command->number.opcode == MENU_SCRIPT_OP_NUMBER_DIM_LEADING_ZEROS) {
                     minus_rect.x = 0xAE;
                 }
@@ -709,7 +709,7 @@ menu_instruction_t* menu_opcode_0d_draw_formatted_number(menu_instruction_t* com
                 if (command->number.opcode == MENU_SCRIPT_OP_NUMBER_DIM_LEADING_ZEROS) {
                     clut = g_menu_palette_clut;
                 }
-                if (blanks != 0) {
+                if (blanks) {
                     digit = 0;
                     blanks--;
                     if (command->number.opcode == MENU_SCRIPT_OP_NUMBER_TINTED_NO_LEADING_ZEROS) {
@@ -773,12 +773,9 @@ menu_instruction_t* menu_opcode_17_draw_right_aligned_number(menu_instruction_t*
     rect.w = 8;
     rect.h = 14;
     /* The digit glyphs sit 8 pixels apart from u 0xA8 ('0' * 8 - 0xD8). */
-    i = 0;
-    while (i < value) {
+    for (i = 0; i < value; i++, rect.x += 8) {
         menu_gfx_enqueue_textured_quad(
             &rect, text[i] * 8 - 0xD8, 0x32, 0, 0, g_menu_cursor_texture_page, 0x7EE7, g_menu_gfx_otag_index);
-        i++;
-        rect.x += 8;
     }
     return menu_next_instruction(instruction);
 }
@@ -825,10 +822,10 @@ void menu_draw_sliding_cursor(const point16_t* pos, u16* state, s32 mode) {
     timer *= menu_get_event_speed();
     state_mode = alternate;
     if (state_mode != 0) {
-        if (timer >= 0x25) {
-            timer = 0x24;
+        if (timer >= 37) {
+            timer = 36;
         }
-    } else if (timer >= 0x2F) {
+    } else if (timer >= 47) {
         timer = 0;
     }
     state_mode = alternate;
@@ -843,10 +840,10 @@ void menu_draw_sliding_cursor(const point16_t* pos, u16* state, s32 mode) {
     timer += menu_get_event_speed();
     state_mode = alternate;
     if (state_mode != 0) {
-        if (timer < 0x25) {
+        if (timer < 37) {
             *state += 1;
         }
-    } else if (timer < 0x2F) {
+    } else if (timer < 47) {
         *state += 1;
     } else {
         *state = 0;
@@ -860,8 +857,8 @@ void menu_draw_sliding_cursor(const point16_t* pos, u16* state, s32 mode) {
     }
     rect.x = x_offset + pos->x - 2;
     rect.y = pos->y;
-    rect.w = 0x10;
-    rect.h = 0x10;
+    rect.w = 16;
+    rect.h = 16;
     menu_gfx_enqueue_textured_quad(&rect, 0xA8, 0, 0, 0, g_menu_cursor_texture_page, front_clut, g_menu_gfx_otag_index);
     rect.x += 2;
     rect.y += 2;
@@ -903,10 +900,10 @@ void menu_draw_bouncing_cursor(point16_t* pos, u16* state, s32 mode) {
     timer *= menu_get_event_speed();
     state_mode = active;
     if (state_mode != 0) {
-        if (timer >= 0x25) {
-            timer = 0x24;
+        if (timer >= 37) {
+            timer = 36;
         }
-    } else if (timer >= 0x2F) {
+    } else if (timer >= 47) {
         timer = 0;
     }
     state_mode = active;
@@ -921,10 +918,10 @@ void menu_draw_bouncing_cursor(point16_t* pos, u16* state, s32 mode) {
     timer += menu_get_event_speed();
     state_mode = active;
     if (state_mode != 0) {
-        if (timer < 0x25) {
+        if (timer < 37) {
             *state += 1;
         }
-    } else if (timer < 0x2F) {
+    } else if (timer < 47) {
         *state += 1;
     } else {
         *state = 0;
@@ -1025,7 +1022,7 @@ void menu_scrollable_list_refresh(const menu_instruction_t* script) {
     if (g_menu_list_selected_index >= g_menu_list_entry_count) {
         g_menu_list_selected_index = g_menu_list_entry_count - 1;
     }
-    if (g_menu_screen_list_text_table != 0) {
+    if (g_menu_screen_list_text_table) {
         rect.x = 0x240;
         rect.y = 0x130;
         rect.w = g_menu_screen_list_image_width;
@@ -1103,13 +1100,13 @@ menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* comm
     }
     speed = menu_get_event_speed();
     g_menu_screen_use_scroll_position = 1;
-    if (g_menu_screen_list_layout_pending != 0) {
+    if (g_menu_screen_list_layout_pending) {
         menu_scrollable_list_refresh(command);
     }
     old_cursor = g_menu_list_selected_index;
     if (g_menu_screen_list_scroll_direction == 0) {
         i = menu_input_read_page_scroll_direction();
-        if (i != 0) {
+        if (i) {
             if (i != 2) {
                 menu_scroll_list_by_page(i, command);
             }
@@ -1118,7 +1115,7 @@ menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* comm
             if (index == g_menu_list_selected_index) {
                 if (index > 0) {
                     g_menu_screen_list_scroll_direction = -1;
-                    if (g_menu_screen_list_text_table != 0) {
+                    if (g_menu_screen_list_text_table) {
                         g_menu_screen_list_row_text_ids[0] = g_menu_screen_list_entry_ids[index - 1];
                         rect.x = 0x240;
                         rect.y = 0x120;
@@ -1135,7 +1132,7 @@ menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* comm
             if (g_menu_scroll_base_index + g_menu_screen_list_visible_rows - 1 == g_menu_list_selected_index) {
                 if (g_menu_scroll_base_index + g_menu_screen_list_visible_rows - 1 < g_menu_list_entry_count - 1) {
                     g_menu_screen_list_scroll_direction = 1;
-                    if (g_menu_screen_list_text_table != 0) {
+                    if (g_menu_screen_list_text_table) {
                         index = g_menu_scroll_base_index + g_menu_screen_list_visible_rows - 1;
                         g_menu_screen_list_row_text_ids[0] = g_menu_screen_list_entry_ids[index + 1];
                         rect.x = 0x240;
@@ -1166,7 +1163,7 @@ menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* comm
             g_menu_list_scroll_offset = 0;
             g_menu_screen_list_scroll_direction = 0;
             g_menu_scroll_base_index = --g_menu_list_selected_index;
-            if (g_menu_screen_list_text_table != 0) {
+            if (g_menu_screen_list_text_table) {
                 for (i = 0; i < g_menu_screen_list_visible_rows; i++) {
                     rect.x = 0x240;
                     rect.y = (i - 1) * g_menu_screen_row_height + 0x130;
@@ -1188,7 +1185,7 @@ menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* comm
             g_menu_screen_list_scroll_direction = 0;
             g_menu_scroll_base_index++;
             g_menu_list_selected_index++;
-            if (g_menu_screen_list_text_table != 0) {
+            if (g_menu_screen_list_text_table) {
                 rect.x = 0x240;
                 rect.y = g_menu_screen_row_height + 0x130;
                 rect.w = g_menu_screen_list_image_width;
@@ -1197,7 +1194,7 @@ menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* comm
             }
         }
     }
-    if (g_menu_screen_list_text_table != 0) {
+    if (g_menu_screen_list_text_table) {
         if (g_menu_list_scroll_offset != 0) {
             rect.x = command->list.x;
             rect.y = command->list.y - 5;
@@ -1219,7 +1216,7 @@ menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* comm
             rect.x = g_menu_screen_window_right_x;
             rect.y = command->list.arrow_up_y;
             rect.w = 8;
-            rect.h = 0x10;
+            rect.h = 16;
             menu_gfx_enqueue_textured_quad(&rect, 0xD8, 0, 0, g_menu_gfx_semitransparency, g_menu_cursor_texture_page,
                 g_menu_cursor_mode0_foreground_clut, g_menu_gfx_otag_index);
         }
@@ -1227,12 +1224,12 @@ menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* comm
             rect.x = g_menu_screen_window_right_x;
             rect.y = command->list.arrow_down_y;
             rect.w = 8;
-            rect.h = 0x10;
+            rect.h = 16;
             menu_gfx_enqueue_textured_quad(&rect, 0xE0, 0, 0, g_menu_gfx_semitransparency, g_menu_cursor_texture_page,
                 g_menu_cursor_mode0_foreground_clut, g_menu_gfx_otag_index);
         }
         if (g_menu_list_entry_count > g_menu_screen_list_visible_rows) {
-            i = command->list.arrow_up_y + 0xF;
+            i = command->list.arrow_up_y + 15;
             j = command->list.arrow_down_y - (s16)(i + 5);
             i += j * g_menu_list_selected_index / (g_menu_list_entry_count - 1);
             rect.x = g_menu_screen_window_right_x;
@@ -1243,7 +1240,7 @@ menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* comm
                 g_menu_cursor_texture_page, g_menu_cursor_mode0_foreground_clut, g_menu_gfx_otag_index);
         }
     }
-    if (command->list.show_cursor != 0) {
+    if (command->list.show_cursor) {
         marker.x = command->list.x - command->list.cursor_x_offset;
         marker.y = command->list.y + (g_menu_list_selected_index - g_menu_scroll_base_index) * g_menu_screen_row_height;
         menu_draw_sliding_cursor(&marker, &g_menu_screen_list_cursor_anim, g_menu_screen_use_alternate_palette);
@@ -1273,7 +1270,7 @@ menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* comm
 
 /* Set the WORLD menu sprite color from an RGB triple; a null color leaves it unchanged. */
 void menu_gfx_set_draw_color(const rgb24_t* src) {
-    if (src != 0) {
+    if (src) {
         g_menu_screen_sprite_color.r = src->r;
         g_menu_screen_sprite_color.g = src->g;
         g_menu_screen_sprite_color.b = src->b;

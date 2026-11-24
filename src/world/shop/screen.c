@@ -154,38 +154,37 @@ void shop_run_screen(s32 shop_type) {
     u32 otags[2 * 64];
     menu_gfx_context_t buffers[2];
     u32* tim;
-    RECT* tile_box = &s_shop_edge_tile_rect;
     s32 buttons;
     s32 ot_index;
     s32 disabled;
     s32 tim_index;
     s16 last_step;
 
-    g_menu_screen_ot_length = 0x40;
-    g_menu_screen_textured_quad_capacity = 0x1F4;
+    g_menu_screen_ot_length = 64;
+    g_menu_screen_textured_quad_capacity = 500;
     g_gfx_poly_f3_capacity = 0;
     g_gfx_poly_ft3_capacity = 0;
     g_gfx_poly_f4_capacity = 0;
     g_gfx_poly_g3_capacity = 0;
     g_gfx_poly_gt3_capacity = 0;
-    g_menu_screen_gradient_quad_capacity = 0x5A;
-    g_menu_screen_textured_gradient_quad_capacity = 0x3C;
-    g_menu_screen_flat_line_capacity = 0xA;
+    g_menu_screen_gradient_quad_capacity = 90;
+    g_menu_screen_textured_gradient_quad_capacity = 60;
+    g_menu_screen_flat_line_capacity = 10;
     g_gfx_line_f3_capacity = 0;
     g_gfx_line_f4_capacity = 0;
     g_menu_screen_gradient_line_capacity = 0;
     g_menu_screen_line_g3_capacity = 0;
     g_gfx_line_g4_capacity = 0;
-    g_gfx_tile_capacity = 0x1E;
+    g_gfx_tile_capacity = 30;
     g_gfx_tile_1_capacity = 0;
     g_gfx_tile_8_capacity = 0;
     g_gfx_tile_16_capacity = 0;
     g_gfx_sprite_capacity = 0;
     g_gfx_sprite_8_capacity = 0;
     g_gfx_sprite_16_capacity = 0;
-    g_menu_screen_draw_move_capacity = 0x1E;
-    g_menu_screen_draw_area_capacity = 0xA;
-    g_gfx_draw_mode_capacity = 0x1E;
+    g_menu_screen_draw_move_capacity = 30;
+    g_menu_screen_draw_area_capacity = 10;
+    g_gfx_draw_mode_capacity = 30;
 
     /* Until the loop, buttons holds the town background, ot_index the music and disabled the
      * shopkeeper's first line. */
@@ -251,7 +250,7 @@ void shop_run_screen(s32 shop_type) {
         if (g_shop_background_visible != 0) {
             menu_gfx_enqueue_textured_quad(&s_shop_background_rect, 0, 0, 0, 0, 0x14C, 0, 1);
             gfx_enqueue_tile(&s_shop_backdrop_tile_rect, &g_menu_screen_black_tile_color, 0, 0);
-            gfx_enqueue_tile(tile_box, &g_menu_screen_black_tile_color, 0, g_menu_screen_ot_length - 1);
+            gfx_enqueue_tile(&s_shop_edge_tile_rect, &g_menu_screen_black_tile_color, 0, g_menu_screen_ot_length - 1);
         }
 
         /* L1/R1 cycle units on the item and Fur Shop steps (those before the Soldier Office's). */
@@ -279,9 +278,9 @@ void shop_run_screen(s32 shop_type) {
                 buttons = 0;
             }
             menu_draw_pressable_button(
-                MENU_PRESSABLE_BUTTON_L1, 0xC, 0xC, buttons & PSX_PAD_L1, disabled, SOUND_SFX_PAGE_SWITCH);
+                MENU_PRESSABLE_BUTTON_L1, 12, 12, buttons & PSX_PAD_L1, disabled, SOUND_SFX_PAGE_SWITCH);
             menu_draw_pressable_button(
-                MENU_PRESSABLE_BUTTON_R1, 0xE0, 0xC, buttons & PSX_PAD_R1, disabled, SOUND_SFX_PAGE_SWITCH);
+                MENU_PRESSABLE_BUTTON_R1, 224, 12, buttons & PSX_PAD_R1, disabled, SOUND_SFX_PAGE_SWITCH);
         }
 
         s_shop_step_handlers[g_shop_menu_step]();
@@ -389,14 +388,11 @@ static void update_exit_fade(void) {
 /* Run the shop's war-funds menu script with shop_adjust_gil installed as the
  * script callback, then put the previous callback back. The step handlers call it. */
 void shop_draw_gil(void) {
-    menu_callback_t* callback_slot;
-    s32 (*previous_callback)(s32);
+    s32 (*previous_callback)(s32) = g_menu_row_callbacks[0].value;
 
-    callback_slot = g_menu_row_callbacks;
-    previous_callback = callback_slot->value;
-    callback_slot->value = shop_adjust_gil;
+    g_menu_row_callbacks[0].value = shop_adjust_gil;
     menu_script_run_with_palette_mode(g_shop_war_funds_script, 0, 0);
-    callback_slot->value = previous_callback;
+    g_menu_row_callbacks[0].value = previous_callback;
 }
 
 /* Returns the owned-and-equipped count for the selected item. */
@@ -428,8 +424,9 @@ s32 shop_buy_get_equipped_count(s32 unused_row) {
 s32 shop_buy_get_price(s32 entry_index) {
     s32 display_value = shop_get_item_price(g_item_list_entries[entry_index]);
 
-    if ((g_item_list_entries[entry_index] & ITEM_ENTRY_UNEQUIPPABLE) != 0)
+    if (g_item_list_entries[entry_index] & ITEM_ENTRY_UNEQUIPPABLE) {
         display_value |= MENU_NUMBER_VALUE_DISABLED;
+    }
     return display_value;
 }
 
@@ -548,7 +545,7 @@ static void update_buy_list(void) {
     if (menu_screen_check_busy() != 0 || g_menu_list_entry_count == 0 || g_shop_item_category == ITEM_MENU_TAB_OTHER) {
         disabled = 1;
     }
-    menu_draw_pressable_button(MENU_PRESSABLE_BUTTON_SHOP_LIST_TRIANGLE, 0xBA, 0x4C,
+    menu_draw_pressable_button(MENU_PRESSABLE_BUTTON_SHOP_LIST_TRIANGLE, 186, 76,
         g_menu_input_primary_repeat & PSX_PAD_TRIANGLE, disabled, SOUND_SFX_CONFIRM);
     shop_draw_gil();
 }
@@ -594,7 +591,7 @@ static void update_buy_confirm(void) {
     }
     shop_switch_item_tab(0);
     menu_script_run_with_palette_mode(g_shop_buy_menu_script, 0, g_menu_input_lock_mode);
-    menu_draw_pressable_button(MENU_PRESSABLE_BUTTON_SHOP_LIST_TRIANGLE, 0xBA, 0x4C, 0, 1, SOUND_SFX_CONFIRM);
+    menu_draw_pressable_button(MENU_PRESSABLE_BUTTON_SHOP_LIST_TRIANGLE, 186, 76, 0, 1, SOUND_SFX_CONFIRM);
     shop_draw_gil();
 }
 
@@ -732,6 +729,7 @@ void shop_buy_update_unit_preview(void) {
     if (g_formation_unit_browse_enabled != 0) {
         if (g_unit_selected_index != g_shop_buy_equip_last_unit) {
             formation_stage_selected_unit();
+            /* The counter is set before the flag and the latch, as the original orders the stores. */
             i = 0;
             equipped = 0;
             g_shop_buy_equip_last_unit = g_unit_selected_index;

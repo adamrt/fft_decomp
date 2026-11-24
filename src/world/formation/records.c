@@ -91,7 +91,7 @@ void formation_unit_build_record(const battle_unit_t* unit, formation_unit_t* re
     record->detail.magical_accessory_evade = unit->equipment_stats[UNIT_EQUIPMENT_STAT_ACCESSORY_MAGIC_EVADE];
 
     /* The record's equipment and abilities. */
-    if (record->detail.uses_monster_skillset != 0) {
+    if (record->detail.uses_monster_skillset) {
         s32 count;
 
         /* The signed view keeps the original single-load copy loop. */
@@ -132,7 +132,7 @@ void formation_unit_build_record(const battle_unit_t* unit, formation_unit_t* re
     }
 
     /* Monsters keep their stored unlocked-job bits; humans recompute theirs from the job levels. */
-    if (job_is_special_monster(unit->job_id) != 0 || record->detail.uses_monster_skillset != 0) {
+    if (job_is_special_monster(unit->job_id) || record->detail.uses_monster_skillset) {
         bcopy(unit->career.unlocked_jobs, record->unlocked_jobs, sizeof(record->unlocked_jobs));
     } else {
         i = job_calculate_unlocks(unit->career.job_levels, unit->unit_flags & (UNIT_FLAG_FEMALE | UNIT_FLAG_MALE));
@@ -176,7 +176,7 @@ void formation_unit_build_record(const battle_unit_t* unit, formation_unit_t* re
  */
 s16 formation_build_record_list(s32 item_id, formation_unit_t** unused_list, formation_record_list_mode_e mode) {
     battle_unit_t unit;
-    s32 slot = 0;
+    s32 slot = 0; /* initialized here, not in the loop, for the target's register order */
     s32 count = 0;
     s32 id = item_id & ITEM_ENTRY_ID_MASK;
     s32 found;
@@ -194,10 +194,10 @@ s16 formation_build_record_list(s32 item_id, formation_unit_t** unused_list, for
             if (g_formation_unit_records[count].gender_flags & UNIT_FLAG_EGG) {
                 continue;
             }
-            if (g_formation_unit_records[count].detail.uses_monster_skillset != 0) {
+            if (g_formation_unit_records[count].detail.uses_monster_skillset) {
                 continue;
             }
-            if (job_is_special_monster(g_formation_unit_records[count].identity.job_id) != 0) {
+            if (job_is_special_monster(g_formation_unit_records[count].identity.job_id)) {
                 continue;
             }
         } else if (mode == FORMATION_RECORD_LIST_MONSTERS) {
@@ -216,7 +216,7 @@ s16 formation_build_record_list(s32 item_id, formation_unit_t** unused_list, for
                     found = 1;
                 }
             }
-            if (found == 0) {
+            if (!found) {
                 continue;
             }
         }
@@ -259,7 +259,7 @@ void formation_save_records(void) {
         party->movement_ability.low = g_formation_unit_pointers[i]->detail.abilities[FORMATION_ABILITY_SLOT_MOVEMENT];
         party->movement_ability.high
             = g_formation_unit_pointers[i]->detail.abilities[FORMATION_ABILITY_SLOT_MOVEMENT] >> 8;
-        if (g_formation_unit_pointers[i]->detail.uses_monster_skillset == 0) {
+        if (!g_formation_unit_pointers[i]->detail.uses_monster_skillset) {
             item = g_formation_unit_pointers[i]->detail.equipment[MENU_EQUIPMENT_SLOT_RIGHT_HAND];
             party->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON] = ITEM_ID_NONE;
             party->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_SHIELD] = ITEM_ID_NONE;

@@ -34,7 +34,7 @@ static u8 s_shop_slot_categories[MENU_EQUIPMENT_SLOT_COUNT] = { ITEM_LIST_FILTER
  * shop_fitting_build_best_fit is the shop's sibling.
  */
 void formation_item_build_best_fit(s16 unit_index, s16* equipment) {
-    s16 list[0x90];
+    s16 list[144];
     s32 right_hand;
     s16 two_swords;
     s32 left_hand;
@@ -66,14 +66,16 @@ void formation_item_build_best_fit(s16 unit_index, s16* equipment) {
         }
     } else {
         s_owned_slot_categories[MENU_EQUIPMENT_SLOT_LEFT_HAND] = ITEM_LIST_FILTER_SHIELD;
-        if (right_hand >= ITEM_ID_THROWABLE_FIRST)
+        if (right_hand >= ITEM_ID_THROWABLE_FIRST) {
             held_off_hand = right_hand;
-        else if (right_hand != ITEM_ID_NOTHING)
+        } else if (right_hand != ITEM_ID_NOTHING) {
             held_weapon = right_hand;
-        if (left_hand >= ITEM_ID_THROWABLE_FIRST)
+        }
+        if (left_hand >= ITEM_ID_THROWABLE_FIRST) {
             held_off_hand = left_hand;
-        else if (left_hand != ITEM_ID_NOTHING)
+        } else if (left_hand != ITEM_ID_NOTHING) {
             held_weapon = left_hand;
+        }
     }
 
     for (slot = 0; slot < MENU_EQUIPMENT_SLOT_COUNT; slot++) {
@@ -82,10 +84,12 @@ void formation_item_build_best_fit(s16 unit_index, s16* equipment) {
             ITEM_LIST_MODE_EQUIPPABLE_IN_INVENTORY);
         length = count;
         if (category == ITEM_LIST_FILTER_WEAPON) {
-            if (held_weapon < ITEM_ID_THROWABLE_FIRST)
+            if (held_weapon < ITEM_ID_THROWABLE_FIRST) {
                 list[length++] = held_weapon;
-            if (held_off_hand < ITEM_ID_THROWABLE_FIRST)
+            }
+            if (held_off_hand < ITEM_ID_THROWABLE_FIRST) {
                 list[length++] = held_off_hand;
+            }
             list[length] = -1;
             item_list_sort(ITEM_SORT_ORDER_BEST_FIT, list);
             if (ability_has_two_hands(unit_index)) {
@@ -114,18 +118,21 @@ void formation_item_build_best_fit(s16 unit_index, s16* equipment) {
                             break;
                         }
                         owned = item_adjust_inventory_count(list[i], 0);
-                        if (held_weapon == list[i])
+                        if (held_weapon == list[i]) {
                             owned++;
-                        if (held_off_hand == list[i])
+                        }
+                        if (held_off_hand == list[i]) {
                             owned++;
+                        }
                         if (owned >= 2 || equipment[MENU_EQUIPMENT_SLOT_RIGHT_HAND] != list[i]) {
                             list[0] = list[i];
                             break;
                         }
                     }
                 }
-                if (retry)
+                if (retry) {
                     continue;
+                }
             }
         } else if (category == ITEM_LIST_FILTER_SHIELD) {
             if ((ability_has_two_hands(unit_index)
@@ -135,8 +142,9 @@ void formation_item_build_best_fit(s16 unit_index, s16* equipment) {
                     & WEAPON_FLAG_FORCED_TWO_HANDS)) {
                 list[0] = -1;
             } else {
-                if (held_off_hand >= ITEM_ID_THROWABLE_FIRST)
+                if (held_off_hand >= ITEM_ID_THROWABLE_FIRST) {
                     list[length++] = held_off_hand;
+                }
                 list[length] = -1;
                 item_list_sort(ITEM_SORT_ORDER_BEST_FIT, list);
             }
@@ -145,10 +153,11 @@ void formation_item_build_best_fit(s16 unit_index, s16* equipment) {
             list[length] = -1;
             item_list_sort(ITEM_SORT_ORDER_BEST_FIT, list);
         }
-        if (list[0] <= ITEM_ID_NOTHING)
+        if (list[0] <= ITEM_ID_NOTHING) {
             equipment[slot] = ITEM_ID_NOTHING;
-        else
+        } else {
             equipment[slot] = list[0];
+        }
     }
 
     i = 0; /* reused as the swap flag (the target keeps it in i's register) */
@@ -179,7 +188,7 @@ void formation_item_build_best_fit(s16 unit_index, s16* equipment) {
  * shop items. The accessory slot is left to the caller.
  */
 void shop_fitting_build_best_fit(s16 unit_index, s16 shop_id, s16* out) {
-    s16 list[0x90];
+    s16 list[144];
     s32 right;
     /* Declaration order decides the reload slots: the target spills `first` to
      * sp+328 and `dual` to sp+336, so `first` must be declared first. */
@@ -231,14 +240,16 @@ void shop_fitting_build_best_fit(s16 unit_index, s16 shop_id, s16* out) {
         }
     } else {
         s_shop_slot_categories[MENU_EQUIPMENT_SLOT_LEFT_HAND] = ITEM_LIST_FILTER_SHIELD;
-        if (right >= ITEM_ID_THROWABLE_FIRST)
+        if (right >= ITEM_ID_THROWABLE_FIRST) {
             second = right;
-        else if (right != ITEM_ID_NOTHING)
+        } else if (right != ITEM_ID_NOTHING) {
             first = right;
-        if (left >= ITEM_ID_THROWABLE_FIRST)
+        }
+        if (left >= ITEM_ID_THROWABLE_FIRST) {
             second = left;
-        else if (left != ITEM_ID_NOTHING)
+        } else if (left != ITEM_ID_NOTHING) {
             first = left;
+        }
     }
 
     for (slot = 0; slot < MENU_EQUIPMENT_SLOT_ACCESSORY; slot++) {
@@ -284,8 +295,9 @@ void shop_fitting_build_best_fit(s16 unit_index, s16 shop_id, s16* out) {
                         break;
                     }
                 }
-                if (retry)
+                if (retry) {
                     continue;
+                }
             }
         } else if (category == ITEM_LIST_FILTER_SHIELD) {
             if ((ability_has_two_hands(unit_index)
@@ -294,8 +306,9 @@ void shop_fitting_build_best_fit(s16 unit_index, s16 shop_id, s16* out) {
                 || (g_item_weapon_data[out[MENU_EQUIPMENT_SLOT_RIGHT_HAND]].flags & WEAPON_FLAG_FORCED_TWO_HANDS)) {
                 list[0] = -1;
             } else {
-                if (second >= ITEM_ID_THROWABLE_FIRST)
+                if (second >= ITEM_ID_THROWABLE_FIRST) {
                     list[length++] = second;
+                }
                 list[length] = -1;
                 item_list_sort(ITEM_SORT_ORDER_BEST_FIT, list);
             }
@@ -305,10 +318,11 @@ void shop_fitting_build_best_fit(s16 unit_index, s16 shop_id, s16* out) {
             item_list_sort(ITEM_SORT_ORDER_BEST_FIT, list);
         }
 
-        if (list[0] <= ITEM_ID_NOTHING)
+        if (list[0] <= ITEM_ID_NOTHING) {
             out[slot] = ITEM_ID_NOTHING;
-        else
+        } else {
             out[slot] = list[0];
+        }
     }
 
     i = 0; /* reused as the swap flag, as in the sibling */
@@ -321,8 +335,9 @@ void shop_fitting_build_best_fit(s16 unit_index, s16 shop_id, s16* out) {
      * Swords) or its off-hand item right. */
     if ((right != ITEM_ID_NOTHING && right == out[MENU_EQUIPMENT_SLOT_LEFT_HAND])
         || (left != ITEM_ID_NOTHING && left == out[MENU_EQUIPMENT_SLOT_RIGHT_HAND])
-        || (!dual && left < ITEM_ID_THROWABLE_FIRST && left != ITEM_ID_NOTHING) || right >= ITEM_ID_THROWABLE_FIRST)
+        || (!dual && left < ITEM_ID_THROWABLE_FIRST && left != ITEM_ID_NOTHING) || right >= ITEM_ID_THROWABLE_FIRST) {
         i = 1;
+    }
     if (i) {
         /* Reusing the swap flag preserves the target's register assignment. */
         i = out[MENU_EQUIPMENT_SLOT_RIGHT_HAND];
@@ -520,7 +535,7 @@ s32 formation_job_change(s16 unit_id, s16 job_id, s32 update_equipment) {
             item_adjust_inventory_count(equipment[i], -1);
         }
         formation_save_records();
-        formation_banner_countdown(0xD811, 0x1E);
+        formation_banner_countdown(0xD811, 30);
     }
     return 1;
 }
@@ -615,6 +630,7 @@ s32 equipment_build_item_list(s16 unit_id, s16 sort_mode, s8 category, s16* entr
     if (mode == ITEM_LIST_MODE_MARK_UNEQUIPPABLE && g_game_options.fields.show_unequippable_items != GAME_OPTION_ON) {
         mode = ITEM_LIST_MODE_EQUIPPABLE;
     }
+    /* item is set before count, outside the for, as the original's code order requires. */
     item = 1;
     count = 0;
     for (; item < ITEM_ID_END; item++) {
@@ -668,8 +684,7 @@ s32 equipment_build_item_list(s16 unit_id, s16 sort_mode, s8 category, s16* entr
                 entry |= ITEM_ENTRY_UNEQUIPPABLE;
             }
         }
-        entries[count] = entry;
-        count++;
+        entries[count++] = entry;
     }
     entries[count] = -1;
     list_index = 100;

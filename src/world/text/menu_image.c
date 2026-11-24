@@ -33,6 +33,7 @@ void text_render_to_image(s32 text_id, u8* image, glyph_blit_t* origin, const u8
 
     /* Refresh the player name buffer that the Ramza format code reads: end bytes, then party unit 0's name. */
     party = party_unit_get(0);
+    /* The end byte and buffer go through locals, as the original loop holds them in registers. */
     terminator = TEXT_END_WAIT_FOR_CONFIRM;
     for (i = 19; i >= 0; i--) {
         fill[i] = terminator;
@@ -60,7 +61,7 @@ void text_render_to_image(s32 text_id, u8* image, glyph_blit_t* origin, const u8
     g_menu_text_pen.rect.x = origin->rect.x;
     g_text_glyph_first_row = 0;
     g_menu_text_pen.rect.y = origin->rect.y;
-    g_text_glyph_row_limit = 0x10;
+    g_text_glyph_row_limit = 16;
     g_menu_text_pen.stride = origin->stride;
     line = 0;
 
@@ -71,7 +72,7 @@ void text_render_to_image(s32 text_id, u8* image, glyph_blit_t* origin, const u8
             if ((state->command & 0xF0) == TEXT_EXTENDED_GLYPH_PREFIX_FIRST) {
                 state->command = (*cursor & 0xF) * TEXT_GLYPHS_PER_PREFIX;
                 cursor = menu_text_advance_cursor_with_backreferences(state, cursor);
-                state->command = *cursor + state->command;
+                state->command += *cursor;
             } else {
                 if (state->command == TEXT_SET_GLYPH_DELAY) {
                     cursor = menu_text_advance_cursor_with_backreferences(state, cursor);
@@ -105,7 +106,7 @@ void text_render_to_image(s32 text_id, u8* image, glyph_blit_t* origin, const u8
                     g_menu_text_pen.rect.x = origin->rect.x;
                     if (line >= g_menu_text_first_line) {
                         g_text_glyph_first_row = 0;
-                        g_menu_text_pen.rect.y += 0x10;
+                        g_menu_text_pen.rect.y += 16;
                     }
                     line++;
                 } else if (state->command == TEXT_SET_NUMBER_WIDTH) {
@@ -133,7 +134,7 @@ void text_render_to_image(s32 text_id, u8* image, glyph_blit_t* origin, const u8
                         if (state->value >= g_text_decimal_divisors[i] || i == 0 || started != 0) {
                             state->command = state->value / g_text_decimal_divisors[i];
                             started = 1;
-                            state->value = state->value - state->command * g_text_decimal_divisors[i];
+                            state->value -= state->command * g_text_decimal_divisors[i];
                             if (line >= g_menu_text_line_limit) {
                                 /* Leaves the digit loop and the text loop. */
                                 goto done;

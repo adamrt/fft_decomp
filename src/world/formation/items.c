@@ -461,7 +461,6 @@ static s32 update_remove_menu(void) {
             g_equipment_remove_item_previewed_slot = -2;
             bcopy(g_formation_unit_pointers[g_unit_selected_index]->detail.equipment, g_equipment_remove_item_equipment,
                 sizeof(g_equipment_remove_item_equipment));
-            return 1;
         }
         return 1;
     }
@@ -476,6 +475,7 @@ static s32 update_remove_menu(void) {
     }
     slot = menu_selection_step_vertical_with_sound(MENU_EQUIPMENT_SLOT_COUNT, MENU_SCREEN_CURSOR_REMOVE_SLOT,
         g_menu_input_secondary_repeat, SOUND_SFX_PAGE_SWITCH);
+    /* A direct store to the cursor point changes the code; the original went through a pointer. */
     cursor_y = &g_formation_item_remove_cursor_point.y;
     index = slot;
     *cursor_y = index * 16 + 0x90;
@@ -539,10 +539,10 @@ static s32 update_remove_all_prompt(void) {
 
     g_help_message_text_id = -1;
     gfx_set_otag_index(0x28);
-    g_formation_item_remove_all_blink_counter = g_formation_item_remove_all_blink_counter + 1;
+    g_formation_item_remove_all_blink_counter++;
     if (g_formation_item_remove_all_blink_counter % 2) {
         for (i = 0; i < MENU_EQUIPMENT_SLOT_COUNT; i++) {
-            g_formation_item_remove_all_cursor_point.y = i * 0x10 + 0x90;
+            g_formation_item_remove_all_cursor_point.y = i * 16 + 0x90;
             value = 0;
             menu_draw_sliding_cursor(&g_formation_item_remove_all_cursor_point, &value, g_menu_input_lock_mode);
         }

@@ -78,17 +78,17 @@ void ability_list_scrolling_thread(void) {
     page = g_formation_ability_list_pages[g_thread_current_id];
     entry = (menu_entry_t*)thread_current_get_parameter_1();
     layout = entry->context;
-    entry->window.h = layout->columns.row_count * 16 + 0x1C;
-    entry->inner_height = layout->columns.row_count * 16 + 0x1C;
+    entry->window.h = layout->columns.row_count * 16 + 28;
+    entry->inner_height = layout->columns.row_count * 16 + 28;
     row_buffer_live = 0;
-    entry->text_image.source.h = layout->columns.row_count * 16 + 0x1C;
+    entry->text_image.source.h = layout->columns.row_count * 16 + 28;
     window.source.x = 0x108 - entry->inner_width;
     window.source.y = 0xFE;
     window.x_screen_offset = 8;
-    window.y_screen_offset = 0xC;
+    window.y_screen_offset = 12;
     hold_time = 0;
     window.source.w = entry->inner_width - 8;
-    window.source.h = entry->window.h - 0x1A;
+    window.source.h = entry->window.h - 26;
     base = page;
 
     /* The frame sprite starts two lines above the first row (v0 = ring * 16 + accum - 2), so the
@@ -118,11 +118,11 @@ void ability_list_scrolling_thread(void) {
         menu_init_sprt(&page->arrows[i]);
         page->arrows[i].clut = 0x7D7C;
         page->arrows[i].w = 8;
-        page->arrows[i].h = 0x10;
+        page->arrows[i].h = 16;
         page->arrows[i].u0 = arrow_u;
         page->arrows[i].v0 = 0;
-        page->arrows[i].x0 = entry->window.x + entry->window.w - 0xF;
-        arrow_y = i * (entry->window.h - 0x32) + 0x10;
+        page->arrows[i].x0 = entry->window.x + entry->window.w - 15;
+        arrow_y = i * (entry->window.h - 50) + 16;
         page->arrows[i].y0 = entry->window.y + arrow_y;
         arrow_u += 8;
     }
@@ -136,7 +136,7 @@ void ability_list_scrolling_thread(void) {
     gfx_set_image_primitive_layout(&page->frame, &entry->vram_origin, &entry->window, &window);
     menu_init_sprite_array(page->arrow_marks, 2, MENU_CLUT_NORMAL);
     page->arrow_marks[0].w = 6;
-    page->arrow_marks[0].h = 0xC;
+    page->arrow_marks[0].h = 12;
     page->arrow_marks[1].w = 4;
     page->arrow_marks[1].h = 4;
     page->arrow_marks[0].u0 = 0xE8;
@@ -146,7 +146,7 @@ void ability_list_scrolling_thread(void) {
     page->arrow_marks[0].y0 = page->arrows[0].y0 + 3;
     page->arrow_marks[1].v0 = 0xC;
     page->arrow_marks[1].x0 = page->arrows[1].x0;
-    page->arrow_marks[1].y0 = page->arrows[1].y0 + 0xE;
+    page->arrow_marks[1].y0 = page->arrows[1].y0 + 14;
 
     menu_build_and_upload_window_frame_image(
         entry->inner_width, entry->inner_height, &image_rect, MENU_WINDOW_FRAME_ALTERNATE_UPLOAD);
@@ -236,7 +236,7 @@ void ability_list_scrolling_thread(void) {
                 } else {
                     image_rect.y = (((ring - 1) * 16) & 0x7F) + entry->vram_origin.y;
                 }
-                image_rect.h = 0x10;
+                image_rect.h = 16;
                 image_rect.y += 0x80;
                 row_buffer_live = 1;
                 buffer = menu_alloc_memory(window.source.w * 8);
@@ -368,7 +368,7 @@ void ability_list_scrolling_thread(void) {
 
         /* A whole 16-pixel row has scrolled: commit it. A direction held past the initial repeat
          * delay is fed back into the input so the scroll keeps going. */
-        if (scroll_accum < -0xF || scroll_accum > 0xF) {
+        if (scroll_accum <= -16 || scroll_accum >= 16) {
             ring += scroll_delta;
             row_offset += scroll_delta;
             repeat = script_get_event_initial_repeat_counter();

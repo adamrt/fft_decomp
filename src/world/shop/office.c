@@ -72,7 +72,7 @@ void shop_soldier_update_menu(void) {
     s32 result;
     s32 slot;
 
-    if (g_shop_soldier_hire_menu_initialized == 0) {
+    if (!g_shop_soldier_hire_menu_initialized) {
         g_shop_soldier_hire_confirm_menu.selected_index = 0;
         g_shop_soldier_hire_fee_confirm_menu.selected_index = 0;
         g_shop_soldier_hire_result_shown = 0;
@@ -89,7 +89,7 @@ void shop_soldier_update_menu(void) {
             }
         }
     }
-    if (g_shop_soldier_hire_result_shown != 0) {
+    if (g_shop_soldier_hire_result_shown) {
         if (g_menu_input_primary_repeat & (PSX_PAD_TRIANGLE | PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SQUARE)) {
             g_shop_menu_step = SHOP_STEP_SOLDIER_REOPEN;
         }
@@ -153,11 +153,11 @@ void shop_soldier_update_menu(void) {
  * (message 0xF826).
  */
 void shop_soldier_hire_update_preview(void) {
-    if (g_shop_soldier_hire_preview_initialized == 0) {
+    if (!g_shop_soldier_hire_preview_initialized) {
         if (g_menu_input_primary_repeat & (PSX_PAD_TRIANGLE | PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SQUARE)) {
             thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, -1, 0);
         }
-        if (thread_is_running(THREAD_SCREEN_SLOT_MESSAGE) == 0) {
+        if (!thread_is_running(THREAD_SCREEN_SLOT_MESSAGE)) {
             g_formation_unit_browse_enabled = 1;
             g_formation_unit_banner_enabled = 1;
             g_formation_unit_banner_at_bottom = 0;
@@ -191,11 +191,11 @@ void shop_soldier_hire_update_preview(void) {
 void shop_soldier_hire_update_confirm(void) {
     s16 selection;
 
-    if (g_shop_soldier_hire_confirm_message_wait != 0) {
+    if (g_shop_soldier_hire_confirm_message_wait) {
         if (g_menu_input_primary_repeat & (PSX_PAD_TRIANGLE | PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SQUARE)) {
             thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, -1, 0);
         }
-        if (thread_is_running(THREAD_SCREEN_SLOT_MESSAGE) == 0) {
+        if (!thread_is_running(THREAD_SCREEN_SLOT_MESSAGE)) {
             g_shop_soldier_hire_confirm_message_wait = 0;
             g_shop_menu_step = SHOP_STEP_SOLDIER_HIRE_NAME_ENTRY;
         }
@@ -221,13 +221,13 @@ void shop_soldier_hire_update_confirm(void) {
 
 /* Soldier office: the name entry keyboard for the recruit, then the fee prompt. */
 void shop_soldier_hire_update_name(void) {
-    if (g_shop_soldier_hire_name_entry_initialized == 0) {
+    if (!g_shop_soldier_hire_name_entry_initialized) {
         g_formation_unit_banner_enabled = 0;
         unit_panel_toggle_banner_thread(0);
         g_shop_soldier_hire_name_entry_initialized = 1;
     }
     s_office_entered_name = name_entry_update_keyboard(g_formation_unit_pointers[g_unit_selected_index]->name, 0);
-    if (s_office_entered_name != 0) {
+    if (s_office_entered_name) {
         g_shop_soldier_hire_name_entry_initialized = 0;
         g_text_substitution_values[0] = s_office_fee;
         thread_start(THREAD_SCREEN_SLOT_MESSAGE, message_box_thread);
@@ -246,7 +246,7 @@ void shop_soldier_hire_update_fee(void) {
     s16 choice;
 
     g_help_message_text_id = 0;
-    if (g_shop_soldier_hire_fee_message_wait != 0) {
+    if (g_shop_soldier_hire_fee_message_wait) {
         if (g_menu_input_primary_repeat & (PSX_PAD_TRIANGLE | PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SQUARE)) {
             g_shop_menu_step = SHOP_STEP_SOLDIER_REOPEN;
             g_shop_soldier_hire_fee_message_wait = 0;
@@ -303,7 +303,7 @@ void shop_soldier_rename_update_unit(void) {
     s32 input;
     s32 text_id;
 
-    if (g_shop_soldier_rename_prompt_initialized == 0) {
+    if (!g_shop_soldier_rename_prompt_initialized) {
         if (!(g_menu_input_primary_repeat & (PSX_PAD_TRIANGLE | PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SQUARE))) {
             shop_draw_gil();
             shop_soldier_draw_fee();
@@ -316,9 +316,9 @@ void shop_soldier_rename_update_unit(void) {
         formation_grid_init_cursor(0);
         g_shop_background_visible = 0;
     }
-    if (g_formation_unit_banner_enabled != 0) {
+    if (g_formation_unit_banner_enabled) {
         text_id = MENU_GRID_HELP_BANNER_TOP;
-        if (g_formation_unit_banner_at_bottom != 0) {
+        if (g_formation_unit_banner_at_bottom) {
             text_id = MENU_GRID_HELP_BANNER_BOTTOM;
         }
         g_help_message_text_id = text_id;
@@ -326,18 +326,18 @@ void shop_soldier_rename_update_unit(void) {
         g_help_message_text_id = 0;
     }
     unit_grid_update(1, 1, 0, g_menu_input_secondary_repeat, g_menu_input_lock_mode, get_rename_unit_marker, 0);
-    if (g_shop_soldier_rename_error_shown != 0) {
+    if (g_shop_soldier_rename_error_shown) {
         g_help_message_text_id = -1;
         if (g_menu_input_primary_repeat & (PSX_PAD_TRIANGLE | PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SQUARE)) {
             g_shop_soldier_rename_error_shown = 0;
             thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, -1, 0);
         }
     }
-    if (thread_is_running(THREAD_SCREEN_SLOT_MESSAGE) == 0 && unit_grid_check_scroll() == 0) {
+    if (!thread_is_running(THREAD_SCREEN_SLOT_MESSAGE) && unit_grid_check_scroll() == 0) {
         input = g_menu_input_primary_repeat;
         if (input & PSX_PAD_CIRCLE) {
             if (g_formation_unit_pointers[g_unit_selected_index]->sprite_set == CHARACTER_IDENTITY_REIS_DRAGON) {
-                if (g_formation_unit_banner_at_bottom != 0) {
+                if (g_formation_unit_banner_at_bottom) {
                     mode = 1;
                 } else {
                     mode = 2;
@@ -367,14 +367,14 @@ void shop_soldier_rename_update_unit(void) {
 /* Soldier office: the name entry keyboard of the Rename service; sibling of
  * shop_soldier_hire_update_name, which goes on to the fee prompt (0xF82A). */
 void shop_soldier_rename_update_name(void) {
-    if (g_shop_soldier_rename_name_entry_initialized == 0) {
+    if (!g_shop_soldier_rename_name_entry_initialized) {
         g_formation_unit_banner_enabled = 0;
         unit_panel_toggle_banner_thread(0);
         g_shop_soldier_rename_name_entry_initialized = 1;
     }
     unit_grid_update(1, 0, 0, 0, g_menu_input_lock_mode, get_rename_unit_marker, 0);
     s_office_entered_name = name_entry_update_keyboard(g_formation_unit_pointers[g_unit_selected_index]->name, 0);
-    if (s_office_entered_name != 0) {
+    if (s_office_entered_name) {
         g_shop_menu_step = SHOP_STEP_SOLDIER_REOPEN;
         formation_unit_set_name(g_unit_selected_index, s_office_entered_name);
         thread_start(THREAD_SCREEN_SLOT_MESSAGE, message_box_thread);

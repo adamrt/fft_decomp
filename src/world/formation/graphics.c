@@ -126,6 +126,7 @@ s32 formation_get_party_unit_palette_index(s32 party_index) {
         portrait -= 1;
     }
     if (portrait >= 0x3E) {
+        /* The bytes build the palette index in these steps. */
         portrait -= 0x3E;
         product = portrait * 3;
         palette_base = job->job_portrait_palette + 0x3E;

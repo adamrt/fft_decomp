@@ -263,19 +263,19 @@ static s32 check_banner_at_bottom(s8 scroll_position) {
     if (g_formation_unit_browse_enabled == 0
         || (g_formation_unit_pointers[g_unit_selected_index]->gender_flags & UNIT_FLAG_EGG)) {
         if (g_formation_scroll_velocity < 0) {
-            scroll_position -= 0x3c;
+            scroll_position -= 60;
         }
         if (g_formation_scroll_velocity > 0) {
-            scroll_position += 0x3c;
+            scroll_position += 60;
         }
         switch (scroll_position) {
-        case -0x78:
-            if (g_unit_selected_index >= 0x10) {
+        case -120:
+            if (g_unit_selected_index >= 16) {
                 result = 0;
             }
             break;
-        case -0x3c:
-            if (g_unit_selected_index >= 0xc) {
+        case -60:
+            if (g_unit_selected_index >= 12) {
                 result = 0;
             }
             break;
@@ -294,41 +294,37 @@ static s32 check_banner_at_bottom(s8 scroll_position) {
 /* Step the unit grid's page scroll: at rest, start moving 4 pixels per frame toward the page that
  * holds the selected unit; while moving, accelerate by 4 and settle on the next 60-pixel page. */
 static void update_grid_scroll(s8* velocity, s8* position) {
-    s8 next;
-
     if (*velocity == 0) {
         switch (*position) {
-        case -0x78:
+        case -120:
             if (g_unit_selected_index < 8) {
                 *velocity = 4;
             }
             break;
-        case -0x3C:
-            if (g_unit_selected_index >= 0x10) {
+        case -60:
+            if (g_unit_selected_index >= 16) {
                 *velocity = -4;
             } else if (g_unit_selected_index < 4) {
                 *velocity = 4;
             }
             break;
         case 0:
-            if (g_unit_selected_index >= 0xC) {
+            if (g_unit_selected_index >= 12) {
                 *velocity = -4;
             }
             break;
         }
     } else if (*velocity < 0) {
-        next = *velocity - 4;
-        *velocity = next;
-        if (next < -0x3B) {
+        *velocity -= 4;
+        if (*velocity <= -60) {
             *velocity = 0;
-            *position -= 0x3C;
+            *position -= 60;
         }
     } else if (*velocity > 0) {
-        next = *velocity + 4;
-        *velocity = next;
-        if (next >= 0x3C) {
+        *velocity += 4;
+        if (*velocity >= 60) {
             *velocity = 0;
-            *position += 0x3C;
+            *position += 60;
         }
     }
 }
@@ -342,20 +338,20 @@ s32 unit_grid_check_scroll(void) {
         result = 1;
     } else {
         switch (g_formation_scroll_position) {
-        case -0x78:
+        case -120:
             if (g_unit_selected_index < 8) {
                 result = 1;
             }
             break;
-        case -0x3C:
-            if (g_unit_selected_index >= 0x10) {
+        case -60:
+            if (g_unit_selected_index >= 16) {
                 result = 1;
             } else if (g_unit_selected_index < 4) {
                 result = 1;
             }
             break;
         case 0:
-            if (g_unit_selected_index >= 0xC) {
+            if (g_unit_selected_index >= 12) {
                 result = 1;
             }
             break;
@@ -437,13 +433,11 @@ void menu_draw_pressable_button(s16 index, s32 x, s16 y, s16 pressed, s16 disabl
 /*
  * Initialize the selected formation unit's stat callbacks and cursor position.
  *
- * The scroll update must report 10 stationary iterations before the cursor
- * coordinates are finalized. The four-column layout uses signed coordinates.
+ * The page scroll runs until it has rested for 10 steps, so the grid opens on
+ * the page that holds the unit, before the cursor is placed on its slot.
  */
 void formation_init_selection_cursor(s16 formation_index) {
-    point16_t* cursor;
     s32 count;
-    s16 x;
 
     menu_scrollable_list_init_core(0, 0, 0);
     g_menu_row_callbacks[0].value = get_grid_stat;
@@ -466,12 +460,8 @@ void formation_init_selection_cursor(s16 formation_index) {
         }
     } while (count < 10);
     g_formation_unit_banner_at_bottom = check_banner_at_bottom(g_formation_scroll_position);
-    x = formation_index % 4;
-    cursor = &g_formation_cursor_position;
-    cursor->x = x * 62 + 34;
-    /* x is reused for the scroll offset, read as a byte and then sign-extended. */
-    x = g_formation_scroll_position;
-    cursor->y = x + (formation_index >> 2) * 60 + 61;
+    g_formation_cursor_position.x = (formation_index % 4) * 62 + 34;
+    g_formation_cursor_position.y = g_formation_scroll_position + (formation_index >> 2) * 60 + 61;
     g_formation_selection_cursor_ready = 1;
     init_cursor_trail();
 }
@@ -936,16 +926,12 @@ static void draw_unit_slots(point16_t* positions, s32 shade) {
         if (i != g_unit_selected_index) {
             if (g_formation_unit_pointers[i]->proposition_status & FORMATION_UNIT_PROPOSITION_LEAVING) {
                 palette = MENU_UNIT_READOUT_LEAVING;
+            } else if (g_formation_unit_pointers[i]->gender_flags & UNIT_FLAG_EGG) {
+                palette = MENU_UNIT_READOUT_EGG;
+            } else if (g_formation_unit_pointers[i]->proposition_status & FORMATION_UNIT_PROPOSITION_MISSING) {
+                palette = MENU_UNIT_READOUT_MISSING;
             } else {
-                if (g_formation_unit_pointers[i]->gender_flags & UNIT_FLAG_EGG) {
-                    palette = MENU_UNIT_READOUT_EGG;
-                } else {
-                    if (g_formation_unit_pointers[i]->proposition_status & FORMATION_UNIT_PROPOSITION_MISSING) {
-                        palette = MENU_UNIT_READOUT_MISSING;
-                    } else {
-                        palette = g_formation_stat_display_mode;
-                    }
-                }
+                palette = g_formation_stat_display_mode;
             }
             draw_unit_readout(i, palette, positions[i].x, positions[i].y, &backdrop_rgb, 0, 0, 9);
             ot_index = 8;

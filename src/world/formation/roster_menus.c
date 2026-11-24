@@ -63,7 +63,7 @@ void formation_update_order_menu(void) {
     s32 index;
     s32 selected_entry;
 
-    if (g_formation_order_open == 0) {
+    if (!g_formation_order_open) {
         item_list_load_sort_order(0, g_formation_order_entries);
         for (index = 0; index < FORMATION_SORT_KEY_COUNT; index++) {
             option_ids[index] = g_formation_order_entries[index] + 14;
@@ -90,8 +90,7 @@ void formation_update_order_menu(void) {
         /* Move the chosen entry to the front and redraw the options. */
         index = g_menu_screen_selection_results[9];
         selected_entry = g_formation_order_entries[index];
-        index -= 1;
-        for (; index >= 0; index--) {
+        for (index--; index >= 0; index--) {
             g_formation_order_entries[index + 1] = g_formation_order_entries[index];
         }
         g_formation_order_entries[0] = selected_entry;
@@ -159,7 +158,7 @@ void formation_update_dismiss_menu(void) {
     /* The timer's low byte counts the 16 frames; its high byte only carries the unit index. */
     if (g_formation_dismiss_anim_timer != 0) {
         g_formation_dismiss_anim_timer++;
-        if ((g_formation_dismiss_anim_timer & 0xFF) < 0x11) {
+        if ((g_formation_dismiss_anim_timer & 0xFF) < 17) {
             return;
         }
         for (i = 0; s_dismiss_profiles[i].character_identity != -1; i++) {
@@ -174,16 +173,16 @@ void formation_update_dismiss_menu(void) {
         return;
     }
 
-    if (g_formation_dismiss_prompt_running == 0) {
+    if (!g_formation_dismiss_prompt_running) {
         sprite = g_unit_selected_index;
-        if (g_formation_unit_pointers[sprite]->proposition_status != 0) {
+        if (g_formation_unit_pointers[sprite]->proposition_status) {
             message_box_show_with_sound(0xC012, SOUND_SFX_ERROR_MESSAGE);
             g_formation_dismiss_step = FORMATION_DISMISS_PROPOSITION_MESSAGE;
             g_formation_dismiss_prompt_running = 1;
         } else {
             g_formation_dismiss_step = formation_can_dismiss(sprite);
             menu_screen_text_bind_section(MENU_SCREEN_TEXT_DATA_DISMISS_UNIT_REPLIES);
-            if (g_formation_unit_browse_enabled != 0) {
+            if (g_formation_unit_browse_enabled) {
                 g_formation_unit_cycle_mode = 1;
             }
             g_text_substitution_values[0] = g_formation_unit_pointers[g_unit_selected_index]->identity.roster_slot;
@@ -216,7 +215,7 @@ void formation_update_dismiss_menu(void) {
             if (g_formation_dismiss_step == FORMATION_DISMISS_REFUSED) {
                 g_sound_suppressed = 1;
                 s_formation_dismiss_menu_data = &g_formation_dismiss_prompt;
-                if (g_formation_unit_banner_at_bottom != 0) {
+                if (g_formation_unit_banner_at_bottom) {
                     value = 0x19;
                 } else {
                     value = 0x1A;
@@ -225,7 +224,7 @@ void formation_update_dismiss_menu(void) {
                 g_formation_dismiss_prompt.text_id = text_id;
             } else {
                 menu = g_formation_dismiss_confirm_menu;
-                if (g_formation_unit_banner_at_bottom != 0) {
+                if (g_formation_unit_banner_at_bottom) {
                     menu = g_formation_dismiss_confirm_menu_scrolled;
                 }
                 s_formation_dismiss_menu_data = menu;
@@ -241,7 +240,7 @@ void formation_update_dismiss_menu(void) {
     if (g_formation_dismiss_step == FORMATION_DISMISS_PROPOSITION_MESSAGE) {
         running = thread_is_running(THREAD_SCREEN_SLOT_TEXT);
         g_formation_dismiss_prompt_running = running;
-        if (running != 0) {
+        if (running) {
             return;
         }
         g_formation_current_menu = FORMATION_MENU_UNIT_GRID;
@@ -252,8 +251,8 @@ void formation_update_dismiss_menu(void) {
     step = g_formation_dismiss_step;
     g_formation_dismiss_prompt_running = running;
     if (step != FORMATION_DISMISS_REFUSED) {
-        /* Step 1 queues the answer's sound once; 0x64 then keeps the step nonzero without repeating it. */
-        if (thread_is_running(3) != 0) {
+        /* Step 1 queues the answer's sound once; 100 then keeps the step nonzero without repeating it. */
+        if (thread_is_running(3)) {
             step = g_formation_dismiss_step;
             if (step == FORMATION_DISMISS_CONFIRM) {
                 selection = g_menu_screen_selection_results[10];
@@ -265,7 +264,7 @@ void formation_update_dismiss_menu(void) {
                 }
                 /* A default assignment plus a conditional override, not an
                  * if/else over the two stores: the target puts `li v1,1` in the
-                 * branch's delay slot and overrides with 0x64 on the
+                 * branch's delay slot and overrides with 100 on the
                  * fall-through (`beqz` at 0x3e4). An if/else emits the opposite
                  * branch sense and orders the two `li`s the other way, which
                  * also costs the store's register. */
@@ -277,7 +276,7 @@ void formation_update_dismiss_menu(void) {
             }
         }
 
-        if (g_formation_dismiss_prompt_running != 0) {
+        if (g_formation_dismiss_prompt_running) {
             return;
         }
         if (g_menu_screen_selection_results[10] != 0) {
@@ -289,7 +288,7 @@ void formation_update_dismiss_menu(void) {
         return;
     }
 
-    if (running != 0) {
+    if (running) {
         return;
     }
     g_sound_suppressed = 0;

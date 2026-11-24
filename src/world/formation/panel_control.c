@@ -11,11 +11,11 @@
 /* Open or close the equipment-change panel and its numeric stats panel. While the status panel
  * slides, an open request does nothing, so per-frame callers open it once the slide ends. */
 void unit_panel_toggle_equipment_threads(s32 enable) {
-    if (enable != 0) {
+    if (enable) {
         enable = 1;
         if (!(g_unit_panel_status_display_thread_params.flags
                 & (MENU_STATUS_PANEL_SLIDE_DOWN | MENU_STATUS_PANEL_SLIDE_UP))) {
-            if (thread_is_running(MENU_SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL) == 0) {
+            if (!thread_is_running(MENU_SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL)) {
                 thread_start(MENU_SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL, unit_panel_equipment_thread);
                 thread_set_parameters(
                     MENU_SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL, (s32)&g_formation_change_banner_thread_params, 0, 0);
@@ -34,10 +34,10 @@ void unit_panel_toggle_equipment_threads(s32 enable) {
  * an open request does nothing while the status panel slides. The normalized enable state (0 or 1) is stored in
  * g_formation_change_banner_thread_params.style either way. */
 void formation_toggle_preview_equipment_panel(s32 enable) {
-    if (enable != 0) {
+    if (enable) {
         if (!(g_unit_panel_status_display_thread_params.flags
                 & (MENU_STATUS_PANEL_SLIDE_DOWN | MENU_STATUS_PANEL_SLIDE_UP))
-            && thread_is_running(THREAD_SCREEN_SLOT_CHARACTER_STATUS) == 0) {
+            && !thread_is_running(THREAD_SCREEN_SLOT_CHARACTER_STATUS)) {
             thread_start(THREAD_SCREEN_SLOT_CHARACTER_STATUS, unit_panel_equipment_thread);
             thread_set_parameters(
                 THREAD_SCREEN_SLOT_CHARACTER_STATUS, (s32)&g_formation_stat_preview_panel_thread_params, 0, 0);

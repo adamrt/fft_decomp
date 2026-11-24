@@ -31,7 +31,7 @@ static u32 s_screen_input_frame_secondary_repeat_counter;
  * the yield suppresses script input for 5 frames.
  *
  * WORLD's body; publishes the state twice.
- * The six g_screen_input_frame_* values are laid out as a menu_input_state_t
+ * The six s_screen_input_frame_* values are laid out as a menu_input_state_t
  * (g_menu_screen_input_frame_state), but a struct global makes GCC keep a base
  * register for the field accesses, so they are separate scalars here.
  */
@@ -43,7 +43,6 @@ void menu_input_update_event_state(u32* otag, u32 input, s32 framebuffer_y) {
     u32 previous_input;
     u32 counter;
     s32 thread_id;
-    s32 status;
 
     g_gfx_current_otag_entry = otag;
     g_menu_framebuffer_y = framebuffer_y;
@@ -79,7 +78,7 @@ void menu_input_update_event_state(u32* otag, u32 input, s32 framebuffer_y) {
             repeat_delay = g_input_repeat_period / g_script_event_speed;
             if (counter >= repeat_delay) {
                 s_screen_input_frame_repeat_counter = 0;
-                if ((input & PSX_PAD_SQUARE) != 0) {
+                if (input & PSX_PAD_SQUARE) {
                     s_screen_input_frame_new = input & (PSX_PAD_RIGHT | PSX_PAD_LEFT);
                 } else {
                     s_screen_input_frame_new = input & PSX_PAD_DPAD_MASK;
@@ -88,7 +87,7 @@ void menu_input_update_event_state(u32* otag, u32 input, s32 framebuffer_y) {
             secondary_delay = g_input_secondary_repeat_period / g_script_event_speed;
             if (s_screen_input_frame_secondary_repeat_counter >= secondary_delay) {
                 s_screen_input_frame_secondary_repeat_counter = 0;
-                if ((s_screen_input_frame_current & PSX_PAD_SQUARE) != 0) {
+                if (s_screen_input_frame_current & PSX_PAD_SQUARE) {
                     s_screen_input_frame_new
                         |= s_screen_input_frame_current & (PSX_PAD_L1 | PSX_PAD_R1 | PSX_PAD_UP | PSX_PAD_DOWN);
                 } else {
@@ -114,8 +113,7 @@ void menu_input_update_event_state(u32* otag, u32 input, s32 framebuffer_y) {
 
     thread_yield();
     for (thread_id = 1; thread_id < THREAD_ID_COUNT; thread_id++) {
-        status = g_thread_status_snapshot[thread_id];
-        if (status != thread_is_running_asm(thread_id)) {
+        if (g_thread_status_snapshot[thread_id] != thread_is_running_asm(thread_id)) {
             g_script_input_suppression_frames = 5;
         }
     }
@@ -133,7 +131,5 @@ void menu_input_update_event_state(u32* otag, u32 input, s32 framebuffer_y) {
 
 /* Return whether a thread slot is running. */
 s32 menu_thread_is_running(s32 thread_id) {
-    thread_t* thread = &g_threads[thread_id];
-
-    return thread->is_running;
+    return g_threads[thread_id].is_running;
 }

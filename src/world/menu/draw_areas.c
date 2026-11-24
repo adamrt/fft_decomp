@@ -60,7 +60,7 @@ void menu_palette_set_mode(s32 mode) {
  * g_menu_screen_temporary_draw_area (y reset to 0) one entry after the current
  * ordering-table index, and unlock the index. Returns the next instruction. */
 menu_instruction_t* menu_opcode_13_clear_temporary_draw_area(menu_instruction_t* instruction) {
-    if (g_gfx_otag_index_locked != 0) {
+    if (g_gfx_otag_index_locked) {
         g_menu_screen_temporary_draw_area.y = 0;
         menu_gfx_enqueue_draw_area(&g_menu_screen_temporary_draw_area, g_menu_gfx_otag_index + 1);
         g_gfx_otag_index_locked = 0;
@@ -74,7 +74,7 @@ menu_instruction_t* menu_opcode_13_clear_temporary_draw_area(menu_instruction_t*
 menu_instruction_t* menu_opcode_14_set_draw_area(menu_instruction_t* instruction) {
     RECT rect;
 
-    if (g_gfx_otag_index_locked == 0) {
+    if (!g_gfx_otag_index_locked) {
         rect.x = instruction->draw_area.x;
         rect.y = instruction->draw_area.y;
         rect.w = instruction->draw_area.width;
@@ -88,7 +88,7 @@ menu_instruction_t* menu_opcode_14_set_draw_area(menu_instruction_t* instruction
  * g_menu_screen_temporary_draw_area (y reset to 0) one entry after the current
  * ordering-table index. Returns the next instruction. */
 menu_instruction_t* menu_opcode_15_restore_draw_area(menu_instruction_t* instruction) {
-    if (g_gfx_otag_index_locked == 0) {
+    if (!g_gfx_otag_index_locked) {
         g_menu_screen_temporary_draw_area.y = 0;
         menu_gfx_enqueue_draw_area(&g_menu_screen_temporary_draw_area, g_menu_gfx_otag_index + 1);
     }

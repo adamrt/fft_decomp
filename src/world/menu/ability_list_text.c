@@ -76,7 +76,7 @@ u8* ability_list_update_page_scroll(menu_entry_t* entry, s32* row_offset, s32* r
     changed = 0;
     if (g_menu_input_mode == MENU_INPUT_PLAYER
         && ((*held & PSX_PAD_SQUARE)
-            || g_threads[g_thread_current_id].task_words[MENU_LIST_THREAD_WORD_REDRAW_REQUEST] != 0)) {
+            || g_threads[g_thread_current_id].task_words[MENU_LIST_THREAD_WORD_REDRAW_REQUEST])) {
         /* Page up or down by one screen of rows, clamped to the list. */
         if ((*pressed & PSX_PAD_UP) && *row_offset != 0) {
             offset = *row_offset - layout->row_count;
@@ -94,11 +94,11 @@ u8* ability_list_update_page_scroll(menu_entry_t* entry, s32* row_offset, s32* r
             }
             g_sound_pending_sfx_id = SOUND_SFX_CURSOR_MOVE;
             changed = 1;
-        } else if (g_threads[g_thread_current_id].task_words[MENU_LIST_THREAD_WORD_REDRAW_REQUEST] != 0) {
+        } else if (g_threads[g_thread_current_id].task_words[MENU_LIST_THREAD_WORD_REDRAW_REQUEST]) {
             changed = 1;
             g_threads[g_thread_current_id].task_words[MENU_LIST_THREAD_WORD_REDRAW_REQUEST] = 0;
         }
-        if (changed != 0) {
+        if (changed) {
             buffer = menu_alloc_memory(entry->inner_width * entry->inner_height / 2);
             mem_zero_words(buffer, entry->inner_width * entry->inner_height / 2);
             ability_list_draw_text(entry, row_offset, buffer);

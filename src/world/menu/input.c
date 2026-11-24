@@ -52,7 +52,7 @@ static void update_tutorial_controller(void) {
     secondary_repeat_period = g_input_secondary_repeat_period / speed + 2;
     current_input = menu_screen_read_buttons(0);
     if (current_input & PSX_PAD_TRIANGLE) {
-        if (s_menu_screen_input_triangle_latched != 0) {
+        if (s_menu_screen_input_triangle_latched) {
             menu_input_clear_state();
         } else {
             s_menu_screen_input_triangle_latched = 1;
@@ -62,43 +62,30 @@ static void update_tutorial_controller(void) {
         }
     } else {
         s_menu_screen_input_triangle_latched = 0;
-        {
-            u16 previous_latch = g_tutorial_latched_button;
-            u32 latched_input = current_input & previous_latch;
-            if (latched_input != 0) {
-                current_input = latched_input;
-            } else if (current_input == 0) {
-                g_tutorial_latched_button = 0;
-                s_tutorial_activation_timer += speed;
+        if (current_input & g_tutorial_latched_button) {
+            current_input &= g_tutorial_latched_button;
+        } else if (current_input == 0) {
+            g_tutorial_latched_button = 0;
+            s_tutorial_activation_timer += speed;
+        } else {
+            if (s_tutorial_activation_timer < 4) {
+                if (current_input & PSX_PAD_DPAD_MASK) {
+                    current_input &= PSX_PAD_DPAD_MASK;
+                    s_tutorial_activation_timer = 10;
+                }
+            }
+            if (s_tutorial_activation_timer >= 4) {
+                s_tutorial_activation_timer = 0;
+                for (index = 0; index < 16; index++) {
+                    bit = 1 << index;
+                    if (current_input & bit) {
+                        current_input &= bit;
+                        g_tutorial_latched_button = bit;
+                    }
+                }
             } else {
-                if (s_tutorial_activation_timer < 4) {
-                    u32 priority_input = current_input & PSX_PAD_DPAD_MASK;
-
-                    if (priority_input != 0) {
-                        current_input = priority_input;
-                        s_tutorial_activation_timer = 10;
-                    }
-                }
-                if (s_tutorial_activation_timer >= 4) {
-                    s_tutorial_activation_timer = 0;
-                    index = 0;
-                    {
-                        s32 bit_base = 1;
-                        do {
-                            u32 matched_input;
-                            bit = bit_base << index;
-                            matched_input = current_input & bit;
-                            index++;
-                            if (matched_input != 0) {
-                                current_input = matched_input;
-                                g_tutorial_latched_button = bit;
-                            }
-                        } while (index < 16);
-                    }
-                } else {
-                    current_input = 0;
-                    g_tutorial_latched_button = 0;
-                }
+                current_input = 0;
+                g_tutorial_latched_button = 0;
             }
         }
         filtered_input = current_input;
@@ -144,15 +131,12 @@ static void update_tutorial_controller(void) {
                 filtered_input &= ~(1U << index);
             }
         }
-        {
-            u32 newly_pressed = g_menu_input_newly_pressed & 0x0ff0;
-            current_input &= 0xf00ff00f;
-            filtered_input &= 0xf00ff00f;
-            current_input |= newly_pressed;
-            filtered_input |= newly_pressed;
-            g_menu_input_primary_repeat = current_input;
-            g_menu_input_secondary_repeat = filtered_input;
-        }
+        current_input &= 0xF00FF00F;
+        filtered_input &= 0xF00FF00F;
+        current_input |= g_menu_input_newly_pressed & 0x0FF0;
+        filtered_input |= g_menu_input_newly_pressed & 0x0FF0;
+        g_menu_input_primary_repeat = current_input;
+        g_menu_input_secondary_repeat = filtered_input;
     }
     g_menu_screen_input_primary_repeat_latched = g_menu_input_primary_repeat;
     g_menu_screen_input_secondary_repeat_latched = g_menu_input_secondary_repeat;
@@ -180,9 +164,9 @@ void menu_input_update_message_state(void) {
         menu_input_clear_state();
     } else {
         running = thread_is_running(THREAD_SCREEN_SLOT_TEXT);
-        if (running != 0 || g_menu_screen_grid_id != MENU_GRID_HELP_NONE) {
+        if (running || g_menu_screen_grid_id != MENU_GRID_HELP_NONE) {
             menu_input_clear_state();
-            if (running != 0 && g_menu_input_lock_mode != 0) {
+            if (running && g_menu_input_lock_mode) {
                 value = 1;
                 if (s_menu_screen_text_task_phase != 0) {
                     value = 2;
@@ -196,7 +180,7 @@ void menu_input_update_message_state(void) {
             menu_input_clear_state();
         }
     }
-    if (running == 0) {
+    if (!running) {
         g_menu_input_lock_mode = 0;
         g_menu_screen_sound_release_held_loop = 0;
     }

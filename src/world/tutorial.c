@@ -233,13 +233,11 @@ static void tutorial_opcode_00_press_button(void) {
 static void tutorial_opcode_10_display_message(void) {
     thread_start(MENU_SCREEN_THREAD_SLOT_TUTORIAL_TEXT, message_dialog_thread);
     thread_set_parameters(MENU_SCREEN_THREAD_SLOT_TUTORIAL_TEXT, 0x99,
-        (s32)((u8*)(*(&((tutorial_message_instruction_t*)s_tutorial_command_ptr)->text_id_le[1]) * 0x100)
-            + (*(&((tutorial_message_instruction_t*)s_tutorial_command_ptr)->text_id_le[0]) + 0xB800)),
-        0);
+        (s32)((u8*)(s_tutorial_command_ptr[2] * 0x100) + (s_tutorial_command_ptr[1] + 0xB800)), 0);
     /* Direct slot/member indexing splits this address at -O0. */
     *(s32*)((u8*)g_threads
         + (u32)(&((thread_t*)0)[MENU_SCREEN_THREAD_SLOT_TUTORIAL_TEXT].task_words[DIALOG_THREAD_WORD_Y_OFFSET]))
-        = *(&((tutorial_message_instruction_t*)s_tutorial_command_ptr)->y_offset);
+        = s_tutorial_command_ptr[3];
     s_tutorial_command_ptr += 4;
 }
 
@@ -264,9 +262,7 @@ static void tutorial_opcode_12_wait_for_message(void) {
 static void tutorial_opcode_11_change_dialog(void) {
     if (menu_screen_text_check_printing(MENU_SCREEN_THREAD_SLOT_TUTORIAL_TEXT) != 1) {
         thread_set_parameters(MENU_SCREEN_THREAD_SLOT_TUTORIAL_TEXT, 0x99,
-            (s32)((u8*)(*(&((tutorial_dialog_instruction_t*)s_tutorial_command_ptr)->text_id_le[1]) * 0x100)
-                + (*(&((tutorial_dialog_instruction_t*)s_tutorial_command_ptr)->text_id_le[0]) + 0xB800)),
-            0);
+            (s32)((u8*)(s_tutorial_command_ptr[2] * 0x100) + (s_tutorial_command_ptr[1] + 0xB800)), 0);
         s_tutorial_command_ptr += 3;
         /* Direct slot/member indexing splits this address at -O0. */
         *(s32*)((u8*)g_threads + (u32) & ((thread_t*)0)[MENU_SCREEN_THREAD_SLOT_TUTORIAL_TEXT].task_id)
@@ -301,9 +297,9 @@ static void tutorial_opcode_13_highlight_ring(void) {
     s32 i;
     s32 step = 0x88;
 
-    radius = *(&((tutorial_circle_instruction_t*)s_tutorial_command_ptr)->radius);
-    scale_x = *(&((tutorial_circle_instruction_t*)s_tutorial_command_ptr)->scale_x);
-    scale_y = *(&((tutorial_circle_instruction_t*)s_tutorial_command_ptr)->scale_y);
+    radius = s_tutorial_command_ptr[3];
+    scale_x = s_tutorial_command_ptr[4];
+    scale_y = s_tutorial_command_ptr[5];
     for (i = 0; i < 30; i++) {
         outer_x = (radius + 8) * scale_x;
         outer_y = (radius + 8) * scale_y;
@@ -311,20 +307,14 @@ static void tutorial_opcode_13_highlight_ring(void) {
         middle_y = (radius + 4) * scale_y;
         inner_x = radius * scale_x;
         inner_y = radius * scale_y;
-        s_tutorial_highlight_corners_a[i][0].x = ((rcos(step * i + 1024) * outer_x) >> 19)
-            + *(&((tutorial_circle_instruction_t*)s_tutorial_command_ptr)->x);
-        s_tutorial_highlight_corners_a[i][0].y = ((rsin(step * i + 1024) * outer_y) >> 19)
-            + *(&((tutorial_circle_instruction_t*)s_tutorial_command_ptr)->y);
-        s_tutorial_highlight_corners_a[i][1].x = ((rcos(step * i + 1024) * middle_x) >> 19)
-            + *(&((tutorial_circle_instruction_t*)s_tutorial_command_ptr)->x);
-        s_tutorial_highlight_corners_a[i][1].y = ((rsin(step * i + 1024) * middle_y) >> 19)
-            + *(&((tutorial_circle_instruction_t*)s_tutorial_command_ptr)->y);
+        s_tutorial_highlight_corners_a[i][0].x = ((rcos(step * i + 1024) * outer_x) >> 19) + s_tutorial_command_ptr[1];
+        s_tutorial_highlight_corners_a[i][0].y = ((rsin(step * i + 1024) * outer_y) >> 19) + s_tutorial_command_ptr[2];
+        s_tutorial_highlight_corners_a[i][1].x = ((rcos(step * i + 1024) * middle_x) >> 19) + s_tutorial_command_ptr[1];
+        s_tutorial_highlight_corners_a[i][1].y = ((rsin(step * i + 1024) * middle_y) >> 19) + s_tutorial_command_ptr[2];
         s_tutorial_highlight_corners_b[i][0].x = s_tutorial_highlight_corners_a[i][1].x;
         s_tutorial_highlight_corners_b[i][0].y = s_tutorial_highlight_corners_a[i][1].y;
-        s_tutorial_highlight_corners_b[i][1].x = ((rcos(step * i + 1024) * inner_x) >> 19)
-            + *(&((tutorial_circle_instruction_t*)s_tutorial_command_ptr)->x);
-        s_tutorial_highlight_corners_b[i][1].y = ((rsin(step * i + 1024) * inner_y) >> 19)
-            + *(&((tutorial_circle_instruction_t*)s_tutorial_command_ptr)->y);
+        s_tutorial_highlight_corners_b[i][1].x = ((rcos(step * i + 1024) * inner_x) >> 19) + s_tutorial_command_ptr[1];
+        s_tutorial_highlight_corners_b[i][1].y = ((rsin(step * i + 1024) * inner_y) >> 19) + s_tutorial_command_ptr[2];
     }
 
     /* Point copies emit 32-bit transfers; retail copies the closing sample as four 16-bit values. */
@@ -403,7 +393,7 @@ static void tutorial_opcode_15_wait_time(void) {
         }
     } else {
         s_tutorial_command_active = 1;
-        s_tutorial_wait_time_remaining = *(&((tutorial_wait_instruction_t*)s_tutorial_command_ptr)->frames);
+        s_tutorial_wait_time_remaining = s_tutorial_command_ptr[1];
     }
 }
 

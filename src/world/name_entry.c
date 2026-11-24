@@ -97,8 +97,8 @@ u8* name_entry_update_keyboard(const u8* list, s32 unused_1) {
     point16_t cursor;
     s32 busy;
 
-    if (g_name_entry_started == 0) {
-        if (thread_is_running(THREAD_SCREEN_SLOT_MESSAGE) == 0) {
+    if (!g_name_entry_started) {
+        if (!thread_is_running(THREAD_SCREEN_SLOT_MESSAGE)) {
             g_name_entry_keyboard_last_state = -1;
             init_keyboard(list);
             g_name_entry_started = 1;
@@ -107,7 +107,7 @@ u8* name_entry_update_keyboard(const u8* list, s32 unused_1) {
     }
     if (g_name_entry_state != NAME_ENTRY_STATE_FINISHED) {
         busy = menu_screen_check_busy();
-        if (busy == 0) {
+        if (!busy) {
             if (g_menu_input_primary_repeat & PSX_PAD_L1) {
                 apply_key(NAME_ENTRY_KEY_CURSOR_LEFT);
             }
@@ -119,15 +119,15 @@ u8* name_entry_update_keyboard(const u8* list, s32 unused_1) {
             }
         }
         g_name_entry_state_handlers[g_name_entry_state]();
-        cursor.y = 0x3B;
-        cursor.x = g_name_entry_cursor * 6 + 0x54;
-        gfx_set_otag_index(0x28);
+        cursor.y = 59;
+        cursor.x = g_name_entry_cursor * 6 + 84;
+        gfx_set_otag_index(40);
         menu_draw_bouncing_cursor(&cursor, &g_name_entry_keyboard_text_cursor_anim, busy);
         menu_script_run_with_palette_mode(g_name_entry_display_script, 0, busy);
-        menu_draw_pressable_button(MENU_PRESSABLE_BUTTON_L1, 0x37, 0x50, g_menu_input_primary_repeat & PSX_PAD_L1, busy,
-            SOUND_SFX_PAGE_SWITCH);
-        menu_draw_pressable_button(MENU_PRESSABLE_BUTTON_R1, 0xB1, 0x50, g_menu_input_primary_repeat & PSX_PAD_R1, busy,
-            SOUND_SFX_PAGE_SWITCH);
+        menu_draw_pressable_button(
+            MENU_PRESSABLE_BUTTON_L1, 55, 80, g_menu_input_primary_repeat & PSX_PAD_L1, busy, SOUND_SFX_PAGE_SWITCH);
+        menu_draw_pressable_button(
+            MENU_PRESSABLE_BUTTON_R1, 177, 80, g_menu_input_primary_repeat & PSX_PAD_R1, busy, SOUND_SFX_PAGE_SWITCH);
         menu_script_run_with_palette_mode(g_name_entry_keyboard_script, g_menu_input_primary_repeat, busy);
         if (g_name_entry_state != g_name_entry_keyboard_last_state) {
             g_name_entry_keyboard_last_state = g_name_entry_state;
@@ -166,8 +166,8 @@ u8* name_entry_run_screen(const u8* list, u32* image) {
     s32 busy;
     s32 value;
 
-    g_menu_screen_ot_length = 0x40;
-    g_menu_screen_textured_quad_capacity = 0xDC;
+    g_menu_screen_ot_length = 64;
+    g_menu_screen_textured_quad_capacity = 220;
     g_gfx_poly_f3_capacity = 0;
     g_gfx_poly_ft3_capacity = 0;
     g_gfx_poly_f4_capacity = 0;
@@ -230,7 +230,7 @@ u8* name_entry_run_screen(const u8* list, u32* image) {
         otag = g_menu_gfx_context->otag;
         GetDrawEnv(&env);
         g_menu_screen_draw_buffer_clip_y = env.clip.y;
-        while (DrawSync(1) != 0) { }
+        while (DrawSync(1)) { }
         VSync(g_menu_event_speed);
         {
             menu_gfx_context_t* context = g_menu_screen_packet_buffers;
@@ -242,13 +242,13 @@ u8* name_entry_run_screen(const u8* list, u32* image) {
             PutDispEnv(&context->disp_env);
         }
         PutDrawEnv(&g_menu_gfx_context->draw_env);
-        g_name_entry_screen_image_rect.y = g_menu_screen_draw_buffer_clip_y == 0 ? 0xF0 : 0;
+        g_name_entry_screen_image_rect.y = g_menu_screen_draw_buffer_clip_y == 0 ? 240 : 0;
         gfx_load_image_and_wait(&g_name_entry_screen_image_rect, image);
         DrawOTag(otag);
         ClearOTag(g_menu_gfx_context->otag, g_menu_screen_ot_length);
         menu_input_update_message_state();
         busy = menu_screen_check_busy();
-        if (busy == 0) {
+        if (!busy) {
             if (g_menu_input_primary_repeat & PSX_PAD_L1) {
                 apply_key(NAME_ENTRY_KEY_CURSOR_LEFT);
             }
@@ -260,21 +260,21 @@ u8* name_entry_run_screen(const u8* list, u32* image) {
             }
         }
         g_name_entry_state_handlers[g_name_entry_state]();
-        cursor.y = 0x3B;
-        value = g_name_entry_cursor * 6 + 0x54;
+        cursor.y = 59;
+        value = g_name_entry_cursor * 6 + 84;
         cursor.x = value;
-        gfx_set_otag_index(0x28);
+        gfx_set_otag_index(40);
         menu_draw_bouncing_cursor(&cursor, &g_name_entry_text_cursor_anim, busy);
         menu_script_run_with_palette_mode(g_name_entry_display_script, 0, busy);
-        menu_draw_pressable_button(MENU_PRESSABLE_BUTTON_L1, 0x37, 0x50, g_menu_input_primary_repeat & PSX_PAD_L1, busy,
-            SOUND_SFX_PAGE_SWITCH);
-        menu_draw_pressable_button(MENU_PRESSABLE_BUTTON_R1, 0xB1, 0x50, g_menu_input_primary_repeat & PSX_PAD_R1, busy,
-            SOUND_SFX_PAGE_SWITCH);
+        menu_draw_pressable_button(
+            MENU_PRESSABLE_BUTTON_L1, 55, 80, g_menu_input_primary_repeat & PSX_PAD_L1, busy, SOUND_SFX_PAGE_SWITCH);
+        menu_draw_pressable_button(
+            MENU_PRESSABLE_BUTTON_R1, 177, 80, g_menu_input_primary_repeat & PSX_PAD_R1, busy, SOUND_SFX_PAGE_SWITCH);
         menu_script_run_with_palette_mode(g_name_entry_keyboard_script, g_menu_input_primary_repeat, busy);
         g_gfx_current_otag_entry = g_menu_gfx_context->otag + 63;
         menu_draw_active_window_frames();
         menu_input_update_event_state(
-            g_menu_gfx_context->otag + 63, PadRead(0), g_menu_screen_draw_buffer_clip_y == 0 ? 0xF0 : 0);
+            g_menu_gfx_context->otag + 63, PadRead(0), g_menu_screen_draw_buffer_clip_y == 0 ? 240 : 0);
         value = g_name_entry_state;
         if (value != g_name_entry_last_state) {
             g_name_entry_last_state = value;
@@ -282,7 +282,7 @@ u8* name_entry_run_screen(const u8* list, u32* image) {
         if (g_sound_pending_sfx_id == SOUND_SFX_CANCEL || g_sound_pending_sfx_id == SOUND_SFX_CURSOR_MOVE) {
             g_sound_queued_effect_id = g_sound_pending_sfx_id;
         }
-        if (g_sound_pending_sfx_id < 0 || g_sound_suppressed != 0) {
+        if (g_sound_pending_sfx_id < 0 || g_sound_suppressed) {
             g_sound_pending_sfx_id = SOUND_SFX_NONE;
         }
         value = g_sound_pending_sfx_id;
@@ -331,7 +331,7 @@ void name_entry_update_keys(void) {
     u8 previous;
     s32 character;
 
-    if (g_name_entry_confirm_message_shown == 0) {
+    if (!g_name_entry_confirm_message_shown) {
         g_name_entry_input_delay = 0;
         thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x21, 0xC015, 0);
         g_name_entry_confirm_message_shown = 1;
@@ -399,7 +399,7 @@ static void update_keyboard_cursor(void) {
         }
         g_name_entry_list_cursor = g_menu_list_selected_index;
         cursor.x = g_name_entry_cursor_index * 20 + 2;
-        cursor.y = (g_name_entry_list_cursor - g_menu_scroll_base_index) * 16 + 0x80;
+        cursor.y = (g_name_entry_list_cursor - g_menu_scroll_base_index) * 16 + 128;
     } else if (g_menu_list_selected_index == 0) {
         if (g_name_entry_list_cursor != 0) {
             g_name_entry_cursor_index = g_name_entry_char_to_special_column[previous];
@@ -418,12 +418,12 @@ static void update_keyboard_cursor(void) {
         }
         cursor.x = g_name_entry_cursor_x_positions[g_name_entry_cursor_index];
         g_name_entry_list_cursor = 0;
-        cursor.y = 0x80;
+        cursor.y = 128;
     }
     if (g_name_entry_cursor_index != previous) {
         g_sound_queued_effect_id = SOUND_SFX_CURSOR_MOVE;
     }
-    gfx_set_otag_index(0x28);
+    gfx_set_otag_index(40);
     menu_draw_sliding_cursor(&cursor, &g_name_entry_key_cursor_anim, g_menu_input_lock_mode);
 }
 
@@ -440,6 +440,7 @@ static void apply_key(s16 key) {
     s32 j;
     s32 slot;
 
+    /* The bytes fill the slots through `slot`, which then counts them. */
     slot = TEXT_SPACE;
     for (i = 13; i >= 0; i--) {
         chars[i] = slot;
@@ -513,7 +514,7 @@ void name_entry_update_confirm(void) {
     s32 count;
     u8 value;
 
-    if (g_name_entry_confirm_initialized == 0) {
+    if (!g_name_entry_confirm_initialized) {
         g_name_entry_confirm_menu.selected_index = 0;
         if (s_name_entry_text[0] == TEXT_END_WAIT_FOR_CONFIRM) {
             /* Sharing the flag/index temporary preserves the target's
@@ -543,8 +544,8 @@ void name_entry_update_confirm(void) {
         g_name_entry_confirm_result = -1;
         g_menu_screen_prompt_active = 1;
     }
-    if (s_name_entry_confirm_finished != 0) {
-        if (thread_is_running(THREAD_SCREEN_SLOT_MESSAGE) == 0) {
+    if (s_name_entry_confirm_finished) {
+        if (!thread_is_running(THREAD_SCREEN_SLOT_MESSAGE)) {
             g_name_entry_confirm_initialized = 0;
             g_name_entry_state = NAME_ENTRY_STATE_FINISHED;
             g_menu_screen_prompt_active = 0;
@@ -556,7 +557,7 @@ void name_entry_update_confirm(void) {
             return;
         }
         g_name_entry_state = g_name_entry_saved_state;
-        if (g_name_entry_used_original_name != 0) {
+        if (g_name_entry_used_original_name) {
             s_name_entry_text[0] = TEXT_END_WAIT_FOR_CONFIRM;
         }
         g_name_entry_confirm_initialized = 0;

@@ -63,16 +63,21 @@ s32 formation_ability_set_slot(s16 unit_id, s16 slot, s16 ability, s32 update_eq
 s32 formation_unit_get_lock(s32 unit_id) {
     formation_unit_t* unit = g_formation_unit_pointers[unit_id];
 
-    if (unit->proposition_status != 0)
+    if (unit->proposition_status != 0) {
         return FORMATION_UNIT_LOCK_PROPOSITION;
-    if (unit->detail.uses_monster_skillset != 0)
+    }
+    if (unit->detail.uses_monster_skillset != 0) {
         return FORMATION_UNIT_LOCK_MONSTER;
-    if (job_is_special_monster(unit->identity.job_id) != 0)
+    }
+    if (job_is_special_monster(unit->identity.job_id) != 0) {
         return FORMATION_UNIT_LOCK_MONSTER;
-    if (g_formation_unit_pointers[unit_id]->gender_flags & UNIT_FLAG_EGG)
+    }
+    if (g_formation_unit_pointers[unit_id]->gender_flags & UNIT_FLAG_EGG) {
         return FORMATION_UNIT_LOCK_EGG;
-    if (g_formation_unit_pointers[unit_id]->identity.job_id == JOB_ID_MIME)
+    }
+    if (g_formation_unit_pointers[unit_id]->identity.job_id == JOB_ID_MIME) {
         return FORMATION_UNIT_LOCK_MIME;
+    }
     return FORMATION_UNIT_UNLOCKED;
 }
 
@@ -85,21 +90,15 @@ void formation_ability_learn(s16 unit_id, s16 job_id, s16 ability_id) {
     s32 i = 0;
     s32 byte;
     s32 bit;
-    s32 mask;
-    u8* learned_abilities;
 
     while (list[i] != ability_id) {
         i++;
     }
     byte = i >> 3;
     bit = 7 - (i & 7);
-    mask = 1;
-    i = mask << bit;
-    /* Keeping the job-byte stride before the field address preserves the retail load/add order. */
-    learned_abilities = (u8*)g_formation_unit_pointers[unit_id]
-        + generic_job * sizeof(g_formation_unit_pointers[unit_id]->learned_abilities[0])
-        + offsetof(formation_unit_t, learned_abilities);
-    learned_abilities[byte] |= i;
+    /* i is reused for the mask; a separate local reorders the address arithmetic. */
+    i = 1 << bit;
+    g_formation_unit_pointers[unit_id]->learned_abilities[generic_job][byte] |= i;
 }
 
 /* Build the sprite texture source and palette for a formation unit.
@@ -140,7 +139,8 @@ void formation_unit_build_sprite_source(s16 formation_index, texture_source_t* d
     bcopy(&g_formation_sprite_sources[index], destination, sizeof(*destination));
     palette
         = (s16)formation_get_party_unit_palette_index(g_formation_unit_pointers[formation_index]->identity.roster_slot);
-    clut_x = (palette % 4) * 0x10 + 0x140;
+    clut_x = (palette % 4) * 16 + 0x140;
+    /* Reusing job_id for the palette row matches the original register use. */
     job_id = palette / 4;
     destination->clut = GetClut(clut_x, job_id + 0xE0);
 }
@@ -166,25 +166,25 @@ s32 formation_unit_find_by_roster_slot(s16 roster_slot) {
  * plus one for a female unit. */
 void formation_job_build_sprite_source(s32 job_id, s16 is_female, texture_source_t* destination) {
     s16 id = job_id;
-    s16 idx;
+    s16 index;
 
     if (id < JOB_ID_CHEMIST_35) {
-        idx = g_formation_sprite_index_by_identity[id];
+        index = g_formation_sprite_index_by_identity[id];
     } else if (id == JOB_ID_DANCER) {
-        idx = 0x3B;
+        index = 0x3B;
     } else if (id == JOB_ID_BARD) {
-        idx = 0x3A;
+        index = 0x3A;
     } else {
         if (id == JOB_ID_MIME) {
-            idx = 0x3C;
+            index = 0x3C;
         } else {
-            idx = (job_id * 2) - 0x7C;
+            index = job_id * 2 - 0x7C;
         }
         if (is_female != 0) {
-            idx += 1;
+            index++;
         }
     }
-    bcopy(&g_formation_sprite_sources[idx], destination, sizeof(*destination));
+    bcopy(&g_formation_sprite_sources[index], destination, sizeof(*destination));
 }
 
 /*

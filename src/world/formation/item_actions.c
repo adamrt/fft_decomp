@@ -69,7 +69,7 @@ s8 item_list_update_action_menu(void) {
     s32 i;
     s32 slot;
 
-    if (g_formation_item_action_menu_initialized == 0) {
+    if (!g_formation_item_action_menu_initialized) {
         g_formation_item_category_input_lock = 0;
         g_help_message_text_id = 0;
         menu_screen_reset_selection_results();
@@ -135,7 +135,7 @@ s8 item_list_update_action_menu(void) {
     if (selected != -1) {
         if (selected == 0) {
             g_unit_panel_preview_stats_thread_params.style = 1;
-            if (thread_is_running(THREAD_SCREEN_SLOT_MENU_CHILD) != 0) {
+            if (thread_is_running(THREAD_SCREEN_SLOT_MENU_CHILD)) {
                 return MENU_ITEM_LIST_STATE_ACTION;
             }
             if (g_menu_screen_selection_results[5] == 0) {
@@ -174,7 +174,7 @@ s8 item_list_update_action_menu(void) {
                 /* Once a sound is queued, 100 keeps the menu initialized but stops this block running again. */
                 g_formation_item_action_menu_initialized = g_sound_queued_effect_id != SOUND_SFX_NONE ? 100 : 1;
             }
-            if (thread_is_running(THREAD_SCREEN_SLOT_MENU_CHILD) != 0) {
+            if (thread_is_running(THREAD_SCREEN_SLOT_MENU_CHILD)) {
                 return MENU_ITEM_LIST_STATE_ACTION;
             }
             if (g_menu_screen_selection_results[5] == 0) {
@@ -198,7 +198,7 @@ s8 item_list_update_action_menu(void) {
         }
     } else {
         /* No option chosen: Left/Right switch the category tab, saving the old list's cursor. */
-        if (thread_is_running(THREAD_SCREEN_SLOT_MENU_CHILD) != 0) {
+        if (thread_is_running(THREAD_SCREEN_SLOT_MENU_CHILD)) {
             return MENU_ITEM_LIST_STATE_ACTION;
         }
         result = menu_selection_step_horizontal_with_sound(
@@ -247,7 +247,7 @@ s8 item_list_update_sort_menu(void) {
     s32 index;
     s32 selected;
 
-    if (g_formation_item_sort_order_initialized == 0) {
+    if (!g_formation_item_sort_order_initialized) {
         g_formation_item_category_icon_strip_a.selected_index = 0;
         g_formation_item_category_icon_strip_b.selected_index = 0;
         item_list_load_sort_order(g_menu_selected_slot + 1, s_formation_item_category_strip_text_ids);
@@ -322,7 +322,7 @@ s8 item_list_update_sort_menu(void) {
  * the result is MENU_ITEM_LIST_STATE_EQUIPPED_BY.
  */
 s32 formation_item_update_equipped_units(void) {
-    if (g_formation_item_equipping_units_initialized == 0) {
+    if (!g_formation_item_equipping_units_initialized) {
         formation_save_records();
         g_formation_unit_count = formation_build_record_list(
             g_item_list_entries[g_menu_list_selected_index], g_formation_unit_pointers, FORMATION_RECORD_LIST_ALL);
@@ -337,7 +337,7 @@ s32 formation_item_update_equipped_units(void) {
         menu_set_event_speed(0);
         g_formation_unit_cycle_mode = 2;
     }
-    if (thread_is_running(THREAD_SCREEN_SLOT_COMPARISON_STATUS) == 0) {
+    if (!thread_is_running(THREAD_SCREEN_SLOT_COMPARISON_STATUS)) {
         if ((g_menu_input_newly_pressed & PSX_PAD_CROSS) || (g_menu_input_newly_pressed & PSX_PAD_CIRCLE)) {
             g_formation_unit_browse_enabled = 0;
             g_formation_unit_banner_enabled = 0;
@@ -370,27 +370,28 @@ void item_list_draw_tabs(s32 wide, s32 row, s32 mode) {
     oriented_quad_t* cursor;
 
     x = g_formation_item_category_tab_x[row];
-    if (wide != 0) {
+    /* The bytes test `wide` twice. */
+    if (wide) {
         x -= 1;
     }
-    if (wide == 0) {
+    if (!wide) {
         drawing = g_formation_item_category_tabs_script;
-        y = 0x40;
+        y = 64;
     } else {
-        y = 0x4F;
+        y = 79;
         drawing = g_formation_item_category_tabs_wide_script;
     }
     menu_script_run_with_palette_mode(drawing, 0, mode);
     drawing = &g_formation_item_category_tab_sprites[row];
     ((oriented_quad_t*)drawing)->position.x = x;
     ((oriented_quad_t*)drawing)->position.y = y - (row == 0);
-    menu_gfx_enqueue_oriented_textured_quad(drawing, menu_gfx_get_draw_color(), TEXTURE_UV_FLIP_NONE, 0, 0x2C);
+    menu_gfx_enqueue_oriented_textured_quad(drawing, menu_gfx_get_draw_color(), TEXTURE_UV_FLIP_NONE, 0, 44);
     cursor = &g_formation_item_category_tab_cursor_sprite;
     cursor_x = x + 9;
     if (row == 3) {
         cursor_x = x + 7;
     }
     cursor->position.x = cursor_x;
-    g_formation_item_category_tab_cursor_sprite.position.y = y + 10;
-    menu_gfx_enqueue_oriented_textured_quad(cursor, 0, TEXTURE_UV_FLIP_NONE, 0, 0x2D);
+    cursor->position.y = y + 10;
+    menu_gfx_enqueue_oriented_textured_quad(cursor, 0, TEXTURE_UV_FLIP_NONE, 0, 45);
 }
