@@ -48,14 +48,14 @@ typedef struct effect_polar_mesh_scratch {
     u8 _unused_0ac[0x08];
     point32_t acceleration; /* 0xb4: change in center step per ring, Q12 */
     u8 _unused_0bc[0x1c];
-    s32 radius;                                                                        /* 0xd8: 20.12 fixed */
-    s32 radius_step;                                                                   /* 0xdc */
-    s32 radius_step_delta;                                                             /* 0xe0 */
-    s32 angle;                                                                         /* 0xe4 */
-    s32 angle_step;                                                                    /* 0xe8 */
-    s32 angle_step_delta;                                                              /* 0xec */
-    s32 ot_depth;                                                                      /* 0xf0: clamped to 4..0x17f */
-    point16_t points[POLAR_MESH_RING_COUNT + 1][POLAR_MESH_SEGMENTS_PER_QUADRANT + 1]; /* 0xf4 */
+    s32 radius;            /* 0xd8: 20.12 fixed */
+    s32 radius_step;       /* 0xdc */
+    s32 radius_step_delta; /* 0xe0 */
+    s32 angle;             /* 0xe4 */
+    s32 angle_step;        /* 0xe8 */
+    s32 angle_step_delta;  /* 0xec */
+    s32 ot_depth;          /* 0xf0: clamped to 4..0x17f */
+    point16_t points[EFFECT_POLAR_MESH_RING_COUNT + 1][EFFECT_POLAR_MESH_SEGMENTS_PER_QUADRANT + 1]; /* 0xf4 */
 } effect_polar_mesh_scratch_t;
 
 /* Pack one primitive color and code word after applying 4.12 brightness. */
@@ -110,7 +110,7 @@ s32 effect_polar_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_in
         scratch->tpage = ((entry->polar_mesh.texture_page_flags & EFFECT_TEXTURE_PAGE_ABR_MASK)
                              << EFFECT_RENDER_TEXTURE_PAGE_BLEND_SHIFT)
             | EFFECT_RENDER_TEXTURE_PAGE_BASE;
-        for (i = 0; i < POLAR_MESH_QUAD_COUNT; i++) {
+        for (i = 0; i < EFFECT_POLAR_MESH_QUAD_COUNT; i++) {
             quad = &work->quads[0][i];
             SetPolyGT4(quad);
             setSemiTrans(quad, scratch->translucent);
@@ -158,15 +158,15 @@ s32 effect_polar_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_in
             = effect_lerp_q8(entry->polar_mesh.angle_step_delta_start, entry->polar_mesh.angle_step_delta_end, i);
 
         /* Each ring sweeps one quadrant; its last point is the first turned a quarter turn. */
-        for (ring = 0; ring < POLAR_MESH_RING_COUNT + 1; ring++) {
-            for (i = 0; i < POLAR_MESH_SEGMENTS_PER_QUADRANT; i++) {
+        for (ring = 0; ring < EFFECT_POLAR_MESH_RING_COUNT + 1; ring++) {
+            for (i = 0; i < EFFECT_POLAR_MESH_SEGMENTS_PER_QUADRANT; i++) {
                 scratch->points[ring][i].x
-                    = rcos(scratch->angle + (i * POLAR_MESH_ANGLE_STEP)) * (scratch->radius >> 12) >> 12;
+                    = rcos(scratch->angle + (i * EFFECT_POLAR_MESH_ANGLE_STEP)) * (scratch->radius >> 12) >> 12;
                 scratch->points[ring][i].y
-                    = rsin(scratch->angle + (i * POLAR_MESH_ANGLE_STEP)) * (scratch->radius >> 12) >> 12;
+                    = rsin(scratch->angle + (i * EFFECT_POLAR_MESH_ANGLE_STEP)) * (scratch->radius >> 12) >> 12;
             }
-            scratch->points[ring][POLAR_MESH_SEGMENTS_PER_QUADRANT].x = -scratch->points[ring][0].y;
-            scratch->points[ring][POLAR_MESH_SEGMENTS_PER_QUADRANT].y = scratch->points[ring][0].x;
+            scratch->points[ring][EFFECT_POLAR_MESH_SEGMENTS_PER_QUADRANT].x = -scratch->points[ring][0].y;
+            scratch->points[ring][EFFECT_POLAR_MESH_SEGMENTS_PER_QUADRANT].y = scratch->points[ring][0].x;
             scratch->radius += scratch->radius_step;
             scratch->radius_step += scratch->radius_step_delta;
             scratch->angle += scratch->angle_step;
@@ -245,7 +245,7 @@ s32 effect_polar_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_in
 
         /* Ring 0: the inner edge of the first quad row, which also sets the UVs. Quadrants 1-3
          * turn each point (x, y) to (-y, x), (-x, -y) and (y, -x). */
-        for (i = 0; i < POLAR_MESH_SEGMENTS_PER_QUADRANT; i++) {
+        for (i = 0; i < EFFECT_POLAR_MESH_SEGMENTS_PER_QUADRANT; i++) {
             quad = &work->quads[work->buffer][i];
             setXY2(quad, scratch->center.vx + scratch->points[0][i].x + GFX_BATTLE_SCREEN_X,
                 scratch->center.vy + scratch->points[0][i].y,
@@ -260,7 +260,7 @@ s32 effect_polar_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_in
             POLY_RGB(quad, 0) = scratch->rgb;
             POLY_RGB(quad, 1) = scratch->rgb;
 
-            quad = &work->quads[work->buffer][i + POLAR_MESH_QUADS_PER_QUADRANT];
+            quad = &work->quads[work->buffer][i + EFFECT_POLAR_MESH_QUADS_PER_QUADRANT];
             setXY2(quad, scratch->center.vx - scratch->points[0][i].y + GFX_BATTLE_SCREEN_X,
                 scratch->center.vy + scratch->points[0][i].x,
                 scratch->center.vx - scratch->points[0][i + 1].y + GFX_BATTLE_SCREEN_X,
@@ -272,7 +272,7 @@ s32 effect_polar_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_in
             POLY_RGB(quad, 0) = scratch->rgb;
             POLY_RGB(quad, 1) = scratch->rgb;
 
-            quad = &work->quads[work->buffer][i + 2 * POLAR_MESH_QUADS_PER_QUADRANT];
+            quad = &work->quads[work->buffer][i + 2 * EFFECT_POLAR_MESH_QUADS_PER_QUADRANT];
             setXY2(quad, scratch->center.vx - scratch->points[0][i].x + GFX_BATTLE_SCREEN_X,
                 scratch->center.vy - scratch->points[0][i].y,
                 scratch->center.vx - scratch->points[0][i + 1].x + GFX_BATTLE_SCREEN_X,
@@ -284,7 +284,7 @@ s32 effect_polar_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_in
             POLY_RGB(quad, 0) = scratch->rgb;
             POLY_RGB(quad, 1) = scratch->rgb;
 
-            quad = &work->quads[work->buffer][i + 3 * POLAR_MESH_QUADS_PER_QUADRANT];
+            quad = &work->quads[work->buffer][i + 3 * EFFECT_POLAR_MESH_QUADS_PER_QUADRANT];
             setXY2(quad, scratch->center.vx + scratch->points[0][i].y + GFX_BATTLE_SCREEN_X,
                 scratch->center.vy - scratch->points[0][i].x,
                 scratch->center.vx + scratch->points[0][i + 1].y + GFX_BATTLE_SCREEN_X,
@@ -298,16 +298,16 @@ s32 effect_polar_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_in
         }
 
         /* Rings 1-4 close the inner quad row and open the next one. */
-        for (j = 0; j < POLAR_MESH_RING_COUNT - 1; j++) {
+        for (j = 0; j < EFFECT_POLAR_MESH_RING_COUNT - 1; j++) {
             scratch->center.vx += scratch->velocity.x >> 12;
             scratch->center.vy += scratch->velocity.y >> 12;
             scratch->velocity.x += scratch->acceleration.x;
             scratch->velocity.y += scratch->acceleration.y;
 
-            for (i = 0; i < POLAR_MESH_SEGMENTS_PER_QUADRANT; i++) {
+            for (i = 0; i < EFFECT_POLAR_MESH_SEGMENTS_PER_QUADRANT; i++) {
                 /* The ring is inner's outer edge and quad's inner edge; inner is then complete. */
-                inner = &work->quads[work->buffer][j * POLAR_MESH_SEGMENTS_PER_QUADRANT + i];
-                quad = &work->quads[work->buffer][(j + 1) * POLAR_MESH_SEGMENTS_PER_QUADRANT + i];
+                inner = &work->quads[work->buffer][j * EFFECT_POLAR_MESH_SEGMENTS_PER_QUADRANT + i];
+                quad = &work->quads[work->buffer][(j + 1) * EFFECT_POLAR_MESH_SEGMENTS_PER_QUADRANT + i];
                 setXY2(quad, inner->x2 = scratch->center.vx + scratch->points[j + 1][i].x + GFX_BATTLE_SCREEN_X,
                     inner->y2 = scratch->center.vy + scratch->points[j + 1][i].y,
                     inner->x3 = scratch->center.vx + scratch->points[j + 1][i + 1].x + GFX_BATTLE_SCREEN_X,
@@ -321,10 +321,10 @@ s32 effect_polar_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_in
                 scratch->v0 = quad->v0 = quad->v1 = (work->scroll_v >> 12) + work->base_v;
                 scratch->v1 = quad->v2 = quad->v3 = scratch->v0 + scratch->half_height;
 
-                inner = &work->quads[work->buffer]
-                                    [j * POLAR_MESH_SEGMENTS_PER_QUADRANT + i + POLAR_MESH_QUADS_PER_QUADRANT];
-                quad = &work->quads[work->buffer]
-                                   [(j + 1) * POLAR_MESH_SEGMENTS_PER_QUADRANT + i + POLAR_MESH_QUADS_PER_QUADRANT];
+                inner = &work->quads[work->buffer][j * EFFECT_POLAR_MESH_SEGMENTS_PER_QUADRANT + i
+                    + EFFECT_POLAR_MESH_QUADS_PER_QUADRANT];
+                quad = &work->quads[work->buffer][(j + 1) * EFFECT_POLAR_MESH_SEGMENTS_PER_QUADRANT + i
+                    + EFFECT_POLAR_MESH_QUADS_PER_QUADRANT];
                 setXY2(quad, inner->x2 = scratch->center.vx - scratch->points[j + 1][i].y + GFX_BATTLE_SCREEN_X,
                     inner->y2 = scratch->center.vy + scratch->points[j + 1][i].x,
                     inner->x3 = scratch->center.vx - scratch->points[j + 1][i + 1].y + GFX_BATTLE_SCREEN_X,
@@ -336,10 +336,10 @@ s32 effect_polar_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_in
                 quad->v0 = quad->v1 = scratch->v0;
                 quad->v2 = quad->v3 = scratch->v1;
 
-                inner = &work->quads[work->buffer]
-                                    [j * POLAR_MESH_SEGMENTS_PER_QUADRANT + i + 2 * POLAR_MESH_QUADS_PER_QUADRANT];
-                quad = &work->quads[work->buffer]
-                                   [(j + 1) * POLAR_MESH_SEGMENTS_PER_QUADRANT + i + 2 * POLAR_MESH_QUADS_PER_QUADRANT];
+                inner = &work->quads[work->buffer][j * EFFECT_POLAR_MESH_SEGMENTS_PER_QUADRANT + i
+                    + 2 * EFFECT_POLAR_MESH_QUADS_PER_QUADRANT];
+                quad = &work->quads[work->buffer][(j + 1) * EFFECT_POLAR_MESH_SEGMENTS_PER_QUADRANT + i
+                    + 2 * EFFECT_POLAR_MESH_QUADS_PER_QUADRANT];
                 setXY2(quad, inner->x2 = scratch->center.vx - scratch->points[j + 1][i].x + GFX_BATTLE_SCREEN_X,
                     inner->y2 = scratch->center.vy - scratch->points[j + 1][i].y,
                     inner->x3 = scratch->center.vx - scratch->points[j + 1][i + 1].x + GFX_BATTLE_SCREEN_X,
@@ -351,10 +351,10 @@ s32 effect_polar_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_in
                 quad->v0 = quad->v1 = scratch->v0;
                 quad->v2 = quad->v3 = scratch->v1;
 
-                inner = &work->quads[work->buffer]
-                                    [j * POLAR_MESH_SEGMENTS_PER_QUADRANT + i + 3 * POLAR_MESH_QUADS_PER_QUADRANT];
-                quad = &work->quads[work->buffer]
-                                   [(j + 1) * POLAR_MESH_SEGMENTS_PER_QUADRANT + i + 3 * POLAR_MESH_QUADS_PER_QUADRANT];
+                inner = &work->quads[work->buffer][j * EFFECT_POLAR_MESH_SEGMENTS_PER_QUADRANT + i
+                    + 3 * EFFECT_POLAR_MESH_QUADS_PER_QUADRANT];
+                quad = &work->quads[work->buffer][(j + 1) * EFFECT_POLAR_MESH_SEGMENTS_PER_QUADRANT + i
+                    + 3 * EFFECT_POLAR_MESH_QUADS_PER_QUADRANT];
                 setXY2(quad, inner->x2 = scratch->center.vx + scratch->points[j + 1][i].y + GFX_BATTLE_SCREEN_X,
                     inner->y2 = scratch->center.vy - scratch->points[j + 1][i].x,
                     inner->x3 = scratch->center.vx + scratch->points[j + 1][i + 1].y + GFX_BATTLE_SCREEN_X,
@@ -374,37 +374,44 @@ s32 effect_polar_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_in
         scratch->velocity.x += scratch->acceleration.x;
         scratch->velocity.y += scratch->acceleration.y;
 
-        for (i = 0; i < POLAR_MESH_SEGMENTS_PER_QUADRANT; i++) {
-            quad = &work->quads[work->buffer][i + POLAR_MESH_OUTER_RING_OFFSET];
-            quad->x2 = scratch->center.vx + scratch->points[POLAR_MESH_RING_COUNT][i].x + GFX_BATTLE_SCREEN_X;
-            quad->y2 = scratch->center.vy + scratch->points[POLAR_MESH_RING_COUNT][i].y;
-            quad->x3 = scratch->center.vx + scratch->points[POLAR_MESH_RING_COUNT][i + 1].x + GFX_BATTLE_SCREEN_X;
-            quad->y3 = scratch->center.vy + scratch->points[POLAR_MESH_RING_COUNT][i + 1].y;
-            brightness = g_effect_polar_mesh_brightness_table[scratch->brightness_row][POLAR_MESH_RING_COUNT];
+        for (i = 0; i < EFFECT_POLAR_MESH_SEGMENTS_PER_QUADRANT; i++) {
+            quad = &work->quads[work->buffer][i + EFFECT_POLAR_MESH_OUTER_RING_OFFSET];
+            quad->x2 = scratch->center.vx + scratch->points[EFFECT_POLAR_MESH_RING_COUNT][i].x + GFX_BATTLE_SCREEN_X;
+            quad->y2 = scratch->center.vy + scratch->points[EFFECT_POLAR_MESH_RING_COUNT][i].y;
+            quad->x3
+                = scratch->center.vx + scratch->points[EFFECT_POLAR_MESH_RING_COUNT][i + 1].x + GFX_BATTLE_SCREEN_X;
+            quad->y3 = scratch->center.vy + scratch->points[EFFECT_POLAR_MESH_RING_COUNT][i + 1].y;
+            brightness = g_effect_polar_mesh_brightness_table[scratch->brightness_row][EFFECT_POLAR_MESH_RING_COUNT];
             POLY_RGB(quad, 2) = POLY_RGB(quad, 3) = scratch->rgb = PACK_RGB(scratch, brightness);
             AddPrim(ot + scratch->ot_depth, quad);
 
-            quad = &work->quads[work->buffer][i + POLAR_MESH_OUTER_RING_OFFSET + POLAR_MESH_QUADS_PER_QUADRANT];
-            quad->x2 = scratch->center.vx - scratch->points[POLAR_MESH_RING_COUNT][i].y + GFX_BATTLE_SCREEN_X;
-            quad->y2 = scratch->center.vy + scratch->points[POLAR_MESH_RING_COUNT][i].x;
-            quad->x3 = scratch->center.vx - scratch->points[POLAR_MESH_RING_COUNT][i + 1].y + GFX_BATTLE_SCREEN_X;
-            quad->y3 = scratch->center.vy + scratch->points[POLAR_MESH_RING_COUNT][i + 1].x;
+            quad = &work->quads[work->buffer]
+                               [i + EFFECT_POLAR_MESH_OUTER_RING_OFFSET + EFFECT_POLAR_MESH_QUADS_PER_QUADRANT];
+            quad->x2 = scratch->center.vx - scratch->points[EFFECT_POLAR_MESH_RING_COUNT][i].y + GFX_BATTLE_SCREEN_X;
+            quad->y2 = scratch->center.vy + scratch->points[EFFECT_POLAR_MESH_RING_COUNT][i].x;
+            quad->x3
+                = scratch->center.vx - scratch->points[EFFECT_POLAR_MESH_RING_COUNT][i + 1].y + GFX_BATTLE_SCREEN_X;
+            quad->y3 = scratch->center.vy + scratch->points[EFFECT_POLAR_MESH_RING_COUNT][i + 1].x;
             POLY_RGB(quad, 2) = POLY_RGB(quad, 3) = scratch->rgb;
             AddPrim(ot + scratch->ot_depth, quad);
 
-            quad = &work->quads[work->buffer][i + POLAR_MESH_OUTER_RING_OFFSET + 2 * POLAR_MESH_QUADS_PER_QUADRANT];
-            quad->x2 = scratch->center.vx - scratch->points[POLAR_MESH_RING_COUNT][i].x + GFX_BATTLE_SCREEN_X;
-            quad->y2 = scratch->center.vy - scratch->points[POLAR_MESH_RING_COUNT][i].y;
-            quad->x3 = scratch->center.vx - scratch->points[POLAR_MESH_RING_COUNT][i + 1].x + GFX_BATTLE_SCREEN_X;
-            quad->y3 = scratch->center.vy - scratch->points[POLAR_MESH_RING_COUNT][i + 1].y;
+            quad = &work->quads[work->buffer]
+                               [i + EFFECT_POLAR_MESH_OUTER_RING_OFFSET + 2 * EFFECT_POLAR_MESH_QUADS_PER_QUADRANT];
+            quad->x2 = scratch->center.vx - scratch->points[EFFECT_POLAR_MESH_RING_COUNT][i].x + GFX_BATTLE_SCREEN_X;
+            quad->y2 = scratch->center.vy - scratch->points[EFFECT_POLAR_MESH_RING_COUNT][i].y;
+            quad->x3
+                = scratch->center.vx - scratch->points[EFFECT_POLAR_MESH_RING_COUNT][i + 1].x + GFX_BATTLE_SCREEN_X;
+            quad->y3 = scratch->center.vy - scratch->points[EFFECT_POLAR_MESH_RING_COUNT][i + 1].y;
             POLY_RGB(quad, 2) = POLY_RGB(quad, 3) = scratch->rgb;
             AddPrim(ot + scratch->ot_depth, quad);
 
-            quad = &work->quads[work->buffer][i + POLAR_MESH_OUTER_RING_OFFSET + 3 * POLAR_MESH_QUADS_PER_QUADRANT];
-            quad->x2 = scratch->center.vx + scratch->points[POLAR_MESH_RING_COUNT][i].y + GFX_BATTLE_SCREEN_X;
-            quad->y2 = scratch->center.vy - scratch->points[POLAR_MESH_RING_COUNT][i].x;
-            quad->x3 = scratch->center.vx + scratch->points[POLAR_MESH_RING_COUNT][i + 1].y + GFX_BATTLE_SCREEN_X;
-            quad->y3 = scratch->center.vy - scratch->points[POLAR_MESH_RING_COUNT][i + 1].x;
+            quad = &work->quads[work->buffer]
+                               [i + EFFECT_POLAR_MESH_OUTER_RING_OFFSET + 3 * EFFECT_POLAR_MESH_QUADS_PER_QUADRANT];
+            quad->x2 = scratch->center.vx + scratch->points[EFFECT_POLAR_MESH_RING_COUNT][i].y + GFX_BATTLE_SCREEN_X;
+            quad->y2 = scratch->center.vy - scratch->points[EFFECT_POLAR_MESH_RING_COUNT][i].x;
+            quad->x3
+                = scratch->center.vx + scratch->points[EFFECT_POLAR_MESH_RING_COUNT][i + 1].y + GFX_BATTLE_SCREEN_X;
+            quad->y3 = scratch->center.vy - scratch->points[EFFECT_POLAR_MESH_RING_COUNT][i + 1].x;
             POLY_RGB(quad, 2) = POLY_RGB(quad, 3) = scratch->rgb;
             AddPrim(ot + scratch->ot_depth, quad);
         }

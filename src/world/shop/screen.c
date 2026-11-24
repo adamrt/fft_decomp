@@ -234,7 +234,7 @@ void shop_run_screen(s32 shop_type) {
         if (g_menu_input_primary_repeat & PSX_PAD_SELECT) {
             help_start_text(DIALOG_POSITION_CENTER);
         }
-        if (g_menu_screen_grid_id != MENU_GRID_HELP_NONE) {
+        if (g_menu_screen_grid_id != HELP_GRID_NONE) {
             menu_screen_update_help_grid(
                 g_formation_unit_pointers[g_unit_selected_index]->detail.uses_monster_skillset);
         }
@@ -250,7 +250,7 @@ void shop_run_screen(s32 shop_type) {
         if ((g_formation_unit_cycle_mode != 0 || g_formation_unit_browse_enabled != 0)
             && g_shop_menu_step < SHOP_STEP_SOLDIER_MENU) {
             disabled = 0;
-            if (g_menu_input_lock_mode != 0 || g_menu_screen_grid_id != MENU_GRID_HELP_NONE
+            if (g_menu_input_lock_mode != 0 || g_menu_screen_grid_id != HELP_GRID_NONE
                 || g_formation_unit_cycle_mode == 1) {
                 disabled = 1;
             }
@@ -711,9 +711,9 @@ void shop_buy_update_unit_preview(void) {
         g_unit_panel_status_display_thread_params.redraw_request = 1;
     }
     if (g_formation_unit_banner_enabled != 0 && g_formation_unit_browse_enabled == 0) {
-        text_id = MENU_GRID_HELP_BANNER_TOP;
+        text_id = HELP_GRID_BANNER_TOP;
         if (g_formation_unit_banner_at_bottom != 0) {
-            text_id = MENU_GRID_HELP_BANNER_BOTTOM;
+            text_id = HELP_GRID_BANNER_BOTTOM;
         }
         g_help_message_text_id = text_id;
     } else {

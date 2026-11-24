@@ -30,28 +30,28 @@ static s32 monster_has_supporter_at_tile(s32 team_flags, s32 x, s32 y, s32 total
 
 /* The idle action menu for a unit id: get_unit_menu_id, with
  * the four TURN menus replaced by their RIDER_TURN variants for a rider. Returns
- * MENU_COMMAND_ID_NONE for an empty slot. */
+ * COMMAND_MENU_NONE for an empty slot. */
 command_menu_e command_get_menu_id_by_battle_unit_id(s32 battle_unit_id) {
     battle_unit_t* unit = battle_unit_get_if_present(battle_unit_id);
     s32 menu;
 
     if (unit == 0) {
-        return MENU_COMMAND_ID_NONE;
+        return COMMAND_MENU_NONE;
     }
     menu = get_unit_menu_id(unit);
     if (unit->mount_info & UNIT_MOUNT_INFO_FLAG_RIDER) {
         switch (menu) {
-        case MENU_COMMAND_ID_TURN:
-            menu = MENU_COMMAND_ID_RIDER_TURN;
+        case COMMAND_MENU_TURN:
+            menu = COMMAND_MENU_RIDER_TURN;
             break;
-        case MENU_COMMAND_ID_TURN_MOVED:
-            menu = MENU_COMMAND_ID_RIDER_TURN_MOVED;
+        case COMMAND_MENU_TURN_MOVED:
+            menu = COMMAND_MENU_RIDER_TURN_MOVED;
             break;
-        case MENU_COMMAND_ID_TURN_ACTED:
-            menu = MENU_COMMAND_ID_RIDER_TURN_ACTED;
+        case COMMAND_MENU_TURN_ACTED:
+            menu = COMMAND_MENU_RIDER_TURN_ACTED;
             break;
-        case MENU_COMMAND_ID_TURN_MOVED_ACTED:
-            menu = MENU_COMMAND_ID_RIDER_TURN_MOVED_ACTED;
+        case COMMAND_MENU_TURN_MOVED_ACTED:
+            menu = COMMAND_MENU_RIDER_TURN_MOVED_ACTED;
             break;
         default:
             return menu;
@@ -90,9 +90,9 @@ static command_menu_e get_unit_menu_id(const battle_unit_t* unit) {
     player_controlled = player_flag != 0;
     if (inspect_only != 0) {
         if (player_controlled != 0) {
-            return MENU_COMMAND_ID_PLAYER_UNIT_INSPECT;
+            return COMMAND_MENU_PLAYER_UNIT_INSPECT;
         }
-        return MENU_COMMAND_ID_OTHER_UNIT_INSPECT;
+        return COMMAND_MENU_OTHER_UNIT_INSPECT;
     }
     dont_move = unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_DONT_MOVE)];
     restriction = battle_unit_get_action_restriction(unit);
@@ -100,20 +100,20 @@ static command_menu_e get_unit_menu_id(const battle_unit_t* unit) {
     acted = unit->action_taken | restriction;
     if (unit->has_turn != 0) {
         if (moved == 0 && acted == 0) {
-            return MENU_COMMAND_ID_TURN;
+            return COMMAND_MENU_TURN;
         }
         if (moved != 0 && acted == 0) {
-            return MENU_COMMAND_ID_TURN_MOVED;
+            return COMMAND_MENU_TURN_MOVED;
         }
         if (moved == 0 && acted != 0) {
-            return MENU_COMMAND_ID_TURN_ACTED;
+            return COMMAND_MENU_TURN_ACTED;
         }
-        return MENU_COMMAND_ID_TURN_MOVED_ACTED;
+        return COMMAND_MENU_TURN_MOVED_ACTED;
     }
     if (player_controlled != 0) {
-        return MENU_COMMAND_ID_PLAYER_UNIT;
+        return COMMAND_MENU_PLAYER_UNIT;
     }
-    return MENU_COMMAND_ID_OTHER_UNIT;
+    return COMMAND_MENU_OTHER_UNIT;
 }
 
 /* Return the unit's unit_action_restriction_e.

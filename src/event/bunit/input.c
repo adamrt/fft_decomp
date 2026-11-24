@@ -135,7 +135,7 @@ void menu_input_update(void) {
     update_controller();
     running = thread_is_running(THREAD_SCREEN_SLOT_TEXT);
 
-    if (running != 0 || g_unit_list_help_screen_id != MENU_GRID_HELP_NONE) {
+    if (running != 0 || g_unit_list_help_screen_id != HELP_GRID_NONE) {
         menu_input_clear_state();
         if (running != 0) {
             g_unit_list_help_text_state = g_unit_list_help_text_state != 0 ? 2 : 1;

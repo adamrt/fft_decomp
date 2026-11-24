@@ -27,8 +27,8 @@ void map_queue_untextured_quads(u32* otag, POLY_F4* prims, s32 yaw, s32* unused_
 void map_queue_untextured_triangles(u32* otag, POLY_F3* prims, s32 yaw, s32* unused_count);
 
 /* Weather particles of g_weather_particles: snow
- * (MAP_WEATHER_COMMAND_INIT_SNOW_PARTICLES) uses all 64, rain
- * (MAP_WEATHER_COMMAND_INIT_RAIN_PARTICLES) fills two sets of 32. */
+ * (WEATHER_COMMAND_INIT_SNOW_PARTICLES) uses all 64, rain
+ * (WEATHER_COMMAND_INIT_RAIN_PARTICLES) fills two sets of 32. */
 typedef struct weather_particle {
     s16 x;
     s16 y;
@@ -770,7 +770,7 @@ void map_draw(MATRIX* camera) {
     PopMatrix();
 
     /* Snow: 64 flakes in a slowly spinning volume; a flake that falls below the screen respawns at the top. */
-    if (g_weather_effect_mode == MAP_WEATHER_EFFECT_SNOW) {
+    if (g_weather_effect_mode == WEATHER_EFFECT_SNOW) {
         PushMatrix();
         g_weather_rotation.vy += g_weather_primary_speed;
         RotMatrix(&g_weather_rotation, &g_weather_matrix);
@@ -862,7 +862,7 @@ void map_draw(MATRIX* camera) {
 
     /* Map command 0x96 (E458): the volume swells and rolls over the duration;
      * particles fall during its first eighth and rise after. */
-    if (g_weather_effect_mode == MAP_WEATHER_EFFECT_TIMED_PARTICLE_TRANSFORM) {
+    if (g_weather_effect_mode == WEATHER_EFFECT_TIMED_PARTICLE_TRANSFORM) {
         s32 sine;
 
         PushMatrix();
@@ -978,7 +978,7 @@ void map_draw(MATRIX* camera) {
         /* At the end, restore the script weather and the default volume. That can switch the mode to
          * rain mid-frame; the rain block below then relinks the ft3 drops already queued (QUIRKS.md). */
         if (g_weather_timed_transform_frame == g_weather_timed_transform_duration) {
-            weather_dispatch_command(MAP_WEATHER_COMMAND_APPLY_SCRIPT_WEATHER);
+            weather_dispatch_command(WEATHER_COMMAND_APPLY_SCRIPT_WEATHER);
             g_weather_scale.vx = ONE;
             g_weather_scale.vy = ONE;
             g_weather_scale.vz = ONE;
@@ -994,7 +994,7 @@ void map_draw(MATRIX* camera) {
 
     /* Rain: streak i runs from particle i (lower end) up to particle i + 32. Its fall_speed
      * holds rain_phase_e; the splash record uses that field as a frame countdown. */
-    if (g_weather_effect_mode == MAP_WEATHER_EFFECT_RAIN) {
+    if (g_weather_effect_mode == WEATHER_EFFECT_RAIN) {
         half_size = g_map_camera_zoom.vx * 22;
         half_size /= 0x2000;
         for (i = 0; i < 32; i++) {
@@ -1934,11 +1934,11 @@ void map_reset_render_state(void) {
         bzero(g_map_loaded_gns_records[i].load_info.bytes, sizeof(map_gns_load_info_t));
         bzero(&g_map_pending_gns_records[i].resource_type, 14);
     }
-    weather_dispatch_command(MAP_WEATHER_COMMAND_CLEAR);
+    weather_dispatch_command(WEATHER_COMMAND_CLEAR);
     g_weather_lightning_mode = MAP_LIGHTNING_OFF;
-    /* Clear MAP_WEATHER_FLAG_IGNORE_WEATHER and the palette modifier above the low flags. */
+    /* Clear WEATHER_FLAG_IGNORE_WEATHER and the palette modifier above the low flags. */
     weather_flags = &g_weather_flags;
-    *weather_flags &= MAP_WEATHER_LOW_FLAGS_MASK & ~MAP_WEATHER_FLAG_IGNORE_WEATHER;
+    *weather_flags &= WEATHER_LOW_FLAGS_MASK & ~WEATHER_FLAG_IGNORE_WEATHER;
     SetDrawMode(&g_render_buffers[0].overlay_modes[1], 0, 1, 0, 0);
     SetDrawMode(&g_render_buffers[1].overlay_modes[1], 0, 1, 0, 0);
     SetDrawMode(&g_render_buffers[0].overlay_modes[0], 0, 1, 0, 0);
@@ -2041,52 +2041,52 @@ void weather_dispatch_command(u8 command) {
     s8 weather;
 
     switch (command) {
-    case MAP_WEATHER_COMMAND_RESTORE_LIGHTING:
+    case WEATHER_COMMAND_RESTORE_LIGHTING:
         map_light_dispatch_command(MAP_LIGHT_COMMAND_RESTORE_BACKGROUND_GRADIENT, 0);
         SetColorMatrix(g_weather_lightning_state.color_matrices);
         SetBackColor(g_map_back_color.red, g_map_back_color.green, g_map_back_color.blue);
         break;
-    case MAP_WEATHER_COMMAND_APPLY_SCRIPT_WEATHER:
+    case WEATHER_COMMAND_APPLY_SCRIPT_WEATHER:
         weather = script_variable_get(SCRIPT_VAR_WEATHER);
         g_weather_lightning_mode = MAP_LIGHTNING_OFF;
         weather &= 7;
         if (weather < WEATHER_RAIN) {
             weather_stop_sfx();
-            weather_dispatch_command(MAP_WEATHER_COMMAND_CLEAR);
-            weather_dispatch_command(MAP_WEATHER_COMMAND_RESTORE_LIGHTING);
+            weather_dispatch_command(WEATHER_COMMAND_CLEAR);
+            weather_dispatch_command(WEATHER_COMMAND_RESTORE_LIGHTING);
         }
         if (weather == WEATHER_RAIN) {
-            if (g_weather_flags & MAP_WEATHER_FLAG_SNOW) {
+            if (g_weather_flags & WEATHER_FLAG_SNOW) {
                 weather_stop_sfx();
-                weather_dispatch_command(MAP_WEATHER_COMMAND_LIGHT_SNOW);
+                weather_dispatch_command(WEATHER_COMMAND_LIGHT_SNOW);
             } else {
                 weather_stop_sfx();
-                weather_dispatch_command(MAP_WEATHER_COMMAND_LIGHT_RAIN);
+                weather_dispatch_command(WEATHER_COMMAND_LIGHT_RAIN);
             }
-            weather_dispatch_command(MAP_WEATHER_COMMAND_RESTORE_LIGHTING);
+            weather_dispatch_command(WEATHER_COMMAND_RESTORE_LIGHTING);
         }
         if (weather == WEATHER_STORM) {
-            if (g_weather_flags & MAP_WEATHER_FLAG_SNOW) {
+            if (g_weather_flags & WEATHER_FLAG_SNOW) {
                 weather_stop_sfx();
-                weather_dispatch_command(MAP_WEATHER_COMMAND_SNOW);
+                weather_dispatch_command(WEATHER_COMMAND_SNOW);
             } else {
                 g_weather_rain_sfx_id = SUZUKI_SOUND_ID(SOUND_RESOURCE_ENV, SOUND_ENV_SFX_RAIN);
                 if (g_weather_sfx_enabled) {
                     sound_play_background(SUZUKI_SOUND_ID(SOUND_RESOURCE_ENV, SOUND_ENV_SFX_RAIN));
                 }
-                weather_dispatch_command(MAP_WEATHER_COMMAND_RAIN);
+                weather_dispatch_command(WEATHER_COMMAND_RAIN);
             }
-            weather_dispatch_command(MAP_WEATHER_COMMAND_RESTORE_LIGHTING);
+            weather_dispatch_command(WEATHER_COMMAND_RESTORE_LIGHTING);
         }
         if (weather == WEATHER_STRONG_STORM) {
-            if (g_weather_flags & MAP_WEATHER_FLAG_SNOW) {
+            if (g_weather_flags & WEATHER_FLAG_SNOW) {
                 weather_stop_sfx();
-                weather_dispatch_command(MAP_WEATHER_COMMAND_HEAVY_SNOW);
-                weather_dispatch_command(MAP_WEATHER_COMMAND_RESTORE_LIGHTING);
+                weather_dispatch_command(WEATHER_COMMAND_HEAVY_SNOW);
+                weather_dispatch_command(WEATHER_COMMAND_RESTORE_LIGHTING);
             } else {
                 weather_stop_sfx();
-                weather_dispatch_command(MAP_WEATHER_COMMAND_HEAVY_RAIN);
-                weather_dispatch_command(MAP_WEATHER_COMMAND_LIGHTNING);
+                weather_dispatch_command(WEATHER_COMMAND_HEAVY_RAIN);
+                weather_dispatch_command(WEATHER_COMMAND_LIGHTNING);
                 g_weather_rain_sfx_id = SUZUKI_SOUND_ID(SOUND_RESOURCE_ENV, SOUND_ENV_SFX_RAIN);
                 if (g_weather_sfx_enabled) {
                     sound_play_background(SUZUKI_SOUND_ID(SOUND_RESOURCE_ENV, SOUND_ENV_SFX_RAIN));
@@ -2096,7 +2096,7 @@ void weather_dispatch_command(u8 command) {
         break;
     /* Both lightning commands zero color matrix 1, so on the flash's flicker
      * frames only the blue back color lights the map. */
-    case MAP_WEATHER_COMMAND_THUNDER:
+    case WEATHER_COMMAND_THUNDER:
         g_weather_lightning_mode = MAP_LIGHTNING_ONCE;
         g_weather_lightning_state.timer = 0x3c;
         g_weather_rain_sfx_id = SUZUKI_SOUND_ID(SOUND_RESOURCE_ENV, SOUND_ENV_SFX_RAIN);
@@ -2112,9 +2112,9 @@ void weather_dispatch_command(u8 command) {
         g_weather_lightning_state.color_matrices[1].m[2][0] = 0;
         g_weather_lightning_state.color_matrices[1].m[2][1] = 0;
         g_weather_lightning_state.color_matrices[1].m[2][2] = 0;
-        weather_dispatch_command(MAP_WEATHER_COMMAND_RESTORE_LIGHTING);
+        weather_dispatch_command(WEATHER_COMMAND_RESTORE_LIGHTING);
         break;
-    case MAP_WEATHER_COMMAND_LIGHTNING:
+    case WEATHER_COMMAND_LIGHTNING:
         g_weather_lightning_mode = MAP_LIGHTNING_RANDOM;
         g_weather_lightning_state.timer = 0x3c;
         g_weather_lightning_state.color_matrices[1].m[0][0] = 0;
@@ -2126,43 +2126,43 @@ void weather_dispatch_command(u8 command) {
         g_weather_lightning_state.color_matrices[1].m[2][0] = 0;
         g_weather_lightning_state.color_matrices[1].m[2][1] = 0;
         g_weather_lightning_state.color_matrices[1].m[2][2] = 0;
-        weather_dispatch_command(MAP_WEATHER_COMMAND_RESTORE_LIGHTING);
+        weather_dispatch_command(WEATHER_COMMAND_RESTORE_LIGHTING);
         break;
-    case MAP_WEATHER_COMMAND_SNOW:
+    case WEATHER_COMMAND_SNOW:
         g_weather_fall_speed = 1;
         g_weather_primary_speed = 4;
-        init_weather_particles(MAP_WEATHER_COMMAND_INIT_SNOW_PARTICLES);
+        init_weather_particles(WEATHER_COMMAND_INIT_SNOW_PARTICLES);
         break;
-    case MAP_WEATHER_COMMAND_LIGHT_SNOW:
+    case WEATHER_COMMAND_LIGHT_SNOW:
         g_weather_fall_speed = 1;
         g_weather_primary_speed = 1;
-        init_weather_particles(MAP_WEATHER_COMMAND_INIT_SNOW_PARTICLES);
+        init_weather_particles(WEATHER_COMMAND_INIT_SNOW_PARTICLES);
         break;
-    case MAP_WEATHER_COMMAND_HEAVY_SNOW:
+    case WEATHER_COMMAND_HEAVY_SNOW:
         g_weather_fall_speed = 3;
         g_weather_primary_speed = 0x10;
-        init_weather_particles(MAP_WEATHER_COMMAND_INIT_SNOW_PARTICLES);
+        init_weather_particles(WEATHER_COMMAND_INIT_SNOW_PARTICLES);
         break;
-    case MAP_WEATHER_COMMAND_RAIN:
+    case WEATHER_COMMAND_RAIN:
         g_weather_fall_speed = 5;
         g_weather_primary_speed = 6;
         g_weather_rain_secondary_fall_speed = 9;
-        init_weather_particles(MAP_WEATHER_COMMAND_INIT_RAIN_PARTICLES);
+        init_weather_particles(WEATHER_COMMAND_INIT_RAIN_PARTICLES);
         break;
-    case MAP_WEATHER_COMMAND_LIGHT_RAIN:
+    case WEATHER_COMMAND_LIGHT_RAIN:
         g_weather_fall_speed = 3;
         g_weather_primary_speed = 5;
         g_weather_rain_secondary_fall_speed = 8;
-        init_weather_particles(MAP_WEATHER_COMMAND_INIT_RAIN_PARTICLES);
+        init_weather_particles(WEATHER_COMMAND_INIT_RAIN_PARTICLES);
         break;
-    case MAP_WEATHER_COMMAND_HEAVY_RAIN:
+    case WEATHER_COMMAND_HEAVY_RAIN:
         g_weather_fall_speed = 5;
         g_weather_primary_speed = 9;
         g_weather_rain_secondary_fall_speed = 0x12;
-        init_weather_particles(MAP_WEATHER_COMMAND_INIT_RAIN_PARTICLES);
+        init_weather_particles(WEATHER_COMMAND_INIT_RAIN_PARTICLES);
         break;
-    case MAP_WEATHER_COMMAND_CLEAR:
-        g_weather_effect_mode = MAP_WEATHER_EFFECT_CLEAR;
+    case WEATHER_COMMAND_CLEAR:
+        g_weather_effect_mode = WEATHER_EFFECT_CLEAR;
         g_weather_lightning_mode = MAP_LIGHTNING_OFF;
         break;
     }
@@ -2188,8 +2188,8 @@ static void init_weather_particles(weather_command_e command) {
     POLY_FT3* prim;
 
     switch (command & 0xff) {
-    case MAP_WEATHER_COMMAND_INIT_SNOW_PARTICLES:
-        g_weather_effect_mode = MAP_WEATHER_EFFECT_SNOW;
+    case WEATHER_COMMAND_INIT_SNOW_PARTICLES:
+        g_weather_effect_mode = WEATHER_EFFECT_SNOW;
         for (i = 0; i < 64; i++) {
             g_weather_particles[i].y = -rand() % 240 - 16;
             g_weather_particles[i].fall_speed = g_weather_fall_speed;
@@ -2221,8 +2221,8 @@ static void init_weather_particles(weather_command_e command) {
             }
         }
         break;
-    case MAP_WEATHER_COMMAND_INIT_RAIN_PARTICLES:
-        g_weather_effect_mode = MAP_WEATHER_EFFECT_RAIN;
+    case WEATHER_COMMAND_INIT_RAIN_PARTICLES:
+        g_weather_effect_mode = WEATHER_EFFECT_RAIN;
         for (i = 0; i < 32; i++) {
             g_weather_particles[i].x = rand() % (g_map_tile_width * MAP_TILE_SIZE);
             g_weather_particles[i].z = rand() % (g_map_tile_depth * MAP_TILE_SIZE);
@@ -3502,7 +3502,7 @@ s32 map_gns_dispatch_resource(u8 resource_type, map_resource_t* data) {
         s32* weather_flags;
 
         weather_flags = &g_weather_flags;
-        *weather_flags |= MAP_WEATHER_FLAG_IGNORE_WEATHER;
+        *weather_flags |= WEATHER_FLAG_IGNORE_WEATHER;
         /* Indoors the backdrop gradient is drawn without dithering. */
         SetDrawMode(&g_render_buffers[0].overlay_modes[0], 0, 0, 0, 0);
         SetDrawMode(&g_render_buffers[1].overlay_modes[0], 0, 0, 0, 0);
@@ -3512,7 +3512,7 @@ s32 map_gns_dispatch_resource(u8 resource_type, map_resource_t* data) {
         s32* weather_flags;
 
         weather_flags = &g_weather_flags;
-        *weather_flags &= ~MAP_WEATHER_FLAG_IGNORE_WEATHER;
+        *weather_flags &= ~WEATHER_FLAG_IGNORE_WEATHER;
         SetDrawMode(&g_render_buffers[0].overlay_modes[0], 0, 1, 0, 0);
         SetDrawMode(&g_render_buffers[1].overlay_modes[0], 0, 1, 0, 0);
         break;
@@ -3521,14 +3521,14 @@ s32 map_gns_dispatch_resource(u8 resource_type, map_resource_t* data) {
         s32* weather_flags;
 
         weather_flags = &g_weather_flags;
-        *weather_flags &= ~MAP_WEATHER_FLAG_SNOW;
+        *weather_flags &= ~WEATHER_FLAG_SNOW;
         break;
     }
     case GNS_COMMAND_SET_SNOW: {
         s32* weather_flags;
 
         weather_flags = &g_weather_flags;
-        *weather_flags |= MAP_WEATHER_FLAG_SNOW;
+        *weather_flags |= WEATHER_FLAG_SNOW;
         break;
     }
     case GNS_COMMAND_SET_WEATHER_MODIFIER: {
@@ -3537,7 +3537,7 @@ s32 map_gns_dispatch_resource(u8 resource_type, map_resource_t* data) {
         vector = data->command_halfwords;
         vector += 6;
         weather_flags = &g_weather_flags;
-        *weather_flags = (*weather_flags & MAP_WEATHER_LOW_FLAGS_MASK) | (vector[0] << MAP_WEATHER_MODIFIER_SHIFT);
+        *weather_flags = (*weather_flags & WEATHER_LOW_FLAGS_MASK) | (vector[0] << WEATHER_MODIFIER_SHIFT);
         break;
     }
     }

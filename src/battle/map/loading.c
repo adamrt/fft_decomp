@@ -352,7 +352,7 @@ s32 map_update_load(s32 map_id, map_load_command_e command) {
 
                     s_map_gns_load_phase = MAP_GNS_LOAD_PHASE_IDLE;
                     s_map_resource_load_state = MAP_LOAD_STATE_DONE;
-                    weather_dispatch_command(MAP_WEATHER_COMMAND_APPLY_SCRIPT_WEATHER);
+                    weather_dispatch_command(WEATHER_COMMAND_APPLY_SCRIPT_WEATHER);
                     heap_free(g_map_data_load_buffer);
                 }
             }
@@ -800,11 +800,11 @@ void weather_start_sfx(void) {
  * E458 passes the frames left of its timeline. An id other than 0x96 does
  * nothing. g_weather_timed_transform_unread receives 0x95 and no code reads it. */
 void weather_start_timed_transform(s32 id, s32 value) {
-    if (id == MAP_WEATHER_EFFECT_TIMED_PARTICLE_TRANSFORM) {
+    if (id == WEATHER_EFFECT_TIMED_PARTICLE_TRANSFORM) {
         g_weather_timed_transform_unread = 0x95;
         g_weather_timed_transform_duration = value;
         g_weather_timed_transform_frame = 0;
-        g_weather_effect_mode = MAP_WEATHER_EFFECT_TIMED_PARTICLE_TRANSFORM;
+        g_weather_effect_mode = WEATHER_EFFECT_TIMED_PARTICLE_TRANSFORM;
     }
 }
 

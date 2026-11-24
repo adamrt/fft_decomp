@@ -561,7 +561,7 @@ s32 unit_grid_update(s16 background_y, s16 toggle_banner, s16 allow_browse, s16 
     if (g_formation_unit_browse_enabled != 0) {
         input &= 0xff0;
     }
-    if (thread_is_running(THREAD_SCREEN_SLOT_CHARACTER_STATUS) == 0 && g_menu_screen_grid_id == MENU_GRID_HELP_NONE
+    if (thread_is_running(THREAD_SCREEN_SLOT_CHARACTER_STATUS) == 0 && g_menu_screen_grid_id == HELP_GRID_NONE
         && fade_menu_get_state() == FADE_MENU_STATE_NONE) {
         g_unit_selected_index
             = menu_step_grid_selection(4, 5, g_formation_unit_count - 1, g_unit_selected_index, input);
@@ -585,7 +585,7 @@ s32 unit_grid_update(s16 background_y, s16 toggle_banner, s16 allow_browse, s16 
         if (thread_is_running(THREAD_SCREEN_SLOT_MENU) != 0) {
             row = g_formation_current_menu == FORMATION_MENU_UNIT_GRID;
         }
-        row |= g_menu_input_lock_mode != 0 || g_menu_screen_grid_id != MENU_GRID_HELP_NONE;
+        row |= g_menu_input_lock_mode != 0 || g_menu_screen_grid_id != HELP_GRID_NONE;
         menu_draw_pressable_button(
             MENU_PRESSABLE_BUTTON_L2, 0x26, value, input & PSX_PAD_L2, row, SOUND_SFX_PAGE_SWITCH);
         menu_draw_pressable_button(

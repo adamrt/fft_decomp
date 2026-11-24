@@ -83,100 +83,100 @@ typedef char request_entry_size_must_be_20[(sizeof(request_entry_t) == 20) ? 1 :
 static u8 s_announcement_spell_quote_exception_skillsets[8] = { 1, 2, 3, 4, 0x12, 6, 0x14, 0xff };
 /* System-menu requests: callbacks and their initial message/selection parameters. */
 static request_entry_t s_request_entries[51] = {
-    { MENU_COMMAND_ID_MESSAGE_YES_NO, 0x8004, MENU_COMMAND_ID_MESSAGE, MENU_COMMAND_ID_MESSAGE_YES_NO, 1, { 0, 0 },
+    { COMMAND_MENU_MESSAGE_YES_NO, 0x8004, COMMAND_MENU_MESSAGE, COMMAND_MENU_MESSAGE_YES_NO, 1, { 0, 0 },
         menu_icon_linked_entry_thread, 0, { 0, 0 } }, /* 0 */
-    { MENU_COMMAND_ID_MESSAGE, 0x800f, MENU_COMMAND_ID_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread,
+    { COMMAND_MENU_MESSAGE, 0x800f, COMMAND_MENU_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread,
         MENU_PROMPT_CLOSE, { 0, 0 } }, /* 1 */
-    { MENU_COMMAND_ID_TARGET_KIND, 0x5056, MENU_COMMAND_ID_TARGET_KIND, 0xffff, 1, { 0, 0 }, menu_icon_selection_thread,
-        2, { 0, 0 } }, /* 2 */
-    { MENU_COMMAND_ID_PANEL_EXECUTE, 0x5058, MENU_COMMAND_ID_PANEL_EXECUTE, 0xffff, 1, { 0, 0 },
-        menu_icon_selection_thread, 3, { 0, 0 } }, /* 3 */
-    { MENU_COMMAND_ID_NONE, 0x505a, MENU_COMMAND_ID_MESSAGE, 0xffff, 0, { 0, 0 }, command_request_close_thread,
+    { COMMAND_MENU_TARGET_KIND, 0x5056, COMMAND_MENU_TARGET_KIND, 0xffff, 1, { 0, 0 }, menu_icon_selection_thread, 2,
+        { 0, 0 } }, /* 2 */
+    { COMMAND_MENU_PANEL_EXECUTE, 0x5058, COMMAND_MENU_PANEL_EXECUTE, 0xffff, 1, { 0, 0 }, menu_icon_selection_thread,
+        3, { 0, 0 } }, /* 3 */
+    { COMMAND_MENU_NONE, 0x505a, COMMAND_MENU_MESSAGE, 0xffff, 0, { 0, 0 }, command_request_close_thread,
         MENU_PROMPT_CLOSE, { 0, 0 } }, /* 4 */
-    { MENU_COMMAND_ID_NONE, 0x505a, MENU_COMMAND_ID_MESSAGE, 0xffff, 0, { 0, 0 }, command_request_close_thread,
+    { COMMAND_MENU_NONE, 0x505a, COMMAND_MENU_MESSAGE, 0xffff, 0, { 0, 0 }, command_request_close_thread,
         MENU_PROMPT_CLOSE, { 0, 0 } }, /* 5 */
-    { MENU_COMMAND_ID_MESSAGE, 0x800b, MENU_COMMAND_ID_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread,
+    { COMMAND_MENU_MESSAGE, 0x800b, COMMAND_MENU_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread,
         MENU_PROMPT_CLOSE, { 0, 0 } }, /* 6 */
-    { MENU_COMMAND_ID_MESSAGE, 0x8003, MENU_COMMAND_ID_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread,
+    { COMMAND_MENU_MESSAGE, 0x8003, COMMAND_MENU_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread,
         MENU_PROMPT_CLOSE, { 0, 0 } }, /* 7 */
-    { MENU_COMMAND_ID_NONE, 0x505a, MENU_COMMAND_ID_MESSAGE, 0xffff, 0, { 0, 0 }, command_request_close_thread,
+    { COMMAND_MENU_NONE, 0x505a, COMMAND_MENU_MESSAGE, 0xffff, 0, { 0, 0 }, command_request_close_thread,
         MENU_PROMPT_CLOSE, { 0, 0 } }, /* 8 */
-    { MENU_COMMAND_ID_EXECUTE, 0x5061, MENU_COMMAND_ID_EXECUTE, 0xffff, 1, { 0, 0 }, menu_icon_selection_thread, 9,
+    { COMMAND_MENU_EXECUTE, 0x5061, COMMAND_MENU_EXECUTE, 0xffff, 1, { 0, 0 }, menu_icon_selection_thread, 9,
         { 0, 0 } }, /* 9 */
-    { MENU_COMMAND_ID_MESSAGE, 0x5062, MENU_COMMAND_ID_ANNOUNCEMENT, 0xffff, 1, { 0, 0 }, menu_icon_timed_thread,
+    { COMMAND_MENU_MESSAGE, 0x5062, COMMAND_MENU_ANNOUNCEMENT, 0xffff, 1, { 0, 0 }, menu_icon_timed_thread,
         MENU_PROMPT_ABILITY_ANNOUNCEMENT, { 0, 0 } }, /* 10 */
-    { 100, 0x8010, MENU_COMMAND_ID_MESSAGE, MENU_COMMAND_ID_MESSAGE_TARGET_KIND, 1, { 0, 0 },
-        menu_icon_linked_entry_thread, 2, { 0, 0 } }, /* 11 */
-    { 101, 0x8011, MENU_COMMAND_ID_MESSAGE, MENU_COMMAND_ID_MESSAGE_PANEL_EXECUTE, 1, { 0, 0 },
-        menu_icon_linked_entry_thread, 3, { 0, 0 } }, /* 12 */
-    { 102, 0x8011, MENU_COMMAND_ID_MESSAGE, MENU_COMMAND_ID_MESSAGE_EXECUTE, 1, { 0, 0 }, menu_icon_linked_entry_thread,
-        9, { 0, 0 } }, /* 13 */
-    { MENU_COMMAND_ID_NONE, 0x505a, MENU_COMMAND_ID_MESSAGE, 0xffff, 0, { 0, 0 }, command_request_close_thread,
-        MENU_PROMPT_CLOSE, { 0, 0 } },                                                                         /* 14 */
-    { 99, 0x1004, MENU_COMMAND_ID_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 15, { 0, 0 } }, /* 15 */
-    { 99, 0x8006, MENU_COMMAND_ID_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, MENU_PROMPT_CLOSE,
+    { 100, 0x8010, COMMAND_MENU_MESSAGE, COMMAND_MENU_MESSAGE_TARGET_KIND, 1, { 0, 0 }, menu_icon_linked_entry_thread,
+        2, { 0, 0 } }, /* 11 */
+    { 101, 0x8011, COMMAND_MENU_MESSAGE, COMMAND_MENU_MESSAGE_PANEL_EXECUTE, 1, { 0, 0 }, menu_icon_linked_entry_thread,
+        3, { 0, 0 } }, /* 12 */
+    { 102, 0x8011, COMMAND_MENU_MESSAGE, COMMAND_MENU_MESSAGE_EXECUTE, 1, { 0, 0 }, menu_icon_linked_entry_thread, 9,
+        { 0, 0 } }, /* 13 */
+    { COMMAND_MENU_NONE, 0x505a, COMMAND_MENU_MESSAGE, 0xffff, 0, { 0, 0 }, command_request_close_thread,
+        MENU_PROMPT_CLOSE, { 0, 0 } },                                                                      /* 14 */
+    { 99, 0x1004, COMMAND_MENU_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 15, { 0, 0 } }, /* 15 */
+    { 99, 0x8006, COMMAND_MENU_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, MENU_PROMPT_CLOSE,
         { 0, 0 } }, /* 16 */
-    { 99, 0x8007, MENU_COMMAND_ID_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, MENU_PROMPT_CLOSE,
+    { 99, 0x8007, COMMAND_MENU_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, MENU_PROMPT_CLOSE,
         { 0, 0 } }, /* 17 */
-    { 99, 0x8008, MENU_COMMAND_ID_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, MENU_PROMPT_CLOSE,
+    { 99, 0x8008, COMMAND_MENU_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, MENU_PROMPT_CLOSE,
         { 0, 0 } }, /* 18 */
-    { 99, 0x8009, MENU_COMMAND_ID_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, MENU_PROMPT_CLOSE,
+    { 99, 0x8009, COMMAND_MENU_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, MENU_PROMPT_CLOSE,
         { 0, 0 } }, /* 19 */
-    { MENU_COMMAND_ID_MESSAGE, 0x1012, MENU_COMMAND_ID_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 20,
+    { COMMAND_MENU_MESSAGE, 0x1012, COMMAND_MENU_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 20,
         { 0, 0 } }, /* 20 */
-    { MENU_COMMAND_ID_MESSAGE, 0x1015, MENU_COMMAND_ID_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 21,
-        { 0, 0 } },                                                                                            /* 21 */
-    { 99, 0x1014, MENU_COMMAND_ID_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 22, { 0, 0 } }, /* 22 */
-    { 99, 0x1016, MENU_COMMAND_ID_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 23, { 0, 0 } }, /* 23 */
-    { MENU_COMMAND_ID_AUTO_BATTLE_UNIT, 0x506e, MENU_COMMAND_ID_AUTO_BATTLE_UNIT, 0xffff, 1, { 0, 0 },
+    { COMMAND_MENU_MESSAGE, 0x1015, COMMAND_MENU_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 21,
+        { 0, 0 } },                                                                                         /* 21 */
+    { 99, 0x1014, COMMAND_MENU_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 22, { 0, 0 } }, /* 22 */
+    { 99, 0x1016, COMMAND_MENU_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 23, { 0, 0 } }, /* 23 */
+    { COMMAND_MENU_AUTO_BATTLE_UNIT, 0x506e, COMMAND_MENU_AUTO_BATTLE_UNIT, 0xffff, 1, { 0, 0 },
         menu_icon_selection_thread, MENU_PROMPT_CLOSE, { 0, 0 } }, /* 24 */
-    { MENU_COMMAND_ID_AUTO_BATTLE_UNIT, 0x506f, MENU_COMMAND_ID_AUTO_BATTLE_UNIT, 0xffff, 1, { 0, 0 },
+    { COMMAND_MENU_AUTO_BATTLE_UNIT, 0x506f, COMMAND_MENU_AUTO_BATTLE_UNIT, 0xffff, 1, { 0, 0 },
         menu_icon_selection_thread, MENU_PROMPT_CLOSE, { 0, 0 } }, /* 25 */
-    { 103, 0x800d, MENU_COMMAND_ID_MESSAGE, MENU_COMMAND_ID_MESSAGE_ATTACK_UNIT, 1, { 0, 0 },
-        menu_icon_linked_entry_thread, 24, { 0, 0 } }, /* 26 */
-    { 104, 0x800e, MENU_COMMAND_ID_MESSAGE, MENU_COMMAND_ID_MESSAGE_DEFEND_UNIT, 1, { 0, 0 },
-        menu_icon_linked_entry_thread, 25, { 0, 0 } }, /* 27 */
-    { MENU_COMMAND_ID_MESSAGE_YES_NO, 0x802e, MENU_COMMAND_ID_MESSAGE, MENU_COMMAND_ID_MESSAGE_YES_NO, 1, { 0, 0 },
+    { 103, 0x800d, COMMAND_MENU_MESSAGE, COMMAND_MENU_MESSAGE_ATTACK_UNIT, 1, { 0, 0 }, menu_icon_linked_entry_thread,
+        24, { 0, 0 } }, /* 26 */
+    { 104, 0x800e, COMMAND_MENU_MESSAGE, COMMAND_MENU_MESSAGE_DEFEND_UNIT, 1, { 0, 0 }, menu_icon_linked_entry_thread,
+        25, { 0, 0 } }, /* 27 */
+    { COMMAND_MENU_MESSAGE_YES_NO, 0x802e, COMMAND_MENU_MESSAGE, COMMAND_MENU_MESSAGE_YES_NO, 1, { 0, 0 },
         menu_icon_linked_entry_thread, MENU_PROMPT_CLOSE, { 0, 0 } }, /* 28 */
-    { MENU_COMMAND_ID_MESSAGE, 0x0, MENU_COMMAND_ID_EFFECT_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_timed_thread,
+    { COMMAND_MENU_MESSAGE, 0x0, COMMAND_MENU_EFFECT_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_timed_thread,
         MENU_PROMPT_EFFECT_MESSAGE, { 0, 0 } }, /* 29 */
-    { MENU_COMMAND_ID_MESSAGE_YES_NO, 0x1017, MENU_COMMAND_ID_MESSAGE, MENU_COMMAND_ID_MESSAGE_YES_NO, 1, { 0, 0 },
+    { COMMAND_MENU_MESSAGE_YES_NO, 0x1017, COMMAND_MENU_MESSAGE, COMMAND_MENU_MESSAGE_YES_NO, 1, { 0, 0 },
         menu_icon_linked_entry_thread, MENU_PROMPT_CLOSE, { 0, 0 } }, /* 30 */
-    { MENU_COMMAND_ID_CRYSTAL_PICKUP, 0x505a, MENU_COMMAND_ID_MESSAGE, 0xffff, 0, { 0, 0 },
-        command_request_close_thread, MENU_PROMPT_CRYSTAL_OR_TREASURE, { 0, 0 } },                             /* 31 */
-    { 99, 0x1013, MENU_COMMAND_ID_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 32, { 0, 0 } }, /* 32 */
-    { MENU_COMMAND_ID_MESSAGE_YES_NO, 0x8006, MENU_COMMAND_ID_MESSAGE, MENU_COMMAND_ID_MESSAGE_YES_NO, 1, { 0, 0 },
+    { COMMAND_MENU_CRYSTAL_PICKUP, 0x505a, COMMAND_MENU_MESSAGE, 0xffff, 0, { 0, 0 }, command_request_close_thread,
+        MENU_PROMPT_CRYSTAL_OR_TREASURE, { 0, 0 } },                                                        /* 31 */
+    { 99, 0x1013, COMMAND_MENU_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 32, { 0, 0 } }, /* 32 */
+    { COMMAND_MENU_MESSAGE_YES_NO, 0x8006, COMMAND_MENU_MESSAGE, COMMAND_MENU_MESSAGE_YES_NO, 1, { 0, 0 },
         menu_icon_linked_entry_thread, MENU_PROMPT_CLOSE, { 0, 0 } }, /* 33 */
-    { MENU_COMMAND_ID_MESSAGE, 0x1830, MENU_COMMAND_ID_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread,
+    { COMMAND_MENU_MESSAGE, 0x1830, COMMAND_MENU_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread,
         MENU_PROMPT_TRAP_RESULT_FIRST, { 0, 0 } }, /* 34 */
-    { MENU_COMMAND_ID_MESSAGE, 0x1831, MENU_COMMAND_ID_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 35,
+    { COMMAND_MENU_MESSAGE, 0x1831, COMMAND_MENU_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 35,
         { 0, 0 } }, /* 35 */
-    { MENU_COMMAND_ID_MESSAGE, 0x1832, MENU_COMMAND_ID_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 36,
+    { COMMAND_MENU_MESSAGE, 0x1832, COMMAND_MENU_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 36,
         { 0, 0 } }, /* 36 */
-    { MENU_COMMAND_ID_MESSAGE, 0x1833, MENU_COMMAND_ID_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 37,
+    { COMMAND_MENU_MESSAGE, 0x1833, COMMAND_MENU_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 37,
         { 0, 0 } }, /* 37 */
-    { MENU_COMMAND_ID_MESSAGE, 0x101d, MENU_COMMAND_ID_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread,
+    { COMMAND_MENU_MESSAGE, 0x101d, COMMAND_MENU_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread,
         MENU_PROMPT_MOVE_FIND_ITEM_SOLD, { 0, 0 } }, /* 38 */
-    { MENU_COMMAND_ID_MESSAGE, 0x101c, MENU_COMMAND_ID_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread,
+    { COMMAND_MENU_MESSAGE, 0x101c, COMMAND_MENU_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread,
         MENU_PROMPT_MOVE_FIND_ITEM, { 0, 0 } }, /* 39 */
-    { MENU_COMMAND_ID_MESSAGE, 0x0, MENU_COMMAND_ID_MESSAGE, 0xffff, 1, { 0, 0 }, menu_input_thread,
-        MENU_PROMPT_MOVE_CONFIRM_SILENT, { 0, 0 } },                                                           /* 40 */
-    { 99, 0x100a, MENU_COMMAND_ID_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 41, { 0, 0 } }, /* 41 */
-    { 106, 0x800c, MENU_COMMAND_ID_MESSAGE, MENU_COMMAND_ID_MESSAGE_EXECUTE, 1, { 0, 0 }, menu_icon_linked_entry_thread,
-        43, { 0, 0 } },                                                                                     /* 42 */
-    { 98, 0x5061, MENU_COMMAND_ID_EXECUTE, 0xffff, 1, { 0, 0 }, menu_icon_selection_thread, 43, { 0, 0 } }, /* 43 */
-    { MENU_COMMAND_ID_MESSAGE, 0x5089, MENU_COMMAND_ID_ANNOUNCEMENT, 0xffff, 1, { 0, 0 }, menu_icon_timed_thread,
+    { COMMAND_MENU_MESSAGE, 0x0, COMMAND_MENU_MESSAGE, 0xffff, 1, { 0, 0 }, menu_input_thread,
+        MENU_PROMPT_MOVE_CONFIRM_SILENT, { 0, 0 } },                                                        /* 40 */
+    { 99, 0x100a, COMMAND_MENU_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 41, { 0, 0 } }, /* 41 */
+    { 106, 0x800c, COMMAND_MENU_MESSAGE, COMMAND_MENU_MESSAGE_EXECUTE, 1, { 0, 0 }, menu_icon_linked_entry_thread, 43,
+        { 0, 0 } },                                                                                      /* 42 */
+    { 98, 0x5061, COMMAND_MENU_EXECUTE, 0xffff, 1, { 0, 0 }, menu_icon_selection_thread, 43, { 0, 0 } }, /* 43 */
+    { COMMAND_MENU_MESSAGE, 0x5089, COMMAND_MENU_ANNOUNCEMENT, 0xffff, 1, { 0, 0 }, menu_icon_timed_thread,
         MENU_PROMPT_MATH_SKILL_ANNOUNCEMENT, { 0, 0 } }, /* 44 */
-    { 101, 0x8012, MENU_COMMAND_ID_MESSAGE, MENU_COMMAND_ID_MESSAGE_PANEL_EXECUTE, 1, { 0, 0 },
-        menu_icon_linked_entry_thread, 3, { 0, 0 } }, /* 45 */
-    { 102, 0x8012, MENU_COMMAND_ID_MESSAGE, MENU_COMMAND_ID_MESSAGE_EXECUTE, 1, { 0, 0 }, menu_icon_linked_entry_thread,
-        9, { 0, 0 } }, /* 46 */
-    { 99, 0x100f, MENU_COMMAND_ID_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, MENU_PROMPT_CLOSE,
+    { 101, 0x8012, COMMAND_MENU_MESSAGE, COMMAND_MENU_MESSAGE_PANEL_EXECUTE, 1, { 0, 0 }, menu_icon_linked_entry_thread,
+        3, { 0, 0 } }, /* 45 */
+    { 102, 0x8012, COMMAND_MENU_MESSAGE, COMMAND_MENU_MESSAGE_EXECUTE, 1, { 0, 0 }, menu_icon_linked_entry_thread, 9,
+        { 0, 0 } }, /* 46 */
+    { 99, 0x100f, COMMAND_MENU_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, MENU_PROMPT_CLOSE,
         { 0, 0 } }, /* 47 */
-    { MENU_COMMAND_ID_MESSAGE_YES_NO, 0x8005, MENU_COMMAND_ID_MESSAGE, MENU_COMMAND_ID_MESSAGE_YES_NO, 1, { 0, 0 },
-        menu_icon_linked_entry_thread, MENU_PROMPT_CLOSE, { 0, 0 } },                                          /* 48 */
-    { 99, 0x1025, MENU_COMMAND_ID_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 49, { 0, 0 } }, /* 49 */
-    { MENU_COMMAND_ID_MESSAGE, 0x508c, MENU_COMMAND_ID_ANNOUNCEMENT, 0xffff, 1, { 0, 0 }, menu_icon_timed_thread,
+    { COMMAND_MENU_MESSAGE_YES_NO, 0x8005, COMMAND_MENU_MESSAGE, COMMAND_MENU_MESSAGE_YES_NO, 1, { 0, 0 },
+        menu_icon_linked_entry_thread, MENU_PROMPT_CLOSE, { 0, 0 } },                                       /* 48 */
+    { 99, 0x1025, COMMAND_MENU_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 49, { 0, 0 } }, /* 49 */
+    { COMMAND_MENU_MESSAGE, 0x508c, COMMAND_MENU_ANNOUNCEMENT, 0xffff, 1, { 0, 0 }, menu_icon_timed_thread,
         MENU_PROMPT_POST_ACTION_RESULT, { 0, 0 } }, /* 50 */
 };
 
@@ -230,9 +230,9 @@ void command_move_thread(void) {
         thread_current_exit();
     }
     menu = g_command_current_id;
-    if (menu == MENU_COMMAND_ID_TURN_MOVED || menu == MENU_COMMAND_ID_TURN_MOVED_ACTED
-        || menu == MENU_COMMAND_ID_TURN_NO_ACT_MOVED || menu == MENU_COMMAND_ID_RIDER_TURN_MOVED
-        || menu == MENU_COMMAND_ID_RIDER_TURN_MOVED_ACTED || menu == MENU_COMMAND_ID_RIDER_TURN_NO_ACT_MOVED) {
+    if (menu == COMMAND_MENU_TURN_MOVED || menu == COMMAND_MENU_TURN_MOVED_ACTED
+        || menu == COMMAND_MENU_TURN_NO_ACT_MOVED || menu == COMMAND_MENU_RIDER_TURN_MOVED
+        || menu == COMMAND_MENU_RIDER_TURN_MOVED_ACTED || menu == COMMAND_MENU_RIDER_TURN_NO_ACT_MOVED) {
         sound_queue_invalid();
         thread_current_exit();
     }
@@ -258,8 +258,8 @@ void command_check_act_restrictions(void) {
 
     unit = unit_panel_get_selected_battle_unit();
     menu = g_command_current_id;
-    if (menu == MENU_COMMAND_ID_TURN_ACTED || menu == MENU_COMMAND_ID_TURN_MOVED_ACTED
-        || menu == MENU_COMMAND_ID_RIDER_TURN_ACTED || menu == MENU_COMMAND_ID_RIDER_TURN_MOVED_ACTED) {
+    if (menu == COMMAND_MENU_TURN_ACTED || menu == COMMAND_MENU_TURN_MOVED_ACTED
+        || menu == COMMAND_MENU_RIDER_TURN_ACTED || menu == COMMAND_MENU_RIDER_TURN_MOVED_ACTED) {
         result = battle_unit_get_action_restriction(unit);
         if (result == UNIT_ACTION_RESTRICTION_NONE) {
             sound_queue_invalid();
@@ -293,10 +293,10 @@ void command_check_act_restrictions(void) {
             queue_confirm_sound();
         } else if (g_menu_restore_pending == 0) {
             sound_queue_invalid();
-            g_menu_thread_menu_data[MENU_COMMAND_ID_ACTION_RESTRICTION_MESSAGE].text_id = message;
+            g_menu_thread_menu_data[COMMAND_MENU_ACTION_RESTRICTION_MESSAGE].text_id = message;
             thread_start(g_thread_current_id - 1, menu_icon_linked_entry_thread);
-            thread_set_parameters(g_thread_current_id - 1,
-                (s32)&g_menu_thread_menu_data[MENU_COMMAND_ID_ACTION_RESTRICTION_MESSAGE], 0, 0);
+            thread_set_parameters(
+                g_thread_current_id - 1, (s32)&g_menu_thread_menu_data[COMMAND_MENU_ACTION_RESTRICTION_MESSAGE], 0, 0);
             thread_wait_inactive(g_thread_current_id - 1);
         }
         if (message == 0x1002 || message == 0x1003) {
@@ -340,10 +340,10 @@ void command_check_row_restrictions(s32 menu, s32 value, s32 check_unit) {
     }
     if (mode != 0) {
         if (g_game_options.fields.navigation_messages != GAME_OPTION_OFF || (message & 0xff00) != 0x8000) {
-            g_menu_thread_menu_data[MENU_COMMAND_ID_ACTION_RESTRICTION_MESSAGE].text_id = message;
+            g_menu_thread_menu_data[COMMAND_MENU_ACTION_RESTRICTION_MESSAGE].text_id = message;
             thread_start(g_thread_current_id - 1, menu_icon_linked_entry_thread);
-            thread_set_parameters(g_thread_current_id - 1,
-                (s32)&g_menu_thread_menu_data[MENU_COMMAND_ID_ACTION_RESTRICTION_MESSAGE], 0, 0);
+            thread_set_parameters(
+                g_thread_current_id - 1, (s32)&g_menu_thread_menu_data[COMMAND_MENU_ACTION_RESTRICTION_MESSAGE], 0, 0);
         }
         if (mode == 2) {
             sound_queue_invalid();
@@ -354,7 +354,7 @@ void command_check_row_restrictions(s32 menu, s32 value, s32 check_unit) {
         }
     } else {
         mode = g_command_action_type_modes
-                   [g_menu_skillset_types[g_menu_thread_menu_data[MENU_COMMAND_ID_SKILLSET_LIST].selected_index]]
+                   [g_menu_skillset_types[g_menu_thread_menu_data[COMMAND_MENU_SKILLSET_LIST].selected_index]]
                        .row_action;
         if (mode < 0) {
             g_command_action_slot_row_actions[0] = mode;
@@ -369,7 +369,7 @@ void command_check_row_restrictions(s32 menu, s32 value, s32 check_unit) {
  * for the current menu (MP cost, blocking status, per-menu restrictions) and, when it is not usable, shows the matching
  * message before ending the thread. */
 void command_validate_ability_thread(void) {
-    s32 skill = g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST].selected_index;
+    s32 skill = g_menu_thread_menu_data[COMMAND_MENU_ABILITY_LIST].selected_index;
     menu_entry_t* parameter = (menu_entry_t*)thread_current_get_parameter_1();
     s32 ct;
     s32 entry;
@@ -419,10 +419,10 @@ void command_validate_ability_thread(void) {
         } else {
             g_menu_modal_open = 1;
             g_menu_selected_option = 0;
-            g_menu_thread_menu_data[MENU_COMMAND_ID_ACTION_RESTRICTION_MESSAGE].text_id = message;
+            g_menu_thread_menu_data[COMMAND_MENU_ACTION_RESTRICTION_MESSAGE].text_id = message;
             thread_start(g_thread_current_id - 1, menu_icon_linked_entry_thread);
-            thread_set_parameters(g_thread_current_id - 1,
-                (s32)&g_menu_thread_menu_data[MENU_COMMAND_ID_ACTION_RESTRICTION_MESSAGE], 0, 0);
+            thread_set_parameters(
+                g_thread_current_id - 1, (s32)&g_menu_thread_menu_data[COMMAND_MENU_ACTION_RESTRICTION_MESSAGE], 0, 0);
             sound_queue_invalid();
             thread_wait_inactive(g_thread_current_id - 1);
             g_menu_modal_open = 0;
@@ -474,11 +474,11 @@ s32 command_resolve_selection(void) {
         for (i = 0; i < 31; i++) {
             if (menu == g_command_maps[i].menu_id) {
                 if (command != 0xFF) {
-                    if (menu == MENU_COMMAND_ID_CRYSTAL_PICKUP) {
+                    if (menu == COMMAND_MENU_CRYSTAL_PICKUP) {
                         command = g_crystal_pickup_action;
                         g_command_selected_command.data.action.item_id = g_crystal_pickup_item;
                         option = MENU_SELECTION_NONE;
-                    } else if (menu == MENU_COMMAND_ID_MESSAGE_YES_NO || menu >= 0x64) {
+                    } else if (menu == COMMAND_MENU_MESSAGE_YES_NO || menu >= 0x64) {
                         /* Pointer sums: indexing map[option + 1] changes the address arithmetic. */
                         command = *(g_command_maps[i].map + option + 1);
                         option = MENU_SELECTION_NONE;
@@ -599,7 +599,7 @@ void auto_battle_confirm_thread(void) {
     menu_entry_t* parameter = (menu_entry_t*)thread_current_get_parameter_1();
 
     attacker = unit_panel_get_selected_battle_unit();
-    row = g_menu_thread_menu_data[MENU_COMMAND_ID_AUTO_BATTLE].selected_index;
+    row = g_menu_thread_menu_data[COMMAND_MENU_AUTO_BATTLE].selected_index;
     if (row == 3) {
         attacker->auto_battle_setting = AI_AUTOBATTLE_FADING_LIFE;
     } else if (row == 4) {
@@ -735,7 +735,7 @@ static s32 dispatch_request(
     u8 item_id;
 
     g_menu_thread_menu_data = g_command_idle_action_entries;
-    g_command_current_id = MENU_COMMAND_ID_NONE;
+    g_command_current_id = COMMAND_MENU_NONE;
     g_menu_restore_pending = 0;
     unit = battle_unit_get(unit_id);
     if (command == MENU_REQUEST_SCENARIO_CHECK) {

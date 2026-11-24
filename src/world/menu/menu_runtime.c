@@ -694,7 +694,7 @@ void world_map_menu_text_window_thread(void) {
 
 /* Thread body that opens the game options screen through option_entrypoint. */
 static void options_thread(void) {
-    option_entrypoint(MENU_OPTION_TYPE_GAME_OPTIONS);
+    option_entrypoint(OPTION_SCREEN_GAME_OPTIONS);
 }
 
 /* Runs the game options thread in the slot below the current thread,

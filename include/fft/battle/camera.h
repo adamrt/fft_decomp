@@ -81,13 +81,13 @@ void camera_rotate_for_unit_visibility(const struct map_unit* unit);
 /* g_camera_tilt_target values the tilt code tests; the target is a tilt band plus one, and
  * bands 3 and 4 have no pitch here. */
 enum {
-    MAP_TILT_LOW = 1, /* pitch 0x12e */
-    MAP_TILT_HIGH = 2 /* pitch 0x1c0 */
+    CAMERA_TILT_LOW = 1, /* pitch 0x12e */
+    CAMERA_TILT_HIGH = 2 /* pitch 0x1c0 */
 };
 
 /* g_camera_tilt_action and g_camera_zoom_action: the move in progress towards
- * g_camera_tilt_target or g_camera_zoom_target. INCREASE equals MAP_TILT_HIGH and DECREASE
- * equals MAP_ZOOM_OUT, and retail compares a target with the action loaded for that value. */
+ * g_camera_tilt_target or g_camera_zoom_target. INCREASE equals CAMERA_TILT_HIGH and DECREASE
+ * equals CAMERA_ZOOM_OUT, and retail compares a target with the action loaded for that value. */
 typedef enum camera_step_action {
     CAMERA_STEP_NONE = 0,
     CAMERA_STEP_INCREASE = 2, /* tilt up; zoom in */
@@ -102,8 +102,8 @@ void camera_update_tilt(void);
 /* zoom */
 /* g_camera_zoom_target values. */
 enum {
-    MAP_ZOOM_IN = 1, /* scale ONE */
-    MAP_ZOOM_OUT = 4 /* scale 0xc00 */
+    CAMERA_ZOOM_IN = 1, /* scale ONE */
+    CAMERA_ZOOM_OUT = 4 /* scale 0xc00 */
 };
 
 extern s32 g_camera_zoom_target;

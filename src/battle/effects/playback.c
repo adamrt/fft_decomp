@@ -2093,7 +2093,7 @@ effect_script_result_e effect_opcode_step_child_timeline(effect_record_t* record
                             track->duration[index], g_effect_context.spectator_ids[i], red, green, blue);
                     }
                     /* The darkness color has 8-bit channels; the offsets are 5-bit palette steps. */
-                    if (!(g_weather_flags & MAP_WEATHER_FLAG_IGNORE_WEATHER)) {
+                    if (!(g_weather_flags & WEATHER_FLAG_IGNORE_WEATHER)) {
                         map_light_start_darkness_blend(preset & EFFECT_COLOR_KEYFRAME_MODE_MASK, track->duration[index],
                             red * 8, green * 8, blue * 8);
                     }
@@ -2179,7 +2179,7 @@ effect_script_result_e effect_opcode_step_child_timeline(effect_record_t* record
                     blue = screen->color[index].b * 2;
                     map_light_modify_background(mode, screen->duration[index], red, green, blue);
                     /* Unlike the surroundings track, this one moves the darkness only when weather is ignored. */
-                    if (g_weather_flags & MAP_WEATHER_FLAG_IGNORE_WEATHER) {
+                    if (g_weather_flags & WEATHER_FLAG_IGNORE_WEATHER) {
                         map_light_start_darkness_blend(mode, screen->duration[index], red, green, blue);
                     }
                 } else {
@@ -2190,7 +2190,7 @@ effect_script_result_e effect_opcode_step_child_timeline(effect_record_t* record
                     colors.colors[MAP_BACKGROUND_GRADIENT_BOTTOM].g = screen->second_color[index].g;
                     colors.colors[MAP_BACKGROUND_GRADIENT_BOTTOM].b = screen->second_color[index].b;
                     map_light_set_background(screen->duration[index], &colors);
-                    if (g_weather_flags & MAP_WEATHER_FLAG_IGNORE_WEATHER) {
+                    if (g_weather_flags & WEATHER_FLAG_IGNORE_WEATHER) {
                         map_light_set_darkness(screen->duration[index], &colors.colors[MAP_BACKGROUND_GRADIENT_TOP]);
                     }
                 }
@@ -2406,7 +2406,7 @@ static void advance_surroundings_palette_track(effect_palette_track_t* track, s1
                     sprite_palette_apply_modulation_to_units(preset & EFFECT_COLOR_KEYFRAME_MODE_MASK,
                         track->duration[index], g_effect_context.spectator_ids[i], red, green, blue);
                 }
-                if (!(g_weather_flags & MAP_WEATHER_FLAG_IGNORE_WEATHER)) {
+                if (!(g_weather_flags & WEATHER_FLAG_IGNORE_WEATHER)) {
                     map_light_start_darkness_blend(
                         preset & EFFECT_COLOR_KEYFRAME_MODE_MASK, track->duration[index], red * 8, green * 8, blue * 8);
                 }
@@ -2534,7 +2534,7 @@ static void advance_map_background_track(effect_background_track_t* track, s16* 
                 green = track->color[index].g * 2;
                 blue = track->color[index].b * 2;
                 map_light_modify_background(mode, track->duration[index], red, green, blue);
-                if (g_weather_flags & MAP_WEATHER_FLAG_IGNORE_WEATHER) {
+                if (g_weather_flags & WEATHER_FLAG_IGNORE_WEATHER) {
                     map_light_start_darkness_blend(mode, track->duration[index], red, green, blue);
                 }
             } else {
@@ -2545,7 +2545,7 @@ static void advance_map_background_track(effect_background_track_t* track, s16* 
                 colors.colors[MAP_BACKGROUND_GRADIENT_BOTTOM].g = track->second_color[index].g;
                 colors.colors[MAP_BACKGROUND_GRADIENT_BOTTOM].b = track->second_color[index].b;
                 map_light_set_background(track->duration[index], &colors);
-                if (g_weather_flags & MAP_WEATHER_FLAG_IGNORE_WEATHER) {
+                if (g_weather_flags & WEATHER_FLAG_IGNORE_WEATHER) {
                     map_light_set_darkness(track->duration[index], &colors.colors[MAP_BACKGROUND_GRADIENT_TOP]);
                 }
             }

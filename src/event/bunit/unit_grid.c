@@ -490,7 +490,7 @@ s32 unit_grid_update(s16 allow_banner_toggle, s16 allow_browse, s16 show_stat_pa
         g_sound_queued_effect_id = SOUND_SFX_PAGE_SWITCH;
         g_unit_list_status_banner_enabled = g_unit_list_status_banner_enabled == 0;
     }
-    if (!thread_is_running(THREAD_SCREEN_SLOT_CHARACTER_STATUS) && g_unit_list_help_screen_id == MENU_GRID_HELP_NONE
+    if (!thread_is_running(THREAD_SCREEN_SLOT_CHARACTER_STATUS) && g_unit_list_help_screen_id == HELP_GRID_NONE
         && fade_menu_get_state() == 0) {
         g_unit_list_grid_selected_cell = menu_step_grid_selection(
             4, 5, g_unit_list_reorderable_count - 1, g_unit_list_grid_selected_cell, buttons);
@@ -508,9 +508,9 @@ s32 unit_grid_update(s16 allow_banner_toggle, s16 allow_browse, s16 show_stat_pa
         }
         g_unit_list_grid_selected_cell = g_unit_list_index_map[g_unit_selected_index];
         draw_button(MENU_PRESSABLE_BUTTON_L1, 0xC, 0xE, buttons & PSX_PAD_L1,
-            unit_list_is_busy() != 0 || g_unit_list_help_screen_id != MENU_GRID_HELP_NONE, SOUND_SFX_PAGE_SWITCH);
+            unit_list_is_busy() != 0 || g_unit_list_help_screen_id != HELP_GRID_NONE, SOUND_SFX_PAGE_SWITCH);
         draw_button(MENU_PRESSABLE_BUTTON_R1, 0xE0, 0xE, buttons & PSX_PAD_R1,
-            unit_list_is_busy() != 0 || g_unit_list_help_screen_id != MENU_GRID_HELP_NONE, SOUND_SFX_PAGE_SWITCH);
+            unit_list_is_busy() != 0 || g_unit_list_help_screen_id != HELP_GRID_NONE, SOUND_SFX_PAGE_SWITCH);
     }
     /* The stat-mode bar on the side away from the banner, with its L2 and R2 buttons and the
      * current mode's labels lit. */
@@ -526,9 +526,9 @@ s32 unit_grid_update(s16 allow_banner_toggle, s16 allow_browse, s16 show_stat_pa
             quads = g_unit_list_grid_label_tiles_bottom;
         }
         draw_button(MENU_PRESSABLE_BUTTON_L2, 0x26, top, buttons & PSX_PAD_L2,
-            unit_list_is_busy() != 0 || g_unit_list_help_screen_id != MENU_GRID_HELP_NONE, SOUND_SFX_PAGE_SWITCH);
+            unit_list_is_busy() != 0 || g_unit_list_help_screen_id != HELP_GRID_NONE, SOUND_SFX_PAGE_SWITCH);
         draw_button(MENU_PRESSABLE_BUTTON_R2, 0xC2, top, buttons & PSX_PAD_R2,
-            unit_list_is_busy() != 0 || g_unit_list_help_screen_id != MENU_GRID_HELP_NONE, SOUND_SFX_PAGE_SWITCH);
+            unit_list_is_busy() != 0 || g_unit_list_help_screen_id != HELP_GRID_NONE, SOUND_SFX_PAGE_SWITCH);
         menu_script_run_with_palette_mode(menu, 0, 0);
         menu_gfx_enqueue_textured_quad_list(quads, 0, 0, g_menu_cursor_texture_page, g_menu_text_clut_2_mode0, 0xB, 8);
         mode = g_unit_list_stat_mode;

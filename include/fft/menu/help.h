@@ -64,11 +64,11 @@ typedef char help_navigation_record_size_must_be_16[(sizeof(help_navigation_reco
  * g_menu_screen_grid_id / g_unit_list_help_screen_id instead of showing a
  * description. */
 typedef enum help_grid_id {
-    MENU_GRID_HELP_NONE = 0,
-    MENU_GRID_HELP_BANNER_TOP = 0x20000, /* the status banner is at the top of the screen */
-    MENU_GRID_HELP_BANNER_BOTTOM = 0x20001,
-    MENU_GRID_HELP_UNIT_BROWSE = 0x20002,
-    MENU_GRID_HELP_RECRUIT_PREVIEW = 0x20003 /* WORLD: the cursor skips cell 7 */
+    HELP_GRID_NONE = 0,
+    HELP_GRID_BANNER_TOP = 0x20000, /* the status banner is at the top of the screen */
+    HELP_GRID_BANNER_BOTTOM = 0x20001,
+    HELP_GRID_UNIT_BROWSE = 0x20002,
+    HELP_GRID_RECRUIT_PREVIEW = 0x20003 /* WORLD: the cursor skips cell 7 */
 } help_grid_id_e;
 
 /* The pending help message, or a help_grid_id_e. */

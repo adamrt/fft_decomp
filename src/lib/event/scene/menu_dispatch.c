@@ -123,9 +123,9 @@ static void build_menu_thread(void) {
         thread_wait_frames(2);
     }
     tutorial_pulse_wait_value(SCRIPT_TUTORIAL_WAIT_MENU_ENTRY);
-    if (menu_id == MENU_COMMAND_ID_OTHER_UNIT || menu_id == MENU_COMMAND_ID_OTHER_UNIT_INSPECT) {
+    if (menu_id == COMMAND_MENU_OTHER_UNIT || menu_id == COMMAND_MENU_OTHER_UNIT_INSPECT) {
         if (unit_panel_get_selected_battle_unit()->unit_flags & UNIT_FLAG_EGG) {
-            menu_id = MENU_COMMAND_ID_EGG;
+            menu_id = COMMAND_MENU_EGG;
         }
     }
     thread_start(THREAD_SLOT_MENU, g_menu_thread_menu_data[menu_id].thread_entry);
@@ -138,13 +138,13 @@ static void build_menu_thread(void) {
         if (restore_depth > 0) {
             thread_start(THREAD_SLOT_MENU_CHILD, command_act_menu_thread);
             thread_set_parameters(
-                THREAD_SLOT_MENU_CHILD, (s32)&g_menu_thread_menu_data[MENU_COMMAND_ID_SKILLSET_LIST], 0, 0);
+                THREAD_SLOT_MENU_CHILD, (s32)&g_menu_thread_menu_data[COMMAND_MENU_SKILLSET_LIST], 0, 0);
         }
         thread_wait_frames(2);
         if (restore_depth >= 2) {
             thread_start(THREAD_SLOT_MENU_GRANDCHILD, command_ability_list_thread);
             thread_set_parameters(
-                THREAD_SLOT_MENU_GRANDCHILD, (s32)&g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST], 0, 0);
+                THREAD_SLOT_MENU_GRANDCHILD, (s32)&g_menu_thread_menu_data[COMMAND_MENU_ABILITY_LIST], 0, 0);
         }
         thread_wait_frames(2);
         g_menu_restore_pending = 0;
@@ -165,7 +165,7 @@ enum { IDLE_ACTION_MENU_ENTRY_COUNT = 0x34 };
  * Nothing happens while menu input is blocked. The menu is also skipped while the
  * menus are suspended, a help window is open,
  * g_menu_building_thread_started is set (it is cleared here either way) or
- * menu_id is MENU_COMMAND_ID_NONE.
+ * menu_id is COMMAND_MENU_NONE.
  *
  * g_menu_idle_action_window_x holds two window x bytes per entry, each
  * 0x80 less than the screen x; the second is used when the unit's projected x is
@@ -181,7 +181,7 @@ void command_open_menu(s32 menu_id) {
 
     if (g_menu_input_mode != MENU_INPUT_BLOCKED) {
         if ((g_menu_overlay_state == 0) && (g_help_open == 0) && (g_menu_building_thread_started == 0)
-            && (menu_id != MENU_COMMAND_ID_NONE)) {
+            && (menu_id != COMMAND_MENU_NONE)) {
             g_command_current_id = menu_id;
             g_menu_thread_menu_data = g_command_idle_action_entries;
             map_unit_project_screen_position(
@@ -203,7 +203,7 @@ void command_open_menu(s32 menu_id) {
                 entry++;
             } while (i < IDLE_ACTION_MENU_ENTRY_COUNT);
             command_restore_unit_selection(menu_id);
-            g_menu_thread_menu_data[MENU_COMMAND_ID_STATUS_LIST].selected_index = 0;
+            g_menu_thread_menu_data[COMMAND_MENU_STATUS_LIST].selected_index = 0;
             g_status_screen_status_list_layout.row_offset = 0;
             menu_clear_entry_selections();
             thread_start(THREAD_SLOT_MENU_BUILDING, build_menu_thread);
@@ -222,7 +222,7 @@ void command_open_menu(s32 menu_id) {
  * skipped. */
 void help_menu_start_thread(void) {
     if (thread_is_running_asm(THREAD_SLOT_MENU) != 0 || thread_is_running_asm(THREAD_SLOT_MENU_BUILDING) != 0) {
-        if (g_command_current_id != MENU_COMMAND_ID_MINI_MENU) {
+        if (g_command_current_id != COMMAND_MENU_MINI_MENU) {
             g_menu_building_thread_started = 1;
         }
     }

@@ -63,7 +63,7 @@ void status_screen_status_list_thread(void) {
         if (*flag_a != 0 || *flag_b == 1) {
             g_status_screen_status_list_row_actions[i] = MENU_ROW_ACTION_NONE;
         } else {
-            g_status_screen_status_list_row_actions[i] = MENU_ROW_ACTION_SILENT | MENU_COMMAND_ID_JOBSTTS;
+            g_status_screen_status_list_row_actions[i] = MENU_ROW_ACTION_SILENT | COMMAND_MENU_JOBSTTS;
         }
     }
     unit = battle_unit_get(g_unit_panel_selected_unit.battle_unit_id);

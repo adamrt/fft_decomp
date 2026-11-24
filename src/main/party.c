@@ -22,8 +22,8 @@ typedef struct unit_generation_base_data {
 } unit_generation_base_data_t;
 typedef char unit_generation_base_data_size_must_be_12[(sizeof(unit_generation_base_data_t) == 12) ? 1 : -1];
 
-extern unit_generation_base_data_t g_unit_generation_base_data[UNIT_TYPE_COUNT];
-extern u8 g_unit_generation_raw_stat_variance[UNIT_TYPE_COUNT][UNIT_RAW_STAT_COUNT];
+extern unit_generation_base_data_t g_unit_generation_base_data[UNIT_GENERATION_TYPE_COUNT];
+extern u8 g_unit_generation_raw_stat_variance[UNIT_GENERATION_TYPE_COUNT][UNIT_RAW_STAT_COUNT];
 static void generate_raw_stats(unit_raw_stat_t raw_stats[UNIT_RAW_STAT_COUNT], unit_generation_type_e unit_type);
 static void generate_record(party_unit_t* party, unit_generation_type_e unit_type);
 static void generate_record_raw_stats(party_unit_t* party, unit_generation_type_e unit_type);
@@ -188,7 +188,7 @@ s32 party_find_free_slot(s32 save_formation, u8* palette) {
  * and the zodiac sign is derived from it; the breeding code passes the same value
  * in both nibbles. */
 s32 party_create_monster_egg(s32 monster_job, s32 egg_modifier, s32 egg_color) {
-    s32 party_index = party_unit_generate(UNIT_TYPE_MONSTER);
+    s32 party_index = party_unit_generate(UNIT_GENERATION_TYPE_MONSTER);
     party_unit_t* party;
     u16 birthday;
     s32 zodiac;
@@ -210,7 +210,7 @@ s32 party_create_monster_egg(s32 monster_job, s32 egg_modifier, s32 egg_color) {
     return party_index;
 }
 
-/* Generate a new unit of unit_type (UNIT_TYPE_*) in the first empty ordinary
+/* Generate a new unit of unit_type (UNIT_GENERATION_TYPE_*) in the first empty ordinary
  * roster slot (0..15), with palette 0. Returns the slot, or -1 when all sixteen
  * are taken. */
 s32 party_unit_generate(unit_generation_type_e unit_type) {
@@ -279,21 +279,21 @@ static void generate_record(party_unit_t* party, unit_generation_type_e unit_typ
     s32 found;
     s32 jp;
 
-    if (unit_type == UNIT_TYPE_MALE) {
+    if (unit_type == UNIT_GENERATION_TYPE_MALE) {
         name_flags = TEXT_ID_UNIT_NAME_GENERIC_MALE_BASE;
         name_base.value = 0;
         name_base.fields.name_class = PARTY_NAME_CLASS_GENERIC_MALE;
         party->sprite_set = CHARACTER_IDENTITY_GENERIC_MALE;
         party->gender_flags = UNIT_FLAG_MALE;
         party->job_id = JOB_ID_SQUIRE;
-    } else if (unit_type == UNIT_TYPE_FEMALE) {
+    } else if (unit_type == UNIT_GENERATION_TYPE_FEMALE) {
         name_flags = TEXT_ID_UNIT_NAME_GENERIC_FEMALE_BASE;
         name_base.value = 0;
         name_base.fields.name_class = PARTY_NAME_CLASS_GENERIC_FEMALE;
         party->sprite_set = CHARACTER_IDENTITY_GENERIC_FEMALE;
         party->gender_flags = UNIT_FLAG_FEMALE;
         party->job_id = JOB_ID_SQUIRE;
-    } else if (unit_type == UNIT_TYPE_MONSTER) {
+    } else if (unit_type == UNIT_GENERATION_TYPE_MONSTER) {
         name_flags = TEXT_ID_UNIT_NAME_GENERIC_MONSTER_BASE;
         name_base.value = 0;
         name_base.fields.name_class = PARTY_NAME_CLASS_GENERIC_MONSTER;
@@ -302,7 +302,7 @@ static void generate_record(party_unit_t* party, unit_generation_type_e unit_typ
         party->job_id = JOB_ID_SQUIRE;
     } else {
         name_flags = TEXT_ID_UNIT_NAME_SPECIAL_BASE;
-        unit_type = UNIT_TYPE_RAMZA;
+        unit_type = UNIT_GENERATION_TYPE_RAMZA;
         name_base.value = 0;
         name_base.fields.name_class = PARTY_NAME_CLASS_SPECIAL;
         party->sprite_set = CHARACTER_IDENTITY_RAMZA_CHAPTER_1;
@@ -315,7 +315,7 @@ static void generate_record(party_unit_t* party, unit_generation_type_e unit_typ
     party->birthday_day = birthday;
     party->zodiac = ((birthday & (PARTY_BIRTHDAY_DAY_HIGH_BIT_MASK << 8)) >> 8) + zodiac;
 
-    if (unit_type == UNIT_TYPE_RAMZA) {
+    if (unit_type == UNIT_GENERATION_TYPE_RAMZA) {
         party->brave = 70;
         party->faith = 70;
     } else {
@@ -362,7 +362,7 @@ static void generate_record(party_unit_t* party, unit_generation_type_e unit_typ
         party->equipment[i] = base->equipment[i];
     }
 
-    if (unit_type == UNIT_TYPE_RAMZA) {
+    if (unit_type == UNIT_GENERATION_TYPE_RAMZA) {
         name_id.value = 1;
     } else {
         party->name_id.index = 0xff;
@@ -390,7 +390,7 @@ static void generate_record(party_unit_t* party, unit_generation_type_e unit_typ
     mem_copy_bytes_source_first(text_find_world_entry(name_flags), party->name, sizeof(party->name));
     party->proposition_status = 0;
     party->egg_color = 0;
-    if (unit_type == UNIT_TYPE_RAMZA) {
+    if (unit_type == UNIT_GENERATION_TYPE_RAMZA) {
         party->career.learned_abilities[0][0] = 4;
     }
 }
@@ -406,11 +406,11 @@ void battle_unit_generate_raw_stats(battle_unit_t* unit) {
     unit_generation_type_e unit_type;
 
     if (unit->unit_flags & UNIT_FLAG_MALE) {
-        unit_type = UNIT_TYPE_MALE;
+        unit_type = UNIT_GENERATION_TYPE_MALE;
     } else if (unit->unit_flags & UNIT_FLAG_FEMALE) {
-        unit_type = UNIT_TYPE_FEMALE;
+        unit_type = UNIT_GENERATION_TYPE_FEMALE;
     } else {
-        unit_type = UNIT_TYPE_MONSTER;
+        unit_type = UNIT_GENERATION_TYPE_MONSTER;
     }
     generate_raw_stats(unit->raw_stats, unit_type);
 }

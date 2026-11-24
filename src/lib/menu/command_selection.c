@@ -71,16 +71,16 @@ typedef struct menu_text_row {
     u8 _unused_04;
 } menu_text_row_t;
 
-static u8 s_menu_cleared_entry_indices[11] = { MENU_COMMAND_ID_WAIT_YES_NO, MENU_COMMAND_ID_PROMPT_YES_NO,
-    MENU_COMMAND_ID_MESSAGE_YES_NO, MENU_COMMAND_ID_TARGET_KIND, MENU_COMMAND_ID_PANEL_EXECUTE,
-    MENU_COMMAND_ID_MESSAGE_TARGET_KIND, MENU_COMMAND_ID_MESSAGE_PANEL_EXECUTE, MENU_COMMAND_ID_AUTO_BATTLE_UNIT,
-    MENU_COMMAND_ID_MESSAGE_ATTACK_UNIT, MENU_COMMAND_ID_MESSAGE_DEFEND_UNIT, MENU_COMMAND_ID_MESSAGE_EXECUTE };
+static u8 s_menu_cleared_entry_indices[11] = { COMMAND_MENU_WAIT_YES_NO, COMMAND_MENU_PROMPT_YES_NO,
+    COMMAND_MENU_MESSAGE_YES_NO, COMMAND_MENU_TARGET_KIND, COMMAND_MENU_PANEL_EXECUTE, COMMAND_MENU_MESSAGE_TARGET_KIND,
+    COMMAND_MENU_MESSAGE_PANEL_EXECUTE, COMMAND_MENU_AUTO_BATTLE_UNIT, COMMAND_MENU_MESSAGE_ATTACK_UNIT,
+    COMMAND_MENU_MESSAGE_DEFEND_UNIT, COMMAND_MENU_MESSAGE_EXECUTE };
 
-static menu_selection_remap_t s_menu_selection_remaps[8] = { { MENU_COMMAND_ID_TURN_MOVED, 1, { 0, 0, 0 } },
-    { MENU_COMMAND_ID_TURN_ACTED, 0, { 1, 1, 1 } }, { MENU_COMMAND_ID_TURN_MOVED_ACTED, 2, { 0, 1, 1 } },
-    { MENU_COMMAND_ID_TURN_NO_ACT_MOVED, 1, { 0, 0, 0 } }, { MENU_COMMAND_ID_RIDER_TURN_MOVED, 2, { 0, 1, 1 } },
-    { MENU_COMMAND_ID_RIDER_TURN_ACTED, 0, { 2, 2, 2 } }, { MENU_COMMAND_ID_RIDER_TURN_MOVED_ACTED, 3, { 0, 1, 2 } },
-    { MENU_COMMAND_ID_RIDER_TURN_NO_ACT_MOVED, 2, { 0, 1, 1 } } };
+static menu_selection_remap_t s_menu_selection_remaps[8] = { { COMMAND_MENU_TURN_MOVED, 1, { 0, 0, 0 } },
+    { COMMAND_MENU_TURN_ACTED, 0, { 1, 1, 1 } }, { COMMAND_MENU_TURN_MOVED_ACTED, 2, { 0, 1, 1 } },
+    { COMMAND_MENU_TURN_NO_ACT_MOVED, 1, { 0, 0, 0 } }, { COMMAND_MENU_RIDER_TURN_MOVED, 2, { 0, 1, 1 } },
+    { COMMAND_MENU_RIDER_TURN_ACTED, 0, { 2, 2, 2 } }, { COMMAND_MENU_RIDER_TURN_MOVED_ACTED, 3, { 0, 1, 2 } },
+    { COMMAND_MENU_RIDER_TURN_NO_ACT_MOVED, 2, { 0, 1, 1 } } };
 
 /* Reset the cursor row of the 11 menu entries listed in g_menu_cleared_entry_indices. */
 void menu_clear_entry_selections(void) {
@@ -252,8 +252,8 @@ static void build_ability_list_rows(s32 mode) {
 
     unit_index = g_unit_panel_selected_unit.battle_unit_id;
     unit = unit_panel_get_selected_battle_unit();
-    type = g_menu_skillset_types[g_menu_thread_menu_data[MENU_COMMAND_ID_SKILLSET_LIST].selected_index];
-    skillset = g_command_skillsets[g_menu_thread_menu_data[MENU_COMMAND_ID_SKILLSET_LIST].selected_index];
+    type = g_menu_skillset_types[g_menu_thread_menu_data[COMMAND_MENU_SKILLSET_LIST].selected_index];
+    skillset = g_command_skillsets[g_menu_thread_menu_data[COMMAND_MENU_SKILLSET_LIST].selected_index];
     g_command_selected_command.data.action.skillset_id = skillset;
 
     for (i = 0; i < 80; i++) {
@@ -399,11 +399,11 @@ static void build_ability_list_rows(s32 mode) {
         columns = 5;
     }
 
-    g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST].inner_width = window_width;
-    g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST].window.w = window_width;
-    g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST].text_image.source.w = window_width;
-    g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST].header_id = header_id;
-    g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST].select_text_table = columns;
+    g_menu_thread_menu_data[COMMAND_MENU_ABILITY_LIST].inner_width = window_width;
+    g_menu_thread_menu_data[COMMAND_MENU_ABILITY_LIST].window.w = window_width;
+    g_menu_thread_menu_data[COMMAND_MENU_ABILITY_LIST].text_image.source.w = window_width;
+    g_menu_thread_menu_data[COMMAND_MENU_ABILITY_LIST].header_id = header_id;
+    g_menu_thread_menu_data[COMMAND_MENU_ABILITY_LIST].select_text_table = columns;
 
     for (i = 0; i < count; i++) {
         g_event_work->ability_list.ids[i] |= text_id_base;
@@ -425,7 +425,7 @@ static void build_ability_list_rows(s32 mode) {
     /* An empty list shows one disabled row for ability 0. */
     if (count == 0) {
         count = 1;
-        g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST].header_id = MENU_ICON_HEADER_NONE;
+        g_menu_thread_menu_data[COMMAND_MENU_ABILITY_LIST].header_id = MENU_ICON_HEADER_NONE;
         g_event_work->ability_list.ids[0] = TEXT_ID_ABILITY_NAME_BASE;
         g_event_work->ability_list.values[0] = 0;
         g_event_work->ability_list.extras[0] = 0;
@@ -433,14 +433,14 @@ static void build_ability_list_rows(s32 mode) {
     }
 
     /* Six rows show at most; a shorter list's window moves down 8 pixels per missing row. */
-    g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST].window.y = 48;
+    g_menu_thread_menu_data[COMMAND_MENU_ABILITY_LIST].window.y = 48;
     if (count >= 7) {
         g_ability_list_ability_layout.columns.hidden_rows = count - 6;
         g_ability_list_ability_layout.columns.row_count = 6;
     } else {
         g_ability_list_ability_layout.columns.hidden_rows = 0;
         g_ability_list_ability_layout.columns.row_count = count;
-        g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST].window.y += (6 - count) * 8;
+        g_menu_thread_menu_data[COMMAND_MENU_ABILITY_LIST].window.y += (6 - count) * 8;
     }
 
     /* The menu thread's redraw, cursor and refresh parameters. */
@@ -463,7 +463,7 @@ static void build_ability_list_rows(s32 mode) {
  * which is where the target's `lui/addiu s8` pair sits.
  */
 void command_ability_list_thread(void) {
-    s32 i = g_menu_thread_menu_data[MENU_COMMAND_ID_SKILLSET_LIST].selected_index;
+    s32 i = g_menu_thread_menu_data[COMMAND_MENU_SKILLSET_LIST].selected_index;
     s32 menu = g_menu_skillset_types[i];
     s32 check_unit = g_command_skillset_disabled_flags[i];
     menu_unit_selection_record_t* row = &g_menu_unit_selection_records[g_unit_panel_selected_unit.battle_unit_id];
@@ -477,12 +477,12 @@ void command_ability_list_thread(void) {
         command_check_row_restrictions(menu, i, check_unit);
         if (menu == ACTION_MENU_TYPE_MATH_SKILL) {
             slot = (menu_list_selection_t*)((u8*)row + (i + offsetof(menu_unit_selection_record_t, lists[4])) + i);
-            g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST].selected_index = slot->selected_index;
+            g_menu_thread_menu_data[COMMAND_MENU_ABILITY_LIST].selected_index = slot->selected_index;
             g_ability_list_ability_layout.row_offset = slot->scroll_offset;
         } else {
             pair = (u8*)row
-                + g_menu_thread_menu_data[MENU_COMMAND_ID_SKILLSET_LIST].selected_index * sizeof(menu_list_selection_t);
-            g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST].selected_index
+                + g_menu_thread_menu_data[COMMAND_MENU_SKILLSET_LIST].selected_index * sizeof(menu_list_selection_t);
+            g_menu_thread_menu_data[COMMAND_MENU_ABILITY_LIST].selected_index
                 = pair[offsetof(menu_unit_selection_record_t, lists[0].selected_index)];
             g_ability_list_ability_layout.row_offset
                 = pair[offsetof(menu_unit_selection_record_t, lists[0].scroll_offset)];
@@ -490,21 +490,21 @@ void command_ability_list_thread(void) {
         }
         for (j = 0; j < 6; j++) {
             if (menu != ACTION_MENU_TYPE_MATH_SKILL || i == 0) {
-                g_command_action_slot_row_actions[j] = MENU_ROW_ACTION_SILENT | MENU_COMMAND_ID_ABILITY_CONFIRM;
+                g_command_action_slot_row_actions[j] = MENU_ROW_ACTION_SILENT | COMMAND_MENU_ABILITY_CONFIRM;
             } else {
                 g_command_action_slot_row_actions[j] = -1;
             }
         }
-        if (g_menu_skillset_types[g_menu_thread_menu_data[MENU_COMMAND_ID_SKILLSET_LIST].selected_index]
+        if (g_menu_skillset_types[g_menu_thread_menu_data[COMMAND_MENU_SKILLSET_LIST].selected_index]
             == ACTION_MENU_TYPE_CHANGE_EQUIPMENT) {
-            g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST].selected_index = 0;
+            g_menu_thread_menu_data[COMMAND_MENU_ABILITY_LIST].selected_index = 0;
             equipment_thread();
         }
         g_thread_call_target = build_ability_list_rows;
         thread_call_on_main_stack(i);
         tutorial_pulse_wait_value(SCRIPT_TUTORIAL_WAIT_ABILITY_LIST);
         ability_list_scrolling_thread();
-        slot->selected_index = g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST].selected_index;
+        slot->selected_index = g_menu_thread_menu_data[COMMAND_MENU_ABILITY_LIST].selected_index;
         slot->scroll_offset = g_ability_list_ability_layout.row_offset;
         if (menu != ACTION_MENU_TYPE_MATH_SKILL) {
             thread_current_exit();
@@ -515,7 +515,7 @@ void command_ability_list_thread(void) {
             }
             i += 2;
         } else {
-            text = g_event_work->ability_list.ids[g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST].selected_index]
+            text = g_event_work->ability_list.ids[g_menu_thread_menu_data[COMMAND_MENU_ABILITY_LIST].selected_index]
                 - 0x7000;
             if (i == 2) {
                 g_command_selected_command.data.action.calculator_type = text;
@@ -569,10 +569,10 @@ static void build_act_menu(void) {
         }
         if (g_command_skillset_disabled_flags[i] != 0) {
             rows[i].style = 4;
-            g_command_skillset_row_actions[i] = MENU_ROW_ACTION_SILENT | MENU_COMMAND_ID_ABILITY_LIST;
+            g_command_skillset_row_actions[i] = MENU_ROW_ACTION_SILENT | COMMAND_MENU_ABILITY_LIST;
         } else {
             rows[i].style = 0;
-            g_command_skillset_row_actions[i] = MENU_COMMAND_ID_ABILITY_LIST;
+            g_command_skillset_row_actions[i] = COMMAND_MENU_ABILITY_LIST;
         }
         if (g_command_skillset_build_result != 0) {
             g_text_substitution_values[count] = TEXT_ID_SKILLSET_NAME_SOURCE_BASE;
@@ -590,10 +590,10 @@ static void build_act_menu(void) {
     }
     height = count * 16 + 16;
     rows[count - 1].terminator = 0xff;
-    g_menu_thread_menu_data[MENU_COMMAND_ID_SKILLSET_LIST].max_row_index = count - 1;
-    g_menu_thread_menu_data[MENU_COMMAND_ID_SKILLSET_LIST].text_image.source.h = height;
-    g_menu_thread_menu_data[MENU_COMMAND_ID_SKILLSET_LIST].window.h = height;
-    g_menu_thread_menu_data[MENU_COMMAND_ID_SKILLSET_LIST].inner_height = height;
+    g_menu_thread_menu_data[COMMAND_MENU_SKILLSET_LIST].max_row_index = count - 1;
+    g_menu_thread_menu_data[COMMAND_MENU_SKILLSET_LIST].text_image.source.h = height;
+    g_menu_thread_menu_data[COMMAND_MENU_SKILLSET_LIST].window.h = height;
+    g_menu_thread_menu_data[COMMAND_MENU_SKILLSET_LIST].inner_height = height;
 }
 
 /* Build the skillset list, then wait for its submenu or run icon selection.
@@ -609,11 +609,11 @@ void command_act_menu_thread(void) {
     thread_call_on_main_stack();
     param_value = 1;
     if (g_command_skillset_build_result != 0) {
-        g_menu_thread_menu_data[MENU_COMMAND_ID_SKILLSET_LIST].selected_index = 0;
+        g_menu_thread_menu_data[COMMAND_MENU_SKILLSET_LIST].selected_index = 0;
         if (g_menu_restore_pending == 0) {
             thread_start(g_thread_current_id - 1, command_ability_list_thread);
             thread_set_parameters(
-                g_thread_current_id - 1, (s32)&g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST], 0, 0);
+                g_thread_current_id - 1, (s32)&g_menu_thread_menu_data[COMMAND_MENU_ABILITY_LIST], 0, 0);
         } else {
             thread_wait_frames(2);
         }
@@ -626,11 +626,11 @@ void command_act_menu_thread(void) {
     }
     g_thread_contexts[g_thread_current_id].function_parameter_2 = param_value;
     row = &g_menu_unit_selection_records[g_unit_panel_selected_unit.battle_unit_id];
-    g_menu_thread_menu_data[MENU_COMMAND_ID_SKILLSET_LIST].selected_index = row->skillset_index;
+    g_menu_thread_menu_data[COMMAND_MENU_SKILLSET_LIST].selected_index = row->skillset_index;
     g_menu_restore_depth = 1;
     tutorial_pulse_wait_value(SCRIPT_TUTORIAL_WAIT_SKILLSET_LIST);
     menu_icon_selection_thread();
-    row->skillset_index = g_menu_thread_menu_data[MENU_COMMAND_ID_SKILLSET_LIST].selected_index;
+    row->skillset_index = g_menu_thread_menu_data[COMMAND_MENU_SKILLSET_LIST].selected_index;
     thread_current_exit();
 }
 

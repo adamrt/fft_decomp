@@ -163,7 +163,7 @@ void shop_soldier_hire_update_preview(void) {
             g_formation_unit_banner_enabled = 1;
             g_formation_unit_banner_at_bottom = 0;
             g_unit_panel_status_display_thread_params.position.y = 0;
-            g_help_message_text_id = MENU_GRID_HELP_RECRUIT_PREVIEW;
+            g_help_message_text_id = HELP_GRID_RECRUIT_PREVIEW;
             g_shop_soldier_hire_preview_initialized = 1;
         }
         shop_draw_gil();
@@ -320,9 +320,9 @@ void shop_soldier_rename_update_unit(void) {
         g_shop_background_visible = 0;
     }
     if (g_formation_unit_banner_enabled) {
-        text_id = MENU_GRID_HELP_BANNER_TOP;
+        text_id = HELP_GRID_BANNER_TOP;
         if (g_formation_unit_banner_at_bottom) {
-            text_id = MENU_GRID_HELP_BANNER_BOTTOM;
+            text_id = HELP_GRID_BANNER_BOTTOM;
         }
         g_help_message_text_id = text_id;
     } else {

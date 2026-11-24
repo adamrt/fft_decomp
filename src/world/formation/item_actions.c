@@ -326,7 +326,7 @@ s32 formation_item_update_equipped_units(void) {
         formation_save_records();
         g_formation_unit_count = formation_build_record_list(
             g_item_list_entries[g_menu_list_selected_index], g_formation_unit_pointers, FORMATION_RECORD_LIST_ALL);
-        g_help_message_text_id = MENU_GRID_HELP_UNIT_BROWSE;
+        g_help_message_text_id = HELP_GRID_UNIT_BROWSE;
         g_formation_unit_browse_enabled = 1;
         g_formation_unit_banner_enabled = 1;
         unit_panel_toggle_preview_stats_thread(0);

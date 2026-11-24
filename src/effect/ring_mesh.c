@@ -24,11 +24,11 @@ extern u32 g_effect_ring_mesh_brightness_table[6][3];
  * sweep one quadrant in 0x80 steps; the rotating add helpers reuse them for
  * the other three quadrants. */
 typedef struct effect_ring_mesh_scratch {
-    VECTOR points[3][RING_MESH_ARC_POINTS]; /* 0x000 */
-    VECTOR origin;                          /* 0x1b0 */
-    SVECTOR vertex;                         /* 0x1c0 */
-    VECTOR screen[4];                       /* 0x1c8: projected quad corners; RotTrans writes its flag to pad */
-    s16 depth[3][RING_MESH_SEGMENTS + 1];   /* 0x208 */
+    VECTOR points[3][EFFECT_RING_MESH_ARC_POINTS]; /* 0x000 */
+    VECTOR origin;                                 /* 0x1b0 */
+    SVECTOR vertex;                                /* 0x1c0 */
+    VECTOR screen[4];                              /* 0x1c8: projected quad corners; RotTrans writes its flag to pad */
+    s16 depth[3][EFFECT_RING_MESH_SEGMENTS + 1];   /* 0x208 */
 } effect_ring_mesh_scratch_t;
 
 /* Callback handler for the ring mesh: a band two quads high and 32 around
@@ -105,7 +105,7 @@ s32 effect_ring_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
             translucent = 0;
         }
         for (j = 0; j < 2; j++) {
-            for (i = 0; i < RING_MESH_SEGMENTS * 2; i++) {
+            for (i = 0; i < EFFECT_RING_MESH_SEGMENTS * 2; i++) {
                 quad = &work->quads[j][i];
                 SetPolyGT4(quad);
                 setSemiTrans(quad, translucent);
@@ -209,13 +209,13 @@ s32 effect_ring_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
         k = 0;
         for (i = 0; i < 3; i++) {
             angle = work->spin;
-            for (j = 0; j < RING_MESH_ARC_POINTS; j++) {
+            for (j = 0; j < EFFECT_RING_MESH_ARC_POINTS; j++) {
                 ring_radius = radius + ((k + work->radius_offset) >> 8);
                 scratch->points[i][j].vx = (rcos(angle) * ring_radius) >> 12;
                 sine = rsin(angle);
                 scratch->points[i][j].vy = n >> 8;
                 scratch->points[i][j].vz = (sine * ring_radius) >> 12;
-                angle += ONE / RING_MESH_SEGMENTS;
+                angle += ONE / EFFECT_RING_MESH_SEGMENTS;
             }
             growth.vy += growth_step.vy;
             growth.vz += growth_step.vz;
@@ -257,7 +257,7 @@ s32 effect_ring_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
         quad->y1 = scratch->screen[1].vy;
         scratch->depth[1][1] = scratch->screen[1].vz;
 
-        for (i = 2; i < RING_MESH_ARC_POINTS; i++) {
+        for (i = 2; i < EFFECT_RING_MESH_ARC_POINTS; i++) {
             quad = &work->quads[buffer][i - 1];
             quad->x0 = scratch->screen[1].vx;
             quad->y0 = scratch->screen[1].vy;
@@ -276,58 +276,59 @@ s32 effect_ring_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
         }
 
         /* Quadrants 1-3 reuse the quadrant-0 lattice points, turned a quarter turn at a time. */
-        for (i = RING_MESH_ARC_POINTS; i < 2 * RING_MESH_SEGMENTS_PER_QUADRANT + 1; i++) {
+        for (i = EFFECT_RING_MESH_ARC_POINTS; i < 2 * EFFECT_RING_MESH_SEGMENTS_PER_QUADRANT + 1; i++) {
             quad = &work->quads[buffer][i - 1];
             quad->x0 = scratch->screen[1].vx;
             quad->y0 = scratch->screen[1].vy;
             quad->x2 = scratch->screen[3].vx;
             quad->y2 = scratch->screen[3].vy;
             effect_vector_add_to_svector_rot_y_270(
-                &scratch->origin, &scratch->points[0][i - RING_MESH_SEGMENTS_PER_QUADRANT], &scratch->vertex);
+                &scratch->origin, &scratch->points[0][i - EFFECT_RING_MESH_SEGMENTS_PER_QUADRANT], &scratch->vertex);
             RotTrans(&scratch->vertex, &scratch->screen[3], &scratch->screen[3].pad);
             quad->x3 = scratch->screen[3].vx;
             quad->y3 = scratch->screen[3].vy;
             scratch->depth[0][i] = scratch->screen[3].vz;
             effect_vector_add_to_svector_rot_y_270(
-                &scratch->origin, &scratch->points[1][i - RING_MESH_SEGMENTS_PER_QUADRANT], &scratch->vertex);
+                &scratch->origin, &scratch->points[1][i - EFFECT_RING_MESH_SEGMENTS_PER_QUADRANT], &scratch->vertex);
             RotTrans(&scratch->vertex, &scratch->screen[1], &scratch->screen[1].pad);
             quad->x1 = scratch->screen[1].vx;
             quad->y1 = scratch->screen[1].vy;
             scratch->depth[1][i] = scratch->screen[1].vz;
         }
-        for (i = 2 * RING_MESH_SEGMENTS_PER_QUADRANT + 1; i < 3 * RING_MESH_SEGMENTS_PER_QUADRANT + 1; i++) {
+        for (i = 2 * EFFECT_RING_MESH_SEGMENTS_PER_QUADRANT + 1; i < 3 * EFFECT_RING_MESH_SEGMENTS_PER_QUADRANT + 1;
+            i++) {
             quad = &work->quads[buffer][i - 1];
             quad->x0 = scratch->screen[1].vx;
             quad->y0 = scratch->screen[1].vy;
             quad->x2 = scratch->screen[3].vx;
             quad->y2 = scratch->screen[3].vy;
-            effect_vector_add_to_svector_rot_y_180(
-                &scratch->origin, &scratch->points[0][i - 2 * RING_MESH_SEGMENTS_PER_QUADRANT], &scratch->vertex);
+            effect_vector_add_to_svector_rot_y_180(&scratch->origin,
+                &scratch->points[0][i - 2 * EFFECT_RING_MESH_SEGMENTS_PER_QUADRANT], &scratch->vertex);
             RotTrans(&scratch->vertex, &scratch->screen[3], &scratch->screen[3].pad);
             quad->x3 = scratch->screen[3].vx;
             quad->y3 = scratch->screen[3].vy;
             scratch->depth[0][i] = scratch->screen[3].vz;
-            effect_vector_add_to_svector_rot_y_180(
-                &scratch->origin, &scratch->points[1][i - 2 * RING_MESH_SEGMENTS_PER_QUADRANT], &scratch->vertex);
+            effect_vector_add_to_svector_rot_y_180(&scratch->origin,
+                &scratch->points[1][i - 2 * EFFECT_RING_MESH_SEGMENTS_PER_QUADRANT], &scratch->vertex);
             RotTrans(&scratch->vertex, &scratch->screen[1], &scratch->screen[1].pad);
             quad->x1 = scratch->screen[1].vx;
             quad->y1 = scratch->screen[1].vy;
             scratch->depth[1][i] = scratch->screen[1].vz;
         }
-        for (i = 3 * RING_MESH_SEGMENTS_PER_QUADRANT + 1; i < RING_MESH_SEGMENTS + 1; i++) {
+        for (i = 3 * EFFECT_RING_MESH_SEGMENTS_PER_QUADRANT + 1; i < EFFECT_RING_MESH_SEGMENTS + 1; i++) {
             quad = &work->quads[buffer][i - 1];
             quad->x0 = scratch->screen[1].vx;
             quad->y0 = scratch->screen[1].vy;
             quad->x2 = scratch->screen[3].vx;
             quad->y2 = scratch->screen[3].vy;
-            effect_vector_add_to_svector_rot_y_90(
-                &scratch->origin, &scratch->points[0][i - 3 * RING_MESH_SEGMENTS_PER_QUADRANT], &scratch->vertex);
+            effect_vector_add_to_svector_rot_y_90(&scratch->origin,
+                &scratch->points[0][i - 3 * EFFECT_RING_MESH_SEGMENTS_PER_QUADRANT], &scratch->vertex);
             RotTrans(&scratch->vertex, &scratch->screen[3], &scratch->screen[3].pad);
             quad->x3 = scratch->screen[3].vx;
             quad->y3 = scratch->screen[3].vy;
             scratch->depth[0][i] = scratch->screen[3].vz;
-            effect_vector_add_to_svector_rot_y_90(
-                &scratch->origin, &scratch->points[1][i - 3 * RING_MESH_SEGMENTS_PER_QUADRANT], &scratch->vertex);
+            effect_vector_add_to_svector_rot_y_90(&scratch->origin,
+                &scratch->points[1][i - 3 * EFFECT_RING_MESH_SEGMENTS_PER_QUADRANT], &scratch->vertex);
             RotTrans(&scratch->vertex, &scratch->screen[1], &scratch->screen[1].pad);
             quad->x1 = scratch->screen[1].vx;
             quad->y1 = scratch->screen[1].vy;
@@ -338,22 +339,22 @@ s32 effect_ring_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
         effect_vector_add_to_svector(&scratch->origin, &scratch->points[2][0], &scratch->vertex);
         RotTrans(&scratch->vertex, &scratch->screen[0], &scratch->screen[0].pad);
         quads = work->quads[buffer];
-        quads[RING_MESH_SEGMENTS].x0 = scratch->screen[0].vx;
-        quads[RING_MESH_SEGMENTS].y0 = scratch->screen[0].vy;
+        quads[EFFECT_RING_MESH_SEGMENTS].x0 = scratch->screen[0].vx;
+        quads[EFFECT_RING_MESH_SEGMENTS].y0 = scratch->screen[0].vy;
         scratch->depth[2][0] = scratch->screen[0].vz;
         effect_vector_add_to_svector(&scratch->origin, &scratch->points[2][1], &scratch->vertex);
         RotTrans(&scratch->vertex, &scratch->screen[1], &scratch->screen[1].pad);
-        quads[RING_MESH_SEGMENTS].x1 = scratch->screen[1].vx;
-        quads[RING_MESH_SEGMENTS].y1 = scratch->screen[1].vy;
+        quads[EFFECT_RING_MESH_SEGMENTS].x1 = scratch->screen[1].vx;
+        quads[EFFECT_RING_MESH_SEGMENTS].y1 = scratch->screen[1].vy;
         scratch->depth[2][1] = scratch->screen[1].vz;
         other = quads;
-        quads[RING_MESH_SEGMENTS].x2 = other->x0;
-        quads[RING_MESH_SEGMENTS].y2 = other->y0;
-        quads[RING_MESH_SEGMENTS].x3 = other->x1;
-        quads[RING_MESH_SEGMENTS].y3 = other->y1;
+        quads[EFFECT_RING_MESH_SEGMENTS].x2 = other->x0;
+        quads[EFFECT_RING_MESH_SEGMENTS].y2 = other->y0;
+        quads[EFFECT_RING_MESH_SEGMENTS].x3 = other->x1;
+        quads[EFFECT_RING_MESH_SEGMENTS].y3 = other->y1;
 
-        for (i = 2; i < RING_MESH_ARC_POINTS; i++) {
-            quad = &work->quads[buffer][i + RING_MESH_SEGMENTS - 1];
+        for (i = 2; i < EFFECT_RING_MESH_ARC_POINTS; i++) {
+            quad = &work->quads[buffer][i + EFFECT_RING_MESH_SEGMENTS - 1];
             other = &work->quads[buffer][i - 1];
             quad->x0 = scratch->screen[1].vx;
             quad->y0 = scratch->screen[1].vy;
@@ -367,8 +368,8 @@ s32 effect_ring_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
             quad->y1 = scratch->screen[1].vy;
             scratch->depth[2][i] = scratch->screen[1].vz;
         }
-        for (i = RING_MESH_ARC_POINTS; i < 2 * RING_MESH_SEGMENTS_PER_QUADRANT + 1; i++) {
-            quad = &work->quads[buffer][i + RING_MESH_SEGMENTS - 1];
+        for (i = EFFECT_RING_MESH_ARC_POINTS; i < 2 * EFFECT_RING_MESH_SEGMENTS_PER_QUADRANT + 1; i++) {
+            quad = &work->quads[buffer][i + EFFECT_RING_MESH_SEGMENTS - 1];
             other = &work->quads[buffer][i - 1];
             quad->x0 = scratch->screen[1].vx;
             quad->y0 = scratch->screen[1].vy;
@@ -377,14 +378,15 @@ s32 effect_ring_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
             quad->x3 = other->x1;
             quad->y3 = other->y1;
             effect_vector_add_to_svector_rot_y_270(
-                &scratch->origin, &scratch->points[2][i - RING_MESH_SEGMENTS_PER_QUADRANT], &scratch->vertex);
+                &scratch->origin, &scratch->points[2][i - EFFECT_RING_MESH_SEGMENTS_PER_QUADRANT], &scratch->vertex);
             RotTrans(&scratch->vertex, &scratch->screen[1], &scratch->screen[1].pad);
             quad->x1 = scratch->screen[1].vx;
             quad->y1 = scratch->screen[1].vy;
             scratch->depth[2][i] = scratch->screen[1].vz;
         }
-        for (i = 2 * RING_MESH_SEGMENTS_PER_QUADRANT + 1; i < 3 * RING_MESH_SEGMENTS_PER_QUADRANT + 1; i++) {
-            quad = &work->quads[buffer][i + RING_MESH_SEGMENTS - 1];
+        for (i = 2 * EFFECT_RING_MESH_SEGMENTS_PER_QUADRANT + 1; i < 3 * EFFECT_RING_MESH_SEGMENTS_PER_QUADRANT + 1;
+            i++) {
+            quad = &work->quads[buffer][i + EFFECT_RING_MESH_SEGMENTS - 1];
             other = &work->quads[buffer][i - 1];
             quad->x0 = scratch->screen[1].vx;
             quad->y0 = scratch->screen[1].vy;
@@ -392,15 +394,15 @@ s32 effect_ring_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
             quad->y2 = other->y0;
             quad->x3 = other->x1;
             quad->y3 = other->y1;
-            effect_vector_add_to_svector_rot_y_180(
-                &scratch->origin, &scratch->points[2][i - 2 * RING_MESH_SEGMENTS_PER_QUADRANT], &scratch->vertex);
+            effect_vector_add_to_svector_rot_y_180(&scratch->origin,
+                &scratch->points[2][i - 2 * EFFECT_RING_MESH_SEGMENTS_PER_QUADRANT], &scratch->vertex);
             RotTrans(&scratch->vertex, &scratch->screen[1], &scratch->screen[1].pad);
             quad->x1 = scratch->screen[1].vx;
             quad->y1 = scratch->screen[1].vy;
             scratch->depth[2][i] = scratch->screen[1].vz;
         }
-        for (i = 3 * RING_MESH_SEGMENTS_PER_QUADRANT + 1; i < RING_MESH_SEGMENTS + 1; i++) {
-            quad = &work->quads[buffer][i + RING_MESH_SEGMENTS - 1];
+        for (i = 3 * EFFECT_RING_MESH_SEGMENTS_PER_QUADRANT + 1; i < EFFECT_RING_MESH_SEGMENTS + 1; i++) {
+            quad = &work->quads[buffer][i + EFFECT_RING_MESH_SEGMENTS - 1];
             other = &work->quads[buffer][i - 1];
             quad->x0 = scratch->screen[1].vx;
             quad->y0 = scratch->screen[1].vy;
@@ -408,8 +410,8 @@ s32 effect_ring_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
             quad->y2 = other->y0;
             quad->x3 = other->x1;
             quad->y3 = other->y1;
-            effect_vector_add_to_svector_rot_y_90(
-                &scratch->origin, &scratch->points[2][i - 3 * RING_MESH_SEGMENTS_PER_QUADRANT], &scratch->vertex);
+            effect_vector_add_to_svector_rot_y_90(&scratch->origin,
+                &scratch->points[2][i - 3 * EFFECT_RING_MESH_SEGMENTS_PER_QUADRANT], &scratch->vertex);
             RotTrans(&scratch->vertex, &scratch->screen[1], &scratch->screen[1].pad);
             quad->x1 = scratch->screen[1].vx;
             quad->y1 = scratch->screen[1].vy;
@@ -418,7 +420,7 @@ s32 effect_ring_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
 
         /* Every quad maps the same texture window, scrolled by v_scroll (8.8 fixed). */
         j = work->v_scroll >> 8;
-        for (i = 0; i < RING_MESH_SEGMENTS * 2; i++) {
+        for (i = 0; i < EFFECT_RING_MESH_SEGMENTS * 2; i++) {
             quad = &work->quads[buffer][i];
             quad->u0 = quad->u2 = u;
             quad->v0 = quad->v1 = v + j;
@@ -441,7 +443,7 @@ s32 effect_ring_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
 
         /* Lattice row r shades corners 2/3 of ring r and corners 0/1 of ring r - 1. */
         k = g_effect_ring_mesh_brightness_table[n][0];
-        for (i = 0; i < RING_MESH_SEGMENTS; i++) {
+        for (i = 0; i < EFFECT_RING_MESH_SEGMENTS; i++) {
             quad = &work->quads[buffer][i];
             quad->r3 = (k * red) / ONE;
             quad->r2 = (k * red) / ONE;
@@ -454,9 +456,9 @@ s32 effect_ring_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
         k = g_effect_ring_mesh_brightness_table[n][1];
         /* The redundant quad++ keeps quad from being strength-reduced into a
          * pointer of its own; the target recomputes it from the base. */
-        for (i = 0; i < RING_MESH_SEGMENTS; i++, quad++) {
+        for (i = 0; i < EFFECT_RING_MESH_SEGMENTS; i++, quad++) {
             quad = &work->quads[buffer][i];
-            other = &work->quads[buffer][i + RING_MESH_SEGMENTS];
+            other = &work->quads[buffer][i + EFFECT_RING_MESH_SEGMENTS];
             other->r3 = (k * red) / ONE;
             other->r2 = (k * red) / ONE;
             quad->r1 = (k * red) / ONE;
@@ -472,8 +474,8 @@ s32 effect_ring_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
         }
 
         k = g_effect_ring_mesh_brightness_table[n][2];
-        for (i = 0; i < RING_MESH_SEGMENTS; i++) {
-            quad = &work->quads[buffer][i + RING_MESH_SEGMENTS];
+        for (i = 0; i < EFFECT_RING_MESH_SEGMENTS; i++) {
+            quad = &work->quads[buffer][i + EFFECT_RING_MESH_SEGMENTS];
             quad->r1 = (k * red) / ONE;
             quad->r0 = (k * red) / ONE;
             quad->g1 = (k * green) / ONE;
@@ -484,12 +486,12 @@ s32 effect_ring_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
 
         /* Sort each quad by a quarter of its mean corner depth; quads outside the ordering table are skipped. */
         for (j = 0; j < 2; j++) {
-            for (i = 0; i < RING_MESH_SEGMENTS; i++) {
+            for (i = 0; i < EFFECT_RING_MESH_SEGMENTS; i++) {
                 n = (scratch->depth[j][i] + scratch->depth[j][i + 1] + scratch->depth[j + 1][i]
                         + scratch->depth[j + 1][i + 1])
                     / 16;
                 if (n >= 0 && n < EFFECT_OT_DEPTH_LIMIT) {
-                    addPrim(&ot[n], &work->quads[buffer][j * RING_MESH_SEGMENTS + i]);
+                    addPrim(&ot[n], &work->quads[buffer][j * EFFECT_RING_MESH_SEGMENTS + i]);
                 }
             }
         }

@@ -118,21 +118,21 @@ move_find_result_data_t* move_find_get_result(s32 x, u8 y, u8 layer) {
     }
     if (i != 4) {
         s_tile_pickup_result.entry_index = i;
-        if (!(tile->flags & MAP_MOVE_FIND_ENTRY_NO_ITEM)) {
+        if (!(tile->flags & MOVE_FIND_ENTRY_NO_ITEM)) {
             if (test_or_set_item_flag(script_variable_get(SCRIPT_VAR_CURRENT_MAP), i, 0) != 0) {
                 g_move_find_result_flags |= MOVE_FIND_RESULT_ITEM;
                 s_tile_pickup_result.rare_item_id = tile->rare_item_id;
                 s_tile_pickup_result.common_item_id = tile->common_item_id;
             }
         }
-        if (!(tile->flags & MAP_MOVE_FIND_ENTRY_NO_TRAP)) {
-            if (tile->flags & MAP_MOVE_FIND_ENTRY_TRAP_DEGENERATOR) {
+        if (!(tile->flags & MOVE_FIND_ENTRY_NO_TRAP)) {
+            if (tile->flags & MOVE_FIND_ENTRY_TRAP_DEGENERATOR) {
                 trap = MOVE_FIND_TRAP_DEGENERATOR;
-            } else if (tile->flags & MAP_MOVE_FIND_ENTRY_TRAP_DEATHTRAP) {
+            } else if (tile->flags & MOVE_FIND_ENTRY_TRAP_DEATHTRAP) {
                 trap = MOVE_FIND_TRAP_DEATHTRAP;
-            } else if (tile->flags & MAP_MOVE_FIND_ENTRY_TRAP_SLEEPING_GAS) {
+            } else if (tile->flags & MOVE_FIND_ENTRY_TRAP_SLEEPING_GAS) {
                 trap = MOVE_FIND_TRAP_SLEEPING_GAS;
-            } else if (tile->flags & MAP_MOVE_FIND_ENTRY_TRAP_STEEL_NEEDLE) {
+            } else if (tile->flags & MOVE_FIND_ENTRY_TRAP_STEEL_NEEDLE) {
                 trap = MOVE_FIND_TRAP_STEEL_NEEDLE;
             }
             if (trap != MOVE_FIND_TRAP_NONE) {

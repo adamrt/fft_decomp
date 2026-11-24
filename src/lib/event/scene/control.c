@@ -270,7 +270,7 @@ void camera_settle_tilt_zoom(void) {
     }
 
     g_camera_tilt_target = tilt_target_mode + 1;
-    g_camera_zoom_target = MAP_ZOOM_IN;
+    g_camera_zoom_target = CAMERA_ZOOM_IN;
     g_script_variables[SCRIPT_VAR_CAMERA_ZOOM] = ONE;
 }
 

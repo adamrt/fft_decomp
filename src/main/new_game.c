@@ -45,7 +45,7 @@ void party_init_new_game(int mode) {
     party_clear();
 
     if (mode == PARTY_NEW_GAME_RAMZA) {
-        party_unit_generate(UNIT_TYPE_RAMZA);
+        party_unit_generate(UNIT_GENERATION_TYPE_RAMZA);
     } else if (mode == PARTY_NEW_GAME_ENCOUNTER) {
         encounter_init_party(STARTING_ENCOUNTER_ID);
     }

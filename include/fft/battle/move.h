@@ -271,12 +271,12 @@ typedef enum move_find_trap_id {
 
 /* Four serialized move-find item/trap entries per map. */
 typedef enum move_find_entry_flags {
-    MAP_MOVE_FIND_ENTRY_TRAP_DEGENERATOR = 0x01,
-    MAP_MOVE_FIND_ENTRY_TRAP_DEATHTRAP = 0x02,
-    MAP_MOVE_FIND_ENTRY_TRAP_SLEEPING_GAS = 0x04,
-    MAP_MOVE_FIND_ENTRY_TRAP_STEEL_NEEDLE = 0x08,
-    MAP_MOVE_FIND_ENTRY_NO_TRAP = 0x10,
-    MAP_MOVE_FIND_ENTRY_NO_ITEM = 0x20
+    MOVE_FIND_ENTRY_TRAP_DEGENERATOR = 0x01,
+    MOVE_FIND_ENTRY_TRAP_DEATHTRAP = 0x02,
+    MOVE_FIND_ENTRY_TRAP_SLEEPING_GAS = 0x04,
+    MOVE_FIND_ENTRY_TRAP_STEEL_NEEDLE = 0x08,
+    MOVE_FIND_ENTRY_NO_TRAP = 0x10,
+    MOVE_FIND_ENTRY_NO_ITEM = 0x20
 } move_find_entry_flags_e;
 
 typedef struct move_find_entry {

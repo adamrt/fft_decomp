@@ -46,7 +46,7 @@ void option_entrypoint(s32 menu_type) {
         }
     }
 
-    if (menu_type != MENU_OPTION_TYPE_CRYSTAL_PICKUP) {
+    if (menu_type != OPTION_SCREEN_CRYSTAL_PICKUP) {
         thread_set_parameters(THREAD_SLOT_TILE_INFO_PANEL, 0, 0, 1);
         thread_set_parameters(THREAD_SLOT_UNIT_SUMMARY_PANEL, 0, 0, 1);
         thread_set_parameters(THREAD_SLOT_RIGHT_UNIT_STATS, 0, 0, 1);
@@ -59,7 +59,7 @@ void option_entrypoint(s32 menu_type) {
 
     g_menu_modal_open = 0;
     g_unit_panel_hide_numeric_values = 0;
-    if (menu_type == MENU_OPTION_TYPE_GAME_OPTIONS) {
+    if (menu_type == OPTION_SCREEN_GAME_OPTIONS) {
         tutorial_pulse_wait_value(SCRIPT_TUTORIAL_WAIT_GAME_OPTIONS);
         thread_start(g_thread_current_id - 1, option_game_options_thread);
         menu->select_text_table = 1;
@@ -68,11 +68,11 @@ void option_entrypoint(s32 menu_type) {
         thread_wait_inactive(g_thread_current_id - 1);
         thread_current_exit();
     }
-    if (menu_type == MENU_OPTION_TYPE_AT_LIST) {
+    if (menu_type == OPTION_SCREEN_AT_LIST) {
         tutorial_pulse_wait_value(SCRIPT_TUTORIAL_WAIT_AT_LIST);
         at_list_run();
     }
-    if (menu_type == MENU_OPTION_TYPE_CRYSTAL_PICKUP) {
+    if (menu_type == OPTION_SCREEN_CRYSTAL_PICKUP) {
         crystal_pickup_run_menus();
     }
 }

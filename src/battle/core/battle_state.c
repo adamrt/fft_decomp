@@ -513,10 +513,10 @@ static void open_non_active_unit_menu(void) {
     unit_view_request_mode(UNIT_VIEW_MODE_UNIT_SUMMARY, battle_unit->battle_unit_id, 0);
     menu_id = command_get_menu_id_by_battle_unit_id(unit->battle_unit->battle_unit_id);
     if (g_menu_status_open) {
-        if (menu_id == MENU_COMMAND_ID_PLAYER_UNIT) {
-            menu_id = MENU_COMMAND_ID_PLAYER_UNIT_INSPECT;
-        } else if (menu_id == MENU_COMMAND_ID_OTHER_UNIT) {
-            menu_id = MENU_COMMAND_ID_OTHER_UNIT_INSPECT;
+        if (menu_id == COMMAND_MENU_PLAYER_UNIT) {
+            menu_id = COMMAND_MENU_PLAYER_UNIT_INSPECT;
+        } else if (menu_id == COMMAND_MENU_OTHER_UNIT) {
+            menu_id = COMMAND_MENU_OTHER_UNIT_INSPECT;
         }
     }
     command_open_menu(menu_id);

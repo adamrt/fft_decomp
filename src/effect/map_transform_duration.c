@@ -18,7 +18,7 @@ s32 effect_set_map_timed_transform_duration(
         break;
     case EFFECT_CALLBACK_PHASE_INIT:
         weather_start_timed_transform(
-            MAP_WEATHER_EFFECT_TIMED_PARTICLE_TRANSFORM, g_effect_child_timeline->duration - record->timeline.frame);
+            WEATHER_EFFECT_TIMED_PARTICLE_TRANSFORM, g_effect_child_timeline->duration - record->timeline.frame);
         record->callback_phase[callback_slot] = EFFECT_CALLBACK_PHASE_UPDATE;
         break;
     case EFFECT_CALLBACK_PHASE_UPDATE:

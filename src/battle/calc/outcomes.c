@@ -52,13 +52,13 @@ s32 weather_get_effective(void) {
     s32 weather = script_variable_get(SCRIPT_VAR_WEATHER);
     u32 flags = g_weather_flags;
 
-    if (flags & MAP_WEATHER_FLAG_IGNORE_WEATHER) {
+    if (flags & WEATHER_FLAG_IGNORE_WEATHER) {
         return WEATHER_NONE;
     }
     if (weather < WEATHER_RAIN) {
         return weather;
     }
-    if (flags & MAP_WEATHER_FLAG_SNOW) {
+    if (flags & WEATHER_FLAG_SNOW) {
         weather += WEATHER_SNOW_OFFSET;
     }
     return weather;

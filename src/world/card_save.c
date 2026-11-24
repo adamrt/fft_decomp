@@ -186,7 +186,7 @@ static void update_input_message_state(void) {
         menu_input_clear_state();
     } else {
         running = thread_is_running(THREAD_SCREEN_SLOT_TEXT);
-        if (running != 0 || g_menu_screen_grid_id != MENU_GRID_HELP_NONE) {
+        if (running != 0 || g_menu_screen_grid_id != HELP_GRID_NONE) {
             menu_input_clear_state();
             if (running != 0 && g_menu_input_lock_mode != 0) {
                 value = 1;

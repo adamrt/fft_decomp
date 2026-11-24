@@ -112,9 +112,9 @@ extern game_options_t g_game_options_saved;
 /* The argument of option_entrypoint, both the OPTION overlay's and WORLD's: which of the OPTION overlay's screens to
  * run. */
 typedef enum option_screen {
-    MENU_OPTION_TYPE_GAME_OPTIONS = 0,
-    MENU_OPTION_TYPE_AT_LIST = 1,
-    MENU_OPTION_TYPE_CRYSTAL_PICKUP = 2 /* crystal and treasure panel */
+    OPTION_SCREEN_GAME_OPTIONS = 0,
+    OPTION_SCREEN_AT_LIST = 1,
+    OPTION_SCREEN_CRYSTAL_PICKUP = 2 /* crystal and treasure panel */
 } option_screen_e;
 
 /* Dispatch Game Options, AT List or crystal pickup; OPTION and WORLD each build their own body. */

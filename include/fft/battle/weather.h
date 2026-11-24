@@ -25,38 +25,38 @@ typedef enum weather {
 enum { WEATHER_SNOW_OFFSET = 3 };
 
 /* Bits of g_weather_flags ("weather palette mods"). */
-typedef enum weather_flags { MAP_WEATHER_FLAG_SNOW = 0x01, MAP_WEATHER_FLAG_IGNORE_WEATHER = 0x02 } weather_flags_e;
+typedef enum weather_flags { WEATHER_FLAG_SNOW = 0x01, WEATHER_FLAG_IGNORE_WEATHER = 0x02 } weather_flags_e;
 
 /* The signed palette modifier shares the 32-bit value above its seven low flag bits. */
-enum { MAP_WEATHER_MODIFIER_SHIFT = 7, MAP_WEATHER_LOW_FLAGS_MASK = 0x7f };
+enum { WEATHER_MODIFIER_SHIFT = 7, WEATHER_LOW_FLAGS_MASK = 0x7f };
 
 /* Commands of weather_dispatch_command and init_weather_particles. */
 typedef enum weather_command {
-    MAP_WEATHER_COMMAND_SNOW = 0x53,
-    MAP_WEATHER_COMMAND_CLEAR = 0x54,
-    MAP_WEATHER_COMMAND_RAIN = 0x55,
-    MAP_WEATHER_COMMAND_LIGHT_RAIN = 0x7c,
-    MAP_WEATHER_COMMAND_HEAVY_RAIN = 0x7d,
-    MAP_WEATHER_COMMAND_LIGHT_SNOW = 0x7e,
-    MAP_WEATHER_COMMAND_HEAVY_SNOW = 0x7f,
-    MAP_WEATHER_COMMAND_THUNDER = 0x89,              /* one lightning flash with its sound */
-    MAP_WEATHER_COMMAND_LIGHTNING = 0x8a,            /* random lightning from now on */
-    MAP_WEATHER_COMMAND_APPLY_SCRIPT_WEATHER = 0x8b, /* issue the commands for the weather script variable */
-    MAP_WEATHER_COMMAND_RESTORE_LIGHTING = 0x8c,
-    MAP_WEATHER_COMMAND_INIT_SNOW_PARTICLES = 0x8f, /* init_weather_particles */
-    MAP_WEATHER_COMMAND_INIT_RAIN_PARTICLES = 0x90
+    WEATHER_COMMAND_SNOW = 0x53,
+    WEATHER_COMMAND_CLEAR = 0x54,
+    WEATHER_COMMAND_RAIN = 0x55,
+    WEATHER_COMMAND_LIGHT_RAIN = 0x7c,
+    WEATHER_COMMAND_HEAVY_RAIN = 0x7d,
+    WEATHER_COMMAND_LIGHT_SNOW = 0x7e,
+    WEATHER_COMMAND_HEAVY_SNOW = 0x7f,
+    WEATHER_COMMAND_THUNDER = 0x89,              /* one lightning flash with its sound */
+    WEATHER_COMMAND_LIGHTNING = 0x8a,            /* random lightning from now on */
+    WEATHER_COMMAND_APPLY_SCRIPT_WEATHER = 0x8b, /* issue the commands for the weather script variable */
+    WEATHER_COMMAND_RESTORE_LIGHTING = 0x8c,
+    WEATHER_COMMAND_INIT_SNOW_PARTICLES = 0x8f, /* init_weather_particles */
+    WEATHER_COMMAND_INIT_RAIN_PARTICLES = 0x90
 } weather_command_e;
 
 /* Stored renderer selector at g_weather_effect_mode. The ordinary
  * modes reuse command IDs; 0x96 runs E458's timed particle transform. */
 typedef enum weather_effect_mode {
-    MAP_WEATHER_EFFECT_SNOW = MAP_WEATHER_COMMAND_SNOW,
-    MAP_WEATHER_EFFECT_CLEAR = MAP_WEATHER_COMMAND_CLEAR,
-    MAP_WEATHER_EFFECT_RAIN = MAP_WEATHER_COMMAND_RAIN,
-    MAP_WEATHER_EFFECT_TIMED_PARTICLE_TRANSFORM = 0x96
+    WEATHER_EFFECT_SNOW = WEATHER_COMMAND_SNOW,
+    WEATHER_EFFECT_CLEAR = WEATHER_COMMAND_CLEAR,
+    WEATHER_EFFECT_RAIN = WEATHER_COMMAND_RAIN,
+    WEATHER_EFFECT_TIMED_PARTICLE_TRANSFORM = 0x96
 } weather_effect_mode_e;
 
-/* weather_flags_e bits, with the signed palette modifier above MAP_WEATHER_MODIFIER_SHIFT. */
+/* weather_flags_e bits, with the signed palette modifier above WEATHER_MODIFIER_SHIFT. */
 extern s32 g_weather_flags;
 extern s16 g_weather_effect_mode; /* weather_effect_mode_e */
 
@@ -67,7 +67,7 @@ void weather_dispatch_command(u8 command);
 
 /* timed particle transform */
 /* Frame, duration and rotation of E458's timed particle transform
- * (MAP_WEATHER_EFFECT_TIMED_PARTICLE_TRANSFORM). */
+ * (WEATHER_EFFECT_TIMED_PARTICLE_TRANSFORM). */
 extern s32 g_weather_timed_transform_frame;
 extern s32 g_weather_timed_transform_duration;
 

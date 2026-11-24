@@ -138,10 +138,10 @@ void command_start_mini_menu(void) {
     if (g_menu_overlay_state != 0) {
         return;
     }
-    g_command_current_id = MENU_COMMAND_ID_MINI_MENU;
+    g_command_current_id = COMMAND_MENU_MINI_MENU;
     g_menu_thread_menu_data = g_command_idle_action_entries;
     thread_start(THREAD_SLOT_MENU, command_mini_menu_thread);
-    thread_set_parameters(THREAD_SLOT_MENU, (s32)&g_menu_thread_menu_data[MENU_COMMAND_ID_MINI_MENU], 0, 0);
+    thread_set_parameters(THREAD_SLOT_MENU, (s32)&g_menu_thread_menu_data[COMMAND_MENU_MINI_MENU], 0, 0);
     g_thread_contexts[THREAD_SLOT_MENU].task_id = THREAD_TASK_MINI_MENU;
 }
 

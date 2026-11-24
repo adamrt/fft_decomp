@@ -1436,7 +1436,7 @@ void map_palette_update_color_animations(void) {
 
         /* On maps that ignore weather, color 0 of the first map CLUT follows the darkness color: 16.16
          * channels cut to five bits, with the STP bit set so the color is not transparent. */
-        if (g_weather_flags & MAP_WEATHER_FLAG_IGNORE_WEATHER) {
+        if (g_weather_flags & WEATHER_FLAG_IGNORE_WEATHER) {
             red = s_map_darkness_transition.channels.red / 0x80000;
             green = s_map_darkness_transition.channels.green / 0x80000;
             blue = s_map_darkness_transition.channels.blue / 0x80000;
@@ -1624,7 +1624,7 @@ void map_palette_update_color_animations(void) {
             }
 
             /* Put color 0 back on the darkness color after the blend rewrote it. */
-            if (i == 0 && (g_weather_flags & MAP_WEATHER_FLAG_IGNORE_WEATHER)) {
+            if (i == 0 && (g_weather_flags & WEATHER_FLAG_IGNORE_WEATHER)) {
                 red = s_map_darkness_transition.channels.red / 0x80000;
                 green = s_map_darkness_transition.channels.green / 0x80000;
                 blue = s_map_darkness_transition.channels.blue / 0x80000;

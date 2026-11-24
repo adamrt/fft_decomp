@@ -229,14 +229,14 @@ void camera_start_zoom(s32 mode) {
     switch (mode) {
     case 0:
         if (g_camera_zoom.vx > ONE) {
-            g_camera_zoom_target = MAP_ZOOM_IN;
+            g_camera_zoom_target = CAMERA_ZOOM_IN;
             g_camera_zoom_action = CAMERA_STEP_DECREASE;
             g_camera_zoom_increment = 4;
             sound_play_sfx(SOUND_SFX_CAMERA_ZOOM_OUT);
             return;
         }
         if (g_camera_zoom.vx < ONE) {
-            g_camera_zoom_target = MAP_ZOOM_IN;
+            g_camera_zoom_target = CAMERA_ZOOM_IN;
             g_camera_zoom_action = CAMERA_STEP_INCREASE;
             g_camera_zoom_increment = 4;
             sound_play_sfx(SOUND_SFX_CAMERA_ZOOM_IN);
@@ -245,14 +245,14 @@ void camera_start_zoom(s32 mode) {
         return;
     case 1:
         if (g_camera_zoom.vx > 0xC00) {
-            g_camera_zoom_target = MAP_ZOOM_OUT;
+            g_camera_zoom_target = CAMERA_ZOOM_OUT;
             g_camera_zoom_action = CAMERA_STEP_DECREASE;
             g_camera_zoom_increment = 4;
             sound_play_sfx(SOUND_SFX_CAMERA_ZOOM_OUT);
             return;
         }
         if (g_camera_zoom.vx < 0xC00) {
-            g_camera_zoom_target = MAP_ZOOM_OUT;
+            g_camera_zoom_target = CAMERA_ZOOM_OUT;
             g_camera_zoom_action = CAMERA_STEP_INCREASE;
             g_camera_zoom_increment = 4;
             sound_play_sfx(SOUND_SFX_CAMERA_ZOOM_IN);
@@ -262,16 +262,16 @@ void camera_start_zoom(s32 mode) {
     }
 }
 
-/* Toggle the zoom target between MAP_ZOOM_IN and MAP_ZOOM_OUT, starting the
+/* Toggle the zoom target between CAMERA_ZOOM_IN and CAMERA_ZOOM_OUT, starting the
  * matching zoom with its sound; any other target is left alone. The increment
  * restarts at 4 either way. */
 static void toggle_zoom(void) {
-    if (g_camera_zoom_target == MAP_ZOOM_IN) {
+    if (g_camera_zoom_target == CAMERA_ZOOM_IN) {
         g_camera_zoom_action = CAMERA_STEP_DECREASE;
-        g_camera_zoom_target = MAP_ZOOM_OUT;
+        g_camera_zoom_target = CAMERA_ZOOM_OUT;
         sound_play_sfx(SOUND_SFX_CAMERA_ZOOM_OUT);
-    } else if (g_camera_zoom_target == MAP_ZOOM_OUT) {
-        g_camera_zoom_target = MAP_ZOOM_IN;
+    } else if (g_camera_zoom_target == CAMERA_ZOOM_OUT) {
+        g_camera_zoom_target = CAMERA_ZOOM_IN;
         g_camera_zoom_action = CAMERA_STEP_INCREASE;
         sound_play_sfx(SOUND_SFX_CAMERA_ZOOM_IN);
     }
@@ -294,7 +294,7 @@ void camera_update_zoom(void) {
     s32 increment;
     s32* zoom_ptr;
 
-    if (g_camera_zoom_action == CAMERA_STEP_INCREASE && g_camera_zoom_target == MAP_ZOOM_IN) {
+    if (g_camera_zoom_action == CAMERA_STEP_INCREASE && g_camera_zoom_target == CAMERA_ZOOM_IN) {
         s32 zoom;
         s32 below;
         s32 pan_x;
@@ -320,7 +320,7 @@ void camera_update_zoom(void) {
         }
     } else if (g_camera_zoom_action == CAMERA_STEP_DECREASE
         /* Retail compares the target with the action already loaded: CAMERA_STEP_DECREASE equals
-         * MAP_ZOOM_OUT. */
+         * CAMERA_ZOOM_OUT. */
         && g_camera_zoom_target == g_camera_zoom_action) {
         s32 zoom;
         s32 below;
@@ -354,12 +354,12 @@ void camera_start_tilt(s32 mode) {
     switch (mode) {
     case 0:
         if (g_camera_render_state.vx >= 0x12F) {
-            g_camera_tilt_target = MAP_TILT_LOW;
+            g_camera_tilt_target = CAMERA_TILT_LOW;
             g_camera_tilt_action = CAMERA_STEP_DECREASE;
             g_camera_tilt_increment = 1;
             sound_play_sfx(SOUND_SFX_CAMERA_TILT);
         } else if (g_camera_render_state.vx < 0x12E) {
-            g_camera_tilt_target = MAP_TILT_LOW;
+            g_camera_tilt_target = CAMERA_TILT_LOW;
             g_camera_tilt_action = CAMERA_STEP_INCREASE;
             g_camera_tilt_increment = 1;
             sound_play_sfx(SOUND_SFX_CAMERA_TILT);
@@ -367,13 +367,13 @@ void camera_start_tilt(s32 mode) {
         break;
     case 1:
         if (g_camera_render_state.vx >= 0x1C1) {
-            g_camera_tilt_target = MAP_TILT_HIGH;
+            g_camera_tilt_target = CAMERA_TILT_HIGH;
             g_camera_tilt_action = CAMERA_STEP_DECREASE;
             g_camera_tilt_increment = 1;
             sound_play_sfx(SOUND_SFX_CAMERA_TILT);
         } else if (g_camera_render_state.vx < 0x1C0) {
             g_camera_tilt_action = CAMERA_STEP_INCREASE;
-            g_camera_tilt_target = MAP_TILT_HIGH;
+            g_camera_tilt_target = CAMERA_TILT_HIGH;
             g_camera_tilt_increment = 1;
             sound_play_sfx(SOUND_SFX_CAMERA_TILT);
         }
@@ -386,17 +386,17 @@ void camera_start_tilt(s32 mode) {
 static void toggle_tilt(void) {
     s32 target = g_camera_tilt_target;
 
-    if (target == MAP_TILT_LOW) {
+    if (target == CAMERA_TILT_LOW) {
         g_camera_tilt_action = CAMERA_STEP_INCREASE;
-        g_camera_tilt_target = MAP_TILT_HIGH;
-    } else if (target == MAP_TILT_HIGH) {
-        g_camera_tilt_target = MAP_TILT_LOW;
+        g_camera_tilt_target = CAMERA_TILT_HIGH;
+    } else if (target == CAMERA_TILT_HIGH) {
+        g_camera_tilt_target = CAMERA_TILT_LOW;
         g_camera_tilt_action = CAMERA_STEP_DECREASE;
     } else if (target == 3) {
         g_camera_tilt_action = CAMERA_STEP_DECREASE;
         g_camera_tilt_target = 4;
     } else if (target == 4) {
-        g_camera_tilt_target = MAP_TILT_LOW;
+        g_camera_tilt_target = CAMERA_TILT_LOW;
         g_camera_tilt_action = CAMERA_STEP_INCREASE;
     }
     g_camera_tilt_increment = 1;
@@ -420,7 +420,7 @@ void camera_update_tilt(void) {
 
     if (g_camera_tilt_action == CAMERA_STEP_INCREASE
         /* Retail compares the target with the action already loaded: CAMERA_STEP_INCREASE equals
-         * MAP_TILT_HIGH. */
+         * CAMERA_TILT_HIGH. */
         && g_camera_tilt_target == g_camera_tilt_action) {
         s16* state = &g_camera_render_state.vx;
         tilt = *state + g_camera_tilt_increment;
@@ -429,7 +429,7 @@ void camera_update_tilt(void) {
             g_camera_tilt_action = CAMERA_STEP_NONE;
             *state = 0x1C0;
         }
-    } else if (g_camera_tilt_action == CAMERA_STEP_DECREASE && g_camera_tilt_target == MAP_TILT_LOW) {
+    } else if (g_camera_tilt_action == CAMERA_STEP_DECREASE && g_camera_tilt_target == CAMERA_TILT_LOW) {
         s16* state = &g_camera_render_state.vx;
         tilt = *state - g_camera_tilt_increment;
         *state = tilt;
@@ -437,7 +437,7 @@ void camera_update_tilt(void) {
             g_camera_tilt_action = CAMERA_STEP_NONE;
             *state = 0x12E;
         }
-    } else if (g_camera_tilt_action == CAMERA_STEP_DECREASE && g_camera_tilt_target == MAP_TILT_HIGH) {
+    } else if (g_camera_tilt_action == CAMERA_STEP_DECREASE && g_camera_tilt_target == CAMERA_TILT_HIGH) {
         s16* state = &g_camera_render_state.vx;
         tilt = *state - g_camera_tilt_increment;
         *state = tilt;
@@ -445,7 +445,7 @@ void camera_update_tilt(void) {
             g_camera_tilt_action = CAMERA_STEP_NONE;
             *state = 0x1C0;
         }
-    } else if (g_camera_tilt_action == CAMERA_STEP_INCREASE && g_camera_tilt_target == MAP_TILT_LOW) {
+    } else if (g_camera_tilt_action == CAMERA_STEP_INCREASE && g_camera_tilt_target == CAMERA_TILT_LOW) {
         s16* state = &g_camera_render_state.vx;
         tilt = *state + g_camera_tilt_increment;
         *state = tilt;

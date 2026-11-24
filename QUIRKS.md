@@ -276,7 +276,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   so `formation_sprite_update_slide` never runs. `g_menu_input_mode`
   `MENU_INPUT_BLOCKED` (1) is tested in four places and never stored.
 - `command_wait_thread` stores -2 over the
-  Wait entry's row action (7, `MENU_COMMAND_ID_WAIT_YES_NO`) before confirming,
+  Wait entry's row action (7, `COMMAND_MENU_WAIT_YES_NO`) before confirming,
   so the Yes/No entry of the menu table never opens. No code, row action or
   system function opens entries 0x09, 0x0d, 0x16, 0x17 (the only way to 0x18)
   or the four no-act turn menus (0x20, 0x21, 0x32, 0x33), yet the confirm-move
@@ -509,7 +509,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   damage where any other sign pair deals 1 * YA.
 - DEBUGCHR's unit editor (`debugchr_editor_entrypoint`, started by
   `debug_unit_editor_thread`) is battle menu entry 44
-  (`MENU_COMMAND_ID_DEBUG_UNIT_EDITOR`), which no C caller or retail menu row
+  (`COMMAND_MENU_DEBUG_UNIT_EDITOR`), which no C caller or retail menu row
   selects; DEBUGCHR's reachable use is the mounted-unit Status screen
   (`debugchr_mounted_unit_entrypoint`), which keeps
   `g_debug_unit_editor_active` clear. The editor lets the job, the five
@@ -905,7 +905,7 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
 ## Other surprises
 
 - `save_image_restore` skips a saved Unit List order if any of its first 11 keys is 11, and skips a saved Formation order if any of its first seven keys is 11. It preserves the live order, writes its final -1 terminator, and continues loading the save. Formation key 11 would read the fixed 100 CT maximum; the Order Unit menu exposes only keys 0, 1, 2, 4, 5, 7 and 9.
-- `weather_dispatch_command` selects precipitation from the raw script weather and snow flag. The rain and snow drawing paths do not test `MAP_WEATHER_FLAG_IGNORE_WEATHER`: that indoor flag suppresses elemental and movement weather rules through `weather_get_effective`, but does not itself suppress the particles.
+- `weather_dispatch_command` selects precipitation from the raw script weather and snow flag. The rain and snow drawing paths do not test `WEATHER_FLAG_IGNORE_WEATHER`: that indoor flag suppresses elemental and movement weather rules through `weather_get_effective`, but does not itself suppress the particles.
 - `start_next_post_move_event` handles `MOVE_POST_EVENT_SOURCE_DISPLAY` (0x200), and `battle_state_post_move_events_update` clears it, but the normal producer chain through `move_resolve_post_events` and `move_get_ability_events` never sets it.
 - `animation_set_status` retains two branches selecting animation 0x21 when bit 0 of `status_flags_1_4` is set. Normal status updates never set that bit. Crystal's mask 1 belongs to the separate `status_flags_5_6` word; this does not rule out animation requests from other paths.
 - `gfx_load_debug_font`: patches the low immediate byte of `FntLoad` at `0x80022f5c`, changing its font CLUT placement from `y + 128` to `y + 127`.

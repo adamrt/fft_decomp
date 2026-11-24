@@ -217,12 +217,12 @@ void sprite_palette_tint_unit(map_unit_t* unit, s32 level, s32 update_current_co
     {
         const s32* weather_flags = &g_weather_flags;
 
-        if (!(*weather_flags & MAP_WEATHER_FLAG_IGNORE_WEATHER)) {
+        if (!(*weather_flags & WEATHER_FLAG_IGNORE_WEATHER)) {
             weather = script_variable_get(SCRIPT_VAR_WEATHER);
             /* Weather cools the tint (less red, more blue); at night the shift is stronger and
              * applies in clear weather too. The snow branches match the plain ones. */
             if (script_variable_get(SCRIPT_VAR_TIME_OF_DAY) == TIME_OF_DAY_DAY) {
-                if (*weather_flags & MAP_WEATHER_FLAG_SNOW) {
+                if (*weather_flags & WEATHER_FLAG_SNOW) {
                     switch (weather) {
                     case WEATHER_NONE:
                     case WEATHER_NONE_ALT:
@@ -258,7 +258,7 @@ void sprite_palette_tint_unit(map_unit_t* unit, s32 level, s32 update_current_co
                     }
                 }
             } else {
-                if (*weather_flags & MAP_WEATHER_FLAG_SNOW) {
+                if (*weather_flags & WEATHER_FLAG_SNOW) {
                     switch (weather) {
                     case WEATHER_NONE:
                     case WEATHER_NONE_ALT:
@@ -307,7 +307,7 @@ void sprite_palette_tint_unit(map_unit_t* unit, s32 level, s32 update_current_co
 
     /* y grows downward: a unit more than 0x30 above the ground at its position stays untinted. */
     standing_world_y = map_unit_calculate_height_from_world_coords(unit);
-    if (!(g_weather_flags & MAP_WEATHER_FLAG_IGNORE_WEATHER) && standing_world_y - 0x30 > unit->world_coords.vy) {
+    if (!(g_weather_flags & WEATHER_FLAG_IGNORE_WEATHER) && standing_world_y - 0x30 > unit->world_coords.vy) {
         blue = 0;
         green = 0;
         red = 0;

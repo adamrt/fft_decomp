@@ -182,7 +182,7 @@ static void rebuild_lists(void) {
  * a menu runs in the upper menu or screen menu thread slot, or menu input is
  * locked (g_menu_input_lock_mode). */
 s32 menu_screen_check_busy(void) {
-    return g_menu_screen_grid_id != MENU_GRID_HELP_NONE || thread_is_running(MENU_SCREEN_THREAD_SLOT_UPPER_MENU) != 0
+    return g_menu_screen_grid_id != HELP_GRID_NONE || thread_is_running(MENU_SCREEN_THREAD_SLOT_UPPER_MENU) != 0
         || g_menu_input_lock_mode != 0 || thread_is_running(THREAD_SCREEN_SLOT_MENU) != 0;
 }
 
@@ -254,7 +254,7 @@ s32 menu_screen_filter_buttons(void) {
         if (g_formation_current_menu == FORMATION_MENU_DISMISS_UNIT) {
             input &= 0xF0FF;
         }
-    } else if (g_help_message_text_id != 0 || g_menu_screen_grid_id != MENU_GRID_HELP_NONE) {
+    } else if (g_help_message_text_id != 0 || g_menu_screen_grid_id != HELP_GRID_NONE) {
         input &= 0xF0FF;
     }
     return input;
@@ -350,7 +350,7 @@ void formation_run_screen(s32 tutorial, s32 unused) {
         if (g_menu_input_primary_repeat & PSX_PAD_SELECT) {
             help_start_text(DIALOG_POSITION_CENTER);
         }
-        if (g_menu_screen_grid_id != MENU_GRID_HELP_NONE) {
+        if (g_menu_screen_grid_id != HELP_GRID_NONE) {
             menu_screen_update_help_grid(
                 g_formation_unit_pointers[g_unit_selected_index]->detail.uses_monster_skillset);
         }
@@ -373,7 +373,7 @@ void formation_run_screen(s32 tutorial, s32 unused) {
         /* L1/R1 cycle units; i is the buttons' disabled flag here. */
         i = 0;
         if (g_formation_unit_cycle_mode != 0 || g_formation_unit_browse_enabled != 0) {
-            if (g_menu_input_lock_mode != 0 || g_menu_screen_grid_id != MENU_GRID_HELP_NONE
+            if (g_menu_input_lock_mode != 0 || g_menu_screen_grid_id != HELP_GRID_NONE
                 || g_formation_unit_cycle_mode == 1 || g_formation_triangle_menu_running != 0) {
                 i = 1;
             }
@@ -408,7 +408,7 @@ void formation_run_screen(s32 tutorial, s32 unused) {
         } else {
             i = 9;
         }
-        if (g_menu_screen_grid_id != MENU_GRID_HELP_NONE) {
+        if (g_menu_screen_grid_id != HELP_GRID_NONE) {
             i = 9;
         }
         if (g_formation_cursor_ot_override != 0) {
@@ -663,10 +663,10 @@ void update_unit_grid_menu(void) {
                 g_help_message_text_id = 0x101C;
             } else if (g_formation_triangle_menu_open == 0) {
                 if (g_formation_unit_browse_enabled != 0) {
-                    g_help_message_text_id = MENU_GRID_HELP_UNIT_BROWSE;
+                    g_help_message_text_id = HELP_GRID_UNIT_BROWSE;
                 } else if (g_formation_unit_banner_enabled != 0) {
-                    g_help_message_text_id = g_formation_unit_banner_at_bottom != 0 ? MENU_GRID_HELP_BANNER_BOTTOM
-                                                                                    : MENU_GRID_HELP_BANNER_TOP;
+                    g_help_message_text_id
+                        = g_formation_unit_banner_at_bottom != 0 ? HELP_GRID_BANNER_BOTTOM : HELP_GRID_BANNER_TOP;
                 }
             }
 

@@ -22,71 +22,71 @@
  * PERFORMING_MESSAGE, PROMPT_16, PROMPT_17 or the four NO_ACT turn menus,
  * and WAIT_YES_NO is linked only by a row action that is overwritten. */
 typedef enum command_menu {
-    MENU_COMMAND_ID_NONE = -1,
-    MENU_COMMAND_ID_TURN = 0,                /* the unit's turn: it can move and act */
-    MENU_COMMAND_ID_AUTO_BATTLE = 1,         /* the Auto-battle row: the five settings */
-    MENU_COMMAND_ID_AUTO_BATTLE_TARGET = 2,  /* Change target, Check target: a setting chosen again */
-    MENU_COMMAND_ID_ABILITY_LIST = 3,        /* the abilities or items of the chosen SKILLSET_LIST row */
-    MENU_COMMAND_ID_SKILLSET_LIST = 4,       /* the Act row: the unit's commands */
-    MENU_COMMAND_ID_STATUS = 5,              /* the Status row: the unit status panel */
-    MENU_COMMAND_ID_WAIT = 6,                /* the Wait row */
-    MENU_COMMAND_ID_WAIT_YES_NO = 7,         /* WAIT's row action in the table; command_wait_thread replaces it */
-    MENU_COMMAND_ID_STATUS_LIST = 8,         /* the status panel's list of current statuses */
-    MENU_COMMAND_ID_EMPTY_MESSAGE = 9,       /* a message entry with empty text 0x8000 */
-    MENU_COMMAND_ID_MINI_MENU = 10,          /* command_start_mini_menu: AT, Unit List, Option */
-    MENU_COMMAND_ID_OPTIONS = 11,            /* MINI_MENU's Option row: OPTION.OUT */
-    MENU_COMMAND_ID_UNIT_LIST = 12,          /* MINI_MENU's Unit List row: BUNIT.OUT */
-    MENU_COMMAND_ID_PERFORMING_MESSAGE = 13, /* a message entry with text 0x8002 */
-    MENU_COMMAND_ID_TURN_MOVED = 14,         /* moved, or Don't Move */
-    MENU_COMMAND_ID_PLAYER_UNIT = 15,        /* a player unit, not its turn */
-    MENU_COMMAND_ID_OTHER_UNIT = 16,         /* any other unit, not its turn */
+    COMMAND_MENU_NONE = -1,
+    COMMAND_MENU_TURN = 0,                /* the unit's turn: it can move and act */
+    COMMAND_MENU_AUTO_BATTLE = 1,         /* the Auto-battle row: the five settings */
+    COMMAND_MENU_AUTO_BATTLE_TARGET = 2,  /* Change target, Check target: a setting chosen again */
+    COMMAND_MENU_ABILITY_LIST = 3,        /* the abilities or items of the chosen SKILLSET_LIST row */
+    COMMAND_MENU_SKILLSET_LIST = 4,       /* the Act row: the unit's commands */
+    COMMAND_MENU_STATUS = 5,              /* the Status row: the unit status panel */
+    COMMAND_MENU_WAIT = 6,                /* the Wait row */
+    COMMAND_MENU_WAIT_YES_NO = 7,         /* WAIT's row action in the table; command_wait_thread replaces it */
+    COMMAND_MENU_STATUS_LIST = 8,         /* the status panel's list of current statuses */
+    COMMAND_MENU_EMPTY_MESSAGE = 9,       /* a message entry with empty text 0x8000 */
+    COMMAND_MENU_MINI_MENU = 10,          /* command_start_mini_menu: AT, Unit List, Option */
+    COMMAND_MENU_OPTIONS = 11,            /* MINI_MENU's Option row: OPTION.OUT */
+    COMMAND_MENU_UNIT_LIST = 12,          /* MINI_MENU's Unit List row: BUNIT.OUT */
+    COMMAND_MENU_PERFORMING_MESSAGE = 13, /* a message entry with text 0x8002 */
+    COMMAND_MENU_TURN_MOVED = 14,         /* moved, or Don't Move */
+    COMMAND_MENU_PLAYER_UNIT = 15,        /* a player unit, not its turn */
+    COMMAND_MENU_OTHER_UNIT = 16,         /* any other unit, not its turn */
     /* The same two while the active unit is not under the player's control,
      * or while the status menu is open. */
-    MENU_COMMAND_ID_PLAYER_UNIT_INSPECT = 17,
-    MENU_COMMAND_ID_OTHER_UNIT_INSPECT = 18,
-    MENU_COMMAND_ID_TURN_ACTED = 19, /* acted, or cannot act */
-    MENU_COMMAND_ID_TURN_MOVED_ACTED = 20,
-    MENU_COMMAND_ID_JOBSTTS = 21,   /* a STATUS_LIST row: JOBSTTS.OUT */
-    MENU_COMMAND_ID_PROMPT_16 = 22, /* two equal message entries whose row opens PROMPT_YES_NO */
-    MENU_COMMAND_ID_PROMPT_17 = 23,
-    MENU_COMMAND_ID_PROMPT_YES_NO = 24, /* Yes, No */
+    COMMAND_MENU_PLAYER_UNIT_INSPECT = 17,
+    COMMAND_MENU_OTHER_UNIT_INSPECT = 18,
+    COMMAND_MENU_TURN_ACTED = 19, /* acted, or cannot act */
+    COMMAND_MENU_TURN_MOVED_ACTED = 20,
+    COMMAND_MENU_JOBSTTS = 21,   /* a STATUS_LIST row: JOBSTTS.OUT */
+    COMMAND_MENU_PROMPT_16 = 22, /* two equal message entries whose row opens PROMPT_YES_NO */
+    COMMAND_MENU_PROMPT_17 = 23,
+    COMMAND_MENU_PROMPT_YES_NO = 24, /* Yes, No */
     /* Yes, No under MESSAGE. As the current id: a system function that asks
      * (ride the chocobo, move here, inherit the crystal, learn the ability). */
-    MENU_COMMAND_ID_MESSAGE_YES_NO = 25,
+    COMMAND_MENU_MESSAGE_YES_NO = 25,
     /* The choices a system function shows without its navigation message. */
-    MENU_COMMAND_ID_TARGET_KIND = 26,   /* Unit, Panel, Quit */
-    MENU_COMMAND_ID_PANEL_EXECUTE = 27, /* Execute, Quit for a panel target */
-    MENU_COMMAND_ID_MESSAGE = 28,       /* a system function's navigation message */
-    MENU_COMMAND_ID_AT_LIST = 29,       /* MINI_MENU's AT row: OPTION.OUT's AT list */
-    MENU_COMMAND_ID_EXECUTE = 30,       /* Execute, Quit */
-    MENU_COMMAND_ID_ANNOUNCEMENT = 31,  /* the timed banner: an ability name or an action result */
+    COMMAND_MENU_TARGET_KIND = 26,   /* Unit, Panel, Quit */
+    COMMAND_MENU_PANEL_EXECUTE = 27, /* Execute, Quit for a panel target */
+    COMMAND_MENU_MESSAGE = 28,       /* a system function's navigation message */
+    COMMAND_MENU_AT_LIST = 29,       /* MINI_MENU's AT row: OPTION.OUT's AT list */
+    COMMAND_MENU_EXECUTE = 30,       /* Execute, Quit */
+    COMMAND_MENU_ANNOUNCEMENT = 31,  /* the timed banner: an ability name or an action result */
     /* TURN and TURN_MOVED with the rows Move, Wait and Status only. */
-    MENU_COMMAND_ID_TURN_NO_ACT = 32,
-    MENU_COMMAND_ID_TURN_NO_ACT_MOVED = 33,
-    MENU_COMMAND_ID_MOVE = 34,                       /* the Move row: command_move_thread */
-    MENU_COMMAND_ID_ACTION_RESTRICTION_MESSAGE = 35, /* why the unit cannot act or use the ability */
-    MENU_COMMAND_ID_ABILITY_CONFIRM = 36,            /* an ABILITY_LIST row: command_validate_ability_thread */
+    COMMAND_MENU_TURN_NO_ACT = 32,
+    COMMAND_MENU_TURN_NO_ACT_MOVED = 33,
+    COMMAND_MENU_MOVE = 34,                       /* the Move row: command_move_thread */
+    COMMAND_MENU_ACTION_RESTRICTION_MESSAGE = 35, /* why the unit cannot act or use the ability */
+    COMMAND_MENU_ABILITY_CONFIRM = 36,            /* an ABILITY_LIST row: command_validate_ability_thread */
     /* The same choices under MESSAGE. */
-    MENU_COMMAND_ID_MESSAGE_TARGET_KIND = 37,
-    MENU_COMMAND_ID_MESSAGE_PANEL_EXECUTE = 38,
-    MENU_COMMAND_ID_AUTO_BATTLE_CONFIRM = 39, /* an AUTO_BATTLE row chosen for the first time */
-    MENU_COMMAND_ID_AUTO_BATTLE_UNIT = 40,    /* Attack, Quit or Defend, Quit: the unit an auto-battle setting names */
-    MENU_COMMAND_ID_MESSAGE_ATTACK_UNIT = 41, /* Attack, Quit under MESSAGE */
-    MENU_COMMAND_ID_MESSAGE_DEFEND_UNIT = 42, /* Defend, Quit under MESSAGE */
-    MENU_COMMAND_ID_EFFECT_MESSAGE = 43,      /* MENU_PROMPT_EFFECT_MESSAGE's entry */
-    MENU_COMMAND_ID_DEBUG_UNIT_EDITOR = 44,   /* debug_unit_editor_thread */
-    MENU_COMMAND_ID_MESSAGE_EXECUTE = 45,     /* Execute, Quit under MESSAGE */
-    MENU_COMMAND_ID_RIDER_TURN = 46,          /* the TURN menus of a mounted unit, with a Stop ride row */
-    MENU_COMMAND_ID_RIDER_TURN_MOVED = 47,
-    MENU_COMMAND_ID_RIDER_TURN_ACTED = 48,
-    MENU_COMMAND_ID_RIDER_TURN_MOVED_ACTED = 49,
-    MENU_COMMAND_ID_RIDER_TURN_NO_ACT = 50,
-    MENU_COMMAND_ID_RIDER_TURN_NO_ACT_MOVED = 51,
-    MENU_COMMAND_ID_ABILITY_PREVIEW_AT_LIST = 52, /* the turn order with the ability under the cursor in it */
-    MENU_COMMAND_ID_ABILITY_PREVIEW_MESSAGE = 53, /* shown instead when that ability gets no turn */
-    MENU_COMMAND_ID_EGG = 54,                     /* replaces OTHER_UNIT and OTHER_UNIT_INSPECT for an egg */
-    MENU_COMMAND_ID_EGG_STATUS = 55,              /* EGG's Status row: only the invalid sound */
-    MENU_COMMAND_ID_CRYSTAL_PICKUP = 105          /* crystal or treasure options */
+    COMMAND_MENU_MESSAGE_TARGET_KIND = 37,
+    COMMAND_MENU_MESSAGE_PANEL_EXECUTE = 38,
+    COMMAND_MENU_AUTO_BATTLE_CONFIRM = 39, /* an AUTO_BATTLE row chosen for the first time */
+    COMMAND_MENU_AUTO_BATTLE_UNIT = 40,    /* Attack, Quit or Defend, Quit: the unit an auto-battle setting names */
+    COMMAND_MENU_MESSAGE_ATTACK_UNIT = 41, /* Attack, Quit under MESSAGE */
+    COMMAND_MENU_MESSAGE_DEFEND_UNIT = 42, /* Defend, Quit under MESSAGE */
+    COMMAND_MENU_EFFECT_MESSAGE = 43,      /* MENU_PROMPT_EFFECT_MESSAGE's entry */
+    COMMAND_MENU_DEBUG_UNIT_EDITOR = 44,   /* debug_unit_editor_thread */
+    COMMAND_MENU_MESSAGE_EXECUTE = 45,     /* Execute, Quit under MESSAGE */
+    COMMAND_MENU_RIDER_TURN = 46,          /* the TURN menus of a mounted unit, with a Stop ride row */
+    COMMAND_MENU_RIDER_TURN_MOVED = 47,
+    COMMAND_MENU_RIDER_TURN_ACTED = 48,
+    COMMAND_MENU_RIDER_TURN_MOVED_ACTED = 49,
+    COMMAND_MENU_RIDER_TURN_NO_ACT = 50,
+    COMMAND_MENU_RIDER_TURN_NO_ACT_MOVED = 51,
+    COMMAND_MENU_ABILITY_PREVIEW_AT_LIST = 52, /* the turn order with the ability under the cursor in it */
+    COMMAND_MENU_ABILITY_PREVIEW_MESSAGE = 53, /* shown instead when that ability gets no turn */
+    COMMAND_MENU_EGG = 54,                     /* replaces OTHER_UNIT and OTHER_UNIT_INSPECT for an egg */
+    COMMAND_MENU_EGG_STATUS = 55,              /* EGG's Status row: only the invalid sound */
+    COMMAND_MENU_CRYSTAL_PICKUP = 105          /* crystal or treasure options */
 } command_menu_e;
 
 command_menu_e command_get_menu_id_by_battle_unit_id(s32 battle_unit_id);

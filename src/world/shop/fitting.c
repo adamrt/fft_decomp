@@ -129,7 +129,7 @@ void shop_fitting_update_menu(void) {
         g_shop_background_visible = 0;
         if (g_formation_unit_banner_enabled != 0) {
             g_help_message_text_id
-                = (g_formation_unit_banner_at_bottom != 0) ? MENU_GRID_HELP_BANNER_BOTTOM : MENU_GRID_HELP_BANNER_TOP;
+                = (g_formation_unit_banner_at_bottom != 0) ? HELP_GRID_BANNER_BOTTOM : HELP_GRID_BANNER_TOP;
         } else {
             g_help_message_text_id = 0;
         }

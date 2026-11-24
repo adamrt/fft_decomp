@@ -42,10 +42,9 @@ extern u8 g_event_thread_status_snapshot[THREAD_ID_COUNT];
 
 /* Five rain and five snow commands; the dispatcher consumes each halfword's low byte.
  * WORLD retains this table even though it has no weather-request consumer. */
-static u16 s_event_weather_commands[10]
-    = { MAP_WEATHER_COMMAND_CLEAR, MAP_WEATHER_COMMAND_CLEAR, MAP_WEATHER_COMMAND_LIGHT_RAIN, MAP_WEATHER_COMMAND_RAIN,
-          MAP_WEATHER_COMMAND_HEAVY_RAIN, MAP_WEATHER_COMMAND_CLEAR, MAP_WEATHER_COMMAND_CLEAR,
-          MAP_WEATHER_COMMAND_LIGHT_SNOW, MAP_WEATHER_COMMAND_SNOW, MAP_WEATHER_COMMAND_HEAVY_SNOW };
+static u16 s_event_weather_commands[10] = { WEATHER_COMMAND_CLEAR, WEATHER_COMMAND_CLEAR, WEATHER_COMMAND_LIGHT_RAIN,
+    WEATHER_COMMAND_RAIN, WEATHER_COMMAND_HEAVY_RAIN, WEATHER_COMMAND_CLEAR, WEATHER_COMMAND_CLEAR,
+    WEATHER_COMMAND_LIGHT_SNOW, WEATHER_COMMAND_SNOW, WEATHER_COMMAND_HEAVY_SNOW };
 
 static void load_camera_from_script_variables(void);
 static void process_pending_requests(void);

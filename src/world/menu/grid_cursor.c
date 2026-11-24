@@ -49,7 +49,7 @@ void help_start_text(s32 position) {
 }
 
 /* Runs the d-pad help grid selected by g_menu_screen_grid_id (the shop banner
- * grids for MENU_GRID_HELP_BANNER_TOP and _BOTTOM, else the default grid) and
+ * grids for HELP_GRID_BANNER_TOP and _BOTTOM, else the default grid) and
  * draws its cursor. `alternate` (the unit uses a monster skillset) switches
  * the text offset of cells 23 and 24.
  *
@@ -74,9 +74,9 @@ void menu_screen_update_help_grid(s16 alternate) {
         g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
         g_menu_screen_grid_initialized = 1;
         s_menu_screen_grid_selected_cell = 0;
-        if (g_menu_screen_grid_id == MENU_GRID_HELP_BANNER_TOP) {
+        if (g_menu_screen_grid_id == HELP_GRID_BANNER_TOP) {
             s_menu_screen_grid_active_cells = g_menu_screen_grid_shop_cells;
-        } else if (g_menu_screen_grid_id == MENU_GRID_HELP_BANNER_BOTTOM) {
+        } else if (g_menu_screen_grid_id == HELP_GRID_BANNER_BOTTOM) {
             s_menu_screen_grid_active_cells = g_menu_screen_grid_shop_scrolled_cells;
         } else {
             s_menu_screen_grid_active_cells = g_menu_screen_grid_default_cells;
@@ -88,7 +88,7 @@ void menu_screen_update_help_grid(s16 alternate) {
         cell = s_menu_screen_grid_selected_cell;
         if (input & PSX_PAD_CROSS) {
             s32 menu_id = g_menu_screen_grid_id;
-            g_menu_screen_grid_id = MENU_GRID_HELP_NONE;
+            g_menu_screen_grid_id = HELP_GRID_NONE;
             g_sound_queued_effect_id = SOUND_SFX_CANCEL;
             g_menu_screen_grid_initialized = 0;
             g_help_message_text_id = menu_id;
@@ -111,7 +111,7 @@ void menu_screen_update_help_grid(s16 alternate) {
             cell = s_menu_screen_grid_active_cells[cell].destination[3];
         }
         /* The recruit preview grid steps over cell 7 between cells 6 and 8. */
-        if (g_menu_screen_grid_id == MENU_GRID_HELP_RECRUIT_PREVIEW) {
+        if (g_menu_screen_grid_id == HELP_GRID_RECRUIT_PREVIEW) {
             if (s_menu_screen_grid_selected_cell == 6 && cell == 7) {
                 cell = 8;
             }

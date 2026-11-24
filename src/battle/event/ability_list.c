@@ -237,8 +237,8 @@ void ability_list_scrolling_thread(void) {
                 thread_yield();
                 sound_queue_cursor();
                 thread_start(g_thread_current_id - 1, at_list_ability_preview_thread);
-                thread_set_parameters(g_thread_current_id - 1,
-                    (s32)&g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_PREVIEW_AT_LIST], 0, 0);
+                thread_set_parameters(
+                    g_thread_current_id - 1, (s32)&g_menu_thread_menu_data[COMMAND_MENU_ABILITY_PREVIEW_AT_LIST], 0, 0);
                 /* Blink CLUTs 1 and 2 (24 and 6 frames of every 30) until the preview thread ends,
                  * then restore CLUT 3. `column` serves as the frame counter. */
                 column = 0;

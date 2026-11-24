@@ -641,11 +641,11 @@ extern unit_graphics_load_queue_t g_unit_graphics_load_queue;
 /* unit generation */
 /* Base-stat and equipment generation profiles; these are not job ids or gender flags. */
 typedef enum unit_generation_type {
-    UNIT_TYPE_MALE = 0,
-    UNIT_TYPE_FEMALE = 1,
-    UNIT_TYPE_RAMZA = 2,
-    UNIT_TYPE_MONSTER = 3,
-    UNIT_TYPE_COUNT = 4
+    UNIT_GENERATION_TYPE_MALE = 0,
+    UNIT_GENERATION_TYPE_FEMALE = 1,
+    UNIT_GENERATION_TYPE_RAMZA = 2,
+    UNIT_GENERATION_TYPE_MONSTER = 3,
+    UNIT_GENERATION_TYPE_COUNT = 4
 } unit_generation_type_e;
 
 /* stat building and growth */

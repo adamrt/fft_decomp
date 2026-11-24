@@ -300,7 +300,7 @@ void debugchr_mounted_unit_entrypoint(s32 unit_id) {
                 g_unit_panel_character_status_frame_config.style = one;
                 thread_start(g_thread_current_id - 1, status_screen_status_list_thread);
                 thread_set_parameters(
-                    g_thread_current_id - 1, (s32)&g_menu_thread_menu_data[MENU_COMMAND_ID_STATUS_LIST], 0, 0);
+                    g_thread_current_id - 1, (s32)&g_menu_thread_menu_data[COMMAND_MENU_STATUS_LIST], 0, 0);
                 animation[0] = one;
                 animation_second[0] = one;
                 animation_third[0] = one;

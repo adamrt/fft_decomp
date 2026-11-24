@@ -27,8 +27,8 @@
 #include "psx/types.h"
 
 /* Unpacks the configured options into the options-menu value table, then runs one Options screen:
- * MENU_OPTION_TYPE_GAME_OPTIONS runs option_game_options_thread in the thread slot before this one
- * and exits once it ends, MENU_OPTION_TYPE_AT_LIST starts the AT list and MENU_OPTION_TYPE_CRYSTAL_PICKUP the
+ * OPTION_SCREEN_GAME_OPTIONS runs option_game_options_thread in the thread slot before this one
+ * and exits once it ends, OPTION_SCREEN_AT_LIST starts the AT list and OPTION_SCREEN_CRYSTAL_PICKUP the
  * crystal pickup threads.
  *
  * The Initialize row initially shows Initialize if all 13 options equal their
@@ -62,8 +62,8 @@ void option_entrypoint(s32 mode) {
     g_unit_panel_hide_numeric_values = 0;
     /* The target keeps this constant in a callee-saved register across the
      * mode 0 and mode 1 calls, so it is its own variable. */
-    last_mode = MENU_OPTION_TYPE_CRYSTAL_PICKUP;
-    if (mode == MENU_OPTION_TYPE_GAME_OPTIONS) {
+    last_mode = OPTION_SCREEN_CRYSTAL_PICKUP;
+    if (mode == OPTION_SCREEN_GAME_OPTIONS) {
         tutorial_pulse_wait_value(SCRIPT_TUTORIAL_WAIT_GAME_OPTIONS);
         thread_start(g_thread_current_id - 1, option_game_options_thread);
         entry->select_text_table = 1;
@@ -72,7 +72,7 @@ void option_entrypoint(s32 mode) {
         thread_wait_inactive(g_thread_current_id - 1);
         thread_current_exit();
     }
-    if (mode == MENU_OPTION_TYPE_AT_LIST) {
+    if (mode == OPTION_SCREEN_AT_LIST) {
         tutorial_pulse_wait_value(SCRIPT_TUTORIAL_WAIT_AT_LIST);
         at_list_run();
     }
@@ -82,7 +82,7 @@ void option_entrypoint(s32 mode) {
 }
 
 /*
- * Options-menu thread started by option_entrypoint (MENU_OPTION_TYPE_GAME_OPTIONS) with
+ * Options-menu thread started by option_entrypoint (OPTION_SCREEN_GAME_OPTIONS) with
  * entry->context = &g_option_entry_table.
  *
  * Scrolls the two-column option list like ability_list_scrolling_thread, shows the

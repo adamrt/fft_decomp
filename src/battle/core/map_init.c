@@ -52,9 +52,9 @@ static void init_camera_defaults(void) {
     g_cursor_x = 0;
     g_camera_rotation_action = CAMERA_ROTATION_NONE;
     g_camera_zoom_action = CAMERA_STEP_NONE;
-    g_camera_zoom_target = MAP_ZOOM_IN;
+    g_camera_zoom_target = CAMERA_ZOOM_IN;
     g_camera_tilt_action = CAMERA_STEP_NONE;
-    g_camera_tilt_target = MAP_TILT_LOW;
+    g_camera_tilt_target = CAMERA_TILT_LOW;
     g_camera_pan_enabled = 0;
 }
 

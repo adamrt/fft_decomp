@@ -43,9 +43,8 @@ typedef struct at_list_work {
 typedef char at_list_work_size_must_be_1824[(sizeof(at_list_work_t) == 1824) ? 1 : -1];
 
 /* Row actions of the auto-battle setting menu (menu entry 0x80166b4c, +0x24). */
-static s16 s_auto_battle_row_actions[8]
-    = { 1000, MENU_COMMAND_ID_AUTO_BATTLE_TARGET, MENU_COMMAND_ID_AUTO_BATTLE_TARGET,
-          MENU_COMMAND_ID_AUTO_BATTLE_TARGET, MENU_COMMAND_ID_AUTO_BATTLE_TARGET, 0, -3, -3 };
+static s16 s_auto_battle_row_actions[8] = { 1000, COMMAND_MENU_AUTO_BATTLE_TARGET, COMMAND_MENU_AUTO_BATTLE_TARGET,
+    COMMAND_MENU_AUTO_BATTLE_TARGET, COMMAND_MENU_AUTO_BATTLE_TARGET, 0, -3, -3 };
 
 /* Draw or queue an icon frame's six packets: sprites 3, 1 and 2, the draw mode, sprite 0, then the
  * first draw mode. Queued into one ordering-table entry they run in the reverse order. */
@@ -130,16 +129,16 @@ void auto_battle_settings_thread(void) {
                     color[4] = 0;
                     color[selected] = 8;
                 }
-                s_auto_battle_row_actions[1] = MENU_COMMAND_ID_AUTO_BATTLE_CONFIRM;
-                s_auto_battle_row_actions[2] = MENU_COMMAND_ID_AUTO_BATTLE_CONFIRM;
-                s_auto_battle_row_actions[3] = MENU_COMMAND_ID_AUTO_BATTLE_CONFIRM;
-                s_auto_battle_row_actions[4] = MENU_COMMAND_ID_AUTO_BATTLE_CONFIRM;
+                s_auto_battle_row_actions[1] = COMMAND_MENU_AUTO_BATTLE_CONFIRM;
+                s_auto_battle_row_actions[2] = COMMAND_MENU_AUTO_BATTLE_CONFIRM;
+                s_auto_battle_row_actions[3] = COMMAND_MENU_AUTO_BATTLE_CONFIRM;
+                s_auto_battle_row_actions[4] = COMMAND_MENU_AUTO_BATTLE_CONFIRM;
                 if (cursor == previous) {
-                    s_auto_battle_row_actions[1] = MENU_COMMAND_ID_AUTO_BATTLE_TARGET;
-                    s_auto_battle_row_actions[2] = MENU_COMMAND_ID_AUTO_BATTLE_TARGET;
+                    s_auto_battle_row_actions[1] = COMMAND_MENU_AUTO_BATTLE_TARGET;
+                    s_auto_battle_row_actions[2] = COMMAND_MENU_AUTO_BATTLE_TARGET;
                 }
                 previous = cursor;
-                g_menu_thread_menu_data[MENU_COMMAND_ID_AUTO_BATTLE_TARGET].selected_index = 0;
+                g_menu_thread_menu_data[COMMAND_MENU_AUTO_BATTLE_TARGET].selected_index = 0;
                 menu_handle_confirm_input(param, previous);
             }
             for (j = 0; j < 5; j++) {
@@ -246,11 +245,11 @@ static void build_ability_preview(void) {
     const u16* at_table = g_event_work->ability_list.ids;
 
     work = (at_list_work_t*)g_heap_companion_overlay_load_address;
-    g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_PREVIEW_AT_LIST].select_text_table = 0x13;
-    g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_PREVIEW_AT_LIST].context = &g_at_list_layout;
-    text_id = at_table[g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST].selected_index];
+    g_menu_thread_menu_data[COMMAND_MENU_ABILITY_PREVIEW_AT_LIST].select_text_table = 0x13;
+    g_menu_thread_menu_data[COMMAND_MENU_ABILITY_PREVIEW_AT_LIST].context = &g_at_list_layout;
+    text_id = at_table[g_menu_thread_menu_data[COMMAND_MENU_ABILITY_LIST].selected_index];
     g_command_selected_command.data.action.targeting_type = TARGET_TYPE_TILE;
-    entry = &g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_PREVIEW_AT_LIST];
+    entry = &g_menu_thread_menu_data[COMMAND_MENU_ABILITY_PREVIEW_AT_LIST];
 
     if ((text_id & TEXT_ID_SECTION_MASK) == TEXT_ID_ABILITY_NAME_BASE) {
         staged_item = 0;
@@ -275,9 +274,9 @@ static void build_ability_preview(void) {
     /* Without an AT position for the action, this thread shows preview message 0x1023
      * and exits. */
     if (turn < 0 || turn == 0xff) {
-        g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_PREVIEW_MESSAGE].text_id = 0x1023;
+        g_menu_thread_menu_data[COMMAND_MENU_ABILITY_PREVIEW_MESSAGE].text_id = 0x1023;
         thread_set_parameters(
-            g_thread_current_id, (s32)&g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_PREVIEW_MESSAGE], 0, 0);
+            g_thread_current_id, (s32)&g_menu_thread_menu_data[COMMAND_MENU_ABILITY_PREVIEW_MESSAGE], 0, 0);
         menu_icon_linked_entry_thread();
     }
 
