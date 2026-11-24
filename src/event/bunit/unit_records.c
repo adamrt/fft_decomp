@@ -242,7 +242,7 @@ static void build_record(const battle_unit_t* unit, unit_list_record_t* record, 
     record->gender_flags = unit->unit_flags;
     record->character_identity = unit->character_identity;
 
-    if (job_is_special_monster(unit->job_id) != 0 || record->uses_monster_skillset != 0 || record->team_kind == 1) {
+    if (job_is_special_monster(unit->job_id) || record->uses_monster_skillset != 0 || record->team_kind == 1) {
         bcopy(unit->career.unlocked_jobs, record->unlocked_jobs, sizeof(record->unlocked_jobs));
     } else {
         i = job_calculate_unlocks(unit->career.job_levels, unit->unit_flags & UNIT_FLAG_MALE);
@@ -282,7 +282,7 @@ s32 unit_list_build_records(s32 unused, unit_list_record_t** unused_records, s32
     /* Keep status-byte reads separate; GCC otherwise merges the two tests into one 16-bit load. */
     for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
         unit = battle_unit_get(i);
-        if ((unit != 0) && (unit->active_battle_unit_id != UNIT_ACTIVE_BATTLE_UNIT_ID_NONE)) {
+        if (unit != 0 && unit->active_battle_unit_id != UNIT_ACTIVE_BATTLE_UNIT_ID_NONE) {
             if (unit->unit_flags & UNIT_FLAG_EGG) {
                 total++;
             } else if (!(*&unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_CRYSTAL)]

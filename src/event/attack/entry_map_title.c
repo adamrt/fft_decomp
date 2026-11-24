@@ -128,7 +128,7 @@ static void build_title_strips(POLY_GT4* polys, s32 width, s32 shade, s32 revers
 
 /* Thread body that animates the map-title panel strip with double-buffered
  * primitives: widen it by the thread's step, hold it, then sweep it again
- * with `reverse` set. The hold phase reuses `width` as its frame counter. */
+ * with `reverse` set. The hold phase reuses `width` as its step counter. */
 void attack_map_title_entrypoint(void) {
     s32 step = thread_current_get_parameter_3();
     s32 buffer = 0;
@@ -138,32 +138,26 @@ void attack_map_title_entrypoint(void) {
         step = 1;
     }
 
-    width = 8;
-    do {
+    for (width = 8; width < 0xf8; width += step) {
         buffer ^= 1;
         build_title_strips(g_map_title_sprites[buffer], width, 0x80, 0);
-        width += step;
         thread_yield();
-    } while (width < 0xf8);
+    }
 
-    width = 0;
-    do {
+    for (width = 0; width < 110; width += step) {
         buffer ^= 1;
         build_title_strips(g_map_title_sprites[buffer], 0xf8, 0x80, 0);
-        width += step;
         thread_yield();
-    } while (width < 0x6e);
+    }
 
-    width = 8;
-    do {
+    for (width = 8; width < 0xf9; width += step) {
         buffer ^= 1;
         build_title_strips(g_map_title_sprites[buffer], width, 0x80, 1);
         if (width >= 0x81) {
             s_map_title_closing_past_midpoint = 1;
         }
-        width += step;
         thread_yield();
-    } while (width < 0xf9);
+    }
 
     thread_current_exit();
 }
@@ -183,6 +177,7 @@ void map_load_title_graphic(void) {
     s32 adjusted = title - 1;
     s32 group_input = adjusted;
 
+    /* adjusted / 4 and % 4, spelled out: the bytes round a negative id up from title + 2. */
     if (adjusted < 0) {
         group_input = title + 2;
     }

@@ -158,7 +158,7 @@ menu_instruction_t* menu_opcode_12_draw_opening_window_frame(menu_instruction_t*
         rect.y = (command->window.y + (command->window.height >> 1)) - (rect.h >> 1);
         menu_gfx_enqueue_draw_area(&rect, g_menu_gfx_otag_index);
         g_gfx_otag_index_locked = 1;
-        g_menu_gfx_otag_index = g_menu_gfx_otag_index + 1;
+        g_menu_gfx_otag_index++;
     } else {
         g_gfx_otag_index_locked = 0;
     }

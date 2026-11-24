@@ -30,8 +30,12 @@ static void update_controller(void) {
     s32 index;
     u32 current_input;
     u32 filtered_input;
-    s32* counter_base;
-    u32 speed, initial_delay, secondary_repeat_period, repeat_period;
+    s32* counters;
+    u32 speed;
+    u32 initial_delay;
+    u32 secondary_repeat_period;
+    u32 repeat_period;
+
     speed = menu_get_event_speed();
     initial_delay = g_input_repeat_initial_delay / speed;
     repeat_period = g_input_repeat_period / speed;
@@ -79,25 +83,25 @@ static void update_controller(void) {
             g_save_input_previous &= ~mask;
         }
     }
-    counter_base = g_input_repeat_counters;
+    counters = g_input_repeat_counters;
     for (index = 0; index < 16; index++) {
         if (index == 4) {
             index = 12;
         }
         if (current_input & (1 << index)) {
-            counter_base[index]++;
+            counters[index]++;
         } else {
-            counter_base[index] = 0;
+            counters[index] = 0;
         }
-        if ((counter_base[index] >= initial_delay && counter_base[index] % repeat_period != 0)
-            || (counter_base[index] >= 2 && counter_base[index] < initial_delay)) {
+        if ((counters[index] >= initial_delay && counters[index] % repeat_period != 0)
+            || (counters[index] >= 2 && counters[index] < initial_delay)) {
             current_input &= ~(1 << index);
         }
-        if (counter_base[index] >= initial_delay) {
+        if (counters[index] >= initial_delay) {
             current_input |= 1U << (index + 16);
         }
-        if ((counter_base[index] >= initial_delay && counter_base[index] % secondary_repeat_period != 0)
-            || (counter_base[index] >= 2 && counter_base[index] < initial_delay << 1)) {
+        if ((counters[index] >= initial_delay && counters[index] % secondary_repeat_period != 0)
+            || (counters[index] >= 2 && counters[index] < initial_delay << 1)) {
             filtered_input &= ~(1 << index);
         }
     }

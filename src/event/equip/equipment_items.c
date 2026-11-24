@@ -80,8 +80,7 @@ s32 equipment_check_item_compatibility(s16 unit_index, s16 item_entry) {
  * The s16 slot parameter is retained because it reproduces the original
  * calling convention; menu_equipment_slot_e names its accepted values.
  * The s16 id and its new_item copy reproduce the target's two callee-saved
- * copies of the masked id (the same shape as
- * check_equipment_slot_item). */
+ * copies of the masked id. */
 static equipment_slot_result_e check_equipment_slot_item(s16 unit, s16 slot, s16 item_id) {
     s32 result;
     s16 id = item_id & ITEM_ENTRY_ID_MASK;

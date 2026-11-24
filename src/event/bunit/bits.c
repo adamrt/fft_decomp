@@ -30,19 +30,15 @@ u32 bits_primary_read(s32 bit_count) {
         g_unit_list_bits_reader_reset = 0;
     }
 
-    bit_count--;
     accumulator = 0;
-    if (bit_count != -1) {
-        do {
-            if ((*s_unit_list_bits_cursor >> g_unit_list_bits_index--) & 1) {
-                accumulator |= 1 << bit_count;
-            }
-            bit_count--;
-            if (g_unit_list_bits_index < 0) {
-                g_unit_list_bits_index = 7;
-                s_unit_list_bits_cursor++;
-            }
-        } while (bit_count != -1);
+    for (bit_count--; bit_count != -1; bit_count--) {
+        if ((*s_unit_list_bits_cursor >> g_unit_list_bits_index--) & 1) {
+            accumulator |= 1 << bit_count;
+        }
+        if (g_unit_list_bits_index < 0) {
+            g_unit_list_bits_index = 7;
+            s_unit_list_bits_cursor++;
+        }
     }
     return accumulator;
 }

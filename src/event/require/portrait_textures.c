@@ -105,10 +105,7 @@ void portrait_party_prepare_textures(void) {
         col = value % 8;
         /* Copy the 32x48 cell into the staging buffer and upload it, in rows of seven from
          * (0x100, 0x28). */
-        g_portrait_cell_rect.x = (i % 7) * 8 + 0x100;
-        g_portrait_cell_rect.y = (i / 7) * 0x30 + 0x28;
-        g_portrait_cell_rect.w = 8;
-        g_portrait_cell_rect.h = 0x30;
+        setRECT(&g_portrait_cell_rect, (i % 7) * 8 + 0x100, (i / 7) * 0x30 + 0x28, 8, 0x30);
         value = 0;
         offset = row * 2;
         offset += row;
@@ -127,10 +124,7 @@ void portrait_party_prepare_textures(void) {
         /* Upload the palette, three per VRAM line from (0x100, 0): palette n is in row n / 4
          * of the sheet's palette block; a monster's alternate palette is in its row from
          * WLDFACE_MONSTER_PALETTE_ROW, at the palette number's column. */
-        g_portrait_palette_rect.x = (i % 3) * 0x10 + 0x100;
-        g_portrait_palette_rect.y = i / 3;
-        g_portrait_palette_rect.w = 0x10;
-        g_portrait_palette_rect.h = 1;
+        setRECT(&g_portrait_palette_rect, (i % 3) * 0x10 + 0x100, i / 3, 0x10, 1);
         sheet = cell / WLDFACE_PORTRAITS_PER_SHEET;
         value = cell - sheet * WLDFACE_PORTRAITS_PER_SHEET;
         row = value / 4;

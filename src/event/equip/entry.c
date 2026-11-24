@@ -25,7 +25,7 @@ static u8 s_equipment_text_restore_pending;
  * g_equipment_item_numeric_thread_enabled and the numeric panel style. */
 void unit_panel_toggle_preview_stats_thread(s32 enable) {
     if (enable != 0) {
-        if (thread_is_running(EQUIPMENT_THREAD_SLOT_ITEM_NUMERIC) == 0) {
+        if (!thread_is_running(EQUIPMENT_THREAD_SLOT_ITEM_NUMERIC)) {
             thread_start(EQUIPMENT_THREAD_SLOT_ITEM_NUMERIC, unit_panel_numbers_thread);
             thread_set_parameters(
                 EQUIPMENT_THREAD_SLOT_ITEM_NUMERIC, (s32)&g_unit_panel_preview_stats_thread_params, 0, 0);

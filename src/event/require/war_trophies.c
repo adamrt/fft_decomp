@@ -254,7 +254,7 @@ void war_trophy_list_thread(void) {
                     row++;
                     last++;
                 }
-                if (last == s_war_trophy_entry_count || (row != 0 && (row & 7) == 0)) {
+                if (last == s_war_trophy_entry_count || (row != 0 && !(row & 7))) {
                     break;
                 }
 
@@ -530,7 +530,7 @@ void war_trophy_gil_ticker_thread(void) {
                             g_war_trophy_money_digit_speeds_q8[j] = 0x100;
                             if ((g_war_trophy_money_digit_positions_q8[j] >> 13) % 10
                                     == g_war_trophy_money_digit_targets[j]
-                                && ((g_war_trophy_money_digit_positions_q8[j] >> 8) & 0x1f) == 0) {
+                                && !((g_war_trophy_money_digit_positions_q8[j] >> 8) & 0x1f)) {
                                 g_war_trophy_money_digit_speeds_q8[j] = 0;
                                 if (j == digits - 1) {
                                     /* The last digit settled: leave all three loops. */

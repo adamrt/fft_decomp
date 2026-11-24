@@ -94,7 +94,7 @@ s32 item_list_update(void) {
         g_input_page_scroll_disabled = 1;
     }
     override = 0;
-    if (g_menu_input_lock_mode != 0 || thread_is_running(THREAD_SCREEN_SLOT_MESSAGE) != 0) {
+    if (g_menu_input_lock_mode != 0 || thread_is_running(THREAD_SCREEN_SLOT_MESSAGE)) {
         override = 1;
     }
     menu_script_run_with_palette_mode(g_equipment_render_commands, input, override);

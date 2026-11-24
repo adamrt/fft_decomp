@@ -30,7 +30,7 @@ void menu_gfx_present_frame(s32 first_otag, s32 draw_otag) {
     VSync(g_menu_event_speed);
     context = s_save_gfx_context_base;
     if (g_save_gfx_context == context) {
-        context = context + 1;
+        context++;
     }
     g_save_gfx_context = context;
     PutDispEnv(&context->display_environment);

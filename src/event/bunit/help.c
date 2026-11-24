@@ -45,7 +45,7 @@ extern s16 g_unit_list_help_node_24_help_base;
  * it has finished, also kept in g_unit_list_thread_running. */
 s32 menu_managed_thread_start(s32 id, menu_entry_t* desc) {
     if (g_unit_list_thread_running == 0) {
-        if (thread_is_running(id) != 0) {
+        if (thread_is_running(id)) {
             return 1;
         }
         g_menu_thread_menu_data = desc;

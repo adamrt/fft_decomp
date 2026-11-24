@@ -84,10 +84,7 @@ s32 ability_list_update(void) {
         menu_selection_clear_record(MENU_ABILITY_CATEGORY_REACTION);
         menu_selection_clear_record(MENU_ABILITY_CATEGORY_SUPPORT);
         menu_selection_clear_record(MENU_ABILITY_CATEGORY_MOVEMENT);
-        rect.x = 0x100;
-        rect.y = 0xc8;
-        rect.w = 0x14;
-        rect.h = 0x10;
+        setRECT(&rect, 0x100, 0xc8, 0x14, 0x10);
         s_ability_list_job_name_ids[0] = g_job_list_selected_id;
         text_render_id_rows_to_vram(
             g_text_section_pointers[TEXT_SECTION_JOB_NAMES], s_ability_list_job_name_ids, &rect, 0);
@@ -134,16 +131,13 @@ s32 ability_list_update(void) {
             g_ability_list_ability_category, &selected, &scroll, g_ability_list_ability_entries);
         menu_scrollable_list_init(
             g_ability_list_ability_entries, selected, scroll, g_text_section_pointers[TEXT_SECTION_ABILITY_NAMES]);
-        menu_window_set_scale_step(0xa);
+        menu_window_set_scale_step(10);
         g_sound_queued_effect_id = SOUND_SFX_PAGE_SWITCH;
     }
     menu_script_run_with_palette_mode(
         g_ability_list_render_commands, g_menu_input_primary_repeat, g_menu_input_lock_mode);
     /* The job name title, drawn from where the first call rendered it (0x100, 0xc8). */
-    rect.x = 0x26;
-    rect.y = 0x27;
-    rect.w = 0x50;
-    rect.h = 0x10;
+    setRECT(&rect, 0x26, 0x27, 0x50, 0x10);
     menu_gfx_enqueue_textured_quad(
         &rect, 0, 0xc8, 0, 0, g_status_screen_gfx_background_texture_page, g_menu_window_clut, 0xb);
     return MENU_JOB_LIST_STEP_ABILITIES;

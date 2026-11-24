@@ -171,13 +171,13 @@ void at_list_run(void) {
         frame = &page->frame;
 
         /* The frame thread dims its border while the thread before this one runs. */
-        if (thread_is_previous_running() != 0 && g_menu_input_lock_mode == 0) {
+        if (thread_is_previous_running() && g_menu_input_lock_mode == 0) {
             thread_set_parameters(g_thread_current_id + 1, (s32)&entry->window, 1, 0);
         } else {
             thread_set_parameters(g_thread_current_id + 1, (s32)&entry->window, 0, 0);
         }
 
-        if (delta == 0 && menu_can_accept_input() != 0 && i != 0) {
+        if (delta == 0 && menu_can_accept_input() && i != 0) {
             /* Dead store (column is reinitialized before use); only the reload
              * of layout for this branch survives in the target. */
             if (layout == 0) {
@@ -265,7 +265,7 @@ void at_list_run(void) {
         if (redraw_pending != 0) {
             redraw_pending = 0;
         }
-        if (delta == 0 && menu_can_accept_input() != 0) {
+        if (delta == 0 && menu_can_accept_input()) {
             redraw_pending = (s32)menu_text_update_page_scroll(entry, &row_offset, &ring, &cursor);
             ClearImage(&clear, 0, 0, 0);
         }
@@ -305,13 +305,13 @@ void at_list_run(void) {
         }
 
         frame->v0 = ring * 16 + accum - 2;
-        if (thread_is_previous_running() != 0 || g_menu_input_lock_mode == 1) {
+        if (thread_is_previous_running() || g_menu_input_lock_mode == 1) {
             frame->clut = 0x7F7D;
         } else {
             frame->clut = 0x7FFC;
         }
 
-        if (layout->hidden_rows != 0 && menu_can_accept_input() != 0) {
+        if (layout->hidden_rows != 0 && menu_can_accept_input()) {
             if (row_offset != 0) {
                 gfx_draw_or_append_gpu_primitive(&page->arrows[0]);
                 gfx_draw_or_append_gpu_primitive(&page->arrow_marks[0]);

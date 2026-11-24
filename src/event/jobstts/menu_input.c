@@ -30,7 +30,7 @@ void menu_input_update_message_state(void) {
             g_menu_input_newly_pressed = 0;
             g_menu_input_primary_repeat = 0;
             g_menu_input_secondary_repeat = 0;
-            g_text_thread_running_state = (g_text_thread_running_state != 0) ? 2 : 1;
+            g_text_thread_running_state = g_text_thread_running_state != 0 ? 2 : 1;
         } else if (g_text_thread_running_state != 0) {
             g_text_thread_running_state = 0;
             g_menu_input_newly_pressed = 0;

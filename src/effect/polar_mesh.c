@@ -217,7 +217,7 @@ s32 effect_polar_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_in
         }
 
         if (entry->polar_mesh.flags & EFFECT_EMITTER_FLAG_COLOR_CURVES) {
-            j = (entry->polar_mesh.color_curves & 0xfff);
+            j = entry->polar_mesh.color_curves & 0xfff;
             scratch->red_factor
                 = g_effect_animation_curve_data->curves[(j >> EFFECT_COLOR_CURVE_RED_SHIFT) & 0xf][work->frame];
             scratch->green_factor

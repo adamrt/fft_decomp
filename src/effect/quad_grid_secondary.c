@@ -158,7 +158,7 @@ s32 effect_textured_quad_grid_4x4_update(s32 record_index, s32 callback_slot, s3
         }
 
         if (geometry->flags & EFFECT_EMITTER_FLAG_COLOR_CURVES) {
-            row = (geometry->color_curves & 0xfff);
+            row = geometry->color_curves & 0xfff;
             red = g_effect_animation_curve_data->curves[(row >> EFFECT_COLOR_CURVE_RED_SHIFT) & 0xf][work->frame];
             green = g_effect_animation_curve_data->curves[(row >> EFFECT_COLOR_CURVE_GREEN_SHIFT) & 0xf][work->frame];
             blue = g_effect_animation_curve_data->curves[(row >> EFFECT_COLOR_CURVE_BLUE_SHIFT) & 0xf][work->frame];

@@ -23,9 +23,9 @@ static s16 s_unit_list_gfx_poly_f4_count = 0;
 void menu_gfx_present_frame(s32 first_otag, s32 draw_otag) {
     u32* previous_otag = g_menu_gfx_context->otag;
     menu_gfx_context_t* context;
-    /* Preserve the target's unused 0x60-byte stack area (0x80-byte frame,
-     * four register saves at 0x70..0x7c). Its original declaration is unknown. */
-    u8 unused_scratch[0x60];
+    /* Never used here: WORLD's twin reads the draw environment into its DRAWENV, and this
+     * copy still reserves the frame space for one. */
+    DRAWENV env;
 
     system_frame_stub();
     g_gfx_poly_f3_count = 0;
@@ -63,7 +63,7 @@ void menu_gfx_present_frame(s32 first_otag, s32 draw_otag) {
     PutDrawEnv(&g_menu_gfx_context->draw_env);
     g_menu_gfx_drawenv_y = g_menu_gfx_context->draw_env.clip.y;
     if (draw_otag != -1) {
-        DrawOTag((previous_otag + draw_otag));
+        DrawOTag(previous_otag + draw_otag);
     }
     ClearOTag(g_menu_gfx_context->otag + first_otag, g_gfx_otag_count - first_otag);
 }

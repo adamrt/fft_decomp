@@ -134,7 +134,7 @@ void menu_draw_sliding_cursor(const point16_t* anchor, u16* state, s32 mode) {
     }
 
     frame = *state;
-    frame = frame & 0x7F;
+    frame &= 0x7F;
     frame = frame * menu_get_event_speed();
     active_test = active;
     if (active_test != 0) {
@@ -180,8 +180,8 @@ void menu_draw_sliding_cursor(const point16_t* anchor, u16* state, s32 mode) {
     rect.w = 0x10;
     rect.h = 0x10;
     menu_gfx_enqueue_textured_quad(&rect, 0xA8, 0, 0, 0, g_menu_cursor_texture_page, clut, g_menu_gfx_otag_index);
-    rect.x = rect.x + 2;
-    rect.y = rect.y + 2;
+    rect.x += 2;
+    rect.y += 2;
     menu_gfx_enqueue_textured_quad(&rect, 0xB8, 0, 0, 1, 0x5F, shadow_clut, g_menu_gfx_otag_index);
 }
 
@@ -490,7 +490,7 @@ menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* comm
     }
     start = command;
     for (i = 0; i < total; i++) {
-        if (((g_menu_scroll_base_index + i) > (g_menu_list_entry_count - 1)) && (g_menu_list_scroll_offset == 0)) {
+        if (((g_menu_scroll_base_index + i) > (g_menu_list_entry_count - 1)) && g_menu_list_scroll_offset == 0) {
             break;
         }
         command = start;

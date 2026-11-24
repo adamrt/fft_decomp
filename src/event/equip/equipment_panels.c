@@ -141,6 +141,7 @@ void unit_panel_equipment_thread(void) {
             if ((id & ITEM_ID_MASK) != ITEM_ID_NONE) {
                 item_set_icon_sprite(&screen->frame.sprites[19 + i], id);
             } else {
+                /* Offset from sprites[i]: indexing sprites[19 + i] changes the addressing. */
                 (&screen->frame.sprites[i])[19].x0 = 0;
             }
         }

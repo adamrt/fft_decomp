@@ -115,7 +115,7 @@ void unit_panel_toggle_equipment_and_numbers(s32 enable) {
             & (MENU_STATUS_PANEL_SLIDE_DOWN | MENU_STATUS_PANEL_SLIDE_UP)) {
             return;
         }
-        if (thread_is_running(THREAD_SCREEN_SLOT_CHARACTER_STATUS) != 0) {
+        if (thread_is_running(THREAD_SCREEN_SLOT_CHARACTER_STATUS)) {
             return;
         }
         thread_start(THREAD_SCREEN_SLOT_CHARACTER_STATUS, unit_panel_equipment_ability_thread);
@@ -305,8 +305,8 @@ static void draw_button(s16 slot, s16 x, s16 y, s16 pressed, s16 busy, u16 sound
         g_sound_queued_effect_id = sound_id;
     } else {
         phase = g_menu_button_press_timers[slot];
-        if ((phase != 0) && (phase < 6 / speed)) {
-            g_menu_button_press_timers[slot] = g_menu_button_press_timers[slot] + 1;
+        if (phase != 0 && phase < 6 / speed) {
+            g_menu_button_press_timers[slot]++;
         } else {
             clut = g_menu_cursor_mode0_foreground_clut;
             g_menu_button_press_timers[slot] = 0;
@@ -461,13 +461,12 @@ s32 unit_grid_update(s16 allow_banner_toggle, s16 allow_browse, s16 show_stat_pa
     /* CIRCLE starts browsing units with their equipment panels and CROSS ends it; `unit`
      * drops to 0 on the frame browsing ends. */
     unit = 1;
-    if (allow_browse != 0 && unit_list_get_input_lock() == 0
-        && thread_is_running(THREAD_SCREEN_SLOT_COMPARISON_STATUS) == 0
+    if (allow_browse != 0 && unit_list_get_input_lock() == 0 && !thread_is_running(THREAD_SCREEN_SLOT_COMPARISON_STATUS)
         && !(g_unit_panel_status_display_thread_params.flags
             & (MENU_STATUS_PANEL_SLIDE_DOWN | MENU_STATUS_PANEL_SLIDE_UP))
         && g_unit_list_status_banner_slide_step == 0 && g_unit_list_scroll_step == 0) {
         if (buttons & PSX_PAD_CIRCLE) {
-            if (g_unit_list_browse_enabled == 0 && thread_is_running(THREAD_SCREEN_SLOT_CHARACTER_STATUS) == 0) {
+            if (g_unit_list_browse_enabled == 0 && !thread_is_running(THREAD_SCREEN_SLOT_CHARACTER_STATUS)) {
                 g_unit_list_browse_enabled = 1;
                 g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
             }
@@ -484,14 +483,14 @@ s32 unit_grid_update(s16 allow_banner_toggle, s16 allow_browse, s16 show_stat_pa
     }
     /* SQUARE shows or hides the status banner. */
     if (allow_banner_toggle != 0 && g_unit_list_browse_enabled == 0 && (buttons & PSX_PAD_SQUARE)
-        && unit_grid_check_scroll() == 0 && thread_is_running(THREAD_SCREEN_SLOT_CHARACTER_STATUS) == 0
-        && thread_is_running(THREAD_SCREEN_SLOT_COMPARISON_STATUS) == 0
+        && unit_grid_check_scroll() == 0 && !thread_is_running(THREAD_SCREEN_SLOT_CHARACTER_STATUS)
+        && !thread_is_running(THREAD_SCREEN_SLOT_COMPARISON_STATUS)
         && !(g_unit_panel_status_display_thread_params.flags
             & (MENU_STATUS_PANEL_SLIDE_DOWN | MENU_STATUS_PANEL_SLIDE_UP))) {
         g_sound_queued_effect_id = SOUND_SFX_PAGE_SWITCH;
         g_unit_list_status_banner_enabled = g_unit_list_status_banner_enabled == 0;
     }
-    if (thread_is_running(THREAD_SCREEN_SLOT_CHARACTER_STATUS) == 0 && g_unit_list_help_screen_id == MENU_GRID_HELP_NONE
+    if (!thread_is_running(THREAD_SCREEN_SLOT_CHARACTER_STATUS) && g_unit_list_help_screen_id == MENU_GRID_HELP_NONE
         && fade_menu_get_state() == 0) {
         g_unit_list_grid_selected_cell = menu_step_grid_selection(
             4, 5, g_unit_list_reorderable_count - 1, g_unit_list_grid_selected_cell, buttons);

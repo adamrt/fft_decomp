@@ -17,7 +17,7 @@ menu_instruction_t* menu_opcode_13_clear_temporary_draw_area(menu_instruction_t*
         g_menu_gfx_otag_index = otag_index;
         menu_gfx_enqueue_draw_area(&g_gfx_draw_area, otag_index);
         g_gfx_otag_index_locked = 0;
-        g_menu_gfx_otag_index = g_menu_gfx_otag_index + 1;
+        g_menu_gfx_otag_index++;
     }
     return menu_next_instruction(data);
 }

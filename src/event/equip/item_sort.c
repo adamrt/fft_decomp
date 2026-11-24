@@ -61,12 +61,11 @@ void item_list_sort(s32 mode, s16* list) {
         return;
     }
 
-    passes = count - 1;
     criteria = g_item_type_order_lists[mode];
-    for (; passes > 0; passes--) {
+    for (passes = count - 1; passes > 0; passes--) {
         for (j = 0; j < passes; j++) {
             k = 0;
-            criterion = criteria[k];
+            criterion = criteria[0];
             item_a = list[j] & ITEM_ENTRY_ID_MASK;
             item_b = list[j + 1] & ITEM_ENTRY_ID_MASK;
 

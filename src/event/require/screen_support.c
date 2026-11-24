@@ -104,7 +104,7 @@ void input_wait_frames_or_skip(s32 frames) {
             thread_yield();
             input = script_get_controller_input_pointer(0);
             g_menu_input_controller = input;
-            if ((*input & PSX_PAD_CIRCLE) == 0) {
+            if (!(*input & PSX_PAD_CIRCLE)) {
                 i++;
                 if (i < frames) {
                     continue;

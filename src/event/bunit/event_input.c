@@ -65,7 +65,7 @@ void menu_input_update_event_state(u32* otag, u32 input, s32 framebuffer_y) {
             repeat_delay = g_input_repeat_period / g_script_event_speed;
             if (counter >= repeat_delay) {
                 g_input_repeat_counter = 0;
-                if ((input & PSX_PAD_SQUARE) != 0) {
+                if (input & PSX_PAD_SQUARE) {
                     g_input_event = input & (PSX_PAD_RIGHT | PSX_PAD_LEFT);
                 } else {
                     g_input_event = input & (PSX_PAD_UP | PSX_PAD_RIGHT | PSX_PAD_DOWN | PSX_PAD_LEFT);
@@ -74,7 +74,7 @@ void menu_input_update_event_state(u32* otag, u32 input, s32 framebuffer_y) {
             secondary_delay = g_input_secondary_repeat_period / g_script_event_speed;
             if (g_input_secondary_repeat_counter >= secondary_delay) {
                 g_input_secondary_repeat_counter = 0;
-                if ((g_input_current & PSX_PAD_SQUARE) != 0) {
+                if (g_input_current & PSX_PAD_SQUARE) {
                     g_input_event |= g_input_current & (PSX_PAD_L1 | PSX_PAD_R1 | PSX_PAD_UP | PSX_PAD_DOWN);
                 } else {
                     g_input_event |= g_input_current & (PSX_PAD_L1 | PSX_PAD_R1);
@@ -92,21 +92,17 @@ void menu_input_update_event_state(u32* otag, u32 input, s32 framebuffer_y) {
         g_script_input_suppression_frames = 5;
     }
 
-    thread_id = 1;
-    do {
+    for (thread_id = 1; thread_id < 16; thread_id++) {
         g_thread_status_snapshot[thread_id] = thread_is_running_asm(thread_id);
-        thread_id++;
-    } while (thread_id < 16);
+    }
 
     thread_yield();
-    thread_id = 1;
-    do {
+    for (thread_id = 1; thread_id < 16; thread_id++) {
         status = g_thread_status_snapshot[thread_id];
         if (status != thread_is_running_asm(thread_id)) {
             g_script_input_suppression_frames = 5;
         }
-        thread_id++;
-    } while (thread_id < 16);
+    }
 
     if (g_script_input_suppression_frames != 0) {
         g_script_input_suppression_frames--;

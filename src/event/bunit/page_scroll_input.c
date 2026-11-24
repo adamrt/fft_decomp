@@ -28,10 +28,10 @@ menu_vertical_scroll_direction_e menu_input_read_page_scroll_direction(void) {
             input = PadRead(0);
             if ((input & PSX_PAD_UP) && (input & PSX_PAD_SQUARE)) {
                 direction = MENU_VERTICAL_SCROLL_UP;
-                g_input_page_scroll_hold_frames = g_input_page_scroll_hold_frames + 1;
+                g_input_page_scroll_hold_frames++;
             } else if ((input & PSX_PAD_DOWN) && (input & PSX_PAD_SQUARE)) {
                 direction = MENU_VERTICAL_SCROLL_DOWN;
-                g_input_page_scroll_hold_frames = g_input_page_scroll_hold_frames + 1;
+                g_input_page_scroll_hold_frames++;
             } else {
                 g_input_page_scroll_hold_frames = 0;
             }
@@ -40,8 +40,8 @@ menu_vertical_scroll_direction_e menu_input_read_page_scroll_direction(void) {
             initial_delay = g_input_repeat_initial_delay / input;
             repeat_period = g_input_secondary_repeat_period / input;
             held_frames = g_input_page_scroll_hold_frames;
-            if ((held_frames < initial_delay) || ((held_frames % repeat_period) == 0)) {
-                if ((held_frames >= 2) && (held_frames < initial_delay)) {
+            if (held_frames < initial_delay || ((held_frames % repeat_period) == 0)) {
+                if (held_frames >= 2 && held_frames < initial_delay) {
                     return MENU_VERTICAL_SCROLL_WAIT;
                 }
             } else {

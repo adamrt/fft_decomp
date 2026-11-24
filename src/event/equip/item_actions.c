@@ -63,8 +63,9 @@ s8 item_list_update_action_menu(void) {
         g_equipment_item_action_menu_active = 1;
     }
 
-    /* Each row's help text, from entry 0x2f of HELP_TEXT_SECTION_MENU_COMMANDS (0x1000) on. */
-    g_help_message_text_id = s_equipment_item_action_active_menu->selected_index + 0x102F;
+    /* Each row's help text, from entry 0x2f of HELP_TEXT_SECTION_MENU_COMMANDS on. */
+    g_help_message_text_id
+        = s_equipment_item_action_active_menu->selected_index + HELP_TEXT_ID_MENU_COMMAND_BASE + 0x2f;
     g_equipment_item_action_menu_active
         = menu_managed_thread_start(EQUIPMENT_THREAD_SLOT_POPUP_MENU, s_equipment_item_action_active_menu);
     if (g_equipment_item_action_menu_active == 0) {
@@ -173,8 +174,8 @@ enum {
  * branch instead of the target's `li`/`sltiu`/`subu`. Assigning it before the
  * window call also keeps the constant load after the marker address arithmetic.
  *
- * Structurally identical to item_list_draw_tabs, which draws
- * the same window/marker pair for the world-map menu.
+ * WORLD's item_list_draw_tabs draws the same window/marker pair for its formation
+ * and shop screens.
  */
 void item_list_draw_tabs(s32 unused, s32 slot, s32 override) {
     s16 x = g_equipment_slot_marker_x[slot];

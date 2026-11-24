@@ -346,7 +346,7 @@ void unit_panel_banner_thread(void) {
         panel->sprites[6].v0 = (zodiac / 7) * 0x14 + 0x2A;
 
         /* Rebuild the text images only on the first frame and on redraw requests; VRAM keeps them in between. */
-        if ((frame == 0) || (thread->redraw_request != 0)) {
+        if (frame == 0 || thread->redraw_request != 0) {
             /* Units off the AT list (negative index) show dashes. */
             if (state->list_index < 0) {
                 number_entries[6].format = 0xC00;

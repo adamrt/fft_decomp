@@ -224,14 +224,12 @@ void require_dark_screen_entrypoint(void) {
                                 tile->radius = 0;
                             }
                         }
-                        poly->r0 = g_after_battle_gfx_fade_rgb[0];
-                        poly->g0 = g_after_battle_gfx_fade_rgb[1];
-                        poly->b0 = g_after_battle_gfx_fade_rgb[2];
+                        setRGB0(poly, g_after_battle_gfx_fade_rgb[0], g_after_battle_gfx_fade_rgb[1],
+                            g_after_battle_gfx_fade_rgb[2]);
                         gfx_append_gpu_primitive_to_secondary_otag(poly);
                     } else {
-                        poly->r0 = g_after_battle_gfx_fade_rgb[0];
-                        poly->g0 = g_after_battle_gfx_fade_rgb[1];
-                        poly->b0 = g_after_battle_gfx_fade_rgb[2];
+                        setRGB0(poly, g_after_battle_gfx_fade_rgb[0], g_after_battle_gfx_fade_rgb[1],
+                            g_after_battle_gfx_fade_rgb[2]);
                         /* Waiting tiles stay hidden in phase 0 and keep their full shape in phase 1. */
                         if (phase == 1) {
                             gfx_append_gpu_primitive_to_secondary_otag(poly);
@@ -259,9 +257,7 @@ void require_dark_screen_entrypoint(void) {
 
         SetPolyF4(&s_conditions_burst_flash_polys[0]);
         setXY4(&s_conditions_burst_flash_polys[0], 0x80, 0, 0x180, 0, 0x80, 0x100, 0x180, 0x100);
-        s_conditions_burst_flash_polys[0].r0 = 0x30;
-        s_conditions_burst_flash_polys[0].g0 = 0x28;
-        s_conditions_burst_flash_polys[0].b0 = 0x10;
+        setRGB0(&s_conditions_burst_flash_polys[0], 0x30, 0x28, 0x10);
         SetSemiTrans(&s_conditions_burst_flash_polys[0], 1);
         mem_copy_bytes_nonempty(
             &s_conditions_burst_flash_polys[1], &s_conditions_burst_flash_polys[0], sizeof(POLY_F4));

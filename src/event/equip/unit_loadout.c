@@ -24,19 +24,19 @@ static equipment_unit_preview_t s_equipment_unit_records[2] = { 0 };
 s32 equipment_is_two_handing_weapon(const s16* slots, s32 two_hands_support) {
     s32 result = 0;
     s32 item_id;
-    s16 w0 = slots[MENU_EQUIPMENT_SLOT_RIGHT_HAND];
-    s16 w1;
+    s16 right_hand = slots[MENU_EQUIPMENT_SLOT_RIGHT_HAND];
+    s16 left_hand;
     u8 flags;
 
     item_id = 0;
-    if (w0 != 0) {
+    if (right_hand != 0) {
         if (slots[MENU_EQUIPMENT_SLOT_LEFT_HAND] == 0) {
-            item_id = w0;
+            item_id = right_hand;
         }
     } else {
-        w1 = slots[MENU_EQUIPMENT_SLOT_LEFT_HAND];
-        if (w1 != 0) {
-            item_id = w1;
+        left_hand = slots[MENU_EQUIPMENT_SLOT_LEFT_HAND];
+        if (left_hand != 0) {
+            item_id = left_hand;
         }
     }
     if (item_id != 0 && item_id < ITEM_ID_THROWABLE_FIRST) {
@@ -216,7 +216,7 @@ void equipment_commit_loadout(void) {
     battle_unit_t* battle_unit;
     s16 unit_id = g_equipment_unit_data[0]->battle_unit_id;
     s32 item_id;
-    s32 saved;
+    s32 unit_count;
     s32 hp;
     s32 mp;
     s32 max;
@@ -272,8 +272,8 @@ void equipment_commit_loadout(void) {
     battle_unit->equipment_stats[UNIT_EQUIPMENT_STAT_LEFT_WEAPON_POWER] = bonuses.state.left_weapon_power;
     battle_unit->equipment_stats[UNIT_EQUIPMENT_STAT_RIGHT_WEAPON_EVADE] = bonuses.state.right_weapon_evade;
     battle_unit->equipment_stats[UNIT_EQUIPMENT_STAT_LEFT_WEAPON_EVADE] = bonuses.state.left_weapon_evade;
-    saved = g_equipment_unit_data[0]->unit_count;
+    unit_count = g_equipment_unit_data[0]->unit_count;
     build_unit_preview(battle_unit, g_equipment_unit_data[0]);
-    g_equipment_unit_data[0]->unit_count = saved;
+    g_equipment_unit_data[0]->unit_count = unit_count;
     g_equipment_unit_data[0]->battle_unit_id = unit_id;
 }

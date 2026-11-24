@@ -23,10 +23,10 @@ menu_vertical_scroll_direction_e menu_input_read_page_scroll_direction(void) {
 
     if ((input & PSX_PAD_UP) && (input & PSX_PAD_SQUARE)) {
         page_direction = MENU_VERTICAL_SCROLL_UP;
-        g_input_page_scroll_hold_frames = g_input_page_scroll_hold_frames + 1;
+        g_input_page_scroll_hold_frames++;
     } else if ((input & PSX_PAD_DOWN) && (input & PSX_PAD_SQUARE)) {
         page_direction = MENU_VERTICAL_SCROLL_DOWN;
-        g_input_page_scroll_hold_frames = g_input_page_scroll_hold_frames + 1;
+        g_input_page_scroll_hold_frames++;
     } else {
         g_input_page_scroll_hold_frames = 0;
     }

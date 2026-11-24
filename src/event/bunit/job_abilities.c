@@ -105,10 +105,10 @@ s32 job_list_build(s32 unit_id, s16* job_ids, s32 unused_2) {
         job_is_unlocked = bits_primary_read(1);
         /* saved_unit_id now holds the job id; a separate local changes the allocation. */
         saved_unit_id = generic_job_index + JOB_ID_SQUIRE;
-        if (saved_unit_id == JOB_ID_BARD && ((*unit_data_cursor)->gender_flags & UNIT_FLAG_FEMALE) != 0) {
+        if (saved_unit_id == JOB_ID_BARD && ((*unit_data_cursor)->gender_flags & UNIT_FLAG_FEMALE)) {
             continue;
         }
-        if (saved_unit_id == JOB_ID_DANCER && ((*unit_data_cursor)->gender_flags & UNIT_FLAG_MALE) != 0) {
+        if (saved_unit_id == JOB_ID_DANCER && ((*unit_data_cursor)->gender_flags & UNIT_FLAG_MALE)) {
             continue;
         }
         if (job_is_unlocked != 0) {

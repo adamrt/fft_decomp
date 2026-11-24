@@ -482,7 +482,7 @@ s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter
 
             /* The color curves are read at the tentacle's age, not the effect frame. */
             if (entry->tentacle_mesh.flags & EFFECT_EMITTER_FLAG_COLOR_CURVES) {
-                factor = (entry->tentacle_mesh.color_curves & 0xfff);
+                factor = entry->tentacle_mesh.color_curves & 0xfff;
                 red = g_effect_animation_curve_data
                           ->curves[(factor >> EFFECT_COLOR_CURVE_RED_SHIFT) & 0xf][tentacle->age];
                 green = g_effect_animation_curve_data

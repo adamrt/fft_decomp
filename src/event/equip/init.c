@@ -129,7 +129,7 @@ void equipment_init(s32 battle_unit_id) {
  * thread is idle; stops it otherwise. */
 void unit_panel_toggle_banner_thread(s32 enable) {
     if (enable != 0) {
-        if (thread_is_running(EQUIPMENT_THREAD_SLOT_UNIT_STATUS) == 0) {
+        if (!thread_is_running(EQUIPMENT_THREAD_SLOT_UNIT_STATUS)) {
             thread_start(EQUIPMENT_THREAD_SLOT_UNIT_STATUS, unit_panel_banner_thread);
             thread_set_parameters(EQUIPMENT_THREAD_SLOT_UNIT_STATUS, (s32)&g_unit_panel_unit_status_panel_params, 0, 0);
         }
@@ -142,7 +142,7 @@ void unit_panel_toggle_banner_thread(s32 enable) {
  * when `enable` is set; ask both to stop otherwise. */
 void unit_panel_toggle_equipment_threads(s32 enable) {
     if (enable != 0) {
-        if (thread_is_running(EQUIPMENT_THREAD_SLOT_EQUIPMENT_LIST) == 0) {
+        if (!thread_is_running(EQUIPMENT_THREAD_SLOT_EQUIPMENT_LIST)) {
             thread_start(EQUIPMENT_THREAD_SLOT_EQUIPMENT_LIST, unit_panel_equipment_thread);
             thread_set_parameters(EQUIPMENT_THREAD_SLOT_EQUIPMENT_LIST, (s32)&g_equipment_panel_params, 0, 0);
         }

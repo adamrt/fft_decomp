@@ -115,11 +115,10 @@ static void init_graphics(void) {
 static void update_input_lock(void) {
     s32 timer;
 
-    if (thread_is_running(THREAD_SCREEN_SLOT_COMPARISON_STATUS) != 0) {
+    if (thread_is_running(THREAD_SCREEN_SLOT_COMPARISON_STATUS)) {
         timer = 0xA;
-    } else if ((g_unit_panel_status_display_thread_params.flags
-                   & (MENU_STATUS_PANEL_SLIDE_DOWN | MENU_STATUS_PANEL_SLIDE_UP))
-        != 0) {
+    } else if (g_unit_panel_status_display_thread_params.flags
+        & (MENU_STATUS_PANEL_SLIDE_DOWN | MENU_STATUS_PANEL_SLIDE_UP)) {
         timer = 0xA;
     } else if (unit_grid_check_scroll() != 0) {
         timer = 0xA;

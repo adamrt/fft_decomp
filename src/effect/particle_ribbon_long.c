@@ -495,7 +495,7 @@ s32 effect_particle_ribbon_long_update(s32 record_index, s32 callback_slot, s32 
 
             /* The color curves are read at the ribbon's age, not the effect frame. */
             if (entry->particle_ribbon.flags & EFFECT_EMITTER_FLAG_COLOR_CURVES) {
-                factor = (entry->particle_ribbon.color_curves & 0xfff);
+                factor = entry->particle_ribbon.color_curves & 0xfff;
                 red = g_effect_animation_curve_data->curves[(factor >> EFFECT_COLOR_CURVE_RED_SHIFT) & 0xf][slot->age];
                 green = g_effect_animation_curve_data
                             ->curves[(factor >> EFFECT_COLOR_CURVE_GREEN_SHIFT) & 0xf][slot->age];

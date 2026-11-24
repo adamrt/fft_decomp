@@ -37,7 +37,7 @@ static void copy_unit_jobs(battle_unit_t* unit, status_screen_unit_jobs_t* out) 
         team_kind = 2;
     }
 
-    if ((team_kind == 1) || job_is_special_monster(unit->job_id)) {
+    if (team_kind == 1 || job_is_special_monster(unit->job_id)) {
         bcopy(unit->career.unlocked_jobs, out->career.unlocked_jobs, sizeof(out->career.unlocked_jobs));
     } else {
         i = job_calculate_unlocks(unit->career.job_levels, unit->unit_flags & UNIT_FLAG_MALE);
@@ -107,7 +107,7 @@ s32 job_list_build(u8 unit_id, s16* job_ids, s32 unused) {
     slot = &unit_table[unit_index];
     bits_primary_init_reader((*slot)->career.unlocked_jobs);
     job_ids[0] = get_base_job(unit_id);
-    if ((job_is_special_monster((*slot)->job_id) != 0) || ((*slot)->character_identity == CHARACTER_IDENTITY_MONSTER)) {
+    if ((job_is_special_monster((*slot)->job_id)) || ((*slot)->character_identity == CHARACTER_IDENTITY_MONSTER)) {
         job_ids[1] = -1;
         return 1;
     }
@@ -119,8 +119,8 @@ s32 job_list_build(u8 unit_id, s16* job_ids, s32 unused) {
     out = job_ids + 1;
     for (; i < JOB_ID_GENERIC_COUNT; i++) {
         job = i + JOB_ID_SQUIRE;
-        if ((bits_primary_read(1) != 0) && ((job != JOB_ID_BARD) || !((*loop_slot)->unit_flags & UNIT_FLAG_FEMALE))
-            && ((job != JOB_ID_DANCER) || !((*loop_slot)->unit_flags & UNIT_FLAG_MALE))) {
+        if ((bits_primary_read(1) != 0) && (job != JOB_ID_BARD || !((*loop_slot)->unit_flags & UNIT_FLAG_FEMALE))
+            && (job != JOB_ID_DANCER || !((*loop_slot)->unit_flags & UNIT_FLAG_MALE))) {
             *out = job;
             out++;
             count++;
@@ -224,7 +224,7 @@ s32 ability_list_build(
         + offsetof(status_screen_unit_jobs_t, career.learned_abilities);
     bits_primary_init_reader((u8*)(byte_offset + (s32)unit_data));
     for (i = 0; i < SKILLSET_ABILITY_LIST_COUNT; i++) {
-        if (job_is_special_monster(g_status_screen_unit_data[unit_index]->job_id) != 0) {
+        if (job_is_special_monster(g_status_screen_unit_data[unit_index]->job_id)) {
             learned = 1;
         } else {
             learned = bits_primary_read(1);

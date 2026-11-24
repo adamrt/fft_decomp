@@ -196,7 +196,7 @@ void debugchr_mounted_unit_entrypoint(s32 unit_id) {
     s32 input;
     /* Shared by the R1 and L1 blocks: set twice in the loop, the address is
      * not a loop invariant candidate and is rebuilt in each block. */
-    s16* unit_type_ptr;
+    s16* status_unit_index;
 
     thread_current_set_task(THREAD_TASK_MOUNTED_STATUS_SCREEN);
     g_debug_unit_editor_active = 0;
@@ -226,28 +226,15 @@ void debugchr_mounted_unit_entrypoint(s32 unit_id) {
         g_unit_editor_fields[UNIT_EDITOR_FIELD_SECONDARY_SKILLSET].destination[0] = UNIT_EDITOR_FIELD_PRIMARY_SKILLSET;
     }
 
-    {
-        /* Whole-record locals fold these saved member addresses into absolute stores. */
-        s32* refresh_a;
-        s32* refresh_b;
-        s32* refresh_c;
-
-        refresh_a = &s_unit_editor_status_display_thread_params.style;
-        refresh_b = &g_unit_panel_numbers_thread_params.style;
-        refresh_c = &g_unit_panel_character_status_frame_config.style;
-        *refresh_a = 0;
-        *refresh_b = 0;
-        *refresh_c = 0;
-        thread_start(THREAD_SCREEN_SLOT_UNIT_STATUS, unit_panel_banner_thread);
-        thread_set_parameters(
-            THREAD_SCREEN_SLOT_UNIT_STATUS, (u8*)refresh_a - offsetof(unit_panel_thread_t, style), 0, 0);
-        thread_start(THREAD_SCREEN_SLOT_NUMERIC_PANEL, unit_panel_numbers_thread);
-        thread_set_parameters(
-            THREAD_SCREEN_SLOT_NUMERIC_PANEL, (u8*)refresh_b - offsetof(unit_panel_thread_t, style), 0, 0);
-        thread_start(THREAD_SCREEN_SLOT_CHARACTER_STATUS, unit_panel_equipment_ability_thread);
-        thread_set_parameters(
-            THREAD_SCREEN_SLOT_CHARACTER_STATUS, (u8*)refresh_c - offsetof(unit_panel_thread_t, style), 0, 0);
-    }
+    s_unit_editor_status_display_thread_params.style = 0;
+    g_unit_panel_numbers_thread_params.style = 0;
+    g_unit_panel_character_status_frame_config.style = 0;
+    thread_start(THREAD_SCREEN_SLOT_UNIT_STATUS, unit_panel_banner_thread);
+    thread_set_parameters(THREAD_SCREEN_SLOT_UNIT_STATUS, &s_unit_editor_status_display_thread_params, 0, 0);
+    thread_start(THREAD_SCREEN_SLOT_NUMERIC_PANEL, unit_panel_numbers_thread);
+    thread_set_parameters(THREAD_SCREEN_SLOT_NUMERIC_PANEL, &g_unit_panel_numbers_thread_params, 0, 0);
+    thread_start(THREAD_SCREEN_SLOT_CHARACTER_STATUS, unit_panel_equipment_ability_thread);
+    thread_set_parameters(THREAD_SCREEN_SLOT_CHARACTER_STATUS, &g_unit_panel_character_status_frame_config, 0, 0);
 
     frame = 0;
     render_buffers = s_unit_editor_gfx_render_buffers[0];
@@ -268,7 +255,7 @@ void debugchr_mounted_unit_entrypoint(s32 unit_id) {
             unit_panel_build_button_prompts((POLY_FT4*)(render_offset + (s32)render_buffers));
         }
 
-        if (thread_is_running_asm(THREAD_SLOT_MENU_BUILDING) != 0) {
+        if (thread_is_running_asm(THREAD_SLOT_MENU_BUILDING)) {
             /* `one` doubles as SOUND_SFX_CONFIRM, played once per menu-building run. */
             if (sound_latched == 0) {
                 g_sound_pending_sfx_id = one;
@@ -295,9 +282,9 @@ void debugchr_mounted_unit_entrypoint(s32 unit_id) {
         animation[1] = 0;
         animation[2] = 0;
 
-        if (event_mode == 0 && g_help_open == 0 && thread_is_previous_running() == 0) {
+        if (event_mode == 0 && g_help_open == 0 && !thread_is_previous_running()) {
             input = *g_menu_input_controller;
-            if ((input & PSX_PAD_CROSS) != 0) {
+            if (input & PSX_PAD_CROSS) {
                 thread_set_parameters(THREAD_SCREEN_SLOT_UNIT_STATUS, 0, 0, 1);
                 thread_set_parameters(THREAD_SCREEN_SLOT_NUMERIC_PANEL, 0, 0, 1);
                 thread_set_parameters(THREAD_SCREEN_SLOT_CHARACTER_STATUS, 0, 0, 1);
@@ -305,8 +292,8 @@ void debugchr_mounted_unit_entrypoint(s32 unit_id) {
                 break;
             }
 
-            if ((input & PSX_PAD_CIRCLE) != 0 && thread_is_running_asm(THREAD_SLOT_MENU_BUILDING) == 0
-                && (battle_unit_has_any_current_status(g_unit_panel_selected_unit.battle_unit_id) != 0
+            if ((input & PSX_PAD_CIRCLE) && !thread_is_running_asm(THREAD_SLOT_MENU_BUILDING)
+                && (battle_unit_has_any_current_status(g_unit_panel_selected_unit.battle_unit_id)
                     || g_unit_panel_selected_unit_fields.state.generic_monster == 0)) {
                 s_unit_editor_status_display_thread_params.style = one;
                 g_unit_panel_numbers_thread_params.style = one;
@@ -327,7 +314,7 @@ void debugchr_mounted_unit_entrypoint(s32 unit_id) {
                         /* Typed polygon indexing reverses the ADDU operands. */
                         unit_panel_build_button_prompts((POLY_FT4*)(render_offset + (s32)render_buffers));
                     }
-                    if (thread_is_running_asm(g_thread_current_id - 1) == 0) {
+                    if (!thread_is_running_asm(g_thread_current_id - 1)) {
                         break;
                     }
                     frame++;
@@ -342,7 +329,7 @@ void debugchr_mounted_unit_entrypoint(s32 unit_id) {
             }
         }
 
-        if ((*g_menu_input_controller & PSX_PAD_R1) != 0) {
+        if (*g_menu_input_controller & PSX_PAD_R1) {
             s32 slot;
             u8* chosen_unit;
             unit_panel_unit_t* unit_data;
@@ -357,8 +344,8 @@ void debugchr_mounted_unit_entrypoint(s32 unit_id) {
             *selected_unit = *chosen_unit;
             unit_data = (unit_panel_unit_t*)((u8*)selected_unit - offsetof(unit_panel_unit_t, battle_unit_id));
             unit_data->name_id = *chosen_unit;
-            unit_type_ptr = &g_unit_panel_selected_unit_status.unit_index;
-            *unit_type_ptr = *chosen_unit;
+            status_unit_index = &g_unit_panel_selected_unit_status.unit_index;
+            *status_unit_index = *chosen_unit;
             unit_panel_load_selected();
             unit_panel_copy_billboard_in(
                 &g_unit_panel_selected_unit_status, unit_data, &g_unit_panel_selected_unit_fields);
@@ -369,7 +356,7 @@ void debugchr_mounted_unit_entrypoint(s32 unit_id) {
             g_unit_panel_character_status_frame_config.redraw_request = one;
         }
 
-        if ((*g_menu_input_controller & PSX_PAD_L1) != 0) {
+        if (*g_menu_input_controller & PSX_PAD_L1) {
             s32 slot;
             u8* chosen_unit;
             unit_panel_unit_t* unit_data;
@@ -384,8 +371,8 @@ void debugchr_mounted_unit_entrypoint(s32 unit_id) {
             *selected_unit = *chosen_unit;
             unit_data = (unit_panel_unit_t*)((u8*)selected_unit - offsetof(unit_panel_unit_t, battle_unit_id));
             unit_data->name_id = *chosen_unit;
-            unit_type_ptr = &g_unit_panel_selected_unit_status.unit_index;
-            *unit_type_ptr = *chosen_unit;
+            status_unit_index = &g_unit_panel_selected_unit_status.unit_index;
+            *status_unit_index = *chosen_unit;
             unit_panel_load_selected();
             unit_panel_copy_billboard_in(
                 &g_unit_panel_selected_unit_status, unit_data, &g_unit_panel_selected_unit_fields);
@@ -398,25 +385,12 @@ void debugchr_mounted_unit_entrypoint(s32 unit_id) {
     }
 
     /* Leave the panels on the unit the thread was started with. */
-    {
-        s16* selected_unit_ptr;
-        s16* comparison_ptr;
-        s16* unit_type_id_ptr;
-
-        selected_unit_ptr = &g_unit_panel_selected_unit.battle_unit_id;
-        unit_type_id_ptr = &g_unit_panel_selected_unit_status.unit_index;
-        selected_unit_ptr[0] = g_unit_editor_unit_slots[0];
-        /* A register address keeps cse from folding this store to a direct
-         * global address. */
-        comparison_ptr = selected_unit_ptr
-            - (offsetof(unit_panel_unit_t, battle_unit_id) - offsetof(unit_panel_unit_t, name_id))
-                / sizeof(*selected_unit_ptr);
-        *comparison_ptr = g_unit_editor_unit_slots[0];
-        *unit_type_id_ptr = g_unit_editor_unit_slots[0];
-        unit_panel_load_selected();
-        unit_panel_copy_billboard_in(
-            &g_unit_panel_selected_unit_status, &g_unit_panel_selected_unit, &g_unit_panel_selected_unit_fields);
-    }
+    g_unit_panel_selected_unit.battle_unit_id = g_unit_editor_unit_slots[0];
+    g_unit_panel_selected_unit.name_id = g_unit_editor_unit_slots[0];
+    g_unit_panel_selected_unit_status.unit_index = g_unit_editor_unit_slots[0];
+    unit_panel_load_selected();
+    unit_panel_copy_billboard_in(
+        &g_unit_panel_selected_unit_status, &g_unit_panel_selected_unit, &g_unit_panel_selected_unit_fields);
 }
 
 /* Ordinary indexing changes the ADDU operand order at the primitive bases. */
@@ -435,18 +409,18 @@ void debugchr_editor_entrypoint(void) {
     s32 battle_unit_id;
     help_navigation_record_t* field;
     u32* input;
-    POLY_FT4* cursor_v;
-    POLY_FT4* shadow_v;
+    POLY_FT4* upright_cursor;
+    POLY_FT4* upright_shadow;
     POLY_FT4* cursor_prims;
-    POLY_FT4* cursor_v_edit;
-    POLY_FT4* shadow_v_edit;
-    POLY_FT4* cursor_h;
-    POLY_FT4* shadow_h;
-    POLY_FT4* cursor_h_edit;
-    POLY_FT4* shadow_h_edit;
+    POLY_FT4* upright_edit_cursor;
+    POLY_FT4* upright_edit_shadow;
+    POLY_FT4* cursor;
+    POLY_FT4* shadow;
+    POLY_FT4* edit_cursor;
+    POLY_FT4* edit_shadow;
     u32 buttons;
     u32 keys;
-    u32 navkeys;
+    u32 nav_keys;
     s32 i;
     s32 row;
     s32 steps;
@@ -468,18 +442,18 @@ void debugchr_editor_entrypoint(void) {
     s32 clearable;
     s32 span;
     s32 buffer;
-    s32* hi_limit;
-    s32* lo_limit;
-    s32* up_lo;
-    s32* up_hi;
-    s32* up_clamp;
-    s32* dn_lo;
-    s32* dn_hi;
+    s32* max_limit;
+    s32* min_limit;
+    s32* up_min;
+    s32* up_max;
+    s32* up_clamp_max;
+    s32* down_min;
+    s32* down_max;
     s16* value;
     s16* down_value;
-    s16 cur;
-    s16 cur_u;
-    s16 cur_d;
+    s16 current;
+    s16 current_up;
+    s16 current_down;
     s32 x;
     s32 y;
     s32 shadow_bob_x;
@@ -492,7 +466,7 @@ void debugchr_editor_entrypoint(void) {
      * the first one with that id. */
     for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
         battle_unit_find_by_unit_id(battle_unit_get(i)->unit_id, &battle_unit_id);
-        if ((battle_unit_id >= 0) && (i == battle_unit_id)) {
+        if (battle_unit_id >= 0 && i == battle_unit_id) {
             g_unit_editor_unit_slots[i] = 1;
         } else {
             g_unit_editor_unit_slots[i] = 0;
@@ -565,8 +539,8 @@ loop_outer:
             g_unit_panel_button_prompt_animation[1] = 7;
             /* Label loops: a do-while's loop notes change the allocation. */
         next_unit:
-            s_unit_editor_selected_unit_slot += 1;
-            if (s_unit_editor_selected_unit_slot == 0x15) {
+            s_unit_editor_selected_unit_slot++;
+            if (s_unit_editor_selected_unit_slot == BATTLE_UNIT_SLOT_COUNT) {
                 s_unit_editor_selected_unit_slot = 0;
             }
             if (g_unit_editor_unit_slots[s_unit_editor_selected_unit_slot] == 0) {
@@ -596,9 +570,9 @@ loop_outer:
         if (*g_menu_input_controller & PSX_PAD_L1) {
             g_unit_panel_button_prompt_animation[0] = 7;
         prev_unit:
-            s_unit_editor_selected_unit_slot -= 1;
+            s_unit_editor_selected_unit_slot--;
             if (s_unit_editor_selected_unit_slot == -1) {
-                s_unit_editor_selected_unit_slot = 0x14;
+                s_unit_editor_selected_unit_slot = BATTLE_UNIT_SLOT_COUNT - 1;
             }
             if (g_unit_editor_unit_slots[s_unit_editor_selected_unit_slot] == 0) {
                 goto prev_unit;
@@ -671,7 +645,7 @@ editor:
         }
 
         /* Triangle clears an equipment slot while editing. */
-        if ((s_unit_editor_field_edit_active != 0) && ((row - UNIT_EDITOR_FIELD_RIGHT_HAND) < 5U)
+        if (s_unit_editor_field_edit_active != 0 && (u32)(row - UNIT_EDITOR_FIELD_RIGHT_HAND) < 5
             && (*g_menu_input_controller & PSX_PAD_TRIANGLE)) {
             *s_unit_editor_current_field->value = 0;
             apply_values(s_unit_editor_selected_unit_slot);
@@ -683,60 +657,60 @@ editor:
 
         /* Outside edit mode the D-pad follows the field's up, down, right and left links; while editing it
          * steps the value. */
-        navkeys = *g_menu_input_controller;
-        if (navkeys & PSX_PAD_DPAD_MASK) {
+        nav_keys = *g_menu_input_controller;
+        if (nav_keys & PSX_PAD_DPAD_MASK) {
             if (s_unit_editor_field_edit_active == 0) {
                 /* Removing the wrapper changes direction and input-mask allocation. */
                 do {
                     direction = 0;
                 } while (0);
-                if (!(navkeys & PSX_PAD_UP)) {
-                    if (navkeys & PSX_PAD_DOWN) {
+                if (!(nav_keys & PSX_PAD_UP)) {
+                    if (nav_keys & PSX_PAD_DOWN) {
                         direction = 1;
                     } else {
                         direction = 3;
-                        if (navkeys & PSX_PAD_RIGHT) {
+                        if (nav_keys & PSX_PAD_RIGHT) {
                             direction = 2;
                         }
                     }
                 }
                 row = s_unit_editor_current_field->destination[direction];
             } else {
-                if ((navkeys & PSX_PAD_RIGHT) || (navkeys & PSX_PAD_UP)) {
+                if ((nav_keys & PSX_PAD_RIGHT) || (nav_keys & PSX_PAD_UP)) {
                     /* A value outside its range first snaps to one below the maximum (even from below the minimum),
                      * so stepping up lands on the maximum. */
                     value = s_unit_editor_current_field->value;
-                    cur = *value;
+                    current = *value;
                     /* Shared pointers or a combined range test change address materialization. */
-                    up_lo = &g_unit_editor_field_ranges[row].min;
-                    if (cur < *up_lo) {
+                    up_min = &g_unit_editor_field_ranges[row].min;
+                    if (current < *up_min) {
                         goto clamp_hi;
                     }
-                    up_hi = &g_unit_editor_field_ranges[row].max;
-                    if (*up_hi < cur) {
+                    up_max = &g_unit_editor_field_ranges[row].max;
+                    if (*up_max < current) {
                     clamp_hi:
-                        up_clamp = &g_unit_editor_field_ranges[row].max;
-                        *value = *up_clamp - 1;
+                        up_clamp_max = &g_unit_editor_field_ranges[row].max;
+                        *value = *up_clamp_max - 1;
                     }
 
                     /* PadRead gives the held buttons: holding L1 steps the value by 10. */
                     if (PadRead(1) & PSX_PAD_L1) {
-                        steps = 0xA;
+                        steps = 10;
                     } else {
                         steps = 1;
                     }
 
                     /* `i` is also the frame counter, so each step resets the cursor's buffer index and bob phase. */
                     for (i = 0; i < steps; i++) {
-                        hi_limit = &g_unit_editor_field_ranges[row].max;
+                        max_limit = &g_unit_editor_field_ranges[row].max;
                         span = row - UNIT_EDITOR_FIELD_RIGHT_HAND;
                         clearable = span < 5U;
                         /* The native loop computes this range test without reading its result. */
                         __asm__("" : : "r"(clearable));
                         value = s_unit_editor_current_field->value;
-                        cur_u = *value;
-                        if (cur_u < *hi_limit) {
-                            *value = cur_u + 1;
+                        current_up = *value;
+                        if (current_up < *max_limit) {
+                            *value = current_up + 1;
                             /* Growth depends on the level, so it is applied with the old
                              * level written back before the new value is restored. */
                             if (row == UNIT_EDITOR_FIELD_LEVEL) {
@@ -752,33 +726,33 @@ editor:
                 } else {
                     /* Likewise a value outside its range snaps to one above the minimum. */
                     down_value = s_unit_editor_current_field->value;
-                    cur = *down_value;
-                    dn_lo = &g_unit_editor_field_ranges[row].min;
-                    if (cur < *dn_lo) {
+                    current = *down_value;
+                    down_min = &g_unit_editor_field_ranges[row].min;
+                    if (current < *down_min) {
                         goto clamp_lo;
                     }
-                    dn_hi = &g_unit_editor_field_ranges[row].max;
-                    if (*dn_hi < cur) {
+                    down_max = &g_unit_editor_field_ranges[row].max;
+                    if (*down_max < current) {
                     clamp_lo:
-                        *down_value = *dn_lo + 1;
+                        *down_value = *down_min + 1;
                     }
 
                     if (PadRead(1) & PSX_PAD_L1) {
-                        steps = 0xA;
+                        steps = 10;
                     } else {
                         steps = 1;
                     }
 
                     for (i = 0; i < steps; i++) {
-                        lo_limit = &g_unit_editor_field_ranges[row].min;
+                        min_limit = &g_unit_editor_field_ranges[row].min;
                         span = row - UNIT_EDITOR_FIELD_RIGHT_HAND;
                         clearable = span < 5U;
                         /* The native loop computes this range test without reading its result. */
                         __asm__("" : : "r"(clearable));
                         value = s_unit_editor_current_field->value;
-                        cur_d = *value;
-                        if (*lo_limit < cur_d) {
-                            *value = cur_d - 1;
+                        current_down = *value;
+                        if (*min_limit < current_down) {
+                            *value = current_down - 1;
                             if (row == UNIT_EDITOR_FIELD_LEVEL) {
                                 *s_unit_editor_current_field->value += 1;
                                 apply_values(s_unit_editor_selected_unit_slot);
@@ -825,84 +799,85 @@ editor:
             s_unit_editor_cursor_shade_polys[buffer].v3 = 0x10;
 
             if (s_unit_editor_field_edit_active == 0) {
-                cursor_v = PRIM_AT(cursor_prims, buffer);
-                shadow_v = &s_unit_editor_cursor_shade_polys[buffer];
+                upright_cursor = PRIM_AT(cursor_prims, buffer);
+                upright_shadow = &s_unit_editor_cursor_shade_polys[buffer];
                 bob_y = y - (((i * g_script_event_speed) >> 4) & 3);
-                setXY4(cursor_v, x, bob_y, x + 0x10, bob_y, x, bob_y + 0x10, x + 0x10, bob_y + 0x10);
-                setXY4(shadow_v, x + 2, bob_y + 2, x + 0x12, bob_y + 2, x + 2, bob_y + 0x12, x + 0x12, bob_y + 0x12);
+                setXY4(upright_cursor, x, bob_y, x + 0x10, bob_y, x, bob_y + 0x10, x + 0x10, bob_y + 0x10);
+                setXY4(
+                    upright_shadow, x + 2, bob_y + 2, x + 0x12, bob_y + 2, x + 2, bob_y + 0x12, x + 0x12, bob_y + 0x12);
                 s_unit_editor_cursor_polys[buffer].clut = 0x7D7C;
             } else {
-                cursor_v_edit = PRIM_AT(cursor_prims, buffer);
-                shadow_v_edit = &s_unit_editor_cursor_shade_polys[buffer];
-                setXY4(cursor_v_edit, x, y, x + 0x10, y, x, y + 0x10, x + 0x10, y + 0x10);
-                setXY4(shadow_v_edit, x + 2, y + 2, x + 0x12, y + 2, x + 2, y + 0x12, x + 0x12, y + 0x12);
+                upright_edit_cursor = PRIM_AT(cursor_prims, buffer);
+                upright_edit_shadow = &s_unit_editor_cursor_shade_polys[buffer];
+                setXY4(upright_edit_cursor, x, y, x + 0x10, y, x, y + 0x10, x + 0x10, y + 0x10);
+                setXY4(upright_edit_shadow, x + 2, y + 2, x + 0x12, y + 2, x + 2, y + 0x12, x + 0x12, y + 0x12);
                 s_unit_editor_cursor_polys[buffer].clut = 0x7E7C;
             }
         } else if (s_unit_editor_field_edit_active == 0) {
-            cursor_h = PRIM_AT(cursor_prims, buffer);
+            cursor = PRIM_AT(cursor_prims, buffer);
             uv_lo = 0xA8;
-            cursor_h->u0 = uv_lo;
+            cursor->u0 = uv_lo;
             uv_lo = 0xB8;
             /* Removing the tied use eliminates two native instructions. */
             __asm__("" : "=r"(uv_lo) : "0"(uv_lo));
-            cursor_h->v0 = 0;
+            cursor->v0 = 0;
             uv_h_hi = 0xB8;
-            cursor_h->u1 = uv_h_hi;
-            shadow_h = &s_unit_editor_cursor_shade_polys[buffer];
-            cursor_h->v1 = 0;
+            cursor->u1 = uv_h_hi;
+            shadow = &s_unit_editor_cursor_shade_polys[buffer];
+            cursor->v1 = 0;
             uv_h_mid = 0xA8;
-            cursor_h->u2 = uv_h_mid;
-            cursor_h->v2 = 0x10;
-            cursor_h->u3 = uv_h_hi;
-            cursor_h->v3 = 0x10;
-            shadow_h->u0 = uv_lo;
-            shadow_h->v0 = 0;
+            cursor->u2 = uv_h_mid;
+            cursor->v2 = 0x10;
+            cursor->u3 = uv_h_hi;
+            cursor->v3 = 0x10;
+            shadow->u0 = uv_lo;
+            shadow->v0 = 0;
             uv_h_far = 0xC8;
-            shadow_h->u1 = uv_h_far;
-            shadow_h->v1 = 0;
-            shadow_h->u2 = uv_h_hi;
-            shadow_h->v2 = 0x10;
-            shadow_h->u3 = uv_h_far;
-            shadow_h->v3 = 0x10;
+            shadow->u1 = uv_h_far;
+            shadow->v1 = 0;
+            shadow->u2 = uv_h_hi;
+            shadow->v2 = 0x10;
+            shadow->u3 = uv_h_far;
+            shadow->v3 = 0x10;
 
             bob_x = ((i * g_script_event_speed) >> 4) & 3;
             cursor_x = x - bob_x;
-            setXY4(cursor_h, cursor_x, y, cursor_x + 0x10, y, cursor_x, y + 0x10, cursor_x + 0x10, y + 0x10);
+            setXY4(cursor, cursor_x, y, cursor_x + 0x10, y, cursor_x, y + 0x10, cursor_x + 0x10, y + 0x10);
             /* A separate temporary schedules the decrement after the
              * cursor's `cursor_x + 0x10` sums; `bob_x -= 2` would move it ahead. */
             shadow_bob_x = bob_x - 2;
-            setXY4(shadow_h, x - shadow_bob_x, y + 2, (x - shadow_bob_x) + 0x10, y + 2, x - shadow_bob_x, y + 0x12,
+            setXY4(shadow, x - shadow_bob_x, y + 2, (x - shadow_bob_x) + 0x10, y + 2, x - shadow_bob_x, y + 0x12,
                 (x - shadow_bob_x) + 0x10, y + 0x12);
             s_unit_editor_cursor_polys[buffer].clut = 0x7D7C;
         } else {
-            cursor_h_edit = PRIM_AT(cursor_prims, buffer);
-            shadow_h_edit = &s_unit_editor_cursor_shade_polys[buffer];
+            edit_cursor = PRIM_AT(cursor_prims, buffer);
+            edit_shadow = &s_unit_editor_cursor_shade_polys[buffer];
             uv_lo = 0xA8;
-            cursor_h_edit->u0 = uv_lo;
+            edit_cursor->u0 = uv_lo;
             uv_lo = 0xB8;
             /* Removing the tied use eliminates two native instructions. */
             __asm__("" : "=r"(uv_lo) : "0"(uv_lo));
-            cursor_h_edit->v0 = 0;
+            edit_cursor->v0 = 0;
             uv_s_hi = 0xB8;
-            cursor_h_edit->u1 = uv_s_hi;
-            cursor_h_edit->v1 = 0;
+            edit_cursor->u1 = uv_s_hi;
+            edit_cursor->v1 = 0;
             uv_s_mid = 0xA8;
-            cursor_h_edit->u2 = uv_s_mid;
-            cursor_h_edit->v2 = 0x10;
-            cursor_h_edit->u3 = uv_s_hi;
-            cursor_h_edit->v3 = 0x10;
-            shadow_h_edit->u0 = uv_lo;
-            shadow_h_edit->v0 = 0;
+            edit_cursor->u2 = uv_s_mid;
+            edit_cursor->v2 = 0x10;
+            edit_cursor->u3 = uv_s_hi;
+            edit_cursor->v3 = 0x10;
+            edit_shadow->u0 = uv_lo;
+            edit_shadow->v0 = 0;
             uv_s_far = 0xC8;
-            shadow_h_edit->u1 = uv_s_far;
-            shadow_h_edit->v1 = 0;
-            shadow_h_edit->u2 = uv_s_hi;
-            shadow_h_edit->v2 = 0x10;
-            shadow_h_edit->u3 = uv_s_far;
-            shadow_h_edit->v3 = 0x10;
+            edit_shadow->u1 = uv_s_far;
+            edit_shadow->v1 = 0;
+            edit_shadow->u2 = uv_s_hi;
+            edit_shadow->v2 = 0x10;
+            edit_shadow->u3 = uv_s_far;
+            edit_shadow->v3 = 0x10;
 
-            setXY4(cursor_h_edit, x, y, x + 0x10, y, x, y + 0x10, x + 0x10, y + 0x10);
-            setXY4(shadow_h_edit, x + 2, y + 2, x + 0x12, y + 2, x + 2, y + 0x12, x + 0x12, y + 0x12);
+            setXY4(edit_cursor, x, y, x + 0x10, y, x, y + 0x10, x + 0x10, y + 0x10);
+            setXY4(edit_shadow, x + 2, y + 2, x + 0x12, y + 2, x + 2, y + 0x12, x + 0x12, y + 0x12);
             s_unit_editor_cursor_polys[buffer].clut = 0x7E7C;
         }
 

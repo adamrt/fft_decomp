@@ -621,7 +621,7 @@ void input_wait_skip(void) {
         thread_yield();
         input = script_get_controller_input_pointer(0);
         g_menu_input_controller = input;
-    } while ((*input & PSX_PAD_CIRCLE) == 0);
+    } while (!(*input & PSX_PAD_CIRCLE));
 }
 
 /*

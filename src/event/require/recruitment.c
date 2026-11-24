@@ -182,11 +182,9 @@ void unit_panel_load_party_unit(s32 unused, s32 party_index) {
 
     if (editor->generic_monster != 0) {
         abilities = ability_build_skillset_list(unit->primary_skillset, SKILLSET_ABILITY_FILTER_ACTION);
-        i = 0;
-        do {
+        for (i = 0; i < 5; i++) {
             editor->ability_ids[i] = *abilities++;
-            i++;
-        } while (i < 5);
+        }
         /* No monster skill check runs here (unlike unit_panel_load_selected),
          * so the fourth monster ability is always cleared. */
         editor->ability_ids[3] = 0;
@@ -237,7 +235,7 @@ static s32 return_equipment(s32 party_index) {
     for (index = 0; index < UNIT_EQUIPMENT_SLOT_COUNT; index++) {
         u8 item_id = party->equipment[index];
 
-        if ((item_id != ITEM_ID_NOTHING) && (item_id != ITEM_ID_NONE)) {
+        if (item_id != ITEM_ID_NOTHING && item_id != ITEM_ID_NONE) {
             g_item_quantities[item_id]++;
         }
     }
@@ -253,8 +251,7 @@ s32 after_battle_sell_equipment_over_limit(s32 battle_index) {
     s32 equipment_slot;
 
     unit = battle_unit_get(battle_index);
-    equipment_slot = 0;
-    do {
+    for (equipment_slot = 0; equipment_slot < UNIT_EQUIPMENT_SLOT_COUNT; equipment_slot++) {
         u8 item_id = unit->equipment[equipment_slot];
         s32 sale_value;
 
@@ -266,8 +263,7 @@ s32 after_battle_sell_equipment_over_limit(s32 battle_index) {
                 EVENT_SCRIPT_VAR_WAR_FUNDS, script_variable_get(EVENT_SCRIPT_VAR_WAR_FUNDS) + sale_value);
             sold_equipment = 1;
         }
-        equipment_slot++;
-    } while (equipment_slot < UNIT_EQUIPMENT_SLOT_COUNT);
+    }
     return sold_equipment;
 }
 
@@ -281,12 +277,11 @@ s32 after_battle_store_or_sell_equipment(s32 battle_index) {
     s32 equipment_slot;
 
     unit = battle_unit_get(battle_index);
-    equipment_slot = 0;
-    do {
+    for (equipment_slot = 0; equipment_slot < UNIT_EQUIPMENT_SLOT_COUNT; equipment_slot++) {
         u8 item_id = unit->equipment[equipment_slot];
         s32 sale_value;
 
-        if ((item_id != ITEM_ID_NOTHING) && (item_id != ITEM_ID_NONE)) {
+        if (item_id != ITEM_ID_NOTHING && item_id != ITEM_ID_NONE) {
             if (item_get_total_quantity(item_id, 1) >= 100) {
                 unit->equipment[equipment_slot] = ITEM_ID_NOTHING;
                 sale_value = item_get_data(item_id)->price;
@@ -298,8 +293,7 @@ s32 after_battle_store_or_sell_equipment(s32 battle_index) {
                 g_item_quantities[item_id]++;
             }
         }
-        equipment_slot++;
-    } while (equipment_slot < UNIT_EQUIPMENT_SLOT_COUNT);
+    }
     return sold_equipment;
 }
 
@@ -323,8 +317,8 @@ static s32 get_join_status(s32 battle_index) {
 
     for (index = 0; index < PARTY_ROSTER_SLOT_COUNT; index++) {
         party = party_unit_get(index);
-        if ((party->party_id != PARTY_ID_NONE) && (party->sprite_set != CHARACTER_IDENTITY_ENTD_NONE)
-            && (party->sprite_set < CHARACTER_IDENTITY_RAMZA_END)) {
+        if (party->party_id != PARTY_ID_NONE && party->sprite_set != CHARACTER_IDENTITY_ENTD_NONE
+            && party->sprite_set < CHARACTER_IDENTITY_RAMZA_END) {
             break;
         }
     }
@@ -379,7 +373,7 @@ static s32 run_dismissal_selection(void) {
         for (party_index = 0; party_index < PARTY_ROSTER_SLOT_COUNT; party_index++) {
             party_unit = party_unit_get(party_index);
             if (party_unit->party_id == PARTY_ID_NONE || party_index >= PARTY_MEMBER_SLOT_COUNT
-                || party_unit->proposition_status != 0 || (party_unit->gender_flags & UNIT_FLAG_EGG) != 0) {
+                || party_unit->proposition_status != 0 || (party_unit->gender_flags & UNIT_FLAG_EGG)) {
                 g_party_removable_flags[party_index] = 0;
                 *text = 0xfe;
                 text++;

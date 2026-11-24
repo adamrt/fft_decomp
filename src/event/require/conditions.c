@@ -332,8 +332,7 @@ void conditions_show_general_banner(s32 hold_frames) {
     }
 
     hide_offset = 0;
-    frame = 0;
-    do {
+    for (frame = 0; frame < 10; frame++) {
         u8* parameters = &range[condition];
 
         thread_yield();
@@ -348,8 +347,7 @@ void conditions_show_general_banner(s32 hold_frames) {
             gfx_draw_or_append_gpu_primitive(poly);
         }
         hide_offset += 8;
-        frame++;
-    } while (frame < 0xa);
+    }
     thread_yield();
     thread_current_exit();
 }

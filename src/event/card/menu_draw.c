@@ -359,7 +359,7 @@ void menu_draw_sliding_cursor(const point16_t* pos, u16* state, s32 mode) {
         }
     }
     active_bit = active;
-    if (active_bit == 0 && (mode & 1) != 0) {
+    if (active_bit == 0 && (mode & 1)) {
         *state = 0x8000;
         active = 1;
     }

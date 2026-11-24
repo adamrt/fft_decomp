@@ -56,7 +56,7 @@ void deploy_find_fieldable_units(void) {
     for (index = 0; index < PARTY_ROSTER_SLOT_COUNT; index++) {
         party_unit = party_unit_get(index);
         if (party_unit->party_id == PARTY_ID_NONE || index >= PARTY_GUEST_SLOT_FIRST
-            || party_unit->proposition_status != 0 || (party_unit->gender_flags & UNIT_FLAG_EGG) != 0) {
+            || party_unit->proposition_status != 0 || (party_unit->gender_flags & UNIT_FLAG_EGG)) {
             g_deploy_unit_fieldable[index] = 0;
             *name_cursor++ = DEPLOY_NAME_END;
         } else {

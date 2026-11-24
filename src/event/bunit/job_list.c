@@ -28,7 +28,7 @@ static s32 calculate_level(s32 index) {
     s32 generic_job = job_get_generic_index(g_job_list_job_ids[index]);
 
     g_job_list_job_current_level = g_unit_list_pointers[g_unit_selected_index]->job_levels[generic_job >> 1];
-    if ((generic_job & 1) != 0) {
+    if (generic_job & 1) {
         g_job_list_job_current_level &= 0xf;
     } else {
         g_job_list_job_current_level >>= 4;

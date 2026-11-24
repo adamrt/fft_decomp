@@ -173,7 +173,7 @@ s32 effect_wave_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
         }
 
         if (geometry->textured_quad.flags & EFFECT_EMITTER_FLAG_COLOR_CURVES) {
-            row = (geometry->textured_quad.color_curves & 0xfff);
+            row = geometry->textured_quad.color_curves & 0xfff;
             red = g_effect_animation_curve_data->curves[(row >> EFFECT_COLOR_CURVE_RED_SHIFT) & 0xf][work->frame];
             green = g_effect_animation_curve_data->curves[(row >> EFFECT_COLOR_CURVE_GREEN_SHIFT) & 0xf][work->frame];
             blue = g_effect_animation_curve_data->curves[(row >> EFFECT_COLOR_CURVE_BLUE_SHIFT) & 0xf][work->frame];

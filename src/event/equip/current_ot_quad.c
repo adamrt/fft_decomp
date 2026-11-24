@@ -30,8 +30,5 @@ void menu_gfx_enqueue_textured_quad_current_ot(const RECT* rect, s32 u, s32 v, c
     poly->clut = clut;
     poly->tpage = texture_page;
 
-    {
-        u32* ot = g_equipment_gfx_current_ot;
-        addPrim(ot, poly);
-    }
+    addPrim(g_equipment_gfx_current_ot, poly);
 }

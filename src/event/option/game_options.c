@@ -201,7 +201,7 @@ void option_game_options_thread(void) {
     mem_copy_bytes_nonempty(&base[1], base, sizeof(option_page_t));
     for (;;) {
         page = &g_option_pages[i & 1];
-        if (delta == 0 && menu_can_accept_input() != 0) {
+        if (delta == 0 && menu_can_accept_input()) {
             /* Square with up or down pages through the list instead (menu_text_update_page_scroll). */
             if ((*input0 & PSX_PAD_UP) && (!(*input1 & PSX_PAD_SQUARE) || g_menu_input_mode != MENU_INPUT_PLAYER)) {
                 if (cursor != 0) {
@@ -259,7 +259,7 @@ void option_game_options_thread(void) {
 
             if (*input0 & PSX_PAD_CIRCLE) {
                 g_sound_pending_sfx_id = SOUND_SFX_CONFIRM;
-                if (menu_can_accept_input() != 0) {
+                if (menu_can_accept_input()) {
                     *input0 = 0;
                     index = cursor + row_offset + delta;
                     thread_start(g_thread_current_id - 1, option_choice_thread);
@@ -286,7 +286,7 @@ void option_game_options_thread(void) {
             break;
         }
 
-        if (delta == 0 && menu_can_accept_input() != 0) {
+        if (delta == 0 && menu_can_accept_input()) {
             menu_text_update_page_scroll(entry, &row_offset, &ring, &cursor);
             ClearImage(&clear, 0, 0, 0);
         }
@@ -332,7 +332,7 @@ void option_game_options_thread(void) {
         gfx_draw_or_append_gpu_primitive(&page->icons.base.sprites[2]);
         gfx_draw_or_append_gpu_primitive(&page->icons.base.draw_mode);
 
-        if (layout->hidden_rows != 0 && menu_can_accept_input() != 0) {
+        if (layout->hidden_rows != 0 && menu_can_accept_input()) {
             if (row_offset != 0) {
                 gfx_draw_or_append_gpu_primitive(&page->arrows[0]);
                 gfx_draw_or_append_gpu_primitive(&page->arrow_marks[0]);

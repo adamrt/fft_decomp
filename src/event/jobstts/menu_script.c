@@ -48,7 +48,7 @@ void menu_script_run(void* script, s32 flags) {
         instruction = g_menu_opcode_handlers[instruction->header.opcode](instruction);
     }
     if (g_gfx_transition_frame < 10) {
-        g_gfx_transition_frame = g_gfx_transition_frame + 1;
+        g_gfx_transition_frame++;
     }
 }
 

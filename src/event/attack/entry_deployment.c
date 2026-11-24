@@ -265,27 +265,19 @@ static void swap_roster_unit_tile(s32 column, s32 row, s32 roster_id) {
 /* Empty the deployment tables: the 5x5 grid of roster ids by tile and the
  * four squads' 25-entry unit lists. */
 static void clear_placement_tables(void) {
-    s32 row = 0;
+    s32 row;
     s32 column;
 
-    do {
-        column = 4;
-        do {
+    for (row = 0; row < 5; row++) {
+        for (column = 4; column >= 0; column--) {
             g_deploy_roster_id_by_tile[row][column] = DEPLOY_ROSTER_ID_NONE;
-            column--;
-        } while (column >= 0);
-        row++;
-    } while (row < 5);
-
-    row = 0;
-    do {
-        column = 24;
-        do {
+        }
+    }
+    for (row = 0; row < 4; row++) {
+        for (column = 24; column >= 0; column--) {
             g_deploy_units_by_squad[row][column] = DEPLOY_ROSTER_ID_NONE;
-            column--;
-        } while (column >= 0);
-        row++;
-    } while (row < 4);
+        }
+    }
 }
 
 /* ATTACK deployment controller: runs the formation screen for every squad of
@@ -530,7 +522,7 @@ ramza_placed:
                     g_unit_panel_button_prompt_animation[2] = 1;
                 }
             }
-            if (thread_is_running(DEPLOY_PROMPT_THREAD_SLOT_DETAIL_MARKER) == 0
+            if (!thread_is_running(DEPLOY_PROMPT_THREAD_SLOT_DETAIL_MARKER)
                 && g_unit_panel_button_prompt_animation[3] < 2) {
                 g_unit_panel_button_prompt_animation[3] = 0;
             }
@@ -701,7 +693,7 @@ ramza_placed:
                 if (g_deploy_valid_tiles[row][column] != 0) {
                     if (g_deploy_roster_id_by_tile[row][column] == DEPLOY_ROSTER_ID_NONE) {
                         /* A new unit needs room under the squad limit; a placed one just moves here. */
-                        if (deploy_has_roster_unit_on_tiles(g_deploy_selected_roster_index) == 0) {
+                        if (!deploy_has_roster_unit_on_tiles(g_deploy_selected_roster_index)) {
                             if (g_deploy_deployed_unit_count < g_deploy_current_squad_data->unit_limit) {
                                 g_sound_pending_sfx_id = SOUND_SFX_CONFIRM;
                                 g_deploy_roster_id_by_tile[row][column] = g_deploy_selected_roster_index;
@@ -748,7 +740,7 @@ ramza_placed:
                                 s_deploy_cursor_column[0] = s_deploy_cursor_column[1];
                                 s_deploy_cursor_row[0] = s_deploy_cursor_row[1];
                             } else if (g_deploy_roster_id_by_tile[row][column] != g_deploy_selected_roster_index) {
-                                if (deploy_has_roster_unit_on_tiles(g_deploy_selected_roster_index) != 0) {
+                                if (deploy_has_roster_unit_on_tiles(g_deploy_selected_roster_index)) {
                                     s_deploy_active_cursor = 0;
                                     g_sound_pending_sfx_id = SOUND_SFX_CAMERA_ZOOM_OUT;
                                     remove_roster_unit(g_deploy_selected_roster_index);
@@ -832,7 +824,7 @@ ramza_placed:
                 if (cursor_unit != DEPLOY_ROSTER_ID_NONE) {
                     g_unit_panel_button_prompt_animation[2] = 7;
                     g_sound_pending_sfx_id = SOUND_SFX_CONFIRM;
-                    if (thread_is_running(DEPLOY_THREAD_SLOT_ROSTER_STEP) == 0) {
+                    if (!thread_is_running(DEPLOY_THREAD_SLOT_ROSTER_STEP)) {
                         g_deploy_pending_roster_index
                             = g_deploy_roster_id_by_tile[s_deploy_cursor_row[s_deploy_active_cursor]]
                                                         [s_deploy_cursor_column[s_deploy_active_cursor]];
@@ -1023,12 +1015,12 @@ s32 deploy_return_zero_1(void) {
 static void update_roster_input(void) {
     u32* flags = script_get_controller_input_pointer(0);
 
-    if ((*flags & PSX_PAD_L1) && (thread_is_running(DEPLOY_THREAD_SLOT_ROSTER_STEP) == 0)) {
+    if ((*flags & PSX_PAD_L1) && (!thread_is_running(DEPLOY_THREAD_SLOT_ROSTER_STEP))) {
         g_unit_panel_button_prompt_animation[0] = 7;
         g_sound_pending_sfx_id = SOUND_SFX_PAGE_SWITCH;
         thread_start(DEPLOY_THREAD_SLOT_ROSTER_STEP, roster_previous_thread);
     }
-    if ((*flags & PSX_PAD_R1) && (thread_is_running(DEPLOY_THREAD_SLOT_ROSTER_STEP) == 0)) {
+    if ((*flags & PSX_PAD_R1) && (!thread_is_running(DEPLOY_THREAD_SLOT_ROSTER_STEP))) {
         g_unit_panel_button_prompt_animation[1] = 7;
         g_sound_pending_sfx_id = SOUND_SFX_PAGE_SWITCH;
         thread_start(DEPLOY_THREAD_SLOT_ROSTER_STEP, roster_next_thread);
@@ -1173,11 +1165,9 @@ void unit_panel_load_party_unit(s32 unused, s32 party_index) {
 
     if (editor->generic_monster != 0) {
         abilities = ability_build_skillset_list(unit->primary_skillset, SKILLSET_ABILITY_FILTER_ACTION);
-        i = 0;
-        do {
+        for (i = 0; i < 5; i++) {
             editor->ability_ids[i] = *abilities++;
-            i++;
-        } while (i < 5);
+        }
         /* No monster skill check runs here (unlike unit_panel_load_selected),
          * so the fourth monster ability is always cleared. */
         editor->ability_ids[3] = 0;
@@ -1269,7 +1259,7 @@ static void roster_previous_thread(void) {
         do {
             g_deploy_selected_roster_index--;
             if (g_deploy_selected_roster_index < 0) {
-                g_deploy_selected_roster_index = 19;
+                g_deploy_selected_roster_index = PARTY_ROSTER_SLOT_COUNT - 1;
             }
         } while (g_deploy_roster_unit_deployable[g_deploy_selected_roster_index] == 0);
     }
@@ -1326,18 +1316,18 @@ static void build_banner_arrow(void) {
 static void build_button_hint(s32 frame, u32 mode, placement_buffer_t* render_buffer) {
     s32 i;
     s32 palette;
-    POLY_FT4* ptr;
+    POLY_FT4* hint;
 
     gfx_set_draw_mode_for_texture_page(&render_buffer->menu_draw_mode, MENU_TEXTURE_PAGE_FRAME);
 
     for (i = 0; i < 4; i++) {
-        ptr = &render_buffer->button_hints[i];
-        menu_init_default_poly_ft4(ptr);
-        SetSemiTrans(ptr, 0);
-        SetShadeTex(ptr, 1);
+        hint = &render_buffer->button_hints[i];
+        menu_init_default_poly_ft4(hint);
+        SetSemiTrans(hint, 0);
+        SetShadeTex(hint, 1);
         /* The draw area's x/y serve as the screen base point. */
         gfx_set_image_primitive_layout(
-            ptr, &g_deploy_texture_origin, &g_menu_draw_area_template, &g_deploy_button_hint_cells[i]);
+            hint, &g_deploy_texture_origin, &g_menu_draw_area_template, &g_deploy_button_hint_cells[i]);
     }
 
     if (mode != DEPLOY_MENU_BLOCKED_TILE) {
@@ -1886,6 +1876,7 @@ static void labels_draw_thread(void) {
                 g_deploy_text_reveal_steps[8] = 1;
             }
             menu_init_default_poly_ft4(&g_deploy_text_polys[parity][i]);
+            /* Each store adds the byte offset to the table base; a typed row pointer changes the addressing. */
             ((POLY_FT4*)((u8*)g_deploy_text_polys + off))->tpage = GetTPage(0, 0, 0x100, 0);
             ((POLY_FT4*)((u8*)g_deploy_text_polys + off))->clut = 0x7d7c;
             gfx_set_image_primitive_layout(&g_deploy_text_polys[parity][i], &g_deploy_texture_origin,

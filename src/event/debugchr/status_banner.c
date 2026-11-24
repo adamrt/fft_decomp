@@ -264,7 +264,7 @@ void unit_panel_banner_thread(void) {
 
         /* A slide advances every other frame through the down or up half of the curve,
          * then clears every flag but HIDDEN. */
-        if ((thread->flags & MENU_STATUS_PANEL_SLIDE_DOWN) && (shake == 0)) {
+        if ((thread->flags & MENU_STATUS_PANEL_SLIDE_DOWN) && shake == 0) {
             shake = 1;
         }
         if (thread->flags & MENU_STATUS_PANEL_SLIDE_UP) {
@@ -280,7 +280,7 @@ void unit_panel_banner_thread(void) {
                 }
                 if (shake >= 7) {
                     shake = 0;
-                    thread->flags = thread->flags & MENU_STATUS_PANEL_HIDDEN;
+                    thread->flags &= MENU_STATUS_PANEL_HIDDEN;
                 }
             } else if (shake >= 0xB) {
                 thread->position.y = g_unit_panel_slide_y[1][shake - 11];
@@ -289,7 +289,7 @@ void unit_panel_banner_thread(void) {
                 }
                 if (shake >= 0x11) {
                     shake = 0;
-                    thread->flags = thread->flags & MENU_STATUS_PANEL_HIDDEN;
+                    thread->flags &= MENU_STATUS_PANEL_HIDDEN;
                 }
             }
         }
@@ -415,7 +415,7 @@ void unit_panel_banner_thread(void) {
         panel->sprites[6].v0 = (zodiac / 7) * 0x14 + 0x2A;
 
         /* Rebuild the text images only on the first frame and on redraw requests; VRAM keeps them in between. */
-        if ((frame == 0) || (thread->redraw_request != 0)) {
+        if (frame == 0 || thread->redraw_request != 0) {
             /* Units off the AT list (negative index) show dashes. */
             if (state->list_index < 0) {
                 number_entries[6].format = 0xC00;

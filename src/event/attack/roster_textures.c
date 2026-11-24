@@ -136,6 +136,7 @@ void portrait_party_prepare_textures(void) {
             }
             src += 0x80;
         }
+        /* Dead after the loop, but this use of j gives the target's register choice. */
         if (j <= 0) {
             j = 0;
         }
@@ -311,11 +312,9 @@ void deploy_prepare_sprites(void) {
         cell_row = row;
         x = 0x47F;
         pixel = &s_formation_sprite_staging[0x47F];
-        do {
-            *pixel = 0;
-            x--;
-            pixel--;
-        } while (x >= 0);
+        for (; x >= 0; x--) {
+            *pixel-- = 0;
+        }
 
         if (quotient == 1 && code >= 8) {
             palette_base = (quotient << 15) + ((column * 0x30 + cell_row * 0x3000 + 0x2800) >> 1);

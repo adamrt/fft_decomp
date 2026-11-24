@@ -29,8 +29,6 @@ void equipment_set_unread_input_value(s32 value) {
 void menu_input_update_message_state(void) {
     s32 running = 0;
     s32 frame;
-    u8 state;
-    s32 delay;
 
     menu_input_update_controller();
     frame = menu_window_get_scale_step();
@@ -40,20 +38,14 @@ void menu_input_update_message_state(void) {
         running = thread_is_running(THREAD_SCREEN_SLOT_TEXT);
         if (running != 0) {
             menu_input_clear_state();
-            if (g_text_thread_running_state != 0) {
-                state = 2;
-            } else {
-                state = 1;
-            }
-            g_text_thread_running_state = state;
+            g_text_thread_running_state = g_text_thread_running_state != 0 ? 2 : 1;
         } else {
             g_text_thread_running_state = 0;
         }
     }
 
-    delay = g_input_lock_timer;
-    if (delay != 0) {
-        g_input_lock_timer = delay - 1;
+    if (g_input_lock_timer != 0) {
+        g_input_lock_timer--;
         g_menu_input_primary_repeat &= ~PSX_PAD_L2;
         g_menu_input_secondary_repeat &= ~PSX_PAD_L2;
         g_menu_input_newly_pressed &= ~PSX_PAD_L2;

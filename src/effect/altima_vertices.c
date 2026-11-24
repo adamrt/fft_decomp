@@ -23,8 +23,7 @@ static effect_map_vertex_location_t s_effect_altima_transformation_vertex_locati
  * 1-6 to state 1; UPDATE spawns the particles of every emitter whose vertex
  * group is live this frame at that group's cached vertex; DESTROY frees the
  * cache. E464's shipped emitter records all have vertex group 0, so none
- * spawn here. The group bound of 12 is the Banish handler's, but this
- * location table has three entries: groups 4-12 would read past it. */
+ * spawn here. */
 s32 effect_altima_transformation_map_vertex_particles_update(
     s32 record_index, s32 callback_slot, s32 unused_emitter_index, s32 frame) {
     s16 state_index = record_index;

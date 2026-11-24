@@ -35,8 +35,9 @@ void require_conditions_entrypoint(void) {
     thread_current_set_task(THREAD_TASK_CONDITION_DISPATCH);
     condition = thread_current_get_parameter_1();
     parameter = thread_current_get_parameter_2();
-    if (condition >= EVENT_DISPLAY_CONDITION_GENERAL_FIRST)
+    if (condition >= EVENT_DISPLAY_CONDITION_GENERAL_FIRST) {
         conditions_show_general_banner(parameter);
+    }
     thread = thread_resolve_slot(THREAD_SLOT_FIRST_IDLE);
 
     if (condition == EVENT_DISPLAY_CONDITION_SPECIAL_CASES) {
@@ -107,9 +108,9 @@ void text_build_battle_unit_names(void) {
 
     for (unit_id = 0; unit_id < BATTLE_UNIT_SLOT_COUNT; unit_id++) {
         battle_unit_t* unit = battle_unit_get(unit_id);
-        s32 length = 0;
+        s32 length;
 
-        do {
+        for (length = 0; length < UNIT_NAME_SIZE; length++) {
             u8 value = unit->name[length];
             *output = value;
             if ((value & 0xfe) != 0xfe) {
@@ -121,7 +122,6 @@ void text_build_battle_unit_names(void) {
                 output++;
                 break;
             }
-            length++;
-        } while (length < UNIT_NAME_SIZE);
+        }
     }
 }

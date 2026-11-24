@@ -18,14 +18,11 @@
 
 /* Thread task THREAD_TASK_STATUS_PANEL: numeric panel.
  *
- * Twin of unit_panel_numbers_thread / unit_panel_numbers_thread
- * with EQUIP's own draw-mode setup. Builds the primitive block once, copies it
- * into the second buffer, then each frame re-renders the three text images when
- * requested, rescales the draw area, recolors the sprites for the thread
- * style and submits the block until the thread's third parameter is set.
- * The primitive block is menu_status_panel_numeric_buffer_t, double buffered
- * (g_unit_panel_editor_numeric_state_a for THREAD_SCREEN_SLOT_NUMERIC_PANEL,
- * g_unit_panel_editor_numeric_state_b otherwise); the thread parameter block is
+ * Twin of DEBUGCHR's unit_panel_numbers_thread with EQUIP's own draw-mode setup. Builds the primitive block once,
+ * copies it into the second buffer, then each frame re-renders the three text images when requested, rescales the draw
+ * area, recolors the sprites for the thread style and submits the block until the thread's third parameter is set. The
+ * primitive block is menu_status_panel_numeric_buffer_t, double buffered (g_unit_panel_editor_numeric_state_a for
+ * THREAD_SCREEN_SLOT_NUMERIC_PANEL, g_unit_panel_editor_numeric_state_b otherwise); the thread parameter block is
  * unit_panel_thread_t.
  *
  * `buffers` is assigned in each branch (not after the if) so the spilled store

@@ -100,40 +100,29 @@ static void open_fullscreen_graphic(s32 graphic_id) {
 
         /* Hold: 1260 frames for END1, 1440 for END3, 2220 for END4, 600 for END5 and 6120 for END2. */
         if (graphic_id == FULLSCREEN_GRAPHIC_END1) {
-            frame = 0;
-            do {
-                frame++;
+            for (frame = 0; frame < 1260; frame++) {
                 thread_yield();
                 g_threads[g_thread_current_id].function_parameter_4 = 1;
-            } while (frame < 1260);
+            }
         } else if (graphic_id == FULLSCREEN_GRAPHIC_END3) {
-            frame = 0;
-            do {
-                frame++;
+            for (frame = 0; frame < 1440; frame++) {
                 thread_yield();
                 g_threads[g_thread_current_id].function_parameter_4 = 1;
-            } while (frame < 1440);
+            }
         } else if (graphic_id == FULLSCREEN_GRAPHIC_END4) {
-            frame = 0;
-            do {
-                frame++;
+            for (frame = 0; frame < 2220; frame++) {
                 thread_yield();
                 g_threads[g_thread_current_id].function_parameter_4 = 1;
-            } while (frame < 2220);
+            }
+        } else if (graphic_id == FULLSCREEN_GRAPHIC_END5) {
+            for (frame = 0; frame < 600; frame++) {
+                thread_yield();
+                g_threads[g_thread_current_id].function_parameter_4 = 1;
+            }
         } else {
-            frame = 0;
-            if (graphic_id == FULLSCREEN_GRAPHIC_END5) {
-                do {
-                    frame++;
-                    thread_yield();
-                    g_threads[g_thread_current_id].function_parameter_4 = 1;
-                } while (frame < 600);
-            } else {
-                do {
-                    frame++;
-                    thread_yield();
-                    g_threads[g_thread_current_id].function_parameter_4 = 1;
-                } while (frame < 6120);
+            for (frame = 0; frame < 6120; frame++) {
+                thread_yield();
+                g_threads[g_thread_current_id].function_parameter_4 = 1;
             }
         }
 
@@ -363,8 +352,6 @@ static void build_game_over_polygons(
  * primitive sets (parts 2 and 0), alternating buffers by frame.
  */
 static void show_chapter_title(s32 graphic_id) {
-    /* The target reserves two otherwise unreferenced local 32-bit values. */
-    s32 reserved_stack_words[2];
     s32 frame;
     s32 fade;
     s32 color;
@@ -372,42 +359,34 @@ static void show_chapter_title(s32 graphic_id) {
 
     dimensions = g_fullscreen_graphics[graphic_id].dimensions;
     frame = 0;
-    fade = 0;
-    if (dimensions[2].source.w > 0) {
-        do {
-            build_chapter_title_polygons(
-                graphic_id, fade, 2, 0, s_fullscreen_graphic_chapter_primitives_a[frame & 1], 0x80);
-            build_chapter_title_polygons(
-                graphic_id, fade, 0, 1, s_fullscreen_graphic_chapter_primitives_b[frame & 1], 0x80);
-            frame++;
-            thread_yield();
-            fade += g_script_event_speed;
-        } while (fade < dimensions[2].source.w);
+    for (fade = 0; fade < dimensions[2].source.w; fade += g_script_event_speed) {
+        build_chapter_title_polygons(
+            graphic_id, fade, 2, 0, s_fullscreen_graphic_chapter_primitives_a[frame & 1], 0x80);
+        build_chapter_title_polygons(
+            graphic_id, fade, 0, 1, s_fullscreen_graphic_chapter_primitives_b[frame & 1], 0x80);
+        frame++;
+        thread_yield();
     }
 
-    fade = 0;
-    do {
+    for (fade = 0; fade < 80; fade += g_script_event_speed) {
         build_chapter_title_polygons(
             graphic_id, dimensions[2].source.w, 2, 0, s_fullscreen_graphic_chapter_primitives_a[frame & 1], 0x80);
         build_chapter_title_polygons(
             graphic_id, dimensions[2].source.w, 0, 1, s_fullscreen_graphic_chapter_primitives_b[frame & 1], 0x80);
         frame++;
         thread_yield();
-        fade += g_script_event_speed;
-    } while (fade < 0x50);
+    }
 
     color = 0x80;
-    fade = 0;
-    do {
+    for (fade = 0; fade < 0x80; fade += g_script_event_speed) {
         build_chapter_title_polygons(
             graphic_id, dimensions[2].source.w, 2, 0, s_fullscreen_graphic_chapter_primitives_a[frame & 1], color);
         build_chapter_title_polygons(
             graphic_id, dimensions[2].source.w, 0, 1, s_fullscreen_graphic_chapter_primitives_b[frame & 1], color);
         color -= g_script_event_speed;
         thread_yield();
-        fade += g_script_event_speed;
         frame++;
-    } while (fade < 0x80);
+    }
 }
 
 /*
@@ -418,8 +397,6 @@ static void show_chapter_title(s32 graphic_id) {
  * alternate by frame.
  */
 static void show_game_over(s32 graphic_id) {
-    /* The target reserves two otherwise unreferenced local 32-bit values. */
-    s32 reserved_stack_words[2];
     s32 frame;
     s32 fade;
     s32 color;
@@ -438,36 +415,27 @@ static void show_game_over(s32 graphic_id) {
 
     dimensions = g_fullscreen_graphics[graphic_id].dimensions;
     frame = 0;
-    fade = 0;
-    if (dimensions[2].source.h > 0) {
-        do {
-            build_game_over_polygons(
-                graphic_id, fade, 2, 0, s_fullscreen_graphic_chapter_primitives_a[frame & 1], 0x80);
-            frame++;
-            thread_yield();
-            fade += g_script_event_speed;
-        } while (fade < dimensions[2].source.h);
+    for (fade = 0; fade < dimensions[2].source.h; fade += g_script_event_speed) {
+        build_game_over_polygons(graphic_id, fade, 2, 0, s_fullscreen_graphic_chapter_primitives_a[frame & 1], 0x80);
+        frame++;
+        thread_yield();
     }
 
-    fade = 0;
-    do {
+    for (fade = 0; fade < 600; fade += g_script_event_speed) {
         build_game_over_polygons(
             graphic_id, dimensions[2].source.h, 2, 0, s_fullscreen_graphic_chapter_primitives_a[frame & 1], 0x80);
         frame++;
         thread_yield();
-        fade += g_script_event_speed;
-    } while (fade < 0x258);
+    }
 
     color = 0x80;
-    fade = 0;
-    do {
+    for (fade = 0; fade < 0x80; fade += g_script_event_speed) {
         build_game_over_polygons(
             graphic_id, dimensions[2].source.h, 2, 0, s_fullscreen_graphic_chapter_primitives_a[frame & 1], color);
         color -= g_script_event_speed;
         thread_yield();
-        fade += g_script_event_speed;
         frame++;
-    } while (fade < 0x80);
+    }
 }
 
 /* Thread body: load ETC graphic parameter 1 and run its show routine, the

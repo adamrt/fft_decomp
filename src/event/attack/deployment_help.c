@@ -89,7 +89,8 @@ void deploy_help_cursor_thread(void) {
         g_deploy_help_cursor_nodes[10].destination[1] = 17;
     }
 
-    /* Each roster unit owns 11 help entries: nodes 18 to 27 take the first ten, node 8 the last. */
+    /* Each roster unit owns 11 help entries in TEXT_SECTION_DEPLOYMENT_UNIT_HELP (-0x3000 as a 16-bit
+     * text id): nodes 18 to 27 take the first ten, node 8 the last. */
     g_deploy_help_cursor_nodes[8].help_base = g_deploy_selected_roster_index * 11 + 10 - 0x3000;
     for (i = 0; i < 10; i++) {
         g_deploy_help_cursor_nodes[i + 18].help_base = g_deploy_selected_roster_index * 11 - 0x3000 + i;
@@ -235,53 +236,20 @@ void deploy_help_cursor_thread(void) {
             shade[buffer].v3 = 0x10;
 
             setXY4(&cursor[buffer], x, y + bob, x + 0x10, y + bob, x, y + bob + 0x10, x + 0x10, y + bob + 0x10);
-            (shade + buffer)->x0 = x + 2;
-            (shade + buffer)->y0 = y + bob + 2;
-            (shade + buffer)->x1 = x + 0x12;
-            (shade + buffer)->y1 = y + bob + 2;
-            (shade + buffer)->x2 = x + 2;
-            (shade + buffer)->y2 = y + bob + 0x12;
-            (shade + buffer)->x3 = x + 0x12;
-            (shade + buffer)->y3 = y + bob + 0x12;
+            setXY4(&shade[buffer], x + 2, y + bob + 2, x + 0x12, y + bob + 2, x + 2, y + bob + 0x12, x + 0x12,
+                y + bob + 0x12);
         } else {
             u = 0xa8;
-            (cursor + buffer)->u0 = u;
-            (cursor + buffer)->v0 = 0;
-            (cursor + buffer)->u1 = u_mid;
-            (cursor + buffer)->v1 = 0;
-            (cursor + buffer)->u2 = 0xa8;
-            (cursor + buffer)->v2 = 0x10;
-            (cursor + buffer)->u3 = u_mid;
-            (cursor + buffer)->v3 = 0x10;
+            setUV4(&cursor[buffer], u, 0, u_mid, 0, 0xa8, 0x10, u_mid, 0x10);
 
             u = 0xb8;
-            (shade + buffer)->u0 = u;
-            (shade + buffer)->v0 = 0;
-            (shade + buffer)->u1 = 0xc8;
-            (shade + buffer)->v1 = 0;
-            (shade + buffer)->u2 = u_mid;
-            (shade + buffer)->v2 = 0x10;
-            (shade + buffer)->u3 = 0xc8;
-            (shade + buffer)->v3 = 0x10;
+            setUV4(&shade[buffer], u, 0, 0xc8, 0, u_mid, 0x10, 0xc8, 0x10);
 
-            (cursor + buffer)->x0 = x + bob;
-            (cursor + buffer)->y0 = y;
-            (cursor + buffer)->x1 = x + bob + 0x10;
-            (cursor + buffer)->y1 = y;
-            (cursor + buffer)->x2 = x + bob;
-            (cursor + buffer)->y2 = y + 0x10;
-            (cursor + buffer)->x3 = x + bob + 0x10;
-            (cursor + buffer)->y3 = y + 0x10;
+            setXY4(&cursor[buffer], x + bob, y, x + bob + 0x10, y, x + bob, y + 0x10, x + bob + 0x10, y + 0x10);
 
             shadow_offset = bob + 2;
-            (shade + buffer)->x0 = x + shadow_offset;
-            (shade + buffer)->y0 = y + 2;
-            (shade + buffer)->x1 = x + shadow_offset + 0x10;
-            (shade + buffer)->y1 = y + 2;
-            (shade + buffer)->x2 = x + shadow_offset;
-            (shade + buffer)->y2 = y + 0x12;
-            (shade + buffer)->x3 = x + shadow_offset + 0x10;
-            (shade + buffer)->y3 = y + 0x12;
+            setXY4(&shade[buffer], x + shadow_offset, y + 2, x + shadow_offset + 0x10, y + 2, x + shadow_offset,
+                y + 0x12, x + shadow_offset + 0x10, y + 0x12);
         }
 
         /* The cursor and its shade switch palettes while the help text is open. */
@@ -374,7 +342,8 @@ void deploy_build_help_strings(void) {
     init_section_pointers(file);
     for (i = 0; i < 16; i++) {
         unit = party_unit_get(i);
-        if (unit->party_id == PARTY_ID_NONE || i >= 0x10 || unit->proposition_status != 0) {
+        /* The i >= 16 test can never pass inside this loop; the bytes keep it. */
+        if (unit->party_id == PARTY_ID_NONE || i >= 16 || unit->proposition_status != 0) {
             for (k = 0; k < 11; k++) {
                 *dst++ = 0xfe;
             }

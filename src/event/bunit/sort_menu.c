@@ -44,7 +44,7 @@ s32 unit_list_build_grid_cells(void) {
     s32 i;
 
     for (i = 0; i < g_unit_list_visible_count; i++) {
-        if ((g_unit_list_pointers[i]->mount_info & UNIT_MOUNT_INFO_FLAG_MOUNT) == 0) {
+        if (!(g_unit_list_pointers[i]->mount_info & UNIT_MOUNT_INFO_FLAG_MOUNT)) {
             g_unit_list_reorderable_indices[count] = i;
             count++;
         }

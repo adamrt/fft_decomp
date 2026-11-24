@@ -30,54 +30,30 @@ static void init_graphics(void) {
     RECT rect;
     palette_t palette;
 
-    rect.x = 0x100;
-    rect.y = 0;
-    rect.w = 0x40;
-    rect.h = 0x30;
+    setRECT(&rect, 0x100, 0, 0x40, 0x30);
     gfx_load_image_and_wait(&rect, g_menu_glyph_sheet->pixels);
 
-    rect.x = 0x100;
-    rect.y = 0xfa;
-    rect.w = 0x40;
-    rect.h = 4;
+    setRECT(&rect, 0x100, 0xfa, 0x40, 4);
     gfx_load_image_and_wait(&rect, g_status_screen_menu_palette_image);
 
-    rect.x = 0x3c0;
-    rect.y = 0x1f0;
-    rect.w = 0x10;
-    rect.h = 1;
+    setRECT(&rect, 0x3c0, 0x1f0, 0x10, 1);
     gfx_store_image_and_wait(&rect, palette);
 
     palette[4].red = palette[4].green = palette[4].blue = palette[4].semi_transparent = 0;
-    rect.x = 0x120;
-    rect.y = 0xfe;
-    rect.w = 0x10;
-    rect.h = 1;
+    setRECT(&rect, 0x120, 0xfe, 0x10, 1);
     gfx_load_image_and_wait(&rect, palette);
 
-    rect.x = 0x100;
-    rect.y = 0xfe;
-    rect.w = 0xc;
-    rect.h = 1;
+    setRECT(&rect, 0x100, 0xfe, 0xc, 1);
     gfx_load_image_and_wait(&rect, &palette[4]);
 
-    rect.x = 0x3c0;
-    rect.y = 0x1f4;
-    rect.w = 0x10;
-    rect.h = 1;
+    setRECT(&rect, 0x3c0, 0x1f4, 0x10, 1);
     gfx_store_image_and_wait(&rect, palette);
 
     palette[4].red = palette[4].green = palette[4].blue = palette[4].semi_transparent = 0;
-    rect.x = 0x130;
-    rect.y = 0xfe;
-    rect.w = 0x10;
-    rect.h = 1;
+    setRECT(&rect, 0x130, 0xfe, 0x10, 1);
     gfx_load_image_and_wait(&rect, palette);
 
-    rect.x = 0x110;
-    rect.y = 0xfe;
-    rect.w = 0xc;
-    rect.h = 1;
+    setRECT(&rect, 0x110, 0xfe, 0xc, 1);
     gfx_load_image_and_wait(&rect, &palette[4]);
 
     menu_selection_clear_values();
