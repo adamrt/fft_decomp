@@ -120,12 +120,12 @@ void camera_update_zoom_move(void);
 
 /* script camera */
 extern SVECTOR g_camera_script_rotation;
-extern u16 g_camera_script_variable_indices[EVENT_CAMERA_COMPONENT_COUNT];
+extern u16 g_camera_script_variable_indices[SCRIPT_CAMERA_COMPONENT_COUNT];
 extern u16 g_camera_shake_z_offset;
 extern u16 g_camera_position_locked;
 extern s32 g_camera_wrap_yaw_pending;
 
-/* The CameraSpeedCurve operand, unpacked with the EVENT_CAMERA_SPEED_CURVE_* masks. */
+/* The CameraSpeedCurve operand, unpacked with the SCRIPT_CAMERA_SPEED_CURVE_* masks. */
 extern s32 g_camera_speed_curve;
 
 void camera_wait_idle(void);

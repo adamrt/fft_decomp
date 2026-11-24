@@ -99,32 +99,32 @@ void script_execute_event(void);
 /* opcode handlers */
 void script_opcode_pause(void);
 void script_opcode_map_darkness_thread(void);
-void script_opcode_walk_to(const event_walk_to_parameters_t* parameters);
+void script_opcode_walk_to(const script_walk_to_parameters_t* parameters);
 void script_opcode_wait_walk(s32 unit_id);
 void script_opcode_block_start_thread(void);
-void script_opcode_color_unit(const event_color_unit_parameters_t* parameters);
+void script_opcode_color_unit(const script_color_unit_parameters_t* parameters);
 void script_opcode_flip_message_portrait(const u8* parameters);
 void script_opcode_color_screen_thread(void);
 void script_opcode_earthquake_start_thread(void);
 void script_opcode_add_unit(void);
 void script_opcode_portrait_col(s32 portrait_id);
 void script_opcode_wait_rotate(s32 unit_id);
-void script_opcode_mirror_sprite(const event_mirror_sprite_parameters_t* parameters);
-void script_opcode_face_tile(const event_face_tile_parameters_t* parameters);
+void script_opcode_mirror_sprite(const script_mirror_sprite_parameters_t* parameters);
+void script_opcode_face_tile(const script_face_tile_parameters_t* parameters);
 void script_opcode_wait_sprite_move(s32 unit_id);
-void script_opcode_jump(const event_jump_parameters_t* parameters);
+void script_opcode_jump(const script_jump_parameters_t* parameters);
 void script_opcode_unknown_74(const u8* unused_parameters);
 void script_opcode_dismiss_unit(s32 sprite_set);
-void script_opcode_wait_value(const event_wait_value_parameters_t* parameters);
-void script_opcode_march(const event_march_parameters_t* parameters);
-void script_opcode_set_unit_movement_effect_suppression(const event_movement_effect_parameters_t* parameters);
+void script_opcode_wait_value(const script_wait_value_parameters_t* parameters);
+void script_opcode_march(const script_march_parameters_t* parameters);
+void script_opcode_set_unit_movement_effect_suppression(const script_movement_effect_parameters_t* parameters);
 void script_opcode_load_attack_graphics(void);
-void script_opcode_change_stats(const event_change_stats_parameters_t* parameters);
+void script_opcode_change_stats(const script_change_stats_parameters_t* parameters);
 void script_opcode_unlock_date(u32* bitset, s32 date_index, s32 month, s32 day);
 void script_opcode_effect_end_thread(void);
-void script_opcode_unit_anim_rotate(const event_unit_anim_rotate_parameters_t* parameters);
+void script_opcode_unit_anim_rotate(const script_unit_anim_rotate_parameters_t* parameters);
 void script_opcode_teleport_out(s32 unit_id, s32 remove);
-void script_opcode_reset_palette(const event_unit_parameters_t* parameters);
+void script_opcode_reset_palette(const script_unit_parameters_t* parameters);
 void script_opcode_teleport_in(s32 unit_id, s32 unused);
 void script_opcode_blue_remove_unit(s32 unit_id);
 
@@ -154,7 +154,7 @@ s32 script_scale_music_volume(s32 volume);
 
 /* units */
 /* Four unit bindings used by the scenario's slot selectors. */
-extern s16 g_script_unit_slots[EVENT_UNIT_SELECTOR_SLOT_COUNT];
+extern s16 g_script_unit_slots[SCRIPT_UNIT_SELECTOR_SLOT_COUNT];
 
 void script_blue_remove_all_enemy_units(void);
 void script_inflict_status_thread(void);
@@ -168,20 +168,20 @@ s32 script_resolve_map_unit_id(s32 unit_id);
  * thread itself store the moving unit's map unit id; WaitSpriteMove matches it. */
 enum { SPRITE_MOVE_THREAD_WORD_MAP_UNIT_ID = 0 };
 
-void script_opcode_warp_unit(const event_warp_unit_parameters_t* instruction);
+void script_opcode_warp_unit(const script_warp_unit_parameters_t* instruction);
 void script_warp_unit_display_to_paired_unit(s32 map_unit_id);
 void script_opcode_sprite_move_thread(void);
 void script_opcode_sprite_move_beta_thread(void);
-void script_opcode_unit_anim(const event_unit_anim_parameters_t* parameters);
-void script_opcode_face_units(const event_face_unit_parameters_t* parameters, s32 second_only);
-void script_opcode_rotate_unit(const event_rotate_unit_parameters_t* parameters);
+void script_opcode_unit_anim(const script_unit_anim_parameters_t* parameters);
+void script_opcode_face_units(const script_face_unit_parameters_t* parameters, s32 second_only);
+void script_opcode_rotate_unit(const script_rotate_unit_parameters_t* parameters);
 void script_opcode_set_unit_palette_updates(s32 event_unit_id, s32 enable);
 void script_wait_unit_ready(s32 map_unit_id);
 s32 script_map_unit_is_moving(s32 map_unit_id);
 
 /* camera */
-void script_opcode_focus(event_focus_parameters_t* parameters);
-void script_apply_relative_camera(event_camera_values_t* parameters, const s32* camera_values);
+void script_opcode_focus(script_focus_parameters_t* parameters);
+void script_apply_relative_camera(script_camera_values_t* parameters, const s32* camera_values);
 
 /* A typed operand plus a local Camera cursor reorders the original argument saves. */
 void script_opcode_focus_speed(u8* parameters, s32* position, s32* rotation);

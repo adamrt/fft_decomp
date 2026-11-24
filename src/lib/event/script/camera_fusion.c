@@ -52,7 +52,7 @@ void camera_fusion_thread(void) {
     track_key_t* key;
     u8* script;
     u8* cursor;
-    s32 values[EVENT_CAMERA_COMPONENT_COUNT];
+    s32 values[SCRIPT_CAMERA_COMPONENT_COUNT];
     s32 key_count;
     s32 key_index;
     s32 i;
@@ -61,9 +61,9 @@ void camera_fusion_thread(void) {
     s32 opcode;
 
     thread_current_set_task(THREAD_TASK_CAMERA);
-    tracks = menu_alloc_memory(sizeof(camera_track_t) * EVENT_CAMERA_COMPONENT_COUNT);
+    tracks = menu_alloc_memory(sizeof(camera_track_t) * SCRIPT_CAMERA_COMPONENT_COUNT);
     script = (u8*)thread_current_get_parameter_1();
-    mem_zero_words(tracks, sizeof(camera_track_t) * EVENT_CAMERA_COMPONENT_COUNT);
+    mem_zero_words(tracks, sizeof(camera_track_t) * SCRIPT_CAMERA_COMPONENT_COUNT);
 
     /* One key per CAMERA instruction up to the end marker, plus the starting key. */
     cursor = script;
@@ -88,11 +88,11 @@ void camera_fusion_thread(void) {
      * in front of it have run. */
     for (key_index = 0; key_index < key_count; key_index++) {
         if (key_index == 0) {
-            for (i = 0; i < EVENT_CAMERA_COMPONENT_COUNT; i++) {
+            for (i = 0; i < SCRIPT_CAMERA_COMPONENT_COUNT; i++) {
                 track = &tracks[i];
                 track->keys[key_index].value = g_script_variables[g_camera_script_variable_indices[i]];
                 values[i] = track->keys[key_index].value;
-                if (i < EVENT_CAMERA_POSITION_COMPONENT_COUNT) {
+                if (i < SCRIPT_CAMERA_POSITION_COMPONENT_COUNT) {
                     track->keys[key_index].value = track->keys[key_index].value / 1024;
                 }
                 track->keys[key_index].time = 0;
@@ -101,18 +101,18 @@ void camera_fusion_thread(void) {
         } else {
             for (;;) {
                 if (*cursor == SCRIPT_OPCODE_FOCUS) {
-                    script_opcode_focus((event_focus_parameters_t*)(cursor + 1));
+                    script_opcode_focus((script_focus_parameters_t*)(cursor + 1));
                 } else if (*cursor == SCRIPT_OPCODE_RELATIVE_CAMERA) {
-                    script_apply_relative_camera((event_camera_values_t*)(cursor + 1), values);
+                    script_apply_relative_camera((script_camera_values_t*)(cursor + 1), values);
                 } else if (*cursor == SCRIPT_OPCODE_FOCUS_SPEED) {
-                    script_opcode_focus_speed(cursor + 1, values, values + EVENT_CAMERA_COMPONENT_TILT);
+                    script_opcode_focus_speed(cursor + 1, values, values + SCRIPT_CAMERA_COMPONENT_TILT);
                 } else if (*cursor == SCRIPT_OPCODE_CAMERA) {
-                    for (i = 0; i < EVENT_CAMERA_COMPONENT_COUNT; i++) {
+                    for (i = 0; i < SCRIPT_CAMERA_COMPONENT_COUNT; i++) {
                         /* Indexed field access replaces retail's two additions with a shift. */
-                        value
-                            = script_read_s16(cursor + i + i + offsetof(event_camera_instruction_t, parameters.values));
+                        value = script_read_s16(
+                            cursor + i + i + offsetof(script_camera_instruction_t, parameters.values));
                         if (value == CAMERA_FUSION_HOLD_SENTINEL) {
-                            if (i < EVENT_CAMERA_POSITION_COMPONENT_COUNT) {
+                            if (i < SCRIPT_CAMERA_POSITION_COMPONENT_COUNT) {
                                 value = values[i] / 1024;
                             } else {
                                 value = values[i];
@@ -120,14 +120,14 @@ void camera_fusion_thread(void) {
                         }
                         key = &tracks[i].keys[key_index];
                         key->value = value;
-                        key->time = script_read_s16(((event_camera_instruction_t*)cursor)->parameters.duration_le);
+                        key->time = script_read_s16(((script_camera_instruction_t*)cursor)->parameters.duration_le);
                         key->time += tracks[i].keys[key_index - 1].time;
                         component = key->value;
                         values[i] = component;
-                        if (i < EVENT_CAMERA_POSITION_COMPONENT_COUNT) {
+                        if (i < SCRIPT_CAMERA_POSITION_COMPONENT_COUNT) {
                             values[i] = component << 10;
                         }
-                        if (i == EVENT_CAMERA_COMPONENT_YAW) {
+                        if (i == SCRIPT_CAMERA_COMPONENT_YAW) {
                             camera_store_yaw_band(key->value);
                         }
                     }
@@ -142,15 +142,16 @@ void camera_fusion_thread(void) {
     /* Play the tracks; the three position tracks stand still while the position is locked. */
     for (;;) {
         track = tracks;
-        for (key_index = 0; key_index < EVENT_CAMERA_POSITION_COMPONENT_COUNT; key_index++, track++) {
+        for (key_index = 0; key_index < SCRIPT_CAMERA_POSITION_COMPONENT_COUNT; key_index++, track++) {
             if (g_camera_position_locked == 0) {
                 g_script_variables[g_camera_script_variable_indices[key_index]] = step_track(track, key_index);
             }
         }
-        for (key_index = EVENT_CAMERA_COMPONENT_TILT; key_index < EVENT_CAMERA_COMPONENT_COUNT; key_index++, track++) {
+        for (key_index = SCRIPT_CAMERA_COMPONENT_TILT; key_index < SCRIPT_CAMERA_COMPONENT_COUNT;
+            key_index++, track++) {
             g_script_variables[g_camera_script_variable_indices[key_index]] = step_track(track, key_index);
         }
-        if (tracks[EVENT_CAMERA_COMPONENT_TILT].finished == 1) {
+        if (tracks[SCRIPT_CAMERA_COMPONENT_TILT].finished == 1) {
             break;
         }
         camera_clear_zoom_flag();
@@ -314,7 +315,7 @@ static s32 step_track(camera_track_t* track, s32 component) {
 
     /* Angles and zoom round Q12 to the nearest integer; positions return in
      * the 1/1024 units of their script variables. */
-    if (component >= EVENT_CAMERA_COMPONENT_TILT) {
+    if (component >= SCRIPT_CAMERA_COMPONENT_TILT) {
         if (result > 0) {
             if ((result & 0xFFF) > 0x800) {
                 result += ONE;

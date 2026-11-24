@@ -12,24 +12,24 @@ enum {
     EVENT_BLOCK_SECTORS = 4,
     SCRIPT_OPCODE_COUNT = 256,
     /* External unit-id selectors used by scenario commands. */
-    EVENT_UNIT_SELECTOR_SLOT_FIRST = 0x64,
-    EVENT_UNIT_SELECTOR_SLOT_COUNT = 4,
+    SCRIPT_UNIT_SELECTOR_SLOT_FIRST = 0x64,
+    SCRIPT_UNIT_SELECTOR_SLOT_COUNT = 4,
     /* The first ENTD unit whose team flags have a nonzero UNIT_TEAM_IMPORTANCE_MASK. */
-    EVENT_UNIT_SELECTOR_IMPORTANT_UNIT = 0x68,
-    EVENT_UNIT_SELECTOR_ACTIVE_TURN = 0x69,
+    SCRIPT_UNIT_SELECTOR_IMPORTANT_UNIT = 0x68,
+    SCRIPT_UNIT_SELECTOR_ACTIVE_TURN = 0x69,
     /* First unit-group selector. The instructions that take a unit group pass
      * selector - 0xfe to filter_unit_id as its mode (2 up);
      * unit id 0 selects mode 1, every unit. */
-    EVENT_UNIT_GROUP_FIRST = 0x100,
+    SCRIPT_UNIT_GROUP_FIRST = 0x100,
     /* Five ordinary deployed-unit IDs; the end value is exclusive. */
-    EVENT_UNIT_ID_DEPLOYED_FIRST = 0x78,
-    EVENT_UNIT_ID_DEPLOYED_END = 0x7d,
+    SCRIPT_UNIT_ID_DEPLOYED_FIRST = 0x78,
+    SCRIPT_UNIT_ID_DEPLOYED_END = 0x7d,
     /* script_resolve_map_unit_id result for an absent unit. */
-    EVENT_MAP_UNIT_ID_NONE = 2000,
+    SCRIPT_MAP_UNIT_ID_NONE = 2000,
     /* battle_unit_get_id_by_event_unit_id result for an absent unit: the same value. */
-    EVENT_BATTLE_UNIT_ID_NONE = EVENT_MAP_UNIT_ID_NONE,
+    SCRIPT_BATTLE_UNIT_ID_NONE = SCRIPT_MAP_UNIT_ID_NONE,
     /* g_script_unit_slots[] entry with no ghost unit assigned. */
-    EVENT_UNIT_SLOT_EMPTY = 1000
+    SCRIPT_UNIT_SLOT_EMPTY = 1000
 };
 
 /* opcodes */
@@ -49,7 +49,7 @@ enum {
  * signed byte, (u16) or (s16) a 16-bit value, and "unread" a byte no handler
  * reads. A "unit id" names one unit (script_resolve_map_unit_id); a "unit group"
  * is a unit id, 0 for every unit, or a team selector from
- * EVENT_UNIT_GROUP_FIRST (prepare_unit_filter).
+ * SCRIPT_UNIT_GROUP_FIRST (prepare_unit_filter).
  *
  * UNKNOWN values are explicit dispatch cases, not guesses for otherwise
  * unrecognized byte values. UNHANDLED values have a length in the table but
@@ -95,7 +95,7 @@ typedef enum script_opcode {
     SCRIPT_OPCODE_SET_SPEAKER_PAIR = 0x25,      /* 4: unit id (u16), unit id (u16) */
     SCRIPT_OPCODE_RESUME_WAITING_DIALOG = 0x26, /* 2: text id - 1 (u16) */
     SCRIPT_OPCODE_RELOAD_MAP_STATE = 0x27,      /* 0 */
-    /* 8: unit id (u16), x, y, elevation, speed (s16), terrain-cost flag (event_walk_to_parameters_t) */
+    /* 8: unit id (u16), x, y, elevation, speed (s16), terrain-cost flag (script_walk_to_parameters_t) */
     SCRIPT_OPCODE_WALK_TO = 0x28,
     SCRIPT_OPCODE_WAIT_WALK = 0x29,   /* 2: unit id (u16) */
     SCRIPT_OPCODE_BLOCK_START = 0x2a, /* 0; seeks to BLOCK_END */
@@ -103,7 +103,7 @@ typedef enum script_opcode {
     /* 7: unit id (u16), unit group (u16), rotate mode, speed index, delay; the unit and the group turn to face each
      * other */
     SCRIPT_OPCODE_FACE_EACH_OTHER = 0x2c,
-    /* 6: unit group (u16), facing code (event_rotate_unit_facing_e), rotate mode, speed index, delay */
+    /* 6: unit group (u16), facing code (script_rotate_unit_facing_e), rotate mode, speed index, delay */
     SCRIPT_OPCODE_ROTATE_UNIT = 0x2d,
     /* 8: top red, green, blue, bottom red, green, blue, frames, store flag (0 also stores the gradient) */
     SCRIPT_OPCODE_BACKGROUND = 0x2e,
@@ -128,7 +128,7 @@ typedef enum script_opcode {
     SCRIPT_OPCODE_SET_TILE_HEIGHT = 0x40,       /* 5: x, y, layer, height, untargetable flag */
     SCRIPT_OPCODE_EARTHQUAKE_START = 0x41,      /* 4: shake step, period, second shake step, second period */
     SCRIPT_OPCODE_EARTHQUAKE_END = 0x42,        /* 0 */
-    SCRIPT_OPCODE_CALL_FUNCTION = 0x43,         /* 1: event_call_function_e */
+    SCRIPT_OPCODE_CALL_FUNCTION = 0x43,         /* 1: script_call_function_e */
     SCRIPT_OPCODE_DRAW = 0x44,                  /* 2: unit id (u16) */
     SCRIPT_OPCODE_ADD_UNIT = 0x45,              /* 3: ENTD unit id (u16), hidden flag */
     SCRIPT_OPCODE_ERASE = 0x46,                 /* 2: unit id (u16) */
@@ -191,7 +191,7 @@ typedef enum script_opcode {
     /* 6: unread, burst mode, delay divisor, angle step (u16), radius step */
     SCRIPT_OPCODE_DARK_SCREEN = 0x76,
     SCRIPT_OPCODE_REMOVE_DARK_SCREEN = 0x77,   /* 0 */
-    SCRIPT_OPCODE_DISPLAY_CONDITIONS = 0x78,   /* 2: event_display_condition_e, frames */
+    SCRIPT_OPCODE_DISPLAY_CONDITIONS = 0x78,   /* 2: script_display_condition_e, frames */
     SCRIPT_OPCODE_WALK_TO_ANIM = 0x79,         /* 4: unit id (u16), animation id (u16) */
     SCRIPT_OPCODE_DISMISS_UNIT = 0x7a,         /* 2: party sprite set (u16) */
     SCRIPT_OPCODE_TUTORIAL_BUTTON_WAIT = 0x7b, /* 2: pad button mask (u16) */
@@ -203,7 +203,7 @@ typedef enum script_opcode {
     /* 3: unit group (u16), flag (0 clears the suppression, else sets it) */
     SCRIPT_OPCODE_SET_UNIT_MOVEMENT_EFFECT_SUPPRESSION = 0x81,
     SCRIPT_OPCODE_LOAD_ATTACK_GRAPHICS = 0x82, /* 0 */
-    SCRIPT_OPCODE_CHANGE_STATS = 0x83,         /* 5: unit group (u16), event_change_stats_e, delta (s16) */
+    SCRIPT_OPCODE_CHANGE_STATS = 0x83,         /* 5: unit group (u16), script_change_stats_e, delta (s16) */
     SCRIPT_OPCODE_PLAY_TUNE = 0x84,            /* 1: tune id */
     SCRIPT_OPCODE_UNLOCK_DATE = 0x85,          /* 1: date slot + 1; 0 does nothing */
     SCRIPT_OPCODE_TEMP_WEAPON = 0x86,          /* 3: unit id (u16), item id */
@@ -219,7 +219,7 @@ typedef enum script_opcode {
     SCRIPT_OPCODE_LOCK_MENU_INPUT = 0x8f,             /* 1: lock mode */
     SCRIPT_OPCODE_TUTORIAL_COORDINATE_CONFIRM = 0x90, /* 3: cursor x, cursor y, unread */
     SCRIPT_OPCODE_SHOW_MAP_TITLE = 0x91,              /* 3: x offset, y offset, step (s8 each) */
-    SCRIPT_OPCODE_INFLICT_STATUS = 0x92,              /* 5: unit id (u16), event_inflict_status_e, frames (u16) */
+    SCRIPT_OPCODE_INFLICT_STATUS = 0x92,              /* 5: unit id (u16), script_inflict_status_e, frames (u16) */
     SCRIPT_OPCODE_SET_DATE_ADVANCE = 0x93,            /* 2: value (s16) */
     SCRIPT_OPCODE_TELEPORT_OUT = 0x94,                /* 2: unit id (u16) */
     SCRIPT_OPCODE_UNKNOWN_95 = 0x95,                  /* 0; recognized no-op */
@@ -283,50 +283,50 @@ typedef enum script_opcode {
 /* Built-in operation selected by SCRIPT_OPCODE_CALL_FUNCTION. The PSX domain
  * is 0x01..0x12 and is shared by the structurally parallel BATTLE and WORLD
  * interpreters. BLOCK_START handles only the mute/unmute selectors. */
-typedef enum event_call_function {
-    EVENT_CALL_FUNCTION_JOIN_UNITS_SILENTLY = 0x01,
-    EVENT_CALL_FUNCTION_ADVANCE_YEAR = 0x02,
-    EVENT_CALL_FUNCTION_INCREASE_BLUE_TEAM_BRAVE = 0x03,
-    EVENT_CALL_FUNCTION_REMOVE_ALL_ENEMY_UNITS = 0x04,
-    EVENT_CALL_FUNCTION_REQUEST_CAMERA_YAW_WRAP = 0x05,
-    EVENT_CALL_FUNCTION_OPEN_SAVE_MENU = 0x06,
-    EVENT_CALL_FUNCTION_ADVANCE_YEAR_ALTERNATE = 0x07,
-    EVENT_CALL_FUNCTION_DISABLE_DEBUG_DISPLAY = 0x08,
-    EVENT_CALL_FUNCTION_MUTE_TEXT_AUDIO_CUE = 0x09,
-    EVENT_CALL_FUNCTION_UNMUTE_TEXT_AUDIO_CUE = 0x0a,
-    EVENT_CALL_FUNCTION_ADVANCE_MAP_DESTRUCTION_AND_WAIT = 0x0b,
-    EVENT_CALL_FUNCTION_PLAY_ALTIMA_MUSIC = 0x0c,
-    EVENT_CALL_FUNCTION_COPY_UNIT_8_POSITION_TO_UNIT_9_AND_RELOAD_GRAPHICS = 0x0d,
-    EVENT_CALL_FUNCTION_HIDE_BETHLA_REGION_UNITS = 0x0e,
-    EVENT_CALL_FUNCTION_WARP_UNIT_4_DISPLAY_TO_UNIT_2_POSITION_AND_FACING = 0x0f,
-    EVENT_CALL_FUNCTION_WARP_UNIT_5_DISPLAY_TO_UNIT_3_POSITION_AND_FACING = 0x10,
-    EVENT_CALL_FUNCTION_COPY_UNIT_2_POSITION_AND_FACING_TO_UNIT_8_AND_RELOAD_GRAPHICS = 0x11,
-    EVENT_CALL_FUNCTION_CLEAR_ZALERA_ACTIVE_STATUS_GRAPHICS = 0x12
-} event_call_function_e;
+typedef enum script_call_function {
+    SCRIPT_CALL_FUNCTION_JOIN_UNITS_SILENTLY = 0x01,
+    SCRIPT_CALL_FUNCTION_ADVANCE_YEAR = 0x02,
+    SCRIPT_CALL_FUNCTION_INCREASE_BLUE_TEAM_BRAVE = 0x03,
+    SCRIPT_CALL_FUNCTION_REMOVE_ALL_ENEMY_UNITS = 0x04,
+    SCRIPT_CALL_FUNCTION_REQUEST_CAMERA_YAW_WRAP = 0x05,
+    SCRIPT_CALL_FUNCTION_OPEN_SAVE_MENU = 0x06,
+    SCRIPT_CALL_FUNCTION_ADVANCE_YEAR_ALTERNATE = 0x07,
+    SCRIPT_CALL_FUNCTION_DISABLE_DEBUG_DISPLAY = 0x08,
+    SCRIPT_CALL_FUNCTION_MUTE_TEXT_AUDIO_CUE = 0x09,
+    SCRIPT_CALL_FUNCTION_UNMUTE_TEXT_AUDIO_CUE = 0x0a,
+    SCRIPT_CALL_FUNCTION_ADVANCE_MAP_DESTRUCTION_AND_WAIT = 0x0b,
+    SCRIPT_CALL_FUNCTION_PLAY_ALTIMA_MUSIC = 0x0c,
+    SCRIPT_CALL_FUNCTION_COPY_UNIT_8_POSITION_TO_UNIT_9_AND_RELOAD_GRAPHICS = 0x0d,
+    SCRIPT_CALL_FUNCTION_HIDE_BETHLA_REGION_UNITS = 0x0e,
+    SCRIPT_CALL_FUNCTION_WARP_UNIT_4_DISPLAY_TO_UNIT_2_POSITION_AND_FACING = 0x0f,
+    SCRIPT_CALL_FUNCTION_WARP_UNIT_5_DISPLAY_TO_UNIT_3_POSITION_AND_FACING = 0x10,
+    SCRIPT_CALL_FUNCTION_COPY_UNIT_2_POSITION_AND_FACING_TO_UNIT_8_AND_RELOAD_GRAPHICS = 0x11,
+    SCRIPT_CALL_FUNCTION_CLEAR_ZALERA_ACTIVE_STATUS_GRAPHICS = 0x12
+} script_call_function_e;
 
 /* Display selected by the first SCRIPT_OPCODE_DISPLAY_CONDITIONS operand and
  * run by require_conditions_entrypoint. Values from GENERAL_FIRST up show bonus
  * image (value - GENERAL_FIRST) as a banner. */
-typedef enum event_display_condition {
-    EVENT_DISPLAY_CONDITION_SPECIAL_CASES = 0x00,
-    EVENT_DISPLAY_CONDITION_SHOW_READY_BUGGED = 0x01,
-    EVENT_DISPLAY_CONDITION_BATTLE_CONGRATULATIONS = 0x02,
-    EVENT_DISPLAY_CONDITION_GIL_REWARD = 0x03,
-    EVENT_DISPLAY_CONDITION_WAR_TROPHIES = 0x04,
-    EVENT_DISPLAY_CONDITION_APPLY_PERMANENT_BRAVE_FAITH_CHANGES = 0x05,
-    EVENT_DISPLAY_CONDITION_REMOVE_LOW_BRAVE_HIGH_FAITH_UNITS = 0x06,
-    EVENT_DISPLAY_CONDITION_APPLY_POST_BATTLE_UNIT_CHANGES = 0x07,
-    EVENT_DISPLAY_CONDITION_GENERAL_FIRST = 0x08
-} event_display_condition_e;
+typedef enum script_display_condition {
+    SCRIPT_DISPLAY_CONDITION_SPECIAL_CASES = 0x00,
+    SCRIPT_DISPLAY_CONDITION_SHOW_READY_BUGGED = 0x01,
+    SCRIPT_DISPLAY_CONDITION_BATTLE_CONGRATULATIONS = 0x02,
+    SCRIPT_DISPLAY_CONDITION_GIL_REWARD = 0x03,
+    SCRIPT_DISPLAY_CONDITION_WAR_TROPHIES = 0x04,
+    SCRIPT_DISPLAY_CONDITION_APPLY_PERMANENT_BRAVE_FAITH_CHANGES = 0x05,
+    SCRIPT_DISPLAY_CONDITION_REMOVE_LOW_BRAVE_HIGH_FAITH_UNITS = 0x06,
+    SCRIPT_DISPLAY_CONDITION_APPLY_POST_BATTLE_UNIT_CHANGES = 0x07,
+    SCRIPT_DISPLAY_CONDITION_GENERAL_FIRST = 0x08
+} script_display_condition_e;
 
 /* SCRIPT_OPCODE_ROTATE_UNIT facing codes; any other value is an absolute
  * facing. RELATIVE_FIRST and the two values after it add one to three quarter
  * turns to the unit's current facing. */
-typedef enum event_rotate_unit_facing {
-    EVENT_ROTATE_UNIT_FACING_CAMERA = 0x10,
-    EVENT_ROTATE_UNIT_FACING_RELATIVE_FIRST = 0x11,
-    EVENT_ROTATE_UNIT_FACING_RESTORE = 0x14
-} event_rotate_unit_facing_e;
+typedef enum script_rotate_unit_facing {
+    SCRIPT_ROTATE_UNIT_FACING_CAMERA = 0x10,
+    SCRIPT_ROTATE_UNIT_FACING_RELATIVE_FIRST = 0x11,
+    SCRIPT_ROTATE_UNIT_FACING_RESTORE = 0x14
+} script_rotate_unit_facing_e;
 
 /* First 16-bit value of a scenario condition record, as
  * check_condition tests it. The record's next 16-bit values are
@@ -372,20 +372,20 @@ typedef enum event_scenario_condition_result {
 } event_scenario_condition_result_e;
 
 /* Stat selected by SCRIPT_OPCODE_CHANGE_STATS; other values change nothing. */
-typedef enum event_change_stats {
-    EVENT_CHANGE_STATS_HP = 0x00,
-    EVENT_CHANGE_STATS_CT = 0x02,
-    EVENT_CHANGE_STATS_BRAVE = 0x03,
-    EVENT_CHANGE_STATS_FAITH = 0x04
-} event_change_stats_e;
+typedef enum script_change_stats {
+    SCRIPT_CHANGE_STATS_HP = 0x00,
+    SCRIPT_CHANGE_STATS_CT = 0x02,
+    SCRIPT_CHANGE_STATS_BRAVE = 0x03,
+    SCRIPT_CHANGE_STATS_FAITH = 0x04
+} script_change_stats_e;
 
 /* Operation selected by SCRIPT_OPCODE_INFLICT_STATUS; other values only wait. */
-typedef enum event_inflict_status {
+typedef enum script_inflict_status {
     /* A dead unit returns with 1 HP and Critical. */
-    EVENT_INFLICT_STATUS_REVIVE = 0x00,
-    EVENT_INFLICT_STATUS_CRYSTAL = 0x01,
-    EVENT_INFLICT_STATUS_POISON = 0x02
-} event_inflict_status_e;
+    SCRIPT_INFLICT_STATUS_REVIVE = 0x00,
+    SCRIPT_INFLICT_STATUS_CRYSTAL = 0x01,
+    SCRIPT_INFLICT_STATUS_POISON = 0x02
+} script_inflict_status_e;
 
 /* event file */
 /* event_file_block_t.text_offset_or_marker once script_load_event has processed the block. */
@@ -404,7 +404,7 @@ typedef char event_file_block_size_must_be_8192[(sizeof(event_file_block_t) == E
 
 /* dialog instructions */
 /* Dialogue commands are byte-aligned records in the event instruction stream. */
-typedef struct event_display_message_instruction {
+typedef struct script_display_message_instruction {
     u8 opcode;
     u8 thread_id;
     u8 dialog_type;
@@ -415,115 +415,115 @@ typedef struct event_display_message_instruction {
     u8 y_offset_le[2];
     u8 arrow_offset_le[2];
     u8 window_options;
-} event_display_message_instruction_t;
+} script_display_message_instruction_t;
 typedef char
-    event_display_message_instruction_size_must_be_15[sizeof(event_display_message_instruction_t) == 15 ? 1 : -1];
+    script_display_message_instruction_size_must_be_15[sizeof(script_display_message_instruction_t) == 15 ? 1 : -1];
 
-typedef struct event_change_dialog_instruction {
+typedef struct script_change_dialog_instruction {
     u8 opcode;
     u8 window_selector;
     u8 text_id_le[2]; /* one-based text id; 0xffff closes the window */
     u8 portrait_selector_le[2];
-} event_change_dialog_instruction_t;
-typedef char event_change_dialog_instruction_size_must_be_6[sizeof(event_change_dialog_instruction_t) == 6 ? 1 : -1];
+} script_change_dialog_instruction_t;
+typedef char script_change_dialog_instruction_size_must_be_6[sizeof(script_change_dialog_instruction_t) == 6 ? 1 : -1];
 
 /* Byte-aligned Effect instruction; the coordinate operands are stored but not consumed. */
-typedef struct event_effect_instruction {
+typedef struct script_effect_instruction {
     u8 opcode;
     u8 effect_id_le[2];
     u8 target_unit_id;
     u8 x;
     u8 y;
     u8 target_mode;
-} event_effect_instruction_t;
-typedef char event_effect_instruction_size_must_be_7[sizeof(event_effect_instruction_t) == 7 ? 1 : -1];
+} script_effect_instruction_t;
+typedef char script_effect_instruction_size_must_be_7[sizeof(script_effect_instruction_t) == 7 ? 1 : -1];
 
 /* unit operands */
 /* Operand records start after the opcode byte. 16-bit values stay in
  * little-endian byte arrays because the interpreter may address them at any
  * byte alignment. */
-typedef struct event_unit_parameters {
+typedef struct script_unit_parameters {
     u8 unit_id_le[2];
-} event_unit_parameters_t;
+} script_unit_parameters_t;
 
-typedef struct event_unit_placement {
+typedef struct script_unit_placement {
     u8 x;
     u8 y;
     u8 elevation;
     u8 facing;
-} event_unit_placement_t;
+} script_unit_placement_t;
 
 /* Direct battle-slot placement bypasses the renderer update performed by WarpUnit. */
-typedef struct event_set_battle_unit_position_instruction {
+typedef struct script_set_battle_unit_position_instruction {
     u8 opcode;
     u8 battle_unit_id;
     u8 _unused_02;
-    event_unit_placement_t placement;
-} event_set_battle_unit_position_instruction_t;
-typedef char event_set_battle_unit_position_instruction_size_must_be_7
-    [sizeof(event_set_battle_unit_position_instruction_t) == 7 ? 1 : -1];
+    script_unit_placement_t placement;
+} script_set_battle_unit_position_instruction_t;
+typedef char script_set_battle_unit_position_instruction_size_must_be_7
+    [sizeof(script_set_battle_unit_position_instruction_t) == 7 ? 1 : -1];
 
-typedef struct event_warp_unit_parameters {
+typedef struct script_warp_unit_parameters {
     u8 unit_id_le[2];
-    event_unit_placement_t placement;
-} event_warp_unit_parameters_t;
+    script_unit_placement_t placement;
+} script_warp_unit_parameters_t;
 
 /* Eight-byte operand payload of SCRIPT_OPCODE_WALK_TO. Multi-byte values
  * remain byte arrays because event scripts are not guaranteed to be aligned. */
-typedef struct event_walk_to_parameters {
+typedef struct script_walk_to_parameters {
     u8 unit_id_le[2];
     u8 x;
     u8 y;
     u8 elevation;
     u8 speed_le[2];
     u8 terrain_cost_flag; /* 0 ignores terrain costs; 1 uses them */
-} event_walk_to_parameters_t;
-typedef char event_walk_to_parameters_size_must_be_8[sizeof(event_walk_to_parameters_t) == 8 ? 1 : -1];
+} script_walk_to_parameters_t;
+typedef char script_walk_to_parameters_size_must_be_8[sizeof(script_walk_to_parameters_t) == 8 ? 1 : -1];
 
 /* Jump operands: unit id, encoded path length, and direction. */
-typedef struct event_jump_parameters {
+typedef struct script_jump_parameters {
     u8 unit_id_le[2];
     u8 length_plus_one;
     u8 direction;
-} event_jump_parameters_t;
+} script_jump_parameters_t;
 
-typedef struct event_march_parameters {
+typedef struct script_march_parameters {
     u8 unit_id_le[2];
     u8 wait_frames;
-} event_march_parameters_t;
+} script_march_parameters_t;
 
 /* SpriteMove uses duration_or_speed_le as frames; SpriteMoveBeta as speed. */
-typedef struct event_sprite_move_parameters {
+typedef struct script_sprite_move_parameters {
     u8 unit_id_le[2];
     u8 destination_le[3][2];
     u8 curve;
     u8 weight;
     u8 duration_or_speed_le[2];
-} event_sprite_move_parameters_t;
-typedef char event_sprite_move_parameters_size_must_be_12[sizeof(event_sprite_move_parameters_t) == 12 ? 1 : -1];
+} script_sprite_move_parameters_t;
+typedef char script_sprite_move_parameters_size_must_be_12[sizeof(script_sprite_move_parameters_t) == 12 ? 1 : -1];
 
-typedef struct event_unit_anim_parameters {
+typedef struct script_unit_anim_parameters {
     u8 unit_id_le[2];
     u8 animation_le[2];
     u8 facing_update_mode;
-} event_unit_anim_parameters_t;
+} script_unit_anim_parameters_t;
 
 /* The animation's high byte also controls facing-update suppression. */
-typedef struct event_unit_anim_rotate_parameters {
+typedef struct script_unit_anim_rotate_parameters {
     u8 unit_id_le[2];
     u8 rotation;
     u8 animation_le[2];
-} event_unit_anim_rotate_parameters_t;
+} script_unit_anim_rotate_parameters_t;
 
-typedef struct event_rotate_unit_parameters {
+typedef struct script_rotate_unit_parameters {
     u8 unit_id_le[2];
     u8 facing;
     u8 mode;
     u8 speed;
     u8 delay;
-} event_rotate_unit_parameters_t;
+} script_rotate_unit_parameters_t;
 
-typedef struct event_face_tile_parameters {
+typedef struct script_face_tile_parameters {
     u8 unit_id_le[2];
     u8 x;
     u8 y;
@@ -531,169 +531,169 @@ typedef struct event_face_tile_parameters {
     u8 mode;
     u8 speed;
     u8 delay;
-} event_face_tile_parameters_t;
+} script_face_tile_parameters_t;
 
-typedef struct event_face_unit_parameters {
+typedef struct script_face_unit_parameters {
     u8 first_unit_id_le[2];
     u8 second_unit_id_le[2];
     u8 mode;
     u8 speed;
     u8 delay;
-} event_face_unit_parameters_t;
+} script_face_unit_parameters_t;
 
-typedef struct event_mirror_sprite_parameters {
+typedef struct script_mirror_sprite_parameters {
     u8 unit_id_le[2];
     u8 mode;
-} event_mirror_sprite_parameters_t;
+} script_mirror_sprite_parameters_t;
 
-typedef struct event_unit_color {
+typedef struct script_unit_color {
     u8 mode;
     rgb_s8_t rgb;
     u8 duration;
-} event_unit_color_t;
+} script_unit_color_t;
 
-typedef struct event_color_unit_parameters {
+typedef struct script_color_unit_parameters {
     u8 unit_id_le[2];
-    event_unit_color_t color;
-} event_color_unit_parameters_t;
-typedef char event_color_unit_parameters_size_must_be_7[sizeof(event_color_unit_parameters_t) == 7 ? 1 : -1];
+    script_unit_color_t color;
+} script_color_unit_parameters_t;
+typedef char script_color_unit_parameters_size_must_be_7[sizeof(script_color_unit_parameters_t) == 7 ? 1 : -1];
 
-typedef struct event_background_parameters {
+typedef struct script_background_parameters {
     rgb24_t top;
     rgb24_t bottom;
     u8 duration;
     u8 keep_stored; /* 0 also stores the gradient */
-} event_background_parameters_t;
+} script_background_parameters_t;
 
-typedef struct event_tile_camera_block_parameters {
+typedef struct script_tile_camera_block_parameters {
     u8 x;
     u8 y;
     u8 layer;
     u8 mask;
-} event_tile_camera_block_parameters_t;
+} script_tile_camera_block_parameters_t;
 
-typedef struct event_tile_height_parameters {
+typedef struct script_tile_height_parameters {
     u8 x;
     u8 y;
     u8 layer;
     u8 height;
     u8 untargetable;
-} event_tile_height_parameters_t;
+} script_tile_height_parameters_t;
 
 /* AddGhostUnit's bytes after its spritesheet id operand. */
-typedef struct event_add_ghost_unit_parameters {
+typedef struct script_add_ghost_unit_parameters {
     u8 slot;
     u8 x;
     u8 y;
     u8 level;
     u8 facing;
     u8 flags;
-} event_add_ghost_unit_parameters_t;
+} script_add_ghost_unit_parameters_t;
 
-typedef struct event_movement_effect_parameters {
+typedef struct script_movement_effect_parameters {
     u8 unit_id_le[2];
     u8 suppressed;
-} event_movement_effect_parameters_t;
+} script_movement_effect_parameters_t;
 
-typedef struct event_change_stats_parameters {
+typedef struct script_change_stats_parameters {
     u8 unit_id_le[2];
-    u8 stat; /* event_change_stats_e */
+    u8 stat; /* script_change_stats_e */
     u8 delta_le[2];
-} event_change_stats_parameters_t;
-typedef char event_change_stats_parameters_size_must_be_5[sizeof(event_change_stats_parameters_t) == 5 ? 1 : -1];
+} script_change_stats_parameters_t;
+typedef char script_change_stats_parameters_size_must_be_5[sizeof(script_change_stats_parameters_t) == 5 ? 1 : -1];
 
-typedef struct event_inflict_status_parameters {
+typedef struct script_inflict_status_parameters {
     u8 unit_id_le[2];
-    u8 mode; /* event_inflict_status_e */
+    u8 mode; /* script_inflict_status_e */
     u8 wait_frames_le[2];
-} event_inflict_status_parameters_t;
-typedef char event_inflict_status_parameters_size_must_be_5[sizeof(event_inflict_status_parameters_t) == 5 ? 1 : -1];
+} script_inflict_status_parameters_t;
+typedef char script_inflict_status_parameters_size_must_be_5[sizeof(script_inflict_status_parameters_t) == 5 ? 1 : -1];
 
 /* screen, sound and wait operands */
-typedef struct event_background_sound_parameters {
+typedef struct script_background_sound_parameters {
     u8 sound_id;
     u8 volume_from;
     u8 volume_to;
     u8 find_channel;
     u8 frames;
-} event_background_sound_parameters_t;
+} script_background_sound_parameters_t;
 typedef char
-    event_background_sound_parameters_size_must_be_5[sizeof(event_background_sound_parameters_t) == 5 ? 1 : -1];
+    script_background_sound_parameters_size_must_be_5[sizeof(script_background_sound_parameters_t) == 5 ? 1 : -1];
 
-typedef struct event_earthquake_parameters {
+typedef struct script_earthquake_parameters {
     struct {
         u8 z_delta;
         u8 frames;
     } pulses[2];
-} event_earthquake_parameters_t;
-typedef char event_earthquake_parameters_size_must_be_4[sizeof(event_earthquake_parameters_t) == 4 ? 1 : -1];
+} script_earthquake_parameters_t;
+typedef char script_earthquake_parameters_size_must_be_4[sizeof(script_earthquake_parameters_t) == 4 ? 1 : -1];
 
-typedef struct event_wait_value_parameters {
+typedef struct script_wait_value_parameters {
     u8 variable_id_le[2];
     u8 test_value_le[2];
-} event_wait_value_parameters_t;
+} script_wait_value_parameters_t;
 
 /* camera operands */
-typedef enum event_camera_component {
-    EVENT_CAMERA_COMPONENT_X = 0,
-    EVENT_CAMERA_COMPONENT_Z,
-    EVENT_CAMERA_COMPONENT_Y,
-    EVENT_CAMERA_COMPONENT_TILT,
-    EVENT_CAMERA_COMPONENT_YAW,
-    EVENT_CAMERA_COMPONENT_ROLL,
-    EVENT_CAMERA_COMPONENT_ZOOM
-} event_camera_component_e;
+typedef enum script_camera_component {
+    SCRIPT_CAMERA_COMPONENT_X = 0,
+    SCRIPT_CAMERA_COMPONENT_Z,
+    SCRIPT_CAMERA_COMPONENT_Y,
+    SCRIPT_CAMERA_COMPONENT_TILT,
+    SCRIPT_CAMERA_COMPONENT_YAW,
+    SCRIPT_CAMERA_COMPONENT_ROLL,
+    SCRIPT_CAMERA_COMPONENT_ZOOM
+} script_camera_component_e;
 
-enum { EVENT_CAMERA_POSITION_COMPONENT_COUNT = 3, EVENT_CAMERA_COMPONENT_COUNT = 7 };
+enum { SCRIPT_CAMERA_POSITION_COMPONENT_COUNT = 3, SCRIPT_CAMERA_COMPONENT_COUNT = 7 };
 
 /* The event byte is widened into a 32-bit setting; bitfield reads change the extraction order. */
 enum {
-    EVENT_CAMERA_SPEED_CURVE_MODE_MASK = 0x03,
-    EVENT_CAMERA_SPEED_CURVE_GROUP_MASK = 0x0c,
-    EVENT_CAMERA_SPEED_CURVE_GROUP_SHIFT = 2,
-    EVENT_CAMERA_SPEED_CURVE_EASING_MASK = 0xf0,
-    EVENT_CAMERA_SPEED_CURVE_EASING_SHIFT = 4
+    SCRIPT_CAMERA_SPEED_CURVE_MODE_MASK = 0x03,
+    SCRIPT_CAMERA_SPEED_CURVE_GROUP_MASK = 0x0c,
+    SCRIPT_CAMERA_SPEED_CURVE_GROUP_SHIFT = 2,
+    SCRIPT_CAMERA_SPEED_CURVE_EASING_MASK = 0xf0,
+    SCRIPT_CAMERA_SPEED_CURVE_EASING_SHIFT = 4
 };
 
 /* Camera operands remain byte-aligned in the event stream. Positions are
  * x, z (height), y; rotations are tilt, yaw, roll. RelativeCamera has the
  * same seven values, and Camera appends a frame duration. */
-typedef struct event_camera_values {
+typedef struct script_camera_values {
     u8 position_le[3][2];
     u8 rotation_le[3][2];
     u8 zoom_le[2];
-} event_camera_values_t;
-typedef char event_camera_values_size_must_be_14[sizeof(event_camera_values_t) == 14 ? 1 : -1];
+} script_camera_values_t;
+typedef char script_camera_values_size_must_be_14[sizeof(script_camera_values_t) == 14 ? 1 : -1];
 
-typedef struct event_camera_parameters {
-    event_camera_values_t values;
+typedef struct script_camera_parameters {
+    script_camera_values_t values;
     u8 duration_le[2];
-} event_camera_parameters_t;
-typedef char event_camera_parameters_size_must_be_16[sizeof(event_camera_parameters_t) == 16 ? 1 : -1];
+} script_camera_parameters_t;
+typedef char script_camera_parameters_size_must_be_16[sizeof(script_camera_parameters_t) == 16 ? 1 : -1];
 
-typedef struct event_camera_instruction {
+typedef struct script_camera_instruction {
     u8 opcode;
-    event_camera_parameters_t parameters;
-} event_camera_instruction_t;
-typedef char event_camera_instruction_size_must_be_17[sizeof(event_camera_instruction_t) == 17 ? 1 : -1];
+    script_camera_parameters_t parameters;
+} script_camera_instruction_t;
+typedef char script_camera_instruction_size_must_be_17[sizeof(script_camera_instruction_t) == 17 ? 1 : -1];
 
 /* Focus scans subsequent instructions for the Camera that it rewrites. */
-typedef struct event_focus_parameters {
+typedef struct script_focus_parameters {
     u8 first_unit_id_le[2];
     u8 second_unit_id_le[2];
     u8 keep_angle;
-} event_focus_parameters_t;
-typedef char event_focus_parameters_size_must_be_5[sizeof(event_focus_parameters_t) == 5 ? 1 : -1];
+} script_focus_parameters_t;
+typedef char script_focus_parameters_size_must_be_5[sizeof(script_focus_parameters_t) == 5 ? 1 : -1];
 
 /* FocusSpeed rewrites the immediately following Camera's duration. */
-typedef struct event_focus_speed_parameters {
+typedef struct script_focus_speed_parameters {
     u8 speed_le[2];
-} event_focus_speed_parameters_t;
+} script_focus_speed_parameters_t;
 
-typedef struct event_focus_speed_instruction {
+typedef struct script_focus_speed_instruction {
     u8 opcode;
-    event_focus_speed_parameters_t parameters;
-} event_focus_speed_instruction_t;
-typedef char event_focus_speed_instruction_size_must_be_3[sizeof(event_focus_speed_instruction_t) == 3 ? 1 : -1];
+    script_focus_speed_parameters_t parameters;
+} script_focus_speed_instruction_t;
+typedef char script_focus_speed_instruction_size_must_be_3[sizeof(script_focus_speed_instruction_t) == 3 ? 1 : -1];
 
 #endif

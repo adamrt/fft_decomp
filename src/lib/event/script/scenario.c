@@ -40,8 +40,8 @@ static battle_unit_t* get_condition_battle_unit(s32 unit_id) {
         index = battle_unit_find_id_by_character_identity(unit_id);
         if (index >= 0) {
             battle_unit = battle_unit_get(index);
-            if (battle_unit->unit_id >= EVENT_UNIT_ID_DEPLOYED_FIRST
-                && battle_unit->unit_id < EVENT_UNIT_ID_DEPLOYED_END) {
+            if (battle_unit->unit_id >= SCRIPT_UNIT_ID_DEPLOYED_FIRST
+                && battle_unit->unit_id < SCRIPT_UNIT_ID_DEPLOYED_END) {
                 return battle_unit;
             }
         }
@@ -169,7 +169,7 @@ static event_scenario_condition_result_e check_condition(
     if (type == EVENT_SCENARIO_CONDITION_ACTING_UNIT && g_scenario_condition_battle_unit_id != 0xff) {
         unit = battle_unit_get(g_scenario_condition_battle_unit_id);
         if (unit->unit_id == id
-            || (unit->unit_id >= EVENT_UNIT_ID_DEPLOYED_FIRST && unit->unit_id < EVENT_UNIT_ID_DEPLOYED_END
+            || (unit->unit_id >= SCRIPT_UNIT_ID_DEPLOYED_FIRST && unit->unit_id < SCRIPT_UNIT_ID_DEPLOYED_END
                 && unit->character_identity == id && id >= 0 && id < CHARACTER_IDENTITY_GENERIC_FIRST
                 && id != CHARACTER_IDENTITY_ENTD_NONE)) {
             return EVENT_SCENARIO_CONDITION_RESULT_PASS;

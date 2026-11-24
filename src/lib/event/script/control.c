@@ -393,7 +393,7 @@ static s32 get_variable_shift(s32 value) {
 
 /* SCRIPT_OPCODE_WAIT_VALUE (0x7e)
  * Wait until the variable reaches the signed 16-bit test value. */
-void script_opcode_wait_value(const event_wait_value_parameters_t* parameters) {
+void script_opcode_wait_value(const script_wait_value_parameters_t* parameters) {
     s32 variable_id = script_read_s16(parameters->variable_id_le);
     s32 test_value = script_read_s16(parameters->test_value_le);
 

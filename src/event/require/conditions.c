@@ -221,7 +221,7 @@ void conditions_show_general_banner(s32 hold_frames) {
     s32 hide_offset;
     u32* input;
 
-    conditions_load_banner_image(thread_current_get_parameter_1() - EVENT_DISPLAY_CONDITION_GENERAL_FIRST);
+    conditions_load_banner_image(thread_current_get_parameter_1() - SCRIPT_DISPLAY_CONDITION_GENERAL_FIRST);
     {
         u8* parameters = &range[condition];
 

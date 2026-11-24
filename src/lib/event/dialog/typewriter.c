@@ -26,8 +26,8 @@ extern s32 g_text_glyphs_per_wait;
 extern u8 g_text_slot_row_pitches[3];
 
 /* Typed views for this scanner; each expansion re-reads the event-block base. */
-#define DISPLAY_MESSAGE_INSTRUCTION_AT(base, offset) ((event_display_message_instruction_t*)((base) + (offset)))
-#define CHANGE_DIALOG_INSTRUCTION_AT(base, offset)   ((event_change_dialog_instruction_t*)((base) + (offset)))
+#define DISPLAY_MESSAGE_INSTRUCTION_AT(base, offset) ((script_display_message_instruction_t*)((base) + (offset)))
+#define CHANGE_DIALOG_INSTRUCTION_AT(base, offset)   ((script_change_dialog_instruction_t*)((base) + (offset)))
 
 /* Unreferenced word preceding the glyph pen; no consumer establishes a pointer meaning. */
 static u32 s_message_typewriter_prefix_word = 0;

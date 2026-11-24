@@ -35,42 +35,42 @@ void require_conditions_entrypoint(void) {
     thread_current_set_task(THREAD_TASK_CONDITION_DISPATCH);
     condition = thread_current_get_parameter_1();
     parameter = thread_current_get_parameter_2();
-    if (condition >= EVENT_DISPLAY_CONDITION_GENERAL_FIRST) {
+    if (condition >= SCRIPT_DISPLAY_CONDITION_GENERAL_FIRST) {
         conditions_show_general_banner(parameter);
     }
     thread = thread_resolve_slot(THREAD_SLOT_FIRST_IDLE);
 
-    if (condition == EVENT_DISPLAY_CONDITION_SPECIAL_CASES) {
+    if (condition == SCRIPT_DISPLAY_CONDITION_SPECIAL_CASES) {
         thread_start(thread, conditions_special_thread);
         thread_set_parameters(thread, CONDITIONS_BANNER_READY, 0, 0);
         input_wait_frames_or_skip(parameter);
         thread_set_parameters(thread, 0, 0, 2);
         thread_wait_inactive(thread);
-    } else if (condition == EVENT_DISPLAY_CONDITION_SHOW_READY_BUGGED) {
+    } else if (condition == SCRIPT_DISPLAY_CONDITION_SHOW_READY_BUGGED) {
         thread_start(thread, conditions_hovered_stats_thread);
         thread_set_parameters(thread, 0, 0, 0);
         thread_wait_inactive(thread);
-    } else if (condition == EVENT_DISPLAY_CONDITION_BATTLE_CONGRATULATIONS) {
+    } else if (condition == SCRIPT_DISPLAY_CONDITION_BATTLE_CONGRATULATIONS) {
         thread_start(thread, conditions_congratulations_thread);
         thread_set_parameters(thread, 0, 0, 0);
         thread_wait_inactive(thread);
-    } else if (condition == EVENT_DISPLAY_CONDITION_GIL_REWARD) {
+    } else if (condition == SCRIPT_DISPLAY_CONDITION_GIL_REWARD) {
         thread_start(thread, war_trophy_gil_ticker_thread);
         thread_set_parameters(thread, 0, 0, 0);
         thread_wait_inactive(thread);
-    } else if (condition == EVENT_DISPLAY_CONDITION_WAR_TROPHIES) {
+    } else if (condition == SCRIPT_DISPLAY_CONDITION_WAR_TROPHIES) {
         thread_start(thread, war_trophy_list_thread);
         thread_set_parameters(thread, 0, 0, 0);
         thread_wait_inactive(thread);
-    } else if (condition == EVENT_DISPLAY_CONDITION_APPLY_PERMANENT_BRAVE_FAITH_CHANGES) {
+    } else if (condition == SCRIPT_DISPLAY_CONDITION_APPLY_PERMANENT_BRAVE_FAITH_CHANGES) {
         thread_start(thread, after_battle_brave_faith_report_thread);
         thread_set_parameters(thread, 0, 0, 0);
         thread_wait_inactive(thread);
-    } else if (condition == EVENT_DISPLAY_CONDITION_REMOVE_LOW_BRAVE_HIGH_FAITH_UNITS) {
+    } else if (condition == SCRIPT_DISPLAY_CONDITION_REMOVE_LOW_BRAVE_HIGH_FAITH_UNITS) {
         thread_start(thread, after_battle_departures_thread);
         thread_set_parameters(thread, 0, 0, 0);
         thread_wait_inactive(thread);
-    } else if (condition == EVENT_DISPLAY_CONDITION_APPLY_POST_BATTLE_UNIT_CHANGES) {
+    } else if (condition == SCRIPT_DISPLAY_CONDITION_APPLY_POST_BATTLE_UNIT_CHANGES) {
         after_battle_apply_unit_changes();
     }
     thread_current_exit();

@@ -108,7 +108,7 @@ void script_warp_unit_display_to_paired_unit(s32 map_unit_id) {
     s32 facing;
     s32 battle_unit_id;
 
-    if (map_unit_id == EVENT_CALL_FUNCTION_WARP_UNIT_4_DISPLAY_TO_UNIT_2_POSITION_AND_FACING) {
+    if (map_unit_id == SCRIPT_CALL_FUNCTION_WARP_UNIT_4_DISPLAY_TO_UNIT_2_POSITION_AND_FACING) {
         unit = battle_unit_get(1);
         battle_unit_id = 3;
     } else {

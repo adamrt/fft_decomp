@@ -16,7 +16,7 @@ union controller_record;
  * ids 1-96 (g_music_test_music_ids). */
 typedef enum music_id {
     MUSIC_NONE = 0,       /* music_play_tracks and the WLDCORE music queue skip it */
-    MUSIC_ALTIMA = 19,    /* EVENT_CALL_FUNCTION_PLAY_ALTIMA_MUSIC */
+    MUSIC_ALTIMA = 19,    /* SCRIPT_CALL_FUNCTION_PLAY_ALTIMA_MUSIC */
     MUSIC_MILESTONE = 20, /* proposition_update_discovery, in the bar */
     MUSIC_TUTORIAL = 26,  /* the world menu's tutorial screen */
     MUSIC_WORLD_MAP = 27,

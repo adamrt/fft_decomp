@@ -35,12 +35,12 @@ void script_opcode_debug_pause(void) {
 /* SCRIPT_OPCODE_WALK_TO (0x28)
  * WalkTo: start the unit walking to the tile at the signed speed. A terrain_cost_flag of 1 makes
  * the path respect terrain costs; 0 ignores them. */
-void script_opcode_walk_to(const event_walk_to_parameters_t* parameters) {
+void script_opcode_walk_to(const script_walk_to_parameters_t* parameters) {
     s32 id = script_read_s16(parameters->unit_id_le);
     map_tile_coordinates_t coordinates;
 
     id = script_resolve_map_unit_id(id);
-    if (id != EVENT_MAP_UNIT_ID_NONE) {
+    if (id != SCRIPT_MAP_UNIT_ID_NONE) {
         coordinates.x = parameters->x;
         coordinates.y = parameters->y;
         coordinates.layer = parameters->elevation;
@@ -52,13 +52,13 @@ void script_opcode_walk_to(const event_walk_to_parameters_t* parameters) {
 
 /* SCRIPT_OPCODE_MIRROR_SPRITE (0x68)
  * Mirror the unit sprite for mode 1 and restore it for every other mode. */
-void script_opcode_mirror_sprite(const event_mirror_sprite_parameters_t* parameters) {
+void script_opcode_mirror_sprite(const script_mirror_sprite_parameters_t* parameters) {
     s32 mode;
     s32 map_unit_id = script_read_s16(parameters->unit_id_le);
 
     mode = parameters->mode;
     map_unit_id = script_resolve_map_unit_id(map_unit_id);
-    if (map_unit_id != EVENT_MAP_UNIT_ID_NONE) {
+    if (map_unit_id != SCRIPT_MAP_UNIT_ID_NONE) {
         if (mode == 1) {
             sprite_map_unit_set_horizontal_flip(map_unit_id);
         } else {
@@ -70,10 +70,10 @@ void script_opcode_mirror_sprite(const event_mirror_sprite_parameters_t* paramet
 /* SCRIPT_OPCODE_RESET_PALETTE (0x97)
  * ResetPalette: resolve the unit id operand and reapply the weather, time-of-day
  * palette modulation without tile effects, unless the unit is missing. */
-void script_opcode_reset_palette(const event_unit_parameters_t* parameters) {
+void script_opcode_reset_palette(const script_unit_parameters_t* parameters) {
     s32 map_unit_id = script_resolve_map_unit_id(script_read_s16(parameters->unit_id_le));
 
-    if (map_unit_id != EVENT_MAP_UNIT_ID_NONE) {
+    if (map_unit_id != SCRIPT_MAP_UNIT_ID_NONE) {
         sprite_map_unit_reset_palette(map_unit_id);
     }
 }
@@ -83,14 +83,14 @@ void script_opcode_reset_palette(const event_unit_parameters_t* parameters) {
  * of length_plus_one - 1 tiles in the encoded direction through
  * move_start_jump. The unit's Jump stat is 6 while that runs
  * and is restored afterwards. A unit id that does not resolve does nothing. */
-void script_opcode_jump(const event_jump_parameters_t* parameters) {
+void script_opcode_jump(const script_jump_parameters_t* parameters) {
     SVECTOR vec;
     s32 map_unit_id = script_resolve_map_unit_id(script_read_s16(parameters->unit_id_le));
     const SVECTOR* coords;
     battle_unit_t* battle_unit;
     u8 saved;
 
-    if (map_unit_id != EVENT_MAP_UNIT_ID_NONE) {
+    if (map_unit_id != SCRIPT_MAP_UNIT_ID_NONE) {
         coords = map_unit_get_event_offset(map_unit_id);
         setVector(&vec, -coords->vx, -coords->vy, -coords->vz);
         map_unit_add_event_offset(map_unit_id, &vec);
@@ -107,7 +107,7 @@ void script_opcode_jump(const event_jump_parameters_t* parameters) {
 void script_opcode_wait_walk(s32 unit_id) {
     s32 map_unit_id = script_resolve_map_unit_id(unit_id);
 
-    if (map_unit_id != EVENT_MAP_UNIT_ID_NONE) {
+    if (map_unit_id != SCRIPT_MAP_UNIT_ID_NONE) {
         do {
             thread_yield();
         } while (move_map_unit_is_moving(map_unit_id) != 0);
@@ -171,17 +171,17 @@ void script_opcode_block_start_thread(void) {
     while (script[0] != SCRIPT_OPCODE_BLOCK_END) {
         first_halfword = script_read_s16(parameters);
         if (script[0] == SCRIPT_OPCODE_CALL_FUNCTION) {
-            if (script[1] == EVENT_CALL_FUNCTION_MUTE_TEXT_AUDIO_CUE) {
+            if (script[1] == SCRIPT_CALL_FUNCTION_MUTE_TEXT_AUDIO_CUE) {
                 script_variable_set(SCRIPT_VAR_MUTE_TEXT_AUDIO_CUE, 1);
-            } else if (script[1] == EVENT_CALL_FUNCTION_UNMUTE_TEXT_AUDIO_CUE) {
+            } else if (script[1] == SCRIPT_CALL_FUNCTION_UNMUTE_TEXT_AUDIO_CUE) {
                 script_variable_set(SCRIPT_VAR_MUTE_TEXT_AUDIO_CUE, 0);
             }
         } else if (script[0] == SCRIPT_OPCODE_SOUND_EFFECT) {
             g_sound_pending_sfx_id = first_halfword;
         } else if (script[0] == SCRIPT_OPCODE_WARP_UNIT) {
-            script_opcode_warp_unit((const event_warp_unit_parameters_t*)parameters);
+            script_opcode_warp_unit((const script_warp_unit_parameters_t*)parameters);
         } else if (script[0] == SCRIPT_OPCODE_WAIT_VALUE) {
-            script_opcode_wait_value((const event_wait_value_parameters_t*)parameters);
+            script_opcode_wait_value((const script_wait_value_parameters_t*)parameters);
         } else if (script[0] == SCRIPT_OPCODE_DEBUG_PAUSE) {
             script_opcode_debug_pause();
         } else if (script[0] == SCRIPT_OPCODE_WALK_TO) {
@@ -189,48 +189,48 @@ void script_opcode_block_start_thread(void) {
             thread_call_on_main_stack(parameters);
         } else if (script[0] == SCRIPT_OPCODE_WALK_TO_ANIM) {
             map_unit_id = script_resolve_map_unit_id(first_halfword);
-            if (map_unit_id != EVENT_MAP_UNIT_ID_NONE) {
+            if (map_unit_id != SCRIPT_MAP_UNIT_ID_NONE) {
                 g_unit_pending_animation_ids[map_unit_id] = script_read_s16(script + 3);
             }
-            /* Retail bug: this store runs even for EVENT_MAP_UNIT_ID_NONE (2000), far past the
+            /* Retail bug: this store runs even for SCRIPT_MAP_UNIT_ID_NONE (2000), far past the
              * 21-entry array. */
             g_unit_was_moving_latch[map_unit_id] = 0;
         } else if (script[0] == SCRIPT_OPCODE_JUMP) {
-            script_opcode_jump((const event_jump_parameters_t*)parameters);
+            script_opcode_jump((const script_jump_parameters_t*)parameters);
         } else if (script[0] == SCRIPT_OPCODE_WAIT_WALK) {
             script_opcode_wait_walk(first_halfword);
         } else if (script[0] == SCRIPT_OPCODE_UNIT_ANIM) {
-            script_opcode_unit_anim((const event_unit_anim_parameters_t*)parameters);
+            script_opcode_unit_anim((const script_unit_anim_parameters_t*)parameters);
         } else if (script[0] == SCRIPT_OPCODE_MIRROR_SPRITE) {
-            script_opcode_mirror_sprite((const event_mirror_sprite_parameters_t*)(script + 1));
+            script_opcode_mirror_sprite((const script_mirror_sprite_parameters_t*)(script + 1));
         } else if (script[0] == SCRIPT_OPCODE_RESET_PALETTE) {
-            script_opcode_reset_palette((const event_unit_parameters_t*)(script + 1));
+            script_opcode_reset_palette((const script_unit_parameters_t*)(script + 1));
         } else if (script[0] == SCRIPT_OPCODE_SET_FIRST_UNIT) {
             map_unit_id = script_resolve_map_unit_id(first_halfword);
-            if (map_unit_id != EVENT_MAP_UNIT_ID_NONE) {
+            if (map_unit_id != SCRIPT_MAP_UNIT_ID_NONE) {
                 map_unit_move_to_list_head(map_unit_id);
             }
         } else if (script[0] == SCRIPT_OPCODE_ERASE) {
             map_unit_id = script_resolve_map_unit_id(first_halfword);
-            if (map_unit_id != EVENT_MAP_UNIT_ID_NONE) {
+            if (map_unit_id != SCRIPT_MAP_UNIT_ID_NONE) {
                 map_unit_hide(map_unit_id);
             }
         } else if (script[0] == SCRIPT_OPCODE_DRAW) {
             map_unit_id = script_resolve_map_unit_id(first_halfword);
-            if (map_unit_id != EVENT_MAP_UNIT_ID_NONE) {
+            if (map_unit_id != SCRIPT_MAP_UNIT_ID_NONE) {
                 map_unit_show(map_unit_id);
             }
         } else if (script[0] == SCRIPT_OPCODE_WAIT_UNIT_READY) {
             map_unit_id = script_resolve_map_unit_id(first_halfword);
-            if (map_unit_id != EVENT_MAP_UNIT_ID_NONE) {
+            if (map_unit_id != SCRIPT_MAP_UNIT_ID_NONE) {
                 script_wait_unit_ready(map_unit_id);
             }
         } else if (script[0] == SCRIPT_OPCODE_WAIT) {
             thread_wait_frames(script_read_s16(script + 1));
         } else if (script[0] == SCRIPT_OPCODE_ROTATE_UNIT) {
-            script_opcode_rotate_unit((const event_rotate_unit_parameters_t*)(script + 1));
+            script_opcode_rotate_unit((const script_rotate_unit_parameters_t*)(script + 1));
         } else if (script[0] == SCRIPT_OPCODE_FACE_UNIT) {
-            script_opcode_face_units((const event_face_unit_parameters_t*)(script + 1), 1);
+            script_opcode_face_units((const script_face_unit_parameters_t*)(script + 1), 1);
         } else if (script[0] == SCRIPT_OPCODE_SPRITE_MOVE || script[0] == SCRIPT_OPCODE_SPRITE_MOVE_BETA) {
             thread_id = thread_resolve_next_slot(THREAD_SLOT_FIRST_IDLE);
             if (script[0] == SCRIPT_OPCODE_SPRITE_MOVE) {
@@ -249,11 +249,11 @@ void script_opcode_block_start_thread(void) {
         } else if (script[0] == SCRIPT_OPCODE_WAIT_ROTATE_ALL) {
             script_opcode_wait_rotate(-1);
         } else if (script[0] == SCRIPT_OPCODE_UNIT_ANIM_ROTATE) {
-            script_opcode_unit_anim_rotate((const event_unit_anim_rotate_parameters_t*)(script + 1));
+            script_opcode_unit_anim_rotate((const script_unit_anim_rotate_parameters_t*)(script + 1));
         } else if (script[0] == SCRIPT_OPCODE_COLOR_UNIT) {
             map_unit_id = script_resolve_map_unit_id(first_halfword);
-            if (map_unit_id != EVENT_MAP_UNIT_ID_NONE) {
-                const event_unit_color_t* color = &((const event_color_unit_parameters_t*)(script + 1))->color;
+            if (map_unit_id != SCRIPT_MAP_UNIT_ID_NONE) {
+                const script_unit_color_t* color = &((const script_color_unit_parameters_t*)(script + 1))->color;
 
                 sprite_palette_apply_modulation_to_units(
                     color->mode, color->duration, map_unit_id, color->rgb.r, color->rgb.g, color->rgb.b);

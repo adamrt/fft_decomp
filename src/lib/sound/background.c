@@ -14,7 +14,7 @@
  * It then continues in sound_background_fade_thread, which reads the same
  * parameter record to fade from volume_from to volume_to over frames yields. */
 void sound_background_thread(void) {
-    event_background_sound_parameters_t* request;
+    script_background_sound_parameters_t* request;
     s32 sound_id;
     s32 sound;
     s32 volume;
@@ -22,7 +22,7 @@ void sound_background_thread(void) {
     s32 resource = SUZUKI_SOUND_ID(SOUND_RESOURCE_ENV, 0);
 
     thread_current_set_task(THREAD_TASK_BG_SOUND);
-    request = (event_background_sound_parameters_t*)thread_current_get_parameter_1();
+    request = (script_background_sound_parameters_t*)thread_current_get_parameter_1();
     find_channel = request->find_channel;
     sound_id = request->sound_id;
     if (find_channel != 0) {
@@ -50,7 +50,7 @@ void sound_background_thread(void) {
  * negated and 0 becomes 1. The event script's EditBgSound instruction (opcode
  * 0x6a) starts it as a thread, and sound_background_thread continues in it. */
 void sound_background_fade_thread(void) {
-    event_background_sound_parameters_t* request;
+    script_background_sound_parameters_t* request;
     s32 sound_id;
     s32 volume_from;
     s32 volume_to;
@@ -66,7 +66,7 @@ void sound_background_fade_thread(void) {
 
     thread_current_set_task(THREAD_TASK_BG_SOUND);
     step = 0;
-    request = (event_background_sound_parameters_t*)thread_current_get_parameter_1();
+    request = (script_background_sound_parameters_t*)thread_current_get_parameter_1();
     sound_id = request->sound_id;
     volume_from = request->volume_from;
     steps = request->frames;

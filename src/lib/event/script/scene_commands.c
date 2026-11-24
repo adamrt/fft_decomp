@@ -166,7 +166,7 @@ void map_wait_refresh(void) {
 
 /* Clear bit 0 of the zoom variable selected by the camera component-index table. */
 void camera_clear_zoom_flag(void) {
-    g_script_variables[g_camera_script_variable_indices[EVENT_CAMERA_COMPONENT_ZOOM]] &= ~1;
+    g_script_variables[g_camera_script_variable_indices[SCRIPT_CAMERA_COMPONENT_ZOOM]] &= ~1;
 }
 
 #define ABS(x) (x < 0 ? -(x) : x)
@@ -188,8 +188,8 @@ void camera_clear_zoom_flag(void) {
  * gives the target's s0-s3 assignment.
  */
 void script_opcode_camera_thread(void) {
-    s32 target[EVENT_CAMERA_COMPONENT_COUNT + 1];
-    s32 start[EVENT_CAMERA_COMPONENT_COUNT];
+    s32 target[SCRIPT_CAMERA_COMPONENT_COUNT + 1];
+    s32 start[SCRIPT_CAMERA_COMPONENT_COUNT];
     s32 i;
     s32 j;
     s32* variable;
@@ -210,18 +210,18 @@ void script_opcode_camera_thread(void) {
     s32 angle;
     s16 yaw;
     s32 yaw_delta;
-    const event_camera_parameters_t* parameters;
+    const script_camera_parameters_t* parameters;
     const u8* script;
     s32 remaining;
 
-    mode = g_camera_speed_curve & EVENT_CAMERA_SPEED_CURVE_MODE_MASK;
-    group = (g_camera_speed_curve & EVENT_CAMERA_SPEED_CURVE_GROUP_MASK) >> EVENT_CAMERA_SPEED_CURVE_GROUP_SHIFT;
-    ease = (g_camera_speed_curve & EVENT_CAMERA_SPEED_CURVE_EASING_MASK) >> EVENT_CAMERA_SPEED_CURVE_EASING_SHIFT;
+    mode = g_camera_speed_curve & SCRIPT_CAMERA_SPEED_CURVE_MODE_MASK;
+    group = (g_camera_speed_curve & SCRIPT_CAMERA_SPEED_CURVE_GROUP_MASK) >> SCRIPT_CAMERA_SPEED_CURVE_GROUP_SHIFT;
+    ease = (g_camera_speed_curve & SCRIPT_CAMERA_SPEED_CURVE_EASING_MASK) >> SCRIPT_CAMERA_SPEED_CURVE_EASING_SHIFT;
 
     thread_current_set_task(THREAD_TASK_CAMERA);
-    parameters = (const event_camera_parameters_t*)thread_current_get_parameter_1();
+    parameters = (const script_camera_parameters_t*)thread_current_get_parameter_1();
     script = parameters->values.position_le[0];
-    for (i = 0; i < EVENT_CAMERA_COMPONENT_COUNT + 1; i++) {
+    for (i = 0; i < SCRIPT_CAMERA_COMPONENT_COUNT + 1; i++) {
         target[i] = script_read_s16(script);
         script += 2;
     }
@@ -231,7 +231,7 @@ void script_opcode_camera_thread(void) {
     if (g_camera_wrap_yaw_pending != 0) {
         g_camera_wrap_yaw_pending = 0;
         angle = script_variable_get(SCRIPT_VAR_CAMERA_YAW);
-        yaw_delta = ((angle << 16) >> 16) - target[EVENT_CAMERA_COMPONENT_YAW];
+        yaw_delta = ((angle << 16) >> 16) - target[SCRIPT_CAMERA_COMPONENT_YAW];
         yaw = angle;
         if (ABS(yaw_delta + ONE) < ABS(yaw_delta)) {
             yaw = angle + ONE;
@@ -239,30 +239,30 @@ void script_opcode_camera_thread(void) {
         script_variable_set(SCRIPT_VAR_CAMERA_YAW, yaw);
     }
 
-    for (i = 0; i < EVENT_CAMERA_COMPONENT_COUNT; i++) {
+    for (i = 0; i < SCRIPT_CAMERA_COMPONENT_COUNT; i++) {
         start[i] = g_script_variables[g_camera_script_variable_indices[i]];
     }
     /* Positions blend in 1/256 units: drop the low 12 bits of the 1/1024 value, then scale. */
-    for (i = 0; i < EVENT_CAMERA_POSITION_COMPONENT_COUNT; i++) {
+    for (i = 0; i < SCRIPT_CAMERA_POSITION_COMPONENT_COUNT; i++) {
         start[i] &= ~0xFFF;
         start[i] /= 4;
     }
 
-    duration = target[EVENT_CAMERA_COMPONENT_COUNT];
-    for (i = 0; i < target[EVENT_CAMERA_COMPONENT_COUNT]; i++) {
+    duration = target[SCRIPT_CAMERA_COMPONENT_COUNT];
+    for (i = 0; i < target[SCRIPT_CAMERA_COMPONENT_COUNT]; i++) {
         weight = 16 - ease;
         ramp = (duration - i) * i;
-        for (j = 0; j < EVENT_CAMERA_COMPONENT_COUNT; j++) {
+        for (j = 0; j < SCRIPT_CAMERA_COMPONENT_COUNT; j++) {
             variable = &g_script_variables[g_camera_script_variable_indices[j]];
             if (target[j] == CAMERA_FUSION_HOLD_SENTINEL) {
                 continue;
             }
-            if (g_camera_position_locked != 0 && j < EVENT_CAMERA_POSITION_COMPONENT_COUNT) {
+            if (g_camera_position_locked != 0 && j < SCRIPT_CAMERA_POSITION_COMPONENT_COUNT) {
                 continue;
             }
             /* Components within 6 position units (or 1.5 rotation units) of the target skip the
              * blend; the assignments after the loop still land them. */
-            if (j < EVENT_CAMERA_POSITION_COMPONENT_COUNT) {
+            if (j < SCRIPT_CAMERA_POSITION_COMPONENT_COUNT) {
                 delta = (target[j] << 8) - start[j];
                 base = start[j];
                 if (ABS(delta) < 0x600) {
@@ -277,10 +277,10 @@ void script_opcode_camera_thread(void) {
             }
 
             /* Mode 0 and the group the curve leaves linear (0: rotations, 1: positions) move linearly. */
-            if (mode == 0 || (group == 0 && j >= EVENT_CAMERA_COMPONENT_TILT)
-                || (group == 1 && j < EVENT_CAMERA_POSITION_COMPONENT_COUNT)) {
+            if (mode == 0 || (group == 0 && j >= SCRIPT_CAMERA_COMPONENT_TILT)
+                || (group == 1 && j < SCRIPT_CAMERA_POSITION_COMPONENT_COUNT)) {
                 value = math_mul_div_s64(delta, i, duration) + base;
-                if (j < EVENT_CAMERA_POSITION_COMPONENT_COUNT) {
+                if (j < SCRIPT_CAMERA_POSITION_COMPONENT_COUNT) {
                     value *= 4;
                 }
             } else if (mode == 1) {
@@ -289,7 +289,7 @@ void script_opcode_camera_thread(void) {
                 /* accel + 2 * decel is 32 * delta, so `first` is the linear term; the ramp term bows it. */
                 first = math_mul_div_s64(accel + decel + decel, i, duration * 32);
                 value = math_mul_div_s64(accel, ramp, duration * duration * 32) + first + base;
-                if (j < EVENT_CAMERA_POSITION_COMPONENT_COUNT) {
+                if (j < SCRIPT_CAMERA_POSITION_COMPONENT_COUNT) {
                     value *= 4;
                 }
             } else {
@@ -302,7 +302,7 @@ void script_opcode_camera_thread(void) {
                     decel = delta * weight;
                     value = math_mul_div_s64(
                         math_mul_div_s64(delta * ease * 2, half, duration) + decel + decel, half, duration * 32);
-                    if (j < EVENT_CAMERA_POSITION_COMPONENT_COUNT) {
+                    if (j < SCRIPT_CAMERA_POSITION_COMPONENT_COUNT) {
                         value += base * 4;
                     } else {
                         value = value / 4 + base;
@@ -313,7 +313,7 @@ void script_opcode_camera_thread(void) {
                     elapsed = half - duration;
                     remaining = math_mul_div_s64(accel, duration - elapsed, duration);
                     value = math_mul_div_s64(accel + remaining + decel + decel, elapsed, duration * 32);
-                    if (j < EVENT_CAMERA_POSITION_COMPONENT_COUNT) {
+                    if (j < SCRIPT_CAMERA_POSITION_COMPONENT_COUNT) {
                         value += delta;
                         value += base * 4;
                     } else {
@@ -324,7 +324,7 @@ void script_opcode_camera_thread(void) {
 
             /* Rotations round from 1/64 units; the 0xFF mask (not 0x3F) also tests two integer
              * bits, so the half-step test is uneven (retail). */
-            if (j >= EVENT_CAMERA_COMPONENT_TILT) {
+            if (j >= SCRIPT_CAMERA_COMPONENT_TILT) {
                 if (value > 0) {
                     if ((value & 0xFF) > 0x20) {
                         value += 0x40;
@@ -344,14 +344,14 @@ void script_opcode_camera_thread(void) {
 
     /* Land exactly on the targets, positions back in 1/1024 units. */
     if (g_camera_position_locked == 0) {
-        for (i = 0; i < EVENT_CAMERA_POSITION_COMPONENT_COUNT; i++) {
+        for (i = 0; i < SCRIPT_CAMERA_POSITION_COMPONENT_COUNT; i++) {
             if (target[i] != CAMERA_FUSION_HOLD_SENTINEL) {
                 g_script_variables[g_camera_script_variable_indices[i]] = target[i] << 10;
             }
         }
     }
 
-    for (i = EVENT_CAMERA_COMPONENT_TILT; i < EVENT_CAMERA_COMPONENT_COUNT; i++) {
+    for (i = SCRIPT_CAMERA_COMPONENT_TILT; i < SCRIPT_CAMERA_COMPONENT_COUNT; i++) {
         if (target[i] != CAMERA_FUSION_HOLD_SENTINEL) {
             g_script_variables[g_camera_script_variable_indices[i]] = target[i];
         }
@@ -369,10 +369,10 @@ void script_opcode_camera_thread(void) {
  * g_script_map_darkness_durations[duration index] frames (1 to 256). WORLD's copy
  * also calls the BATTLE blend at 0x800934d0, which is WLDCORE data there. */
 void script_opcode_map_darkness_thread(void) {
-    event_unit_color_t* parameters;
+    script_unit_color_t* parameters;
 
     thread_current_set_task(THREAD_TASK_MAP_DARKNESS);
-    parameters = (event_unit_color_t*)thread_current_get_parameter_1();
+    parameters = (script_unit_color_t*)thread_current_get_parameter_1();
     map_light_start_ambient_blend(
         parameters->mode, parameters->duration, parameters->rgb.r, parameters->rgb.g, parameters->rgb.b);
     thread_wait_frames(s_script_map_darkness_durations[parameters->duration]);
@@ -384,12 +384,12 @@ void script_opcode_map_darkness_thread(void) {
  * offset every pulses[k].frames frames, on independent counters. The thread never ends on
  * its own; another instruction tears it down. */
 void script_opcode_earthquake_start_thread(void) {
-    event_earthquake_parameters_t* parameters;
+    script_earthquake_parameters_t* parameters;
     s32 first_counter;
     s32 second_counter;
 
     thread_current_set_task(THREAD_TASK_EARTHQUAKE);
-    parameters = (event_earthquake_parameters_t*)thread_current_get_parameter_1();
+    parameters = (script_earthquake_parameters_t*)thread_current_get_parameter_1();
     first_counter = 0;
     second_counter = 0;
     for (;;) {
@@ -465,7 +465,7 @@ void script_opcode_color_screen_thread(void) {
 
 /* The parameters are copied into locals in this order: it is what places the
  * s0 copy before the s2 copy in the prologue. */
-static void run_sprite_move(const event_sprite_move_parameters_t* arg, s32 use_speed) {
+static void run_sprite_move(const script_sprite_move_parameters_t* arg, s32 use_speed) {
     s32 pos[4][4];
     SVECTOR vec;
     /* Indexed destination fields change allocation and shorten the target by four bytes. */
@@ -489,7 +489,7 @@ static void run_sprite_move(const event_sprite_move_parameters_t* arg, s32 use_s
     parameters = arg->unit_id_le;
     mode = use_speed;
     map_unit_id = script_resolve_map_unit_id(script_read_s16(parameters));
-    if (map_unit_id == EVENT_MAP_UNIT_ID_NONE) {
+    if (map_unit_id == SCRIPT_MAP_UNIT_ID_NONE) {
         return;
     }
     g_thread_contexts[g_thread_current_id].task_words[SPRITE_MOVE_THREAD_WORD_MAP_UNIT_ID] = map_unit_id;
@@ -596,7 +596,7 @@ static void run_sprite_move(const event_sprite_move_parameters_t* arg, s32 use_s
  * frame count. */
 void script_opcode_sprite_move_thread(void) {
     thread_current_set_task(THREAD_TASK_SPRITE_MOVE);
-    run_sprite_move((const event_sprite_move_parameters_t*)thread_current_get_parameter_1(), 0);
+    run_sprite_move((const script_sprite_move_parameters_t*)thread_current_get_parameter_1(), 0);
     thread_current_exit();
 }
 
@@ -605,7 +605,7 @@ void script_opcode_sprite_move_thread(void) {
  * as a speed. */
 void script_opcode_sprite_move_beta_thread(void) {
     thread_current_set_task(THREAD_TASK_SPRITE_MOVE);
-    run_sprite_move((const event_sprite_move_parameters_t*)thread_current_get_parameter_1(), 1);
+    run_sprite_move((const script_sprite_move_parameters_t*)thread_current_get_parameter_1(), 1);
     thread_current_exit();
 }
 
@@ -617,7 +617,7 @@ void script_opcode_wait_sprite_move(s32 unit_id) {
     s32 map_unit_id = script_resolve_map_unit_id(unit_id);
     s32 i;
 
-    if (map_unit_id == EVENT_MAP_UNIT_ID_NONE) {
+    if (map_unit_id == SCRIPT_MAP_UNIT_ID_NONE) {
         return;
     }
     for (;;) {
@@ -792,22 +792,22 @@ static s16 choose_unblocked_yaw(s32 map_unit_id_a, s32 map_unit_id_b) {
  * camera_values, into the Camera instruction that follows it (skipping one FocusSpeed in
  * between). Positions convert from the variables' 1/1024 units; hold sentinels pass through
  * unchanged. */
-void script_apply_relative_camera(event_camera_values_t* parameters, const s32* camera_values) {
+void script_apply_relative_camera(script_camera_values_t* parameters, const s32* camera_values) {
     u8* source = parameters->position_le[0];
     const s32* deltas = camera_values;
-    u8* destination = ((event_camera_instruction_t*)(parameters + 1))->parameters.values.position_le[0];
+    u8* destination = ((script_camera_instruction_t*)(parameters + 1))->parameters.values.position_le[0];
     s32 index;
     s32 delta;
     s32 value;
 
-    if (((event_camera_instruction_t*)(parameters + 1))->opcode == SCRIPT_OPCODE_FOCUS_SPEED) {
-        destination = ((event_camera_instruction_t*)((event_focus_speed_instruction_t*)(parameters + 1) + 1))
+    if (((script_camera_instruction_t*)(parameters + 1))->opcode == SCRIPT_OPCODE_FOCUS_SPEED) {
+        destination = ((script_camera_instruction_t*)((script_focus_speed_instruction_t*)(parameters + 1) + 1))
                           ->parameters.values.position_le[0];
     }
 
-    for (index = 0; index < EVENT_CAMERA_COMPONENT_COUNT; index++) {
+    for (index = 0; index < SCRIPT_CAMERA_COMPONENT_COUNT; index++) {
         delta = *deltas;
-        if (index < EVENT_CAMERA_POSITION_COMPONENT_COUNT) {
+        if (index < SCRIPT_CAMERA_POSITION_COMPONENT_COUNT) {
             delta = delta / 1024;
         }
         if (script_read_s16(source) == CAMERA_FUSION_HOLD_SENTINEL) {
@@ -830,7 +830,7 @@ void script_apply_relative_camera(event_camera_values_t* parameters, const s32* 
  * second unit Altima's first form. Unless keep_angle is set, its yaw becomes the nearest diagonal not
  * blocked at either unit's tile. When either unit is missing, the Camera instruction is
  * disabled and system error 7 is reported. */
-void script_opcode_focus(event_focus_parameters_t* parameters) {
+void script_opcode_focus(script_focus_parameters_t* parameters) {
     s32 coords[2][4];
     s32 unit_a;
     s32 unit_b;
@@ -850,13 +850,13 @@ void script_opcode_focus(event_focus_parameters_t* parameters) {
     while (*cursor != SCRIPT_OPCODE_CAMERA) {
         cursor += g_script_event_instruction_sizes[*cursor] + 1;
     }
-    cursor = ((event_camera_instruction_t*)cursor)->parameters.values.position_le[0];
+    cursor = ((script_camera_instruction_t*)cursor)->parameters.values.position_le[0];
     unit_a = first;
     unit_b = second;
     first = script_resolve_map_unit_id(unit_a);
     second = script_resolve_map_unit_id(unit_b);
-    if (first == EVENT_MAP_UNIT_ID_NONE || second == EVENT_MAP_UNIT_ID_NONE) {
-        ((event_camera_instruction_t*)(cursor - offsetof(event_camera_instruction_t, parameters)))->opcode
+    if (first == SCRIPT_MAP_UNIT_ID_NONE || second == SCRIPT_MAP_UNIT_ID_NONE) {
+        ((script_camera_instruction_t*)(cursor - offsetof(script_camera_instruction_t, parameters)))->opcode
             = SCRIPT_OPCODE_CAMERA_DISABLED;
         system_report_error(7, 0);
         return;
@@ -876,10 +876,10 @@ void script_opcode_focus(event_focus_parameters_t* parameters) {
     for (i = 0; i < 3; i++) {
         coords[0][i] = (coords[0][i] + coords[1][i]) * 2;
         write_operand_s16(cursor, coords[0][i]);
-        cursor += sizeof(((event_camera_values_t*)0)->position_le[0]);
+        cursor += sizeof(((script_camera_values_t*)0)->position_le[0]);
     }
     if (keep_angle == 0) {
-        cursor += sizeof(((event_camera_values_t*)0)->position_le[0]);
+        cursor += sizeof(((script_camera_values_t*)0)->position_le[0]);
         write_operand_s16(cursor, choose_unblocked_yaw(first, second));
     }
 }
@@ -899,9 +899,9 @@ void script_opcode_focus_speed(u8* parameters, s32* position, s32* rotation) {
     s32 rotation_sum;
 
     /* A separate typed Camera cursor reorders the original argument saves. */
-    speed = script_read_s16(((event_focus_speed_parameters_t*)parameters)->speed_le);
-    parameters += sizeof(event_focus_speed_parameters_t);
-    parameters = ((event_camera_instruction_t*)parameters)->parameters.values.position_le[0];
+    speed = script_read_s16(((script_focus_speed_parameters_t*)parameters)->speed_le);
+    parameters += sizeof(script_focus_speed_parameters_t);
+    parameters = ((script_camera_instruction_t*)parameters)->parameters.values.position_le[0];
     position_sum = 0;
     for (i = 0; i < 3; i++) {
         value = script_read_s16(parameters + i * 2);
@@ -910,7 +910,7 @@ void script_opcode_focus_speed(u8* parameters, s32* position, s32* rotation) {
         } else {
             position_delta[i] = value - position[i] / 1024;
         }
-        value = script_read_s16(parameters + i * 2 + sizeof(((event_camera_values_t*)0)->position_le));
+        value = script_read_s16(parameters + i * 2 + sizeof(((script_camera_values_t*)0)->position_le));
         if (value == CAMERA_FUSION_HOLD_SENTINEL) {
             rotation_delta[i] = 0;
         } else {
@@ -926,7 +926,7 @@ void script_opcode_focus_speed(u8* parameters, s32* position, s32* rotation) {
     if (position_sum == 0) {
         position_sum = 1;
     }
-    write_operand_s16(((event_camera_parameters_t*)parameters)->duration_le, position_sum);
+    write_operand_s16(((script_camera_parameters_t*)parameters)->duration_le, position_sum);
 }
 
 /* Empty in BATTLE and WORLD apart from a 48-byte stack frame (the unused twelve-word local).
@@ -937,21 +937,21 @@ void script_noop_11(void) {
 
 /* Prepare an event unit selector for filter_unit_id. A single unit id is
  * resolved in place to its map unit id with filter mode 0 (returning 0 when it does not
- * resolve). Id 0 selects every unit (mode 1), and the group ids from EVENT_UNIT_GROUP_FIRST
+ * resolve). Id 0 selects every unit (mode 1), and the group ids from SCRIPT_UNIT_GROUP_FIRST
  * select modes 2-5: the blue team, the blue team without excluded statuses, the other
  * teams, and the other teams without them. Callers then loop over all unit slots and stop
  * after the first match in mode 0. */
 static s32 prepare_unit_filter(u16* unit_id, s32* filter_mode) {
     u32 id = *unit_id;
 
-    if (id != 0 && id < EVENT_UNIT_GROUP_FIRST) {
+    if (id != 0 && id < SCRIPT_UNIT_GROUP_FIRST) {
         *unit_id = script_resolve_map_unit_id(id);
         *filter_mode = SCRIPT_UNIT_FILTER_SINGLE;
-        if (*unit_id == EVENT_MAP_UNIT_ID_NONE) {
+        if (*unit_id == SCRIPT_MAP_UNIT_ID_NONE) {
             return 0;
         }
     } else {
-        *filter_mode = id != 0 ? id - EVENT_UNIT_GROUP_FIRST + SCRIPT_UNIT_FILTER_BLUE : SCRIPT_UNIT_FILTER_EXISTING;
+        *filter_mode = id != 0 ? id - SCRIPT_UNIT_GROUP_FIRST + SCRIPT_UNIT_FILTER_BLUE : SCRIPT_UNIT_FILTER_EXISTING;
     }
     return 1;
 }
@@ -1047,7 +1047,7 @@ void script_opcode_teleport_out(s32 unit_id, s32 remove) {
     s32 map_unit_id = script_resolve_map_unit_id(unit_id);
     s32 battle_unit_id;
 
-    if (map_unit_id == EVENT_MAP_UNIT_ID_NONE) {
+    if (map_unit_id == SCRIPT_MAP_UNIT_ID_NONE) {
         return;
     }
     g_sound_pending_sfx_id = SOUND_SFX_TELEPORT_OUT;
@@ -1070,7 +1070,7 @@ void script_opcode_teleport_out(s32 unit_id, s32 remove) {
 void script_opcode_teleport_in(s32 unit_id, s32 unused) {
     s32 map_unit_id = script_resolve_map_unit_id(unit_id);
 
-    if (map_unit_id != EVENT_MAP_UNIT_ID_NONE) {
+    if (map_unit_id != SCRIPT_MAP_UNIT_ID_NONE) {
         g_thread_call_target = (void (*)(void))effect_secondary_map_unit_start_teleport;
         thread_call_on_main_stack(map_unit_id);
     }
@@ -1141,11 +1141,11 @@ void script_opcode_blue_remove_unit(s32 unit_id) {
  * Parameters: 0x00 ENTD unit id (16-bit value), 0x02 x, 0x03 y, 0x04 higher
  * elevation, 0x05 facing.
  */
-void script_opcode_warp_unit(const event_warp_unit_parameters_t* instruction) {
+void script_opcode_warp_unit(const script_warp_unit_parameters_t* instruction) {
     /* Separate instruction and placement pointers change register allocation. */
     union {
-        const event_warp_unit_parameters_t* instruction;
-        const event_unit_placement_t* placement;
+        const script_warp_unit_parameters_t* instruction;
+        const script_unit_placement_t* placement;
     } cursor;
     battle_unit_t* unit;
     s32 battle_unit_id;
@@ -1188,7 +1188,7 @@ void script_opcode_warp_unit(const event_warp_unit_parameters_t* instruction) {
 
 /* SCRIPT_OPCODE_UNIT_ANIM_ROTATE (0x8c)
  * Set facing and animation immediately; the animation high byte also controls facing-update suppression. */
-void script_opcode_unit_anim_rotate(const event_unit_anim_rotate_parameters_t* parameters) {
+void script_opcode_unit_anim_rotate(const script_unit_anim_rotate_parameters_t* parameters) {
     u8 rotation;
     s16 animation;
     s16 map_unit_id = script_read_s16(parameters->unit_id_le);
@@ -1221,7 +1221,7 @@ void script_opcode_unit_anim_rotate(const event_unit_anim_rotate_parameters_t* p
  * toward the second. Successive second-unit records are staggered like FaceTile.
  * The angle is built in place (negate, then add) so combine cannot fold the two
  * constant additions into one. */
-void script_opcode_face_units(const event_face_unit_parameters_t* parameters, s32 second_only) {
+void script_opcode_face_units(const script_face_unit_parameters_t* parameters, s32 second_only) {
     SVECTOR position;
     SVECTOR target;
     u16 unit_id;
@@ -1239,7 +1239,7 @@ void script_opcode_face_units(const event_face_unit_parameters_t* parameters, s3
     unit_id = script_read_s16(parameters->second_unit_id_le);
     if (prepare_unit_filter(&unit_id, &filter_mode) != 0) {
         map_unit_id = script_resolve_map_unit_id(map_unit_id);
-        if (map_unit_id != EVENT_MAP_UNIT_ID_NONE) {
+        if (map_unit_id != SCRIPT_MAP_UNIT_ID_NONE) {
             for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
                 if (filter_unit_id(&unit_id, &s_script_unit_face_slot_order[i], &filter_mode) != 0
                     && map_unit_id != unit_id) {
@@ -1291,7 +1291,7 @@ void script_opcode_face_units(const event_face_unit_parameters_t* parameters, s3
  * The restore arm carries its own copy of the filter_mode test, which is what
  * retail does: it reloads filter_mode and jumps past the absolute arm's own
  * reload, so cross-jumping merges only the branch and the loop increment. */
-void script_opcode_rotate_unit(const event_rotate_unit_parameters_t* parameters) {
+void script_opcode_rotate_unit(const script_rotate_unit_parameters_t* parameters) {
     u16 unit_id;
     s32 filter_mode;
     s32 i;
@@ -1305,14 +1305,14 @@ void script_opcode_rotate_unit(const event_rotate_unit_parameters_t* parameters)
         for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
             if (filter_unit_id(&unit_id, &s_script_unit_face_slot_order[i], &filter_mode) != 0) {
                 facing = parameters->facing;
-                if (facing >= EVENT_ROTATE_UNIT_FACING_RELATIVE_FIRST && facing < EVENT_ROTATE_UNIT_FACING_RESTORE) {
+                if (facing >= SCRIPT_ROTATE_UNIT_FACING_RELATIVE_FIRST && facing < SCRIPT_ROTATE_UNIT_FACING_RESTORE) {
                     /* Stepwise: the one-expression form costs an instruction. */
                     facing = facing & 0xF;
                     facing = map_unit_get_facing_sixteenth(unit_id) + facing * 4;
                     facing = facing & 0xF;
-                } else if (facing == EVENT_ROTATE_UNIT_FACING_CAMERA) {
+                } else if (facing == SCRIPT_ROTATE_UNIT_FACING_CAMERA) {
                     facing = s_unit_facing_by_camera_quadrant[(camera_get_nonnegative_yaw() & 0xC00) >> 10] * 4;
-                } else if (facing == EVENT_ROTATE_UNIT_FACING_RESTORE) {
+                } else if (facing == SCRIPT_ROTATE_UNIT_FACING_RESTORE) {
                     state = &g_unit_animation_states[unit_id];
                     if (state->initial_facing != 0xFF) {
                         state->rotate_mode = UNIT_ROTATE_MODE_SHORTEST;
@@ -1603,7 +1603,7 @@ void battle_unit_status_staging_run(u16 unit_id, u16 restore) {
  * change for real. REVIVE on a unit that is neither dead nor Critical requests its
  * standing pose. Waits wait_frames frames before exiting. */
 void script_inflict_status_thread(void) {
-    event_inflict_status_parameters_t* parameters;
+    script_inflict_status_parameters_t* parameters;
     s32 unit_id;
     s32 mode;
     s32 wait_frames;
@@ -1613,13 +1613,13 @@ void script_inflict_status_thread(void) {
     s32 health; /* 0 dead, 1 Critical, 2 otherwise */
 
     thread_current_set_task(THREAD_TASK_INFLICT_STATUS);
-    parameters = (event_inflict_status_parameters_t*)thread_current_get_parameter_1();
+    parameters = (script_inflict_status_parameters_t*)thread_current_get_parameter_1();
     unit_id = script_read_s16(parameters->unit_id_le);
     mode = parameters->mode;
     wait_frames = script_read_s16(parameters->wait_frames_le);
     battle_unit_index = battle_unit_get_id_by_event_unit_id(unit_id);
     map_unit_id = script_resolve_map_unit_id(unit_id);
-    if (map_unit_id == EVENT_MAP_UNIT_ID_NONE) {
+    if (map_unit_id == SCRIPT_MAP_UNIT_ID_NONE) {
         thread_current_exit();
     }
     battle_unit_status_staging_run(unit_id, 0);
@@ -1632,20 +1632,20 @@ void script_inflict_status_thread(void) {
             health = 1;
         }
     }
-    if (mode == EVENT_INFLICT_STATUS_POISON) {
+    if (mode == SCRIPT_INFLICT_STATUS_POISON) {
         change_event_unit_status(unit_id, STATUS_LSB_INDEX(STATUS_ID_POISON), 1, 1);
         g_unit_status_staging_data->inflict_status_mode[battle_unit_index] = UNIT_INFLICT_STATUS_MODE_POISON;
         g_thread_call_target = (void (*)(void))map_unit_update_display_for_script;
         thread_call_on_main_stack(map_unit_id);
         map_unit_set_event_animation(map_unit_id, ANIMATION_KNEEL);
-    } else if (mode == EVENT_INFLICT_STATUS_CRYSTAL) {
+    } else if (mode == SCRIPT_INFLICT_STATUS_CRYSTAL) {
         change_event_unit_status(unit_id, STATUS_LSB_INDEX(STATUS_ID_DEAD), 0, 1);
         change_event_unit_status(unit_id, STATUS_LSB_INDEX(STATUS_ID_CRITICAL), 0, 1);
         change_event_unit_status(unit_id, STATUS_LSB_INDEX(STATUS_ID_CRYSTAL), 1, 1);
         g_unit_status_staging_data->inflict_status_mode[battle_unit_index] = UNIT_INFLICT_STATUS_MODE_CRYSTAL;
         g_thread_call_target = (void (*)(void))map_unit_update_display_for_script;
         thread_call_on_main_stack(map_unit_id);
-    } else if (mode == EVENT_INFLICT_STATUS_REVIVE) {
+    } else if (mode == SCRIPT_INFLICT_STATUS_REVIVE) {
         if (health == 0) {
             g_unit_status_staging_data->inflict_status_mode[battle_unit_index] = UNIT_INFLICT_STATUS_MODE_REVIVE;
             change_event_unit_status(unit_id, STATUS_LSB_INDEX(STATUS_ID_DEAD), 0, 1);
@@ -1678,7 +1678,7 @@ static void change_event_unit_status(s32 event_unit_id, s32 status, s32 which, s
     s32 byte;
     s32 bit;
 
-    if (battle_unit_id == EVENT_BATTLE_UNIT_ID_NONE) {
+    if (battle_unit_id == SCRIPT_BATTLE_UNIT_ID_NONE) {
         return;
     }
     unit = battle_unit_get(battle_unit_id);
@@ -1703,9 +1703,9 @@ static void change_event_unit_status(s32 event_unit_id, s32 status, s32 which, s
  * ChangeStats event instruction: add a signed delta to one stat of each
  * resolved unit.
  *
- * Parameters: 16-bit unit id, stat selector (event_change_stats_e), then a
+ * Parameters: 16-bit unit id, stat selector (script_change_stats_e), then a
  * 16-bit delta. HP clamps to max HP and the other stats to 0-100. */
-void script_opcode_change_stats(const event_change_stats_parameters_t* parameters) {
+void script_opcode_change_stats(const script_change_stats_parameters_t* parameters) {
     u16 unit_id;
     s32 filter_mode;
     s32 unit_index;
@@ -1723,22 +1723,22 @@ void script_opcode_change_stats(const event_change_stats_parameters_t* parameter
                 if (battle_unit_index != -1) {
                     unit = battle_unit_find_by_unit_id(battle_unit_get(battle_unit_index)->unit_id, &battle_unit_id);
                     if (battle_unit_id >= 0) {
-                        if (parameters->stat == EVENT_CHANGE_STATS_HP) {
+                        if (parameters->stat == SCRIPT_CHANGE_STATS_HP) {
                             value = unit->hp + delta;
                             script_clamp_value(&value, 0, unit->max_hp);
                             unit->hp = value;
                         }
-                        if (parameters->stat == EVENT_CHANGE_STATS_CT) {
+                        if (parameters->stat == SCRIPT_CHANGE_STATS_CT) {
                             value = unit->ct + delta;
                             script_clamp_value(&value, 0, UNIT_TURN_CT_THRESHOLD);
                             unit->ct = value;
                         }
-                        if (parameters->stat == EVENT_CHANGE_STATS_BRAVE) {
+                        if (parameters->stat == SCRIPT_CHANGE_STATS_BRAVE) {
                             value = unit->brave + delta;
                             script_clamp_value(&value, 0, UNIT_BRAVE_FAITH_MAX);
                             unit->brave = value;
                         }
-                        if (parameters->stat == EVENT_CHANGE_STATS_FAITH) {
+                        if (parameters->stat == SCRIPT_CHANGE_STATS_FAITH) {
                             value = unit->faith + delta;
                             script_clamp_value(&value, 0, UNIT_BRAVE_FAITH_MAX);
                             unit->faith = value;
@@ -1759,7 +1759,7 @@ void script_opcode_change_stats(const event_change_stats_parameters_t* parameter
  * (16-bit value), 0x02 animation id (16-bit value), 0x04 facing-update mode (0 allow,
  * 1 suppress; other values leave it unchanged). Units are selected as prepare_unit_filter describes.
  */
-void script_opcode_unit_anim(const event_unit_anim_parameters_t* parameters) {
+void script_opcode_unit_anim(const script_unit_anim_parameters_t* parameters) {
     u16 unit_id = script_read_s16(parameters->unit_id_le);
     s32 filter_mode;
     s32 unit_index;
@@ -1795,7 +1795,7 @@ void script_opcode_unit_anim(const event_unit_anim_parameters_t* parameters) {
  * animation and wait.  Parameters: 0x00 unit id (16-bit value), 0x02 wait length
  * in frames. Units are selected as prepare_unit_filter describes.
  */
-void script_opcode_march(const event_march_parameters_t* parameters) {
+void script_opcode_march(const script_march_parameters_t* parameters) {
     u16 unit_id = script_read_s16(parameters->unit_id_le);
     s32 filter_mode;
     s32 unit_index;
@@ -1820,7 +1820,7 @@ void script_opcode_march(const event_march_parameters_t* parameters) {
  * Parameters: 0x00 unit id (16-bit value), 0x02 nonzero to set, zero to clear.
  * Units are selected as prepare_unit_filter describes.
  */
-void script_opcode_set_unit_movement_effect_suppression(const event_movement_effect_parameters_t* parameters) {
+void script_opcode_set_unit_movement_effect_suppression(const script_movement_effect_parameters_t* parameters) {
     u16 unit_id = script_read_s16(parameters->unit_id_le);
     s32 filter_mode;
     s32 unit_index;
@@ -1846,11 +1846,11 @@ void script_opcode_set_unit_movement_effect_suppression(const event_movement_eff
  *
  * Operands: unit id or group (16-bit value), blend mode, red, green, blue (s8 each)
  * and a time. A plain unit id colors that one unit; id 0 and the group ids from
- * EVENT_UNIT_GROUP_FIRST run all 21 unit ids through
+ * SCRIPT_UNIT_GROUP_FIRST run all 21 unit ids through
  * filter_unit_id. Nothing happens when a plain unit id does
  * not resolve. */
-void script_opcode_color_unit(const event_color_unit_parameters_t* parameters) {
-    const event_unit_color_t* color;
+void script_opcode_color_unit(const script_color_unit_parameters_t* parameters) {
+    const script_unit_color_t* color;
     u16 unit_id = script_read_s16(parameters->unit_id_le);
     s32 filter_mode;
     s32 i;
@@ -1923,7 +1923,7 @@ s32 map_unit_is_facing_away_from_camera_by_event_unit_id(s32 event_unit_id) {
  * tile center to pick one of 16 facings; the n-th matching unit gets
  * rotation time * n / 4.
  */
-void script_opcode_face_tile(const event_face_tile_parameters_t* parameters) {
+void script_opcode_face_tile(const script_face_tile_parameters_t* parameters) {
     SVECTOR world_position;
     SVECTOR tile;
     u16 unit_id;
@@ -1979,7 +1979,7 @@ void script_opcode_wait_rotate(s32 unit_id) {
         } while (i != BATTLE_UNIT_SLOT_COUNT);
     } else {
         index = script_resolve_map_unit_id(unit_id);
-        if (index != EVENT_MAP_UNIT_ID_NONE) {
+        if (index != SCRIPT_MAP_UNIT_ID_NONE) {
             do {
                 thread_yield();
             } while (g_unit_animation_states[index].rotating != 0);

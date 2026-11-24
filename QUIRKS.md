@@ -731,7 +731,7 @@ written that way.
   finder's record (NULL when there is none: kernel RAM at 0x58), and if it
   passes the lookup goes on with ENTD unit 3. In the Ramza game-over event
   (0x194) with no Ramza in the 21 records it returns -1, not
-  `EVENT_MAP_UNIT_ID_NONE`, which is what its callers test for.
+  `SCRIPT_MAP_UNIT_ID_NONE`, which is what its callers test for.
 - `init_map_unit`: stores the spritesheet-slot
   claim (0xffff when all nine slots are taken) in the u8
   `spritesheet_vram_slot` and tests the stored 0xff against 0xffff, so the

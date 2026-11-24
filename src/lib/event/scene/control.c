@@ -36,11 +36,11 @@ void script_process_status_commands(void) {
         instruction = (const u8*)g_script_event_block;
         if (instruction[instruction_offset] == SCRIPT_OPCODE_INFLICT_STATUS) {
             map_unit_id = script_resolve_map_unit_id(script_read_s16(instruction + instruction_offset + 1));
-            if (map_unit_id != EVENT_MAP_UNIT_ID_NONE) {
+            if (map_unit_id != SCRIPT_MAP_UNIT_ID_NONE) {
                 battle_unit_id = map_unit_get_battle_unit_id(map_unit_id);
-                /* EVENT_BATTLE_UNIT_ID_NONE is battle_unit_get_id_by_event_unit_id's "no unit" value;
+                /* SCRIPT_BATTLE_UNIT_ID_NONE is battle_unit_get_id_by_event_unit_id's "no unit" value;
                  * this lookup fails with -1 instead, so the test never rejects anything. */
-                if (battle_unit_id != EVENT_BATTLE_UNIT_ID_NONE) {
+                if (battle_unit_id != SCRIPT_BATTLE_UNIT_ID_NONE) {
                     unit = battle_unit_get(battle_unit_id);
                     if ((unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_FLOAT)]
                             & STATUS_BYTE_MASK(STATUS_ID_FLOAT))
@@ -159,19 +159,19 @@ s32 tutorial_is_current_event(void) {
 #endif
 }
 
-/* The battle unit id of the unit an event unit id resolves to, or EVENT_BATTLE_UNIT_ID_NONE (2000) when it
+/* The battle unit id of the unit an event unit id resolves to, or SCRIPT_BATTLE_UNIT_ID_NONE (2000) when it
  * resolves to no map unit or one without battle stats. */
 s32 battle_unit_get_id_by_event_unit_id(s32 event_unit_id) {
     s32 map_unit_id = script_resolve_map_unit_id(event_unit_id);
 
-    if (map_unit_id != EVENT_MAP_UNIT_ID_NONE) {
+    if (map_unit_id != SCRIPT_MAP_UNIT_ID_NONE) {
         s32 battle_unit_id = map_unit_get_battle_unit_id(map_unit_id);
 
         if (battle_unit_id != -1) {
             return battle_unit_id;
         }
     }
-    return EVENT_BATTLE_UNIT_ID_NONE;
+    return SCRIPT_BATTLE_UNIT_ID_NONE;
 }
 
 /* Set the flag that menu_mark_modal_closed clears: the companion overlay openers (OPTION.OUT and
