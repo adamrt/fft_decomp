@@ -94,7 +94,7 @@ static void start_list_thread(s32 thread_id, s32 limit, point32_t* extent, point
  *
  * The list is drawn by the WORLD menu frame, which this turns on with Circle,
  * Cross and Select withheld from it and ordering-table entry 4 as its base. The
- * only caller is step 5 of update_new_game. */
+ * only caller is update_new_game's NEW_GAME_STEP_MUSIC_TEST. */
 void music_test_open_menu(void) {
     s32 i;
     s32 four;

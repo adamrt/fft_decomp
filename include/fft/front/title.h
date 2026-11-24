@@ -94,10 +94,17 @@ typedef struct title_card_warning_state {
 void title_update_card_warning(union controller_record* record);
 
 /* new game */
+/* new_game_state_t.step. Values 1-3 are never used. */
+typedef enum new_game_step {
+    NEW_GAME_STEP_PROLOGUE = 0,   /* wait for the fade, then run the prologue to its end */
+    NEW_GAME_STEP_NAME_ENTRY = 4, /* build the party and run Ramza's name entry */
+    NEW_GAME_STEP_MUSIC_TEST = 5  /* open the music test; nothing in OPEN.BIN stores it */
+} new_game_step_e;
+
 /* New-game start controller state (handler 4). */
 typedef struct new_game_state {
     /* 0x00 */ u8 _unused_00[0x10];
-    /* 0x10 */ s32 step;
+    /* 0x10 */ s32 step; /* new_game_step_e */
     /* 0x14 */ u8 _unused_14[0x0c];
     /* 0x20 */ s32 name_text_id;
 } new_game_state_t;

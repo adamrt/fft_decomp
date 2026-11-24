@@ -639,29 +639,29 @@ void prologue_start(void) {
     fade_tile_start_in(0x20);
 
     controller = g_controller_depth;
-    g_controller_records[controller].new_game.step = 0;
+    g_controller_records[controller].new_game.step = NEW_GAME_STEP_PROLOGUE;
     g_controller_handler_indices[controller] = CONTROLLER_NEW_GAME_START;
     g_controller_depth = controller + 1;
 }
 
 /* Per-frame handler of the new-game controller (handler 4).
  *
- * Until step 4 it waits for the overlay fade and runs the prologue
- * (prologue_update) to its end. Step 4 builds the new-game
+ * NEW_GAME_STEP_PROLOGUE waits for the overlay fade and runs the prologue
+ * (prologue_update) to its end. NEW_GAME_STEP_NAME_ENTRY builds the new-game
  * party (loading WORLD if needed), copies the displayed frame into the frame
  * image and the other buffer, runs the WORLD name-entry screen, stores the
  * 16-byte name in party slot 0 and replaces itself with the birthday date
  * controller.
  *
- * Step 5 unloads the music and starts the music test controller. Nothing in
- * OPEN.BIN stores 5 in step. */
+ * NEW_GAME_STEP_MUSIC_TEST unloads the music and starts the music test
+ * controller; nothing in OPEN.BIN stores it. */
 static void update_new_game(controller_record_t* record) {
     new_game_state_t* state = &record->new_game;
     RECT rect;
     u8* name;
     party_unit_t* party;
 
-    if (state->step == 5) {
+    if (state->step == NEW_GAME_STEP_MUSIC_TEST) {
         if (g_fade_tile.flags & FADE_TILE_ACTIVE) {
             return;
         }
@@ -671,7 +671,7 @@ static void update_new_game(controller_record_t* record) {
         return;
     }
 
-    if (state->step == 4) {
+    if (state->step == NEW_GAME_STEP_NAME_ENTRY) {
         title_prepare_party(PARTY_NEW_GAME_RAMZA, 0);
         menu_screen_init_open_text();
 
@@ -720,7 +720,7 @@ static void update_new_game(controller_record_t* record) {
         return;
     }
     prologue_finished_stub();
-    state->step = 4;
+    state->step = NEW_GAME_STEP_NAME_ENTRY;
 }
 
 /* Pushes the birthday date-entry controller (handler 5,
