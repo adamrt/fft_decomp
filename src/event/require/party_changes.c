@@ -48,7 +48,7 @@ void conditions_congratulations_thread(void) {
     g_thread_call_target = music_unload_all;
     thread_call_on_main_stack();
     g_thread_call_target = (void (*)(void))music_start_load_into_free_slot;
-    thread_call_on_main_stack(script_variable_get(EVENT_SCRIPT_VAR_CURRENT_EVENT) != EVENT_ID_FINAL_BATTLE_WON
+    thread_call_on_main_stack(script_variable_get(SCRIPT_VAR_CURRENT_EVENT) != EVENT_ID_FINAL_BATTLE_WON
             ? MUSIC_CONGRATULATIONS
             : MUSIC_CONGRATULATIONS_FINAL_BATTLE);
     do {
@@ -61,7 +61,7 @@ void conditions_congratulations_thread(void) {
     thread_a = thread_resolve_slot(THREAD_SLOT_FIRST_IDLE);
     thread_start(thread_a, conditions_special_thread);
     thread_set_parameters(thread_a, CONDITIONS_BANNER_CONGRATULATIONS, 0, 0);
-    if (script_variable_get(EVENT_SCRIPT_VAR_CURRENT_EVENT) != EVENT_ID_FINAL_BATTLE_WON)
+    if (script_variable_get(SCRIPT_VAR_CURRENT_EVENT) != EVENT_ID_FINAL_BATTLE_WON)
         input_wait_frames_or_skip(0x1e);
     else
         thread_wait_frames(0x1e);
@@ -69,7 +69,7 @@ void conditions_congratulations_thread(void) {
     thread_b = thread_resolve_slot(THREAD_SLOT_FIRST_IDLE);
     thread_start(thread_b, conditions_special_thread);
     thread_set_parameters(thread_b, CONDITIONS_BANNER_BATTLE_COMPLETE, 1, 0);
-    if (script_variable_get(EVENT_SCRIPT_VAR_CURRENT_EVENT) != EVENT_ID_FINAL_BATTLE_WON)
+    if (script_variable_get(SCRIPT_VAR_CURRENT_EVENT) != EVENT_ID_FINAL_BATTLE_WON)
         input_wait_frames_or_skip(0xb4);
     else
         thread_wait_frames(0x12c);
@@ -461,7 +461,7 @@ s32 after_battle_update_party(void) {
                     s32 script_variant;
                     unit->unit_flags &= ~(UNIT_FLAG_SAVE_FORMATION | UNIT_FLAG_LOAD_FORMATION);
                     s_party_affected_unit_message_args[g_party_affected_unit_count] = unit->unit_id;
-                    script_variant = script_variable_get(EVENT_SCRIPT_VAR_RANDOM_VALUE) & 7;
+                    script_variant = script_variable_get(SCRIPT_VAR_RANDOM_VALUE) & 7;
                     prompt_count++;
                     count = g_party_affected_unit_count;
                     s_party_affected_unit_message_ids[count]
@@ -489,7 +489,7 @@ void after_battle_brave_faith_report_thread(void) {
     s32 i;
     s32 main_thread;
 
-    if (script_variable_get(EVENT_SCRIPT_VAR_WORLD_DEBUG_BATTLE_STYLE) != 0)
+    if (script_variable_get(SCRIPT_VAR_WORLD_DEBUG_BATTLE_STYLE) != 0)
         thread_current_exit();
     if (update_brave_faith() == 0)
         thread_current_exit();

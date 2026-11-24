@@ -346,7 +346,7 @@ s32 shop_build_stock_list(s16 unit_id, s16 shop_id, s16 category, s16* entries, 
         s32 progression;
         s32 shop_mask;
 
-        progression = script_variable_get(EVENT_SCRIPT_VAR_SHOP_ITEM_AVAILABILITY);
+        progression = script_variable_get(SCRIPT_VAR_SHOP_ITEM_AVAILABILITY);
         /* The bytes start item_id before the mask; a for-loop initializer reorders them. */
         item_id = 0;
         shop_mask = 0x8000 >> shop_id;

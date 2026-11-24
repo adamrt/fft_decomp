@@ -104,9 +104,9 @@ void message_dialog_thread(void) {
     const text_backref_t* backref;
 
     thread_current_set_task(THREAD_TASK_RESUME);
-    script_variable_set(EVENT_SCRIPT_VAR_TYPEWRITER_VRAM_X_OFFSET, 0);
+    script_variable_set(SCRIPT_VAR_TYPEWRITER_VRAM_X_OFFSET, 0);
     value_index = 0;
-    variable_base = EVENT_SCRIPT_VAR_SELECTED_DIALOG_OPTION;
+    variable_base = SCRIPT_VAR_SELECTED_DIALOG_OPTION;
     thread = &g_threads[g_thread_current_id];
 
     /* Box type 0x70 becomes a portrait box placed by the speaker's facing relative to the camera. */
@@ -738,7 +738,7 @@ void message_dialog_thread(void) {
                 select_hidden_window = WINDOW_AT(g_menu_packet_buffer_index);
                 select_hidden_window->sprites[0].x0 = 512;
                 select_hidden_window->sprites[1].x0 = 512;
-                g_script_variables[EVENT_SCRIPT_VAR_SELECTED_DIALOG_OPTION] = selection - rec.mark;
+                g_script_variables[SCRIPT_VAR_SELECTED_DIALOG_OPTION] = selection - rec.mark;
             }
             NEXT();
             g_menu_screen_dialog_waiting = 0;
@@ -792,7 +792,7 @@ void message_dialog_thread(void) {
             NEXT();
             win[0].portrait_code = *text;
             win[1].portrait_code = *text;
-            script_variable_set(EVENT_SCRIPT_VAR_DIALOG_PORTRAIT, *text);
+            script_variable_set(SCRIPT_VAR_DIALOG_PORTRAIT, *text);
             NEXT();
         } else if (character == TEXT_SET_VARIABLE_BASE) {
             NEXT();
@@ -800,10 +800,10 @@ void message_dialog_thread(void) {
             NEXT();
         } else if (character == TEXT_STORE_VARIABLE) {
             NEXT();
-            i = script_variable_get(EVENT_SCRIPT_VAR_TEXT_STORE_INDEX);
+            i = script_variable_get(SCRIPT_VAR_TEXT_STORE_INDEX);
             if (i != 0) {
                 script_variable_set(variable_base + i * 10, *text);
-                script_variable_set(EVENT_SCRIPT_VAR_TEXT_STORE_INDEX, 0);
+                script_variable_set(SCRIPT_VAR_TEXT_STORE_INDEX, 0);
             } else {
                 script_variable_set(variable_base, *text);
             }

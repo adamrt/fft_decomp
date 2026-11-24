@@ -18,21 +18,21 @@ s32 script_variable_get(s32 variable_id) {
     s32 saved_current_variable = *g_script_variables;
     s32 value;
 
-    if (variable_id == EVENT_SCRIPT_VAR_WEATHER_AND_TIME) {
+    if (variable_id == SCRIPT_VAR_WEATHER_AND_TIME) {
         s32 time_of_day;
         s32 weather;
 
         /* Masked and shifted in separate steps for the original instruction order. */
-        time_of_day = script_variable_get(EVENT_SCRIPT_VAR_TIME_OF_DAY);
+        time_of_day = script_variable_get(SCRIPT_VAR_TIME_OF_DAY);
         time_of_day &= 1;
-        weather = script_variable_get(EVENT_SCRIPT_VAR_WEATHER);
+        weather = script_variable_get(SCRIPT_VAR_WEATHER);
         weather &= 7;
         time_of_day <<= 15;
         weather <<= 12;
-        script_variable_set(EVENT_SCRIPT_VAR_WEATHER_AND_TIME, time_of_day | weather);
+        script_variable_set(SCRIPT_VAR_WEATHER_AND_TIME, time_of_day | weather);
     }
-    script_run_variable_command(SCRIPT_OPCODE_ZERO_VARIABLE, EVENT_SCRIPT_VAR_COMPARISON_RESULT, 0, 0);
-    script_run_variable_command(SCRIPT_OPCODE_ADD_VARIABLE, EVENT_SCRIPT_VAR_COMPARISON_RESULT, variable_id, 0);
+    script_run_variable_command(SCRIPT_OPCODE_ZERO_VARIABLE, SCRIPT_VAR_COMPARISON_RESULT, 0, 0);
+    script_run_variable_command(SCRIPT_OPCODE_ADD_VARIABLE, SCRIPT_VAR_COMPARISON_RESULT, variable_id, 0);
     value = *g_script_variables;
     *g_script_variables = saved_current_variable;
     return value;
@@ -45,7 +45,7 @@ s32 script_variable_get(s32 variable_id) {
 void script_variable_set(s32 variable_id, s32 value) {
     s32 saved_current_variable = *g_script_variables;
 
-    if (variable_id == EVENT_SCRIPT_VAR_WAR_FUNDS && value > EVENT_WAR_FUNDS_MAX) {
+    if (variable_id == SCRIPT_VAR_WAR_FUNDS && value > EVENT_WAR_FUNDS_MAX) {
         value = EVENT_WAR_FUNDS_MAX;
     }
     script_run_variable_command(SCRIPT_OPCODE_ZERO_VARIABLE, variable_id, 0, 0);

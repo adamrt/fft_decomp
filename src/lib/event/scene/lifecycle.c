@@ -184,13 +184,13 @@ void map_unit_update_animation_states(void) {
 void script_start_current_event_thread(void) {
     map_unit_reset_animation_states();
     g_script_attack_entry_mode = SCRIPT_ATTACK_ENTRY_NORMAL;
-    if (script_variable_get(EVENT_SCRIPT_VAR_BATTLE_NOT_STARTED)) {
+    if (script_variable_get(SCRIPT_VAR_BATTLE_NOT_STARTED)) {
         camera_store_state_to_script_variables();
         map_light_reset_script_light();
         g_camera_position_locked = 0;
         g_camera_speed_curve = 0;
     }
-    if (script_variable_get(EVENT_SCRIPT_VAR_CURRENT_EVENT)) {
+    if (script_variable_get(SCRIPT_VAR_CURRENT_EVENT)) {
         g_camera_position_locked = 0;
         g_camera_speed_curve = 0;
         fade_tint_start(2, 0, 0, 0, 2);

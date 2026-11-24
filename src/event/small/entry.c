@@ -22,7 +22,7 @@ void small_entrypoint(void) {
     g_text_section_pointers[TEXT_SECTION_JOB_NAMES]
         = string_data + g_text_name_section_offsets[NAME_TEXT_SECTION_JOB_NAMES];
     g_text_section_pointers[TEXT_SECTION_SKILLSET_NAMES_COPY] = g_text_section_pointers[TEXT_SECTION_SKILLSET_NAMES];
-    script_variable_set(EVENT_SCRIPT_VAR_DEPLOYMENT_UNIT_LIMIT, 0);
+    script_variable_set(SCRIPT_VAR_DEPLOYMENT_UNIT_LIMIT, 0);
 }
 
 /* Unreferenced return-zero stub; its original role is unknown. */

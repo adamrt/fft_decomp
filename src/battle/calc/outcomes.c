@@ -49,7 +49,7 @@ void ai_simulation_end(void) {
  * ignores weather (indoors), otherwise the weather script variable, with rain
  * and storms moved to the matching snow values on a map flagged for snow. */
 s32 weather_get_effective(void) {
-    s32 weather = script_variable_get(EVENT_SCRIPT_VAR_WEATHER);
+    s32 weather = script_variable_get(SCRIPT_VAR_WEATHER);
     u32 flags = g_weather_flags;
 
     if (flags & MAP_WEATHER_FLAG_IGNORE_WEATHER) {
@@ -239,13 +239,13 @@ s32 reward_add_war_funds(battle_unit_t* unit, s32 total, u8 item_id) {
     if (item_id != ITEM_ID_NOTHING) {
         total += g_item_primary_data[item_id].price >> 2;
     }
-    value = script_variable_get(EVENT_SCRIPT_VAR_WAR_FUNDS) + total;
+    value = script_variable_get(SCRIPT_VAR_WAR_FUNDS) + total;
     if (value > EVENT_WAR_FUNDS_MAX) {
         value = EVENT_WAR_FUNDS_MAX;
     } else if (value < 0) {
         value = 0;
     }
-    script_variable_set(EVENT_SCRIPT_VAR_WAR_FUNDS, value);
+    script_variable_set(SCRIPT_VAR_WAR_FUNDS, value);
     return total;
 }
 

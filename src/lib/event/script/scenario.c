@@ -188,35 +188,32 @@ static event_scenario_condition_result_e check_condition(
             }
         }
     }
-    if (type == EVENT_SCENARIO_CONDITION_WAR_FUNDS_AT_LEAST
-        && script_variable_get(EVENT_SCRIPT_VAR_WAR_FUNDS) >= value) {
+    if (type == EVENT_SCENARIO_CONDITION_WAR_FUNDS_AT_LEAST && script_variable_get(SCRIPT_VAR_WAR_FUNDS) >= value) {
         return EVENT_SCENARIO_CONDITION_RESULT_PASS;
     }
-    if (type == EVENT_SCENARIO_CONDITION_WAR_FUNDS_AT_MOST
-        && value >= script_variable_get(EVENT_SCRIPT_VAR_WAR_FUNDS)) {
+    if (type == EVENT_SCENARIO_CONDITION_WAR_FUNDS_AT_MOST && value >= script_variable_get(SCRIPT_VAR_WAR_FUNDS)) {
         return EVENT_SCENARIO_CONDITION_RESULT_PASS;
     }
     if (type == EVENT_SCENARIO_CONDITION_DATE_ON_OR_BEFORE) {
-        if (script_variable_get(EVENT_SCRIPT_VAR_MONTH) < id) {
+        if (script_variable_get(SCRIPT_VAR_MONTH) < id) {
             return EVENT_SCENARIO_CONDITION_RESULT_PASS;
         }
-        if (script_variable_get(EVENT_SCRIPT_VAR_MONTH) == id && value >= script_variable_get(EVENT_SCRIPT_VAR_DAY)) {
+        if (script_variable_get(SCRIPT_VAR_MONTH) == id && value >= script_variable_get(SCRIPT_VAR_DAY)) {
             return EVENT_SCENARIO_CONDITION_RESULT_PASS;
         }
     }
     if (type == EVENT_SCENARIO_CONDITION_DATE_ON_OR_AFTER) {
-        if (id < script_variable_get(EVENT_SCRIPT_VAR_MONTH)) {
+        if (id < script_variable_get(SCRIPT_VAR_MONTH)) {
             return EVENT_SCENARIO_CONDITION_RESULT_PASS;
         }
-        if (script_variable_get(EVENT_SCRIPT_VAR_MONTH) == id && script_variable_get(EVENT_SCRIPT_VAR_DAY) >= value) {
+        if (script_variable_get(SCRIPT_VAR_MONTH) == id && script_variable_get(SCRIPT_VAR_DAY) >= value) {
             return EVENT_SCENARIO_CONDITION_RESULT_PASS;
         }
     }
-    if (type == EVENT_SCENARIO_CONDITION_CASUALTIES_AT_LEAST
-        && script_variable_get(EVENT_SCRIPT_VAR_CASUALTIES) >= id) {
+    if (type == EVENT_SCENARIO_CONDITION_CASUALTIES_AT_LEAST && script_variable_get(SCRIPT_VAR_CASUALTIES) >= id) {
         return EVENT_SCENARIO_CONDITION_RESULT_PASS;
     }
-    if (type == EVENT_SCENARIO_CONDITION_CASUALTIES_AT_MOST && id >= script_variable_get(EVENT_SCRIPT_VAR_CASUALTIES)) {
+    if (type == EVENT_SCENARIO_CONDITION_CASUALTIES_AT_MOST && id >= script_variable_get(SCRIPT_VAR_CASUALTIES)) {
         return EVENT_SCENARIO_CONDITION_RESULT_PASS;
     }
     if (type == EVENT_SCENARIO_CONDITION_ENEMIES_DEFEATED && battle_check_outcome() == 0) {
@@ -244,7 +241,7 @@ static event_scenario_condition_result_e check_condition(
         }
     }
     if (type == EVENT_SCENARIO_CONDITION_RUN_EVENT) {
-        script_variable_set(EVENT_SCRIPT_VAR_CURRENT_EVENT, id);
+        script_variable_set(SCRIPT_VAR_CURRENT_EVENT, id);
         return EVENT_SCENARIO_CONDITION_RESULT_RUN_EVENT;
     }
     return EVENT_SCENARIO_CONDITION_RESULT_FAIL;
@@ -257,7 +254,7 @@ s32 scenario_get_finish_operation(void) {
     if (g_scenario_event_active == 0) {
         return 0;
     }
-    return g_scenario_event_finish_operations[script_variable_get(EVENT_SCRIPT_VAR_CURRENT_EVENT)];
+    return g_scenario_event_finish_operations[script_variable_get(SCRIPT_VAR_CURRENT_EVENT)];
 }
 
 /* Return the after-event code of the pending event (g_script_next_event_id): bits

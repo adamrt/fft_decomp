@@ -2031,7 +2031,7 @@ void camera_update_matrices(MATRIX* camera_matrix, SVECTOR* rotation, VECTOR* sc
 
 /* Run a weather display command.
  *
- * APPLY_SCRIPT_WEATHER reads EVENT_SCRIPT_VAR_WEATHER and issues the clear
+ * APPLY_SCRIPT_WEATHER reads SCRIPT_VAR_WEATHER and issues the clear
  * command for no weather, or the set-up command for rain, storm or strong
  * storm, taking the snow variant on snowy maps; each choice also sets the
  * weather sounds and restores the lighting. The weather local is an s8: compares on
@@ -2047,7 +2047,7 @@ void weather_dispatch_command(u8 command) {
         SetBackColor(g_map_back_color.red, g_map_back_color.green, g_map_back_color.blue);
         break;
     case MAP_WEATHER_COMMAND_APPLY_SCRIPT_WEATHER:
-        weather = script_variable_get(EVENT_SCRIPT_VAR_WEATHER);
+        weather = script_variable_get(SCRIPT_VAR_WEATHER);
         g_weather_lightning_mode = MAP_LIGHTNING_OFF;
         weather &= 7;
         if (weather < WEATHER_RAIN) {

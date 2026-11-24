@@ -199,33 +199,33 @@ s32 script_find_instruction_offset(s32 offset, s32 opcode) {
  * nothing. */
 void script_opcode_compare(script_opcode_e opcode) {
     if (opcode == SCRIPT_OPCODE_COMPARE_LESS_EQUAL) {
-        g_script_variables[EVENT_SCRIPT_VAR_COMPARISON_RESULT] = g_script_variables[EVENT_SCRIPT_VAR_COMPARISON_RESULT]
-            <= g_script_variables[EVENT_SCRIPT_VAR_COMPARISON_OPERAND];
+        g_script_variables[SCRIPT_VAR_COMPARISON_RESULT]
+            = g_script_variables[SCRIPT_VAR_COMPARISON_RESULT] <= g_script_variables[SCRIPT_VAR_COMPARISON_OPERAND];
         return;
     }
     if (opcode == SCRIPT_OPCODE_COMPARE_GREATER_EQUAL) {
-        g_script_variables[EVENT_SCRIPT_VAR_COMPARISON_RESULT] = g_script_variables[EVENT_SCRIPT_VAR_COMPARISON_RESULT]
-            >= g_script_variables[EVENT_SCRIPT_VAR_COMPARISON_OPERAND];
+        g_script_variables[SCRIPT_VAR_COMPARISON_RESULT]
+            = g_script_variables[SCRIPT_VAR_COMPARISON_RESULT] >= g_script_variables[SCRIPT_VAR_COMPARISON_OPERAND];
         return;
     }
     if (opcode == SCRIPT_OPCODE_COMPARE_EQUAL) {
-        g_script_variables[EVENT_SCRIPT_VAR_COMPARISON_RESULT] = g_script_variables[EVENT_SCRIPT_VAR_COMPARISON_RESULT]
-            == g_script_variables[EVENT_SCRIPT_VAR_COMPARISON_OPERAND];
+        g_script_variables[SCRIPT_VAR_COMPARISON_RESULT]
+            = g_script_variables[SCRIPT_VAR_COMPARISON_RESULT] == g_script_variables[SCRIPT_VAR_COMPARISON_OPERAND];
         return;
     }
     if (opcode == SCRIPT_OPCODE_COMPARE_NOT_EQUAL) {
-        g_script_variables[EVENT_SCRIPT_VAR_COMPARISON_RESULT] = g_script_variables[EVENT_SCRIPT_VAR_COMPARISON_RESULT]
-            != g_script_variables[EVENT_SCRIPT_VAR_COMPARISON_OPERAND];
+        g_script_variables[SCRIPT_VAR_COMPARISON_RESULT]
+            = g_script_variables[SCRIPT_VAR_COMPARISON_RESULT] != g_script_variables[SCRIPT_VAR_COMPARISON_OPERAND];
         return;
     }
     if (opcode == SCRIPT_OPCODE_COMPARE_LESS) {
-        g_script_variables[EVENT_SCRIPT_VAR_COMPARISON_RESULT] = g_script_variables[EVENT_SCRIPT_VAR_COMPARISON_RESULT]
-            < g_script_variables[EVENT_SCRIPT_VAR_COMPARISON_OPERAND];
+        g_script_variables[SCRIPT_VAR_COMPARISON_RESULT]
+            = g_script_variables[SCRIPT_VAR_COMPARISON_RESULT] < g_script_variables[SCRIPT_VAR_COMPARISON_OPERAND];
         return;
     }
     if (opcode == SCRIPT_OPCODE_COMPARE_GREATER) {
-        g_script_variables[EVENT_SCRIPT_VAR_COMPARISON_RESULT] = g_script_variables[EVENT_SCRIPT_VAR_COMPARISON_RESULT]
-            > g_script_variables[EVENT_SCRIPT_VAR_COMPARISON_OPERAND];
+        g_script_variables[SCRIPT_VAR_COMPARISON_RESULT]
+            = g_script_variables[SCRIPT_VAR_COMPARISON_RESULT] > g_script_variables[SCRIPT_VAR_COMPARISON_OPERAND];
         return;
     }
 }
@@ -236,7 +236,7 @@ void script_opcode_compare(script_opcode_e opcode) {
  * `source` as an immediate. Flags and nibbles are read and written in place, keeping
  * their neighbors.
  *
- * EVENT_SCRIPT_VAR_RANDOM_VALUE is read through the event
+ * SCRIPT_VAR_RANDOM_VALUE is read through the event
  * RNG, not its ordinary storage. ZERO never reads the uninitialized operand.
  * Keep the target's arithmetic edge behavior: only division explicitly stops
  * on zero; modulo has no such check, and signed overflow is not normalized. */
@@ -256,14 +256,14 @@ void script_run_variable_command(s32 opcode, s32 destination_id, s32 source, s32
     if (opcode != SCRIPT_OPCODE_ZERO_VARIABLE) {
         if (!(opcode & 1)) {
             operand = source;
-        } else if (source == EVENT_SCRIPT_VAR_RANDOM_VALUE) {
+        } else if (source == SCRIPT_VAR_RANDOM_VALUE) {
             operand = random16_next();
         } else {
             source_word = get_variable_word(source);
             source_bit = get_variable_shift(source);
             if (source_bit >= 0) {
                 mask = 1;
-                if (source >= EVENT_SCRIPT_VAR_PACKED_NIBBLE_FIRST) {
+                if (source >= SCRIPT_VAR_PACKED_NIBBLE_FIRST) {
                     mask = 0xf;
                 }
                 operand = ((mask << source_bit) & *source_word) >> source_bit;
@@ -277,7 +277,7 @@ void script_run_variable_command(s32 opcode, s32 destination_id, s32 source, s32
     destination_bit = get_variable_shift(destination_id);
     if (destination_bit >= 0) {
         mask = 1;
-        if (destination_id >= EVENT_SCRIPT_VAR_PACKED_NIBBLE_FIRST) {
+        if (destination_id >= SCRIPT_VAR_PACKED_NIBBLE_FIRST) {
             mask = 0xf;
         }
         shifted_mask = mask << destination_bit;
@@ -307,11 +307,11 @@ void script_run_variable_command(s32 opcode, s32 destination_id, s32 source, s32
         value |= operand;
     }
     /* Two vetoes, skipped while the guard is set so the getters below (which run this
-     * function themselves) can read: a variable from EVENT_SCRIPT_VAR_PERSON_PROFILE_FIRST
+     * function themselves) can read: a variable from SCRIPT_VAR_PERSON_PROFILE_FIRST
      * up is written only while its value is 0-11, and while progress effects are suppressed
      * (replay mode) only the variables the conditions below list may change. */
     if (g_script_variable_write_guard == 0) {
-        if (destination_id >= EVENT_SCRIPT_VAR_PERSON_PROFILE_FIRST) {
+        if (destination_id >= SCRIPT_VAR_PERSON_PROFILE_FIRST) {
             g_script_variable_write_guard = 1;
             write_allowed = (u32)script_variable_get(destination_id) < 12;
             g_script_variable_write_guard = 0;
@@ -321,27 +321,26 @@ void script_run_variable_command(s32 opcode, s32 destination_id, s32 source, s32
         }
         if (g_script_variable_write_guard == 0) {
             g_script_variable_write_guard = 1;
-            replay_mode = script_variable_get(EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS);
+            replay_mode = script_variable_get(SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS);
             g_script_variable_write_guard = 0;
             if (replay_mode != 0
-                && (destination_id < EVENT_SCRIPT_VAR_SCENARIO_LOCAL_FIRST
-                    || destination_id >= EVENT_SCRIPT_VAR_SCENARIO_LOCAL_FIRST + 32)
-                && (destination_id < EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS
-                    || destination_id >= EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS + 4)
-                && destination_id != EVENT_SCRIPT_VAR_TEXT_STORE_INDEX
-                && (destination_id < EVENT_SCRIPT_VAR_CURRENT_ENTD
-                    || destination_id >= EVENT_SCRIPT_VAR_CURRENT_ENTD + 8)
-                && destination_id >= EVENT_SCRIPT_VAR_WAR_FUNDS && destination_id != EVENT_SCRIPT_VAR_MAP_ARRANGEMENT
-                && (destination_id < EVENT_SCRIPT_VAR_TUTORIAL_WAIT_VALUE
-                    || destination_id >= EVENT_SCRIPT_VAR_TUTORIAL_WAIT_VALUE + 5)
-                && destination_id != EVENT_SCRIPT_VAR_MUTE_TEXT_AUDIO_CUE) {
+                && (destination_id < SCRIPT_VAR_SCENARIO_LOCAL_FIRST
+                    || destination_id >= SCRIPT_VAR_SCENARIO_LOCAL_FIRST + 32)
+                && (destination_id < SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS
+                    || destination_id >= SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS + 4)
+                && destination_id != SCRIPT_VAR_TEXT_STORE_INDEX
+                && (destination_id < SCRIPT_VAR_CURRENT_ENTD || destination_id >= SCRIPT_VAR_CURRENT_ENTD + 8)
+                && destination_id >= SCRIPT_VAR_WAR_FUNDS && destination_id != SCRIPT_VAR_MAP_ARRANGEMENT
+                && (destination_id < SCRIPT_VAR_TUTORIAL_WAIT_VALUE
+                    || destination_id >= SCRIPT_VAR_TUTORIAL_WAIT_VALUE + 5)
+                && destination_id != SCRIPT_VAR_MUTE_TEXT_AUDIO_CUE) {
                 return;
             }
         }
     }
     if (destination_bit >= 0) {
         mask = 1;
-        if (destination_id >= EVENT_SCRIPT_VAR_PACKED_NIBBLE_FIRST) {
+        if (destination_id >= SCRIPT_VAR_PACKED_NIBBLE_FIRST) {
             mask = 0xf;
         }
         value &= mask;
@@ -350,7 +349,7 @@ void script_run_variable_command(s32 opcode, s32 destination_id, s32 source, s32
         return;
     }
     *destination_word = value;
-    if (destination_id == EVENT_SCRIPT_VAR_TEXT_SUBSTITUTION_VALUE) {
+    if (destination_id == SCRIPT_VAR_TEXT_SUBSTITUTION_VALUE) {
         g_text_substitution_values[0] = value;
     }
 }
@@ -362,14 +361,14 @@ void script_run_variable_command(s32 opcode, s32 destination_id, s32 source, s32
 static s32* get_variable_word(s32 variable_id) {
     s32* word;
 
-    if (variable_id < EVENT_SCRIPT_VAR_PACKED_BIT_FIRST) {
+    if (variable_id < SCRIPT_VAR_PACKED_BIT_FIRST) {
         word = &g_script_variables[variable_id];
-    } else if (variable_id < EVENT_SCRIPT_VAR_PACKED_NIBBLE_FIRST) {
-        word = &g_script_variables[EVENT_SCRIPT_PACKED_BIT_WORD_FIRST
-            + ((variable_id - EVENT_SCRIPT_VAR_PACKED_BIT_FIRST) / 32)];
-    } else if (variable_id < EVENT_SCRIPT_VAR_END) {
-        word = &g_script_variables[EVENT_SCRIPT_PACKED_NIBBLE_WORD_FIRST
-            + ((variable_id - EVENT_SCRIPT_VAR_PACKED_NIBBLE_FIRST) / 8)];
+    } else if (variable_id < SCRIPT_VAR_PACKED_NIBBLE_FIRST) {
+        word = &g_script_variables[SCRIPT_VAR_PACKED_BIT_WORD_FIRST
+            + ((variable_id - SCRIPT_VAR_PACKED_BIT_FIRST) / 32)];
+    } else if (variable_id < SCRIPT_VAR_END) {
+        word = &g_script_variables[SCRIPT_VAR_PACKED_NIBBLE_WORD_FIRST
+            + ((variable_id - SCRIPT_VAR_PACKED_NIBBLE_FIRST) / 8)];
     } else {
         thread_current_exit();
     }
@@ -380,10 +379,10 @@ static s32* get_variable_word(s32 variable_id) {
 static s32 get_variable_shift(s32 value) {
     s32 result = -1;
 
-    if (value >= EVENT_SCRIPT_VAR_PACKED_BIT_FIRST) {
-        if (value < EVENT_SCRIPT_VAR_PACKED_NIBBLE_FIRST) {
+    if (value >= SCRIPT_VAR_PACKED_BIT_FIRST) {
+        if (value < SCRIPT_VAR_PACKED_NIBBLE_FIRST) {
             result = value & 0x1f;
-        } else if (value < EVENT_SCRIPT_VAR_END) {
+        } else if (value < SCRIPT_VAR_END) {
             result = (value & 7) * 4;
         } else {
             thread_current_exit();
@@ -411,7 +410,7 @@ void script_seed_random(void) {
 
 /* Step the event script's random generator, state * 0x6255 + 0x3619 kept to 16
  * bits, and return the new state. script_run_variable_command calls it
- * when a variable opcode reads EVENT_SCRIPT_VAR_RANDOM_VALUE. */
+ * when a variable opcode reads SCRIPT_VAR_RANDOM_VALUE. */
 static s32 random16_next(void) {
     return s_script_rand16_state = (s_script_rand16_state * 0x6255 + 0x3619) & 0xffff;
 }

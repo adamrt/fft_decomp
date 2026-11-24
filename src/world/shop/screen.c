@@ -189,7 +189,7 @@ void shop_run_screen(s32 shop_type) {
     /* Until the loop, buttons holds the town background, ot_index the music and disabled the
      * shopkeeper's first line. */
     g_menu_screen_context_id = shop_type;
-    buttons = script_variable_get(EVENT_SCRIPT_VAR_TOWN_BACKGROUND);
+    buttons = script_variable_get(SCRIPT_VAR_TOWN_BACKGROUND);
     if (shop_type == MENU_SCREEN_CONTEXT_FUR_SHOP) {
         ot_index = MUSIC_FUR_SHOP;
         g_shop_menu_step = SHOP_STEP_FUR_MENU;
@@ -201,7 +201,7 @@ void shop_run_screen(s32 shop_type) {
         disabled = 0xF820;
         tim_index = 6;
     } else {
-        g_menu_screen_context_id = script_variable_get(EVENT_SCRIPT_VAR_LOCATION);
+        g_menu_screen_context_id = script_variable_get(SCRIPT_VAR_LOCATION);
         ot_index = MUSIC_SHOP;
         disabled = 0xF801;
         tim_index = 0;

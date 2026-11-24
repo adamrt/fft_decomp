@@ -78,12 +78,12 @@ static void run_map_load(void) {
 
     battle_init_display(0x100, 0xf0, 0x200, 0, 0, 0);
     show_banner = g_system_go_straight_to_battle;
-    if (script_variable_get(EVENT_SCRIPT_VAR_SAVE_IN_PROGRESS)) {
+    if (script_variable_get(SCRIPT_VAR_SAVE_IN_PROGRESS)) {
         show_banner = 0;
     }
     g_deploy_skipped = deploy_start();
     loading_message_build_offset(g_deploy_skipped);
-    map_id = g_map_id = script_variable_get(EVENT_SCRIPT_VAR_CURRENT_MAP);
+    map_id = g_map_id = script_variable_get(SCRIPT_VAR_CURRENT_MAP);
     g_map_init_step = 0;
     g_deploy_finished = 0;
 

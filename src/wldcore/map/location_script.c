@@ -257,7 +257,7 @@ static void location_opcode_check_war_funds_at_least(void) {
     u16 idx = *ip;
     u16 value = g_location_script_state.data[idx];
     *ip = idx + 1;
-    if (script_variable_get(EVENT_SCRIPT_VAR_WAR_FUNDS) < value) {
+    if (script_variable_get(SCRIPT_VAR_WAR_FUNDS) < value) {
         g_location_script_state.flags |= LOCATION_SCRIPT_RESULT_CONDITION_FAILED;
     }
 }
@@ -269,7 +269,7 @@ static void location_opcode_check_war_funds_at_most(void) {
     u16 idx = *ip;
     s32 value = g_location_script_state.data[idx];
     *ip = idx + 1;
-    if (value < script_variable_get(EVENT_SCRIPT_VAR_WAR_FUNDS)) {
+    if (value < script_variable_get(SCRIPT_VAR_WAR_FUNDS)) {
         g_location_script_state.flags |= LOCATION_SCRIPT_RESULT_CONDITION_FAILED;
     }
 }
@@ -297,8 +297,8 @@ static void read_operand_dates(s32* out_month, s32* out_day, s32* out_current_mo
     *ipp = ip;
     *out_day = g_location_script_state.data[ip];
     (*ipp)++;
-    *out_current_month = script_variable_get(EVENT_SCRIPT_VAR_MONTH);
-    *out_current_day = script_variable_get(EVENT_SCRIPT_VAR_DAY);
+    *out_current_month = script_variable_get(SCRIPT_VAR_MONTH);
+    *out_current_day = script_variable_get(SCRIPT_VAR_DAY);
 }
 
 /* LOCATION_OPCODE_CHECK_DATE_ON_OR_BEFORE (0x11)
@@ -319,7 +319,7 @@ static void location_opcode_check_casualties_at_least(void) {
     u16 idx = *ip;
     u16 value = g_location_script_state.data[idx];
     *ip = idx + 1;
-    if (script_variable_get(EVENT_SCRIPT_VAR_CASUALTIES) < value) {
+    if (script_variable_get(SCRIPT_VAR_CASUALTIES) < value) {
         g_location_script_state.flags |= LOCATION_SCRIPT_RESULT_CONDITION_FAILED;
     }
 }
@@ -331,7 +331,7 @@ static void location_opcode_check_casualties_at_most(void) {
     u16 idx = *ip;
     s32 value = g_location_script_state.data[idx];
     *ip = idx + 1;
-    if (value < script_variable_get(EVENT_SCRIPT_VAR_CASUALTIES)) {
+    if (value < script_variable_get(SCRIPT_VAR_CASUALTIES)) {
         g_location_script_state.flags |= LOCATION_SCRIPT_RESULT_CONDITION_FAILED;
     }
 }

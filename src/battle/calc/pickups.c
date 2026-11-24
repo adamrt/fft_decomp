@@ -76,7 +76,7 @@ move_found_item_t* move_find_determine_item(battle_unit_t* unit) {
         item_id = find_result->common_item_id;
     }
     s_selected_item.item_id = item_id;
-    test_or_set_item_flag(script_variable_get(EVENT_SCRIPT_VAR_CURRENT_MAP), find_result->entry_index, 1);
+    test_or_set_item_flag(script_variable_get(SCRIPT_VAR_CURRENT_MAP), find_result->entry_index, 1);
     s_selected_item._unread_00 = 0;
     return &s_selected_item;
 }
@@ -119,7 +119,7 @@ move_find_result_data_t* move_find_get_result(s32 x, u8 y, u8 layer) {
     if (i != 4) {
         s_tile_pickup_result.entry_index = i;
         if (!(tile->flags & MAP_MOVE_FIND_ENTRY_NO_ITEM)) {
-            if (test_or_set_item_flag(script_variable_get(EVENT_SCRIPT_VAR_CURRENT_MAP), i, 0) != 0) {
+            if (test_or_set_item_flag(script_variable_get(SCRIPT_VAR_CURRENT_MAP), i, 0) != 0) {
                 g_move_find_result_flags |= MOVE_FIND_RESULT_ITEM;
                 s_tile_pickup_result.rare_item_id = tile->rare_item_id;
                 s_tile_pickup_result.common_item_id = tile->common_item_id;

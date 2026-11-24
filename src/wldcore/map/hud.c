@@ -279,8 +279,8 @@ void calendar_draw_date(GsOT* ot) {
     request.color.g = color.g;
     request.color.b = color.b;
 
-    first = script_variable_get(EVENT_SCRIPT_VAR_MONTH);
-    second = script_variable_get(EVENT_SCRIPT_VAR_DAY);
+    first = script_variable_get(SCRIPT_VAR_MONTH);
+    second = script_variable_get(SCRIPT_VAR_DAY);
     request.sequence = first + (DISPLAY_OBJECT_ANIM_MONTH_FIRST - 1);
     display_object_draw_animated(&request, ot);
 

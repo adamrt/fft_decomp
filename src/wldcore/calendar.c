@@ -19,14 +19,14 @@ static void advance_birthday_ages(void);
 /*
  * Advance the calendar by 1 day and run the daily updates.
  *
- * EVENT_SCRIPT_VAR_UNKNOWN_67 increases on 21 March (the start of Aries) and
+ * SCRIPT_VAR_UNKNOWN_67 increases on 21 March (the start of Aries) and
  * is capped at 99; calendar_advance_days raises it at the year's end
  * instead, without the cap. The target does not validate the incoming month
  * or day.
  */
 void calendar_advance_day(void) {
-    s32 month = script_variable_get(EVENT_SCRIPT_VAR_MONTH);
-    s32 day = script_variable_get(EVENT_SCRIPT_VAR_DAY) + 1;
+    s32 month = script_variable_get(SCRIPT_VAR_MONTH);
+    s32 day = script_variable_get(SCRIPT_VAR_DAY) + 1;
 
     if (g_calendar_month_lengths[month - 1] < day) {
         month++;
@@ -35,14 +35,14 @@ void calendar_advance_day(void) {
         }
         day = 1;
     }
-    script_variable_set(EVENT_SCRIPT_VAR_MONTH, month);
-    script_variable_set(EVENT_SCRIPT_VAR_DAY, day);
+    script_variable_set(SCRIPT_VAR_MONTH, month);
+    script_variable_set(SCRIPT_VAR_DAY, day);
     if (month == 3 && day == 21) {
-        s32 value = script_variable_get(EVENT_SCRIPT_VAR_UNKNOWN_67) + 1;
+        s32 value = script_variable_get(SCRIPT_VAR_UNKNOWN_67) + 1;
         if (value >= 100) {
             value = 99;
         }
-        script_variable_set(EVENT_SCRIPT_VAR_UNKNOWN_67, value);
+        script_variable_set(SCRIPT_VAR_UNKNOWN_67, value);
     }
     proposition_advance_day();
     advance_birthday_ages();
@@ -94,7 +94,7 @@ void calendar_date_to_zodiac(s32* month_ptr, s32* day_ptr) {
  *
  * Entry 0 is the player character. Its row in the birthday table is a
  * placeholder (1/1); the real birthday lives in
- * EVENT_SCRIPT_VAR_PLAYER_BIRTH_MONTH and _DAY, written when the player picks
+ * SCRIPT_VAR_PLAYER_BIRTH_MONTH and _DAY, written when the player picks
  * one at game start, so entry 0 is compared against those two variables and
  * the remaining 63 entries against the table. The table contains 64 calendar dates
  * (g_brave_story_birthday_table), reached through
@@ -106,10 +106,10 @@ void calendar_date_to_zodiac(s32* month_ptr, s32* day_ptr) {
  */
 static void advance_birthday_ages(void) {
     const calendar_date_t* birthdays = g_brave_story_birthdays;
-    s32 day = script_variable_get(EVENT_SCRIPT_VAR_DAY);
-    s32 month = script_variable_get(EVENT_SCRIPT_VAR_MONTH);
-    s32 birth_month = script_variable_get(EVENT_SCRIPT_VAR_PLAYER_BIRTH_MONTH);
-    s32 birth_day = script_variable_get(EVENT_SCRIPT_VAR_PLAYER_BIRTH_DAY);
+    s32 day = script_variable_get(SCRIPT_VAR_DAY);
+    s32 month = script_variable_get(SCRIPT_VAR_MONTH);
+    s32 birth_month = script_variable_get(SCRIPT_VAR_PLAYER_BIRTH_MONTH);
+    s32 birth_day = script_variable_get(SCRIPT_VAR_PLAYER_BIRTH_DAY);
     u8 age;
     s32 i;
 

@@ -245,7 +245,7 @@ static void enter_free_cursor_help(void) {
  *
  * Only in a Deep Dungeon battle (WORLD_MAP_RESULT_DEEP_DUNGEON_BATTLE), and not while such a reload is
  * running: the crystal count, capped at 4, is compared with script variable
- * EVENT_SCRIPT_VAR_DEEP_DUNGEON_CRYSTAL_COUNT, the map state that GNS rows of
+ * SCRIPT_VAR_DEEP_DUNGEON_CRYSTAL_COUNT, the map state that GNS rows of
  * those maps select on. A new count is stored and a map data load started; the
  * old count is put back when the load cannot start. Returns whether a reload is
  * in progress. */
@@ -259,13 +259,13 @@ static s32 update_deep_dungeon_map_reload(void) {
             if (crystal_count >= 5) {
                 crystal_count = 4;
             }
-            previous_count = script_variable_get(EVENT_SCRIPT_VAR_DEEP_DUNGEON_CRYSTAL_COUNT);
+            previous_count = script_variable_get(SCRIPT_VAR_DEEP_DUNGEON_CRYSTAL_COUNT);
             if (crystal_count != previous_count) {
-                script_variable_set(EVENT_SCRIPT_VAR_DEEP_DUNGEON_CRYSTAL_COUNT, crystal_count);
+                script_variable_set(SCRIPT_VAR_DEEP_DUNGEON_CRYSTAL_COUNT, crystal_count);
                 if (map_start_load()) {
                     g_map_deep_dungeon_load_in_progress = 1;
                 } else {
-                    script_variable_set(EVENT_SCRIPT_VAR_DEEP_DUNGEON_CRYSTAL_COUNT, previous_count);
+                    script_variable_set(SCRIPT_VAR_DEEP_DUNGEON_CRYSTAL_COUNT, previous_count);
                 }
             }
         }

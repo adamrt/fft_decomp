@@ -112,8 +112,7 @@ static void build_menu_thread(void) {
     if (g_menu_input_mode == MENU_INPUT_PLAYER) {
         if (tutorial_is_current_event() != 0) {
             g_menu_input_mode = MENU_INPUT_TUTORIAL;
-            script_variable_set(
-                EVENT_SCRIPT_VAR_CURRENT_EVENT, script_variable_get(EVENT_SCRIPT_VAR_CURRENT_EVENT) + 1);
+            script_variable_set(SCRIPT_VAR_CURRENT_EVENT, script_variable_get(SCRIPT_VAR_CURRENT_EVENT) + 1);
             script_start_current_event_thread();
             thread_wait_frames(30);
         }

@@ -37,7 +37,7 @@ static void open_rumor_list(void);
 static void open_rumor_detail(s32 value);
 
 /* Opens the bar (MENU_STACK_LEVEL_BAR): hides the map, loads the bar
- * background (set 0x16 or 0x17 by EVENT_SCRIPT_VAR_TOWN_BACKGROUND, else 0),
+ * background (set 0x16 or 0x17 by SCRIPT_VAR_TOWN_BACKGROUND, else 0),
  * starts the message box on TEXT_ID_BAR_WELCOME, and allocates two
  * window records and one render record for the level before
  * bar_build_rows fills it. */
@@ -49,7 +49,7 @@ void bar_open_menu(void) {
     world_map_clear_screen(1);
     display_object_set_queues_enabled(0);
     world_map_start_fade(0, 0x10);
-    value = script_variable_get(EVENT_SCRIPT_VAR_TOWN_BACKGROUND);
+    value = script_variable_get(SCRIPT_VAR_TOWN_BACKGROUND);
     set = value == 1 ? 0x16 : 0;
     if (value == 2) {
         set = 0x17;
@@ -72,7 +72,7 @@ void bar_open_menu(void) {
     g_menu_stack_depth = record_index + 1;
 }
 
-/* Fill the bar menu: Rumors always, Propositions once EVENT_SCRIPT_VAR_PROPOSITIONS_ENABLED is
+/* Fill the bar menu: Rumors always, Propositions once SCRIPT_VAR_PROPOSITIONS_ENABLED is
  * set, the job report while jobs have returned to this town, the in-progress list while some
  * accepted job has not returned, then Leave; draw the rows into the frame window. */
 void bar_build_rows(bar_menu_level_t* level) {
@@ -97,7 +97,7 @@ void bar_build_rows(bar_menu_level_t* level) {
     g_display_object_animated_pool[index].frame_index = 0;
     level->entries[0] = BAR_ROW_RUMORS;
     level->entry_count = 1;
-    if (script_variable_get(EVENT_SCRIPT_VAR_PROPOSITIONS_ENABLED) != 0) {
+    if (script_variable_get(SCRIPT_VAR_PROPOSITIONS_ENABLED) != 0) {
         level->entries[1] = BAR_ROW_AVAILABLE_PROPOSITIONS;
         level->entry_count++;
     }
@@ -330,7 +330,7 @@ void bar_update_menu(menu_stack_record_t* level) {
 
 /* Open the bar's rumors list: every rumor whose location mask in
  * g_rumor_location_masks includes the current town and whose script
- * variable (EVENT_SCRIPT_VAR_RUMOR_FIRST + index) is set, listed by name
+ * variable (SCRIPT_VAR_RUMOR_FIRST + index) is set, listed by name
  * (TEXT_ID_RUMOR_NAME_BASE + index). The panel shows up to eight rows at
  * (0x4c, 0x50), 0x96 wide, and the MENU_STACK_LEVEL_RUMOR_LIST level is pushed.
  * With no rumors the bar menu's windows are reset instead and
@@ -352,11 +352,11 @@ static void open_rumor_list(void) {
     locations = g_rumor_location_masks;
     /* The masks hold one bit per town, location 0 in bit 14. */
     mask = 0x4000 >> g_world_map_marker_state.marker.location_id;
-    for (; i < EVENT_SCRIPT_VAR_RUMOR_COUNT; i++, locations++) {
+    for (; i < SCRIPT_VAR_RUMOR_COUNT; i++, locations++) {
         /* A register operand keeps the loaded 32-bit value first in the `and`;
          * testing *locations directly lets expand_binop swap them. */
         entry = *locations;
-        if ((entry & mask) && script_variable_get(i + EVENT_SCRIPT_VAR_RUMOR_FIRST) != 0) {
+        if ((entry & mask) && script_variable_get(i + SCRIPT_VAR_RUMOR_FIRST) != 0) {
             *values = i + TEXT_ID_RUMOR_NAME_BASE;
             *colors = 0;
             colors++;
@@ -572,8 +572,8 @@ void proposition_open_available_list(void) {
     }
 
     count = 0;
-    for (i = 0; i < EVENT_SCRIPT_VAR_PROPOSITION_COUNT; i++) {
-        if (!(script_variable_get(i + EVENT_SCRIPT_VAR_PROPOSITION_FIRST)
+    for (i = 0; i < SCRIPT_VAR_PROPOSITION_COUNT; i++) {
+        if (!(script_variable_get(i + SCRIPT_VAR_PROPOSITION_FIRST)
                 & (PROPOSITION_VARIABLE_IN_PROGRESS | PROPOSITION_VARIABLE_COMPLETED))
             && !(g_proposition_states[i] & PROPOSITION_STATE_DAYS_MASK)
             && proposition_is_available_at(i, g_world_map_marker_state.marker.location_id + 1)) {
@@ -684,7 +684,7 @@ void proposition_update_available_list_input(menu_stack_record_t* level) {
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
         if (script_variable_get(
                 (g_menu_stack_entry_values[g_window_panel_render_state.selected_index] & TEXT_ID_ENTRY_MASK)
-                + EVENT_SCRIPT_VAR_PROPOSITION_FIRST)
+                + SCRIPT_VAR_PROPOSITION_FIRST)
             & PROPOSITION_VARIABLE_ATTEMPTED) {
             depth = g_menu_stack_depth;
             g_display_object_animated_pool[g_menu_stack_records[depth - 2].bar.cursor_window].flags
@@ -928,7 +928,7 @@ void proposition_update_accept_panel(menu_stack_record_t* level) {
         goto fail;
     }
 
-    if (script_variable_get(EVENT_SCRIPT_VAR_WAR_FUNDS) < g_proposition_gil_amount) {
+    if (script_variable_get(SCRIPT_VAR_WAR_FUNDS) < g_proposition_gil_amount) {
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_NOT_ENOUGH_GIL, 0);
         level->accept_confirm.mode = PROPOSITION_ACCEPT_MODE_CLOSE_MESSAGE;
     fail:

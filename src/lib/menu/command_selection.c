@@ -581,7 +581,7 @@ static void build_act_menu(void) {
         }
         count++;
     }
-    if (script_variable_get(EVENT_SCRIPT_VAR_ANYTHING_ACTION_ENABLED) != 0 && i < 6) {
+    if (script_variable_get(SCRIPT_VAR_ANYTHING_ACTION_ENABLED) != 0 && i < 6) {
         rows[i].style = 0;
         g_command_skillset_row_actions[i] = 0x16;
         g_command_skillsets[i] = ACTION_MENU_PSEUDO_SKILLSET_ANYTHING;

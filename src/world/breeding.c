@@ -150,8 +150,8 @@ void breeding_update(s32 unused) {
                 unit->birthday_day = (unit->birthday_day & 0xF0) | n;
                 if (n == 0) {
                     unit->gender_flags = UNIT_FLAG_MONSTER;
-                    day = script_variable_get(EVENT_SCRIPT_VAR_DAY);
-                    month = script_variable_get(EVENT_SCRIPT_VAR_MONTH);
+                    day = script_variable_get(SCRIPT_VAR_DAY);
+                    month = script_variable_get(SCRIPT_VAR_MONTH);
                     value = 0;
                     for (n = 1; n < month; n++) {
                         value += s_breeding_month_lengths[n];

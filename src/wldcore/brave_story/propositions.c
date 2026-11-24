@@ -75,8 +75,8 @@ void brave_story_open_propositions_level(void) {
         g_menu_stack_records[g_menu_stack_depth].brave_story_propositions.entry_count++;
     }
     completed = 0;
-    for (i = 0; i < EVENT_SCRIPT_VAR_PROPOSITION_COUNT; i++) {
-        if (script_variable_get(i + EVENT_SCRIPT_VAR_PROPOSITION_FIRST) & PROPOSITION_VARIABLE_COMPLETED) {
+    for (i = 0; i < SCRIPT_VAR_PROPOSITION_COUNT; i++) {
+        if (script_variable_get(i + SCRIPT_VAR_PROPOSITION_FIRST) & PROPOSITION_VARIABLE_COMPLETED) {
             completed++;
         }
     }
@@ -1022,8 +1022,8 @@ static void open_work_history(void) {
     i = 0;
     colors = g_menu_stack_row_text_colors;
     values = g_menu_stack_entry_values;
-    for (; i < EVENT_SCRIPT_VAR_PROPOSITION_COUNT; i++) {
-        if (script_variable_get(i + EVENT_SCRIPT_VAR_PROPOSITION_FIRST) & PROPOSITION_VARIABLE_COMPLETED) {
+    for (; i < SCRIPT_VAR_PROPOSITION_COUNT; i++) {
+        if (script_variable_get(i + SCRIPT_VAR_PROPOSITION_FIRST) & PROPOSITION_VARIABLE_COMPLETED) {
             *values = i + TEXT_ID_COMPLETED_PROPOSITION_NAME_BASE;
             *colors = 0;
             colors++;

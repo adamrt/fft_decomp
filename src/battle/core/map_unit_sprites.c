@@ -2638,7 +2638,7 @@ void sprite_clear_load_state(s32 unused_map_id) {
  * up from them first. */
 void deploy_init_placed_units(void) {
     g_unit_graphics_load_queue.count = 0;
-    if (script_variable_get(EVENT_SCRIPT_VAR_WORLD_DEBUG_BATTLE_STYLE) == 0) {
+    if (script_variable_get(SCRIPT_VAR_WORLD_DEBUG_BATTLE_STYLE) == 0) {
         if (g_deploy_skipped != 0) {
             deploy_init_units(g_deploy_deployed_unit_map_coordinates, 0);
             g_sprite_load_state.file_kind = SPRITE_LOAD_KIND_FIRST;

@@ -96,9 +96,9 @@ void message_dialog_thread(void) {
     s32 resume_task;
 
     thread_current_set_task(THREAD_TASK_RESUME);
-    script_variable_set(EVENT_SCRIPT_VAR_TYPEWRITER_VRAM_X_OFFSET, 0);
+    script_variable_set(SCRIPT_VAR_TYPEWRITER_VRAM_X_OFFSET, 0);
     value_index = 0;
-    variable_base = EVENT_SCRIPT_VAR_SELECTED_DIALOG_OPTION;
+    variable_base = SCRIPT_VAR_SELECTED_DIALOG_OPTION;
     thread = &g_threads[g_thread_current_id];
 
     param = thread_current_get_parameter_1();
@@ -403,7 +403,7 @@ void message_dialog_thread(void) {
     /* Centered boxes center each line on its measured width, except in two
      * events (unless primitives draw immediately), where lines start flush left. */
     if (rec.box_type == DIALOG_BOX_TYPE_CENTERED) {
-        event_id = script_variable_get(EVENT_SCRIPT_VAR_CURRENT_EVENT);
+        event_id = script_variable_get(SCRIPT_VAR_CURRENT_EVENT);
         if ((event_id == EVENT_ID_WIEGRAF_PACT_WITH_VELIUS || event_id == EVENT_ID_THE_LYING_HEART)
             && g_gfx_draw_primitives_immediately == 0) {
             cursor_x = rec.x;
@@ -654,7 +654,7 @@ void message_dialog_thread(void) {
             }
 
             if (rec.box_type == DIALOG_BOX_TYPE_CENTERED) {
-                event_id = script_variable_get(EVENT_SCRIPT_VAR_CURRENT_EVENT);
+                event_id = script_variable_get(SCRIPT_VAR_CURRENT_EVENT);
                 if ((event_id == EVENT_ID_WIEGRAF_PACT_WITH_VELIUS || event_id == EVENT_ID_THE_LYING_HEART)
                     && g_gfx_draw_primitives_immediately == 0) {
                     cursor_x = rec.x;
@@ -724,7 +724,7 @@ void message_dialog_thread(void) {
                 select_hidden_window_next->sprites[0].x0 = 512;
                 select_hidden_window_next->sprites[1].x0 = 512;
 
-                g_script_variables[EVENT_SCRIPT_VAR_SELECTED_DIALOG_OPTION] = selection - rec.mark;
+                g_script_variables[SCRIPT_VAR_SELECTED_DIALOG_OPTION] = selection - rec.mark;
             }
             NEXT();
             g_text_awaiting_input = 0;
@@ -781,7 +781,7 @@ void message_dialog_thread(void) {
             NEXT();
             win[0].portrait_code = *text;
             win[1].portrait_code = *text;
-            script_variable_set(EVENT_SCRIPT_VAR_DIALOG_PORTRAIT, *text);
+            script_variable_set(SCRIPT_VAR_DIALOG_PORTRAIT, *text);
             NEXT();
         } else if (character == TEXT_SET_VARIABLE_BASE) {
             NEXT();
@@ -789,10 +789,10 @@ void message_dialog_thread(void) {
             NEXT();
         } else if (character == TEXT_STORE_VARIABLE) {
             NEXT();
-            i = script_variable_get(EVENT_SCRIPT_VAR_TEXT_STORE_INDEX);
+            i = script_variable_get(SCRIPT_VAR_TEXT_STORE_INDEX);
             if (i != 0) {
                 script_variable_set(variable_base + i * 10, *text);
-                script_variable_set(EVENT_SCRIPT_VAR_TEXT_STORE_INDEX, 0);
+                script_variable_set(SCRIPT_VAR_TEXT_STORE_INDEX, 0);
             } else {
                 script_variable_set(variable_base, *text);
             }

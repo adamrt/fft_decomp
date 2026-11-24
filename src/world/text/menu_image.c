@@ -49,7 +49,7 @@ void text_render_to_image(s32 text_id, u8* image, glyph_blit_t* origin, const u8
     }
 
     state = (text_reader_state_t*)getScratchAddr(128);
-    variable_id = EVENT_SCRIPT_VAR_SELECTED_DIALOG_OPTION;
+    variable_id = SCRIPT_VAR_SELECTED_DIALOG_OPTION;
     state->return_cursor = (const u8*)-1;
     state->value_cursor = g_text_substitution_values;
     state->pending_width = 0xFFFF;
@@ -78,16 +78,16 @@ void text_render_to_image(s32 text_id, u8* image, glyph_blit_t* origin, const u8
                     cursor = menu_text_advance_cursor_with_backreferences(state, cursor);
                 } else if (state->command == TEXT_SET_PORTRAIT) {
                     cursor = menu_text_advance_cursor_with_backreferences(state, cursor);
-                    script_variable_set(EVENT_SCRIPT_VAR_DIALOG_PORTRAIT, *cursor);
+                    script_variable_set(SCRIPT_VAR_DIALOG_PORTRAIT, *cursor);
                 } else if (state->command == TEXT_SET_VARIABLE_BASE) {
                     cursor = menu_text_advance_cursor_with_backreferences(state, cursor);
                     variable_id = *cursor;
                 } else if (state->command == TEXT_STORE_VARIABLE) {
                     cursor = menu_text_advance_cursor_with_backreferences(state, cursor);
-                    i = script_variable_get(EVENT_SCRIPT_VAR_TEXT_STORE_INDEX);
+                    i = script_variable_get(SCRIPT_VAR_TEXT_STORE_INDEX);
                     if (i != 0) {
                         script_variable_set(variable_id + i * 10, *cursor);
-                        script_variable_set(EVENT_SCRIPT_VAR_TEXT_STORE_INDEX, 0);
+                        script_variable_set(SCRIPT_VAR_TEXT_STORE_INDEX, 0);
                     } else {
                         script_variable_set(variable_id, *cursor);
                     }

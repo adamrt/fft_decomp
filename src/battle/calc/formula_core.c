@@ -748,8 +748,8 @@ void formula_evade_apply_weather_on_bows(void) {
 
     if (g_item_primary_data[g_action_work.weapon_id].type == ITEM_TYPE_CROSSBOW
         || g_item_primary_data[g_action_work.weapon_id].type == ITEM_TYPE_BOW) {
-        weather = script_variable_get(EVENT_SCRIPT_VAR_WEATHER);
-        time_of_day = script_variable_get(EVENT_SCRIPT_VAR_TIME_OF_DAY);
+        weather = script_variable_get(SCRIPT_VAR_WEATHER);
+        time_of_day = script_variable_get(SCRIPT_VAR_TIME_OF_DAY);
         if (time_of_day == TIME_OF_DAY_NIGHT) {
             g_action_work.base_hit = g_action_work.base_hit * 3 / 4;
         }
@@ -1162,7 +1162,7 @@ void formula_calculate_stolen_gil(void) {
     s16 stolen;
 
     if (!(g_action_target->team_flags & UNIT_TEAM_MASK)) {
-        available = script_variable_get(EVENT_SCRIPT_VAR_WAR_FUNDS);
+        available = script_variable_get(SCRIPT_VAR_WAR_FUNDS);
         if (available < amount) {
             amount = available;
         }

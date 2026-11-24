@@ -218,10 +218,10 @@ void sprite_palette_tint_unit(map_unit_t* unit, s32 level, s32 update_current_co
         const s32* weather_flags = &g_weather_flags;
 
         if (!(*weather_flags & MAP_WEATHER_FLAG_IGNORE_WEATHER)) {
-            weather = script_variable_get(EVENT_SCRIPT_VAR_WEATHER);
+            weather = script_variable_get(SCRIPT_VAR_WEATHER);
             /* Weather cools the tint (less red, more blue); at night the shift is stronger and
              * applies in clear weather too. The snow branches match the plain ones. */
-            if (script_variable_get(EVENT_SCRIPT_VAR_TIME_OF_DAY) == TIME_OF_DAY_DAY) {
+            if (script_variable_get(SCRIPT_VAR_TIME_OF_DAY) == TIME_OF_DAY_DAY) {
                 if (*weather_flags & MAP_WEATHER_FLAG_SNOW) {
                     switch (weather) {
                     case WEATHER_NONE:

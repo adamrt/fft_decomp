@@ -54,10 +54,10 @@ static void process_pending_requests(void);
  * variable for one thread yield with every controller input disabled. */
 void tutorial_pulse_wait_value(s32 wait_value) {
     if (g_menu_input_mode == MENU_INPUT_TUTORIAL) {
-        script_variable_set(EVENT_SCRIPT_VAR_TUTORIAL_WAIT_VALUE, wait_value);
-        script_variable_set(EVENT_SCRIPT_VAR_DISABLED_CONTROLLER_INPUTS, 0xFFFF);
+        script_variable_set(SCRIPT_VAR_TUTORIAL_WAIT_VALUE, wait_value);
+        script_variable_set(SCRIPT_VAR_DISABLED_CONTROLLER_INPUTS, 0xFFFF);
         thread_yield();
-        script_variable_set(EVENT_SCRIPT_VAR_TUTORIAL_WAIT_VALUE, 0);
+        script_variable_set(SCRIPT_VAR_TUTORIAL_WAIT_VALUE, 0);
     }
 }
 
@@ -70,8 +70,8 @@ static void apply_input_overrides(u32* state) {
     }
 
     high = *state & 0xFFFF0000;
-    *state = *state & (script_variable_get(EVENT_SCRIPT_VAR_DISABLED_CONTROLLER_INPUTS) ^ 0xFFFF);
-    *state = high | (script_variable_get(EVENT_SCRIPT_VAR_FORCED_CONTROLLER_INPUTS) | *state);
+    *state = *state & (script_variable_get(SCRIPT_VAR_DISABLED_CONTROLLER_INPUTS) ^ 0xFFFF);
+    *state = high | (script_variable_get(SCRIPT_VAR_FORCED_CONTROLLER_INPUTS) | *state);
 }
 
 /* While the tutorial text thread is current, latch its input and apply the
@@ -180,9 +180,9 @@ s32 script_update_event_frame(u32* ot, u32 buttons) {
         if (i == VARIANT_THREAD_TABLE_SLOT_COUNT) {
             finish_op = scenario_get_finish_operation();
             if (finish_op != 0) {
-                if (script_variable_get(EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS)) {
+                if (script_variable_get(SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS)) {
                     g_script_threads_idle = 0;
-                    script_variable_set(EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS, 0);
+                    script_variable_set(SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS, 0);
                     return SCRIPT_EVENT_FRAME_TO_WORLD;
                 }
             } else {
@@ -190,13 +190,13 @@ s32 script_update_event_frame(u32* ot, u32 buttons) {
                 g_menu_overlay_state = 0;
                 return SCRIPT_EVENT_FRAME_NO_FINISH;
             }
-            if (script_variable_get(EVENT_SCRIPT_VAR_CURRENT_EVENT) == EVENT_ID_FUNERAL) {
+            if (script_variable_get(SCRIPT_VAR_CURRENT_EVENT) == EVENT_ID_FUNERAL) {
                 return SCRIPT_EVENT_FRAME_ENDING;
             }
             /* The finish word holds the next event id in bits 0-7 and 10-11 (its bits 8-9);
              * the remaining high bits give the finish result. */
             next_event = ((finish_op & 0xC00) >> 2) | (finish_op & 0xFF);
-            script_variable_set(EVENT_SCRIPT_VAR_CURRENT_EVENT, next_event);
+            script_variable_set(SCRIPT_VAR_CURRENT_EVENT, next_event);
             finish_op = (finish_op & 0xF300) >> 8;
             g_script_threads_idle = 0;
             g_menu_overlay_state = 0;
@@ -209,8 +209,8 @@ s32 script_update_event_frame(u32* ot, u32 buttons) {
             if (finish_op == SCRIPT_FINISH_RESET) {
                 return SCRIPT_EVENT_FRAME_RESET;
             }
-            script_variable_set(EVENT_SCRIPT_VAR_CURRENT_EVENT, 0);
-            script_variable_set(EVENT_SCRIPT_VAR_CURRENT_ENTD, 0);
+            script_variable_set(SCRIPT_VAR_CURRENT_EVENT, 0);
+            script_variable_set(SCRIPT_VAR_CURRENT_ENTD, 0);
             g_encounter_selection_mode = ENCOUNTER_SELECTION_MAP_ID;
             return SCRIPT_EVENT_FRAME_TO_WORLD;
         }
@@ -222,7 +222,7 @@ s32 script_update_event_frame(u32* ot, u32 buttons) {
         g_script_unfiltered_controller_input = g_script_event_input;
         apply_input_overrides(&g_script_event_input);
         g_event_saved_input = g_script_event_input;
-        script_variable_set(EVENT_SCRIPT_VAR_FORCED_CONTROLLER_INPUTS, 0);
+        script_variable_set(SCRIPT_VAR_FORCED_CONTROLLER_INPUTS, 0);
     }
     if (g_event_map_reload_state >= 3) {
         g_event_map_reload_state = 0;
@@ -310,7 +310,7 @@ s32 script_update_event_frame(u32* ot, u32 buttons) {
         script_set_event_speed(1);
         /* The save menu runs frames of its own and changes the screen polarity; keep the event's. */
         polarity = g_gfx_screen_polarity;
-        script_variable_set(EVENT_SCRIPT_VAR_SAVE_IN_PROGRESS, 1);
+        script_variable_set(SCRIPT_VAR_SAVE_IN_PROGRESS, 1);
         card_entrypoint(0);
         g_overlay_companion_overlay_state = COMPANION_OVERLAY_STATE_IDLE;
         g_gfx_screen_polarity = polarity;
@@ -370,5 +370,5 @@ void camera_store_state_to_script_variables(void) {
 /* The raw weather script variable. weather_get_effective applies the
  * map's indoor and snow flags to it. */
 s32 weather_get_raw(void) {
-    return g_script_variables[EVENT_SCRIPT_VAR_WEATHER];
+    return g_script_variables[SCRIPT_VAR_WEATHER];
 }

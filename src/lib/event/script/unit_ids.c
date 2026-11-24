@@ -103,7 +103,7 @@ s32 script_resolve_map_unit_id(s32 unit_id) {
         }
     }
 
-    if (script_variable_get(EVENT_SCRIPT_VAR_CURRENT_EVENT) == EVENT_ID_GAME_OVER_RAMZA) {
+    if (script_variable_get(SCRIPT_VAR_CURRENT_EVENT) == EVENT_ID_GAME_OVER_RAMZA) {
         for (battle_unit_id = 0; battle_unit_id < BATTLE_UNIT_SLOT_COUNT; battle_unit_id++) {
             unit = battle_unit_get(battle_unit_id);
             if (unit->character_identity != CHARACTER_IDENTITY_ENTD_NONE
@@ -129,7 +129,7 @@ s32 script_resolve_map_unit_id(s32 unit_id) {
 
     unit = battle_unit_find_by_unit_id(unit_id, &unit_state);
     if (unit_state < 0 && unit_state != -2
-        && script_variable_get(EVENT_SCRIPT_VAR_CURRENT_EVENT) != EVENT_ID_GAME_OVER_RAMZA) {
+        && script_variable_get(SCRIPT_VAR_CURRENT_EVENT) != EVENT_ID_GAME_OVER_RAMZA) {
         report_missing_unit_stub(original_unit_id);
         return EVENT_MAP_UNIT_ID_NONE;
     }

@@ -110,8 +110,8 @@ void system_run_game_loop(void) {
         if (g_game_flow_state == SYSTEM_GAME_FLOW_ENDING) {
             sound_stop_all_sfx();
             music_unload_all();
-            script_variable_set(EVENT_SCRIPT_VAR_NEXT_SCENARIO, 1);
-            script_variable_set(EVENT_SCRIPT_VAR_CURRENT_EVENT, EVENT_ID_THE_LYING_HEART);
+            script_variable_set(SCRIPT_VAR_NEXT_SCENARIO, 1);
+            script_variable_set(SCRIPT_VAR_CURRENT_EVENT, EVENT_ID_THE_LYING_HEART);
             overlay_run_ending();
             load_battle_overlay();
             gfx_load_zodiac_and_frame_textures();

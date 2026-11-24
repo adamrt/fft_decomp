@@ -32,7 +32,7 @@ typedef struct proposition_progress {
 } proposition_progress_t;
 typedef char proposition_progress_size_must_be_9[sizeof(proposition_progress_t) == 9 ? 1 : -1];
 
-/* Value of a proposition's script variable (EVENT_SCRIPT_VAR_PROPOSITION_FIRST + id). */
+/* Value of a proposition's script variable (SCRIPT_VAR_PROPOSITION_FIRST + id). */
 typedef enum proposition_variable_flag {
     PROPOSITION_VARIABLE_IN_PROGRESS = 0x02,
     PROPOSITION_VARIABLE_COMPLETED = 0x04,
@@ -96,7 +96,7 @@ typedef enum proposition_speaker {
 
 /* proposition_fields_t.condition_flags: what must hold for the proposition to be offered. */
 typedef enum proposition_condition_flag {
-    PROPOSITION_CONDITION_SHOP_AVAILABILITY = 0x01, /* EVENT_SCRIPT_VAR_SHOP_ITEM_AVAILABILITY >= minimum */
+    PROPOSITION_CONDITION_SHOP_AVAILABILITY = 0x01, /* SCRIPT_VAR_SHOP_ITEM_AVAILABILITY >= minimum */
     PROPOSITION_CONDITION_ZODIAC_SIGN = 0x02,       /* today's zodiac sign (1 = Aries) == condition_value */
     PROPOSITION_CONDITION_STATUS = 0x04
 } proposition_condition_flag_e;
@@ -123,7 +123,7 @@ typedef struct proposition_fields {
     u16 _unused_24;      /* 0x24 */
     u16 speaker_mode;    /* 0x26; proposition_speaker_e */
     u16 preferred_job;   /* 0x28 */
-    u16 required_shop_availability; /* 0x2a; minimum EVENT_SCRIPT_VAR_SHOP_ITEM_AVAILABILITY */
+    u16 required_shop_availability; /* 0x2a; minimum SCRIPT_VAR_SHOP_ITEM_AVAILABILITY */
     u16 condition_value;            /* 0x2c; zodiac sign or proposition status index */
 } proposition_fields_t;
 typedef char proposition_fields_size_must_be_46[sizeof(proposition_fields_t) == 46 ? 1 : -1];

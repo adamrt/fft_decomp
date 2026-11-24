@@ -51,5 +51,5 @@ void party_init_new_game(int mode) {
     }
 
     item_init_new_game_inventory();
-    script_variable_set(EVENT_SCRIPT_VAR_WAR_FUNDS, STARTING_WAR_FUNDS);
+    script_variable_set(SCRIPT_VAR_WAR_FUNDS, STARTING_WAR_FUNDS);
 }

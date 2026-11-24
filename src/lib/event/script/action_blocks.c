@@ -115,13 +115,13 @@ void script_opcode_wait_walk(s32 unit_id) {
 }
 
 /* SCRIPT_OPCODE_LOAD_ATTACK_GRAPHICS (0x82)
- * Preload ATTACK.OUT when EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS is clear:
+ * Preload ATTACK.OUT when SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS is clear:
  * load companion executable 0xd in preload mode, look up the pending
  * scenario's special portrait and unit, and build the formation sprites and
  * portraits, so the later ATTACK entry skips reloading the overlay, sprites
  * and portraits. */
 void script_opcode_load_attack_graphics(void) {
-    if (script_variable_get(EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS) == 0) {
+    if (script_variable_get(SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS) == 0) {
         g_script_attack_entry_mode = SCRIPT_ATTACK_ENTRY_PRELOADED;
         overlay_companion_load(COMPANION_OVERLAY_ATTACK);
         thread_yield();
@@ -172,9 +172,9 @@ void script_opcode_block_start_thread(void) {
         first_halfword = script_read_s16(parameters);
         if (script[0] == SCRIPT_OPCODE_CALL_FUNCTION) {
             if (script[1] == EVENT_CALL_FUNCTION_MUTE_TEXT_AUDIO_CUE) {
-                script_variable_set(EVENT_SCRIPT_VAR_MUTE_TEXT_AUDIO_CUE, 1);
+                script_variable_set(SCRIPT_VAR_MUTE_TEXT_AUDIO_CUE, 1);
             } else if (script[1] == EVENT_CALL_FUNCTION_UNMUTE_TEXT_AUDIO_CUE) {
-                script_variable_set(EVENT_SCRIPT_VAR_MUTE_TEXT_AUDIO_CUE, 0);
+                script_variable_set(SCRIPT_VAR_MUTE_TEXT_AUDIO_CUE, 0);
             }
         } else if (script[0] == SCRIPT_OPCODE_SOUND_EFFECT) {
             g_sound_pending_sfx_id = first_halfword;

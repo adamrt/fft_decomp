@@ -8,7 +8,7 @@
 /* Add `delta` to the war funds, clamped to 0..99,999,999, and return the new
  * amount. */
 s32 shop_adjust_gil(s32 delta) {
-    s32 gil = script_variable_get(EVENT_SCRIPT_VAR_WAR_FUNDS) + delta;
+    s32 gil = script_variable_get(SCRIPT_VAR_WAR_FUNDS) + delta;
 
     if (gil < 0) {
         gil = 0;
@@ -16,7 +16,7 @@ s32 shop_adjust_gil(s32 delta) {
     if (gil > EVENT_WAR_FUNDS_MAX) {
         gil = EVENT_WAR_FUNDS_MAX;
     }
-    script_variable_set(EVENT_SCRIPT_VAR_WAR_FUNDS, gil);
+    script_variable_set(SCRIPT_VAR_WAR_FUNDS, gil);
     return gil;
 }
 

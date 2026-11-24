@@ -491,7 +491,7 @@ static void update_load(s32 slot) {
                 g_save_menu_result = 1;
                 g_save_load_step_state = 0;
                 g_save_menu_step = SAVE_STEP_LEAVE;
-                script_variable_set(EVENT_SCRIPT_VAR_SAVE_IN_PROGRESS, 1);
+                script_variable_set(SCRIPT_VAR_SAVE_IN_PROGRESS, 1);
                 g_sound_queued_effect_id = SOUND_SFX_COMPLETE;
                 g_save_last_used_slot = slot;
                 return;
@@ -616,11 +616,11 @@ void save_image_build(s32 slot) {
     g_save_work_buffer->summary.job_id = g_formation_unit_pointers[i]->identity.job_id;
     g_save_work_buffer->summary.level = g_formation_unit_pointers[i]->status.level;
 
-    day = script_variable_get(EVENT_SCRIPT_VAR_DAY);
-    month = script_variable_get(EVENT_SCRIPT_VAR_MONTH);
+    day = script_variable_get(SCRIPT_VAR_DAY);
+    month = script_variable_get(SCRIPT_VAR_MONTH);
     g_save_work_buffer->summary.date.day = day;
     g_save_work_buffer->summary.date.month = month;
-    location = script_variable_get(EVENT_SCRIPT_VAR_LOCATION);
+    location = script_variable_get(SCRIPT_VAR_LOCATION);
     slot_marker = (slot >= 0) ? 0xff : 0;
     g_save_work_buffer->summary.location = location;
     g_save_work_buffer->summary.slot = slot_marker;

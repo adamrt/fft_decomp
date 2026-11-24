@@ -271,16 +271,16 @@ static void (*s_level_suspend_handlers[MENU_STACK_LEVEL_COUNT])(menu_stack_recor
 };
 
 /* Init step: load WORLD's menu text and unit portraits, build the formation unit name strings,
- * then apply and clear any day advance pending in EVENT_SCRIPT_VAR_DATE_ADVANCE. */
+ * then apply and clear any day advance pending in SCRIPT_VAR_DATE_ADVANCE. */
 void world_map_init_menu_resources(void) {
     s32 value;
 
     menu_screen_init_world_resources();
     formation_roster_build_names();
-    value = script_variable_get(EVENT_SCRIPT_VAR_DATE_ADVANCE);
+    value = script_variable_get(SCRIPT_VAR_DATE_ADVANCE);
     if (value != 0) {
         calendar_advance_days(value);
-        script_variable_set(EVENT_SCRIPT_VAR_DATE_ADVANCE, 0);
+        script_variable_set(SCRIPT_VAR_DATE_ADVANCE, 0);
     }
 }
 
@@ -405,7 +405,7 @@ static void open_cursor_level(void) {
     g_world_map_scroll_y.step = 0x80;
     g_world_map_scroll_x.step = 0x80;
 
-    g_hud_value = script_variable_get(EVENT_SCRIPT_VAR_WAR_FUNDS);
+    g_hud_value = script_variable_get(SCRIPT_VAR_WAR_FUNDS);
     level = g_menu_stack_depth;
     g_menu_stack_records[level].map_cursor.wide_view = 0;
     g_menu_stack_records[level].map_cursor.snap_hit = g_world_map_marker_state.marker.location_id + 1;
@@ -420,7 +420,7 @@ static void open_cursor_level(void) {
 static void resume_cursor_level(menu_stack_record_t* level) {
     g_hud_value_mode = HUD_VALUE_FUNDS;
     g_display_object_animated_pool[level->map_cursor.window_index].palette = 0;
-    g_hud_value = script_variable_get(EVENT_SCRIPT_VAR_WAR_FUNDS);
+    g_hud_value = script_variable_get(SCRIPT_VAR_WAR_FUNDS);
     if (g_display_object_animated_pool[g_world_map_window_index].flags & DISPLAY_OBJECT_HIDDEN) {
         world_map_set_backdrop_mode(0);
     }
@@ -845,7 +845,7 @@ static void update_path_level(menu_stack_record_t* level) {
             return;
         }
         if (level->path.erase != 0) {
-            script_variable_set(g_world_map_path_animation.route_id + EVENT_SCRIPT_VAR_PATH_VISIBLE_FIRST, 0);
+            script_variable_set(g_world_map_path_animation.route_id + SCRIPT_VAR_PATH_VISIBLE_FIRST, 0);
             g_world_map_path_animation.segment_index = g_world_map_path_animation.segment_count - 1;
             g_world_map_path_animation.frame_timer
                 = g_world_map_path_animation.segment_frames[g_world_map_path_animation.segment_count - 1] - 1;
@@ -864,7 +864,7 @@ static void update_path_level(menu_stack_record_t* level) {
                 g_world_map_path_animation.segment_index++;
                 g_world_map_path_animation.frame_timer = 0;
                 if (g_world_map_path_animation.segment_index >= g_world_map_path_animation.segment_count) {
-                    script_variable_set(g_world_map_path_animation.route_id + EVENT_SCRIPT_VAR_PATH_VISIBLE_FIRST, 1);
+                    script_variable_set(g_world_map_path_animation.route_id + SCRIPT_VAR_PATH_VISIBLE_FIRST, 1);
                 }
             }
         } else {
@@ -911,7 +911,7 @@ static void open_visibility_level(s32 dot_index, s32 erase) {
 
 /* Step of the location visibility level, which reveals or erases one
  * location's dot. Once the screen fade is over it plays the sound; a reveal
- * sets the location's visible variable (EVENT_SCRIPT_VAR_LOCATION_VISIBLE_FIRST
+ * sets the location's visible variable (SCRIPT_VAR_LOCATION_VISIBLE_FIRST
  * + dot) at once. The map is redrawn for `delay` frames, then an erase hides
  * the dot and clears the variable, and the level closes.
  *
@@ -927,7 +927,7 @@ static void update_visibility_level(menu_stack_record_t* level) {
         if (level->visibility.erase != 0) {
             sound_play_effect(SOUND_SFX_CANCEL);
         } else {
-            script_variable_set(level->visibility.dot_index + EVENT_SCRIPT_VAR_LOCATION_VISIBLE_FIRST, 1);
+            script_variable_set(level->visibility.dot_index + SCRIPT_VAR_LOCATION_VISIBLE_FIRST, 1);
             sound_play_effect(SOUND_SFX_WORLD_MAP_LOCATION_APPEAR);
         }
         level->visibility.pending_sound = 0;
@@ -939,7 +939,7 @@ static void update_visibility_level(menu_stack_record_t* level) {
     }
     if (level->visibility.erase != 0) {
         g_world_map_dots[level->visibility.dot_index].render.flags |= DISPLAY_OBJECT_HIDDEN;
-        script_variable_set(level->visibility.dot_index + EVENT_SCRIPT_VAR_LOCATION_VISIBLE_FIRST, 0);
+        script_variable_set(level->visibility.dot_index + SCRIPT_VAR_LOCATION_VISIBLE_FIRST, 0);
     }
     g_world_map_flags |= WORLD_MAP_FLAG_DRAW_MAP;
     g_menu_stack_depth--;
@@ -958,7 +958,7 @@ void world_map_open_menu_level(void) {
     g_menu_blocked_buttons = -1;
     menu_screen_open_entry_window(4, -0x30, -0x38);
     g_hud_value_mode = HUD_VALUE_FUNDS;
-    g_hud_value = script_variable_get(EVENT_SCRIPT_VAR_WAR_FUNDS);
+    g_hud_value = script_variable_get(SCRIPT_VAR_WAR_FUNDS);
     depth = g_menu_stack_depth;
     flags = g_world_map_flags;
     g_menu_stack_records[depth].return_level.delay = 3;
@@ -1026,7 +1026,7 @@ static void update_world_menu_level(menu_stack_record_t* level) {
     }
 
     if (flags & WORLD_MAP_FLAG_REQUEST_DESTINATION) {
-        location = script_variable_get(EVENT_SCRIPT_VAR_CURRENT_MAP);
+        location = script_variable_get(SCRIPT_VAR_CURRENT_MAP);
         world_map_capture_backdrop();
         menu_stack_dispatch_resume();
         if (g_world_map_marker_state.marker.location_id != location) {
@@ -1053,8 +1053,8 @@ static void update_world_menu_level(menu_stack_record_t* level) {
 
     if (flags & WORLD_MAP_FLAG_RESTART) {
         g_world_map_flags = cleared & ~(WORLD_MAP_FLAG_RUNNING | WORLD_MAP_FLAG_UNLOCK_ALL);
-        if (script_variable_get(EVENT_SCRIPT_VAR_FORMATION_RETURN_EVENT) != 0
-            || script_variable_get(EVENT_SCRIPT_VAR_NEXT_SCENARIO) == 0) {
+        if (script_variable_get(SCRIPT_VAR_FORMATION_RETURN_EVENT) != 0
+            || script_variable_get(SCRIPT_VAR_NEXT_SCENARIO) == 0) {
             g_world_map_flags |= WORLD_MAP_FLAG_RESTART;
         } else {
             g_world_map_flags &= ~WORLD_MAP_FLAG_RESTART;
@@ -1905,7 +1905,7 @@ static void update_location_menu(menu_stack_record_t* level) {
                     run_location_shop(MENU_SCREEN_CONTEXT_FUR_SHOP);
                     return;
                 default:
-                    script_variable_set(EVENT_SCRIPT_VAR_DEEP_DUNGEON_SELECTION,
+                    script_variable_set(SCRIPT_VAR_DEEP_DUNGEON_SELECTION,
                         value - (TEXT_ID_DEEP_DUNGEON_FLOOR_FIRST & TEXT_ID_ENTRY_MASK));
                     close_location_menu(&level->location_menu.slots, 0);
                     if (location_script_run(
@@ -1918,12 +1918,12 @@ static void update_location_menu(menu_stack_record_t* level) {
                         g_travel_next_map_id = record->map_id;
                         /* Direct ENTD indexing folds the table base and removes a retail addition. */
                         script_variable_set(
-                            EVENT_SCRIPT_VAR_CURRENT_ENTD, (&records->entd_ids[0])[((rand() * 8) >> 15) + offset]);
-                        script_variable_set(EVENT_SCRIPT_VAR_DEPLOYMENT_SQUAD_COUNT, 1);
-                        script_variable_set(EVENT_SCRIPT_VAR_DEPLOYMENT_PRIMARY_SQUAD_ID, record->squad_id);
-                        script_variable_set(EVENT_SCRIPT_VAR_CURRENT_EVENT, g_location_script_state.args[1]);
+                            SCRIPT_VAR_CURRENT_ENTD, (&records->entd_ids[0])[((rand() * 8) >> 15) + offset]);
+                        script_variable_set(SCRIPT_VAR_DEPLOYMENT_SQUAD_COUNT, 1);
+                        script_variable_set(SCRIPT_VAR_DEPLOYMENT_PRIMARY_SQUAD_ID, record->squad_id);
+                        script_variable_set(SCRIPT_VAR_CURRENT_EVENT, g_location_script_state.args[1]);
                         script_variable_set(
-                            EVENT_SCRIPT_VAR_DEEP_DUNGEON_EXIT, (rand() * g_location_script_state.args[2]) >> 15);
+                            SCRIPT_VAR_DEEP_DUNGEON_EXIT, (rand() * g_location_script_state.args[2]) >> 15);
                         g_world_map_flags
                             = (g_world_map_flags | WORLD_MAP_FLAG_DEEP_DUNGEON_BATTLE) ^ WORLD_MAP_FLAG_RUNNING;
                     } else {
@@ -1935,7 +1935,7 @@ static void update_location_menu(menu_stack_record_t* level) {
             }
 
             /* A map entry runs the row's event and travels to map entry + 1. */
-            script_variable_set(EVENT_SCRIPT_VAR_CURRENT_EVENT, g_location_script_state.args[*selected]);
+            script_variable_set(SCRIPT_VAR_CURRENT_EVENT, g_location_script_state.args[*selected]);
             g_world_map_flags ^= WORLD_MAP_FLAG_RUNNING;
             value = values[*selected] & TEXT_ID_ENTRY_MASK;
             g_travel_next_map_id = value + 1;
@@ -2028,7 +2028,7 @@ static void run_location_shop(s32 shop_id) {
     menu_screen_set_brightness(0x80, 0x80, 0x80);
     music_queue_wait_until_empty();
     shop_run_screen(shop_id);
-    g_hud_value = script_variable_get(EVENT_SCRIPT_VAR_WAR_FUNDS);
+    g_hud_value = script_variable_get(SCRIPT_VAR_WAR_FUNDS);
     world_map_suspend_cursor_level(&g_menu_stack_records[g_menu_stack_depth - 1]);
     selected = &g_world_map_marker_state.marker.location_id;
     g_menu_stack_records[g_menu_stack_depth].panel.entry_count

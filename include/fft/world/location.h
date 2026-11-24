@@ -11,7 +11,7 @@
 #include "psx/types.h"
 
 /* locations */
-/* World-map location ids (EVENT_SCRIPT_VAR_LOCATION), named as the location
+/* World-map location ids (SCRIPT_VAR_LOCATION), named as the location
  * name text (TEXT_ID_LOCATION_NAME_BASE + id) spells them. The first fifteen
  * are the towns; a town's id is also its shop's shop id and its bit,
  * counted from the top, in g_shop_item_availability. */

@@ -409,41 +409,41 @@ static void init_map_state(void) {
      * and the fur shop enabled, and a 1 January birthday for the first party
      * member. */
     if (g_world_map_flags & WORLD_MAP_FLAG_UNLOCK_ALL) {
-        for (i = 0; i < EVENT_SCRIPT_VAR_PERSON_PROFILE_COUNT; i++)
-            script_variable_set(EVENT_SCRIPT_VAR_PERSON_PROFILE_FIRST + i, 1);
-        for (i = 0; i < EVENT_SCRIPT_VAR_RUMOR_COUNT; i++)
-            script_variable_set(EVENT_SCRIPT_VAR_RUMOR_FIRST + i, 1);
+        for (i = 0; i < SCRIPT_VAR_PERSON_PROFILE_COUNT; i++)
+            script_variable_set(SCRIPT_VAR_PERSON_PROFILE_FIRST + i, 1);
+        for (i = 0; i < SCRIPT_VAR_RUMOR_COUNT; i++)
+            script_variable_set(SCRIPT_VAR_RUMOR_FIRST + i, 1);
         for (i = 0; i < WORLD_MAP_ROUTE_COUNT; i++)
-            script_variable_set(EVENT_SCRIPT_VAR_PATH_VISIBLE_FIRST + i, 1);
+            script_variable_set(SCRIPT_VAR_PATH_VISIBLE_FIRST + i, 1);
         for (i = 0; i < LOCATION_COUNT; i++)
-            script_variable_set(EVENT_SCRIPT_VAR_LOCATION_VISIBLE_FIRST + i, 1);
-        for (i = 0; i < EVENT_SCRIPT_VAR_STORY_EVENT_COUNT; i++)
-            script_variable_set(EVENT_SCRIPT_VAR_STORY_EVENT_FIRST + i, 1);
+            script_variable_set(SCRIPT_VAR_LOCATION_VISIBLE_FIRST + i, 1);
+        for (i = 0; i < SCRIPT_VAR_STORY_EVENT_COUNT; i++)
+            script_variable_set(SCRIPT_VAR_STORY_EVENT_FIRST + i, 1);
 
         if (!(PadRead(0) & PSX_PAD_START)) {
             date.month = 1;
             date.day = 1;
-            for (i = 0; i < EVENT_SCRIPT_VAR_TREASURE_COUNT; i++) {
-                script_variable_set(EVENT_SCRIPT_VAR_TREASURE_FIRST + i, 1);
+            for (i = 0; i < SCRIPT_VAR_TREASURE_COUNT; i++) {
+                script_variable_set(SCRIPT_VAR_TREASURE_FIRST + i, 1);
                 calendar_write_date_bits(g_brave_story_treasure_acquisition_date_bits, i, &date);
             }
-            for (i = 0; i < EVENT_SCRIPT_VAR_UNEXPLORED_LAND_COUNT; i++) {
-                script_variable_set(EVENT_SCRIPT_VAR_UNEXPLORED_LAND_FIRST + i, 1);
+            for (i = 0; i < SCRIPT_VAR_UNEXPLORED_LAND_COUNT; i++) {
+                script_variable_set(SCRIPT_VAR_UNEXPLORED_LAND_FIRST + i, 1);
                 calendar_write_date_bits(g_brave_story_land_discovery_date_bits, i, &date);
             }
-            for (i = 0; i < EVENT_SCRIPT_VAR_PROPOSITION_COUNT; i++)
-                script_variable_set(EVENT_SCRIPT_VAR_PROPOSITION_FIRST + i, 4);
+            for (i = 0; i < SCRIPT_VAR_PROPOSITION_COUNT; i++)
+                script_variable_set(SCRIPT_VAR_PROPOSITION_FIRST + i, 4);
         }
 
-        script_variable_set(EVENT_SCRIPT_VAR_WAR_FUNDS, 30000);
-        script_variable_set(EVENT_SCRIPT_VAR_SHOP_ITEM_AVAILABILITY, 20);
-        script_variable_set(EVENT_SCRIPT_VAR_PROPOSITIONS_ENABLED, 1);
-        script_variable_set(EVENT_SCRIPT_VAR_FUR_SHOP_ENABLED, 1);
+        script_variable_set(SCRIPT_VAR_WAR_FUNDS, 30000);
+        script_variable_set(SCRIPT_VAR_SHOP_ITEM_AVAILABILITY, 20);
+        script_variable_set(SCRIPT_VAR_PROPOSITIONS_ENABLED, 1);
+        script_variable_set(SCRIPT_VAR_FUR_SHOP_ENABLED, 1);
 
         month = 1;
         day = 1;
-        script_variable_set(EVENT_SCRIPT_VAR_PLAYER_BIRTH_MONTH, 1);
-        script_variable_set(EVENT_SCRIPT_VAR_PLAYER_BIRTH_DAY, day);
+        script_variable_set(SCRIPT_VAR_PLAYER_BIRTH_MONTH, 1);
+        script_variable_set(SCRIPT_VAR_PLAYER_BIRTH_DAY, day);
         day_of_year = calendar_date_to_day_index(month, day);
         calendar_date_to_zodiac(&month, &day);
         party = party_unit_get(0);
@@ -464,7 +464,7 @@ static void finish_map_loop(void) {
     if (!(g_world_map_flags & WORLD_MAP_FLAG_TUTORIAL_EVENT)) {
         music_unload_all();
     }
-    script_variable_set(EVENT_SCRIPT_VAR_CURRENT_MAP, g_travel_next_map_id);
+    script_variable_set(SCRIPT_VAR_CURRENT_MAP, g_travel_next_map_id);
 }
 
 /* Load the picture for the marker's location, capture the first map backdrop,
@@ -523,11 +523,11 @@ static void open_entry_level(void) {
     }
     if (flags & WORLD_MAP_FLAG_STORY_EVENT_REPLAY) {
         g_world_map_flags = flags ^ WORLD_MAP_FLAG_STORY_EVENT_REPLAY;
-        script_variable_set(EVENT_SCRIPT_VAR_WEATHER, g_brave_story_saved_weather_variable);
+        script_variable_set(SCRIPT_VAR_WEATHER, g_brave_story_saved_weather_variable);
         world_map_open_screen_transition(MENU_STACK_LEVEL_BRAVE_STORY_EVENTS, 0, 0);
     } else if (flags & WORLD_MAP_FLAG_TUTORIAL_EVENT) {
         g_world_map_flags = flags ^ WORLD_MAP_FLAG_TUTORIAL_EVENT;
-        script_variable_set(EVENT_SCRIPT_VAR_WEATHER, g_brave_story_saved_weather_variable);
+        script_variable_set(SCRIPT_VAR_WEATHER, g_brave_story_saved_weather_variable);
         g_music_queue.music.tracks[0] = 0x1B;
         g_music_queue.music.tracks[1] = 0x1A;
         g_music_queue.current_slot = 2;
@@ -540,10 +540,10 @@ static void open_entry_level(void) {
 }
 
 /* Called at the top of wldcore_entrypoint's loop. A nonzero
- * EVENT_SCRIPT_VAR_FORMATION_RETURN_EVENT clears WORLD_MAP_FLAG_RESTART,
+ * SCRIPT_VAR_FORMATION_RETURN_EVENT clears WORLD_MAP_FLAG_RESTART,
  * restores WORLD's formation menu and makes the entrypoint return 0. */
 static s32 handle_formation_return(void) {
-    if (script_variable_get(EVENT_SCRIPT_VAR_FORMATION_RETURN_EVENT) != 0) {
+    if (script_variable_get(SCRIPT_VAR_FORMATION_RETURN_EVENT) != 0) {
         g_world_map_flags &= ~WORLD_MAP_FLAG_RESTART;
         formation_run_for_return_event();
         return 1;

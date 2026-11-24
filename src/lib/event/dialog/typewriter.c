@@ -93,7 +93,7 @@ void message_measure_window_width(s32 offset, s32 flags, s32* out_width) {
 /* Menu twin of script_route_event_input: clears the new-press mask,
  * yields a frame, then reads the pad and derives the new-press mask with
  * the shared initial/repeat/secondary key-repeat delays. During a tutorial
- * with `EVENT_SCRIPT_VAR_DISABLED_CONTROLLER_INPUTS` bits 0x5000 set the
+ * with `SCRIPT_VAR_DISABLED_CONTROLLER_INPUTS` bits 0x5000 set the
  * repeat counters restart. */
 void menu_screen_update_dialog_input(void) {
     u32 input;
@@ -109,7 +109,7 @@ void menu_screen_update_dialog_input(void) {
     input = PadRead(1);
     if (input == 0
         || (tutorial_is_current_event() != 0
-            && (script_variable_get(EVENT_SCRIPT_VAR_DISABLED_CONTROLLER_INPUTS) & 0x5000))) {
+            && (script_variable_get(SCRIPT_VAR_DISABLED_CONTROLLER_INPUTS) & 0x5000))) {
         g_script_event_initial_repeat_counter = 0;
         g_script_event_repeat_counter = 0;
         g_script_event_secondary_repeat_counter = 0;
@@ -309,12 +309,12 @@ void message_draw_glyph_timed(s32 pen_x, s32 pen_y, s32 delay) {
             s_message_typewriter_pen.rect.x = phase;
             s_message_typewriter_pen.rect.y = 0;
             s_message_typewriter_pen.stride = pitch;
-            script_variable_set(EVENT_SCRIPT_VAR_PRINTED_CHARACTER_COUNT,
-                script_variable_get(EVENT_SCRIPT_VAR_PRINTED_CHARACTER_COUNT) + 1);
+            script_variable_set(
+                SCRIPT_VAR_PRINTED_CHARACTER_COUNT, script_variable_get(SCRIPT_VAR_PRINTED_CHARACTER_COUNT) + 1);
             text_render_glyph_to_4bpp_image(g_text_glyph_bitmap_data + request->glyph * TEXT_GLYPH_BYTES, image,
                 &s_message_typewriter_pen, request->palette);
             s_message_typewriter_vram_rect.x
-                = (pen_x >> 2) + (s16)(script_variable_get(EVENT_SCRIPT_VAR_TYPEWRITER_VRAM_X_OFFSET) + 0x1C0);
+                = (pen_x >> 2) + (s16)(script_variable_get(SCRIPT_VAR_TYPEWRITER_VRAM_X_OFFSET) + 0x1C0);
             s_message_typewriter_vram_rect.y = pen_y;
             s_message_typewriter_vram_rect.h = 14;
             LoadImage(&s_message_typewriter_vram_rect, (u32*)image);
@@ -356,7 +356,7 @@ void message_draw_glyph_timed(s32 pen_x, s32 pen_y, s32 delay) {
             }
         }
 
-        if (script_variable_get(EVENT_SCRIPT_VAR_MUTE_TEXT_AUDIO_CUE) == 0 && request->mode != 0) {
+        if (script_variable_get(SCRIPT_VAR_MUTE_TEXT_AUDIO_CUE) == 0 && request->mode != 0) {
             g_sound_pending_sfx_id = SOUND_SFX_TEXT_GLYPH;
         }
     }

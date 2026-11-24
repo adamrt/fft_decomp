@@ -656,7 +656,7 @@ void announcement_select(action_command_t* action, s32 unit_id, s32 enabled) {
         && !(unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_TRANSPARENT)]
             & (STATUS_BYTE_MASK(STATUS_ID_TRANSPARENT) | STATUS_BYTE_MASK(STATUS_ID_FROG)))
         && g_game_options.fields.ability_names == GAME_OPTION_ON
-        && (script_variable_get(EVENT_SCRIPT_VAR_RANDOM_VALUE) & 0xF) < 4) {
+        && (script_variable_get(SCRIPT_VAR_RANDOM_VALUE) & 0xF) < 4) {
         g_announcement_spell_quote_last_ability_id = action->ability_id & ABILITY_ID_MASK;
         dispatch_request(MENU_REQUEST_SPELL_QUOTE, 0, unit_id, 0, enabled, action);
         return;
@@ -739,7 +739,7 @@ static s32 dispatch_request(
     g_menu_restore_pending = 0;
     unit = battle_unit_get(unit_id);
     if (command == MENU_REQUEST_SCENARIO_CHECK) {
-        value = script_variable_get(EVENT_SCRIPT_VAR_CURRENT_EVENT);
+        value = script_variable_get(SCRIPT_VAR_CURRENT_EVENT);
         if (value >= EVENT_ID_TUTORIAL_FIRST && value <= EVENT_ID_TUTORIAL_LAST) {
             if (option != MENU_SCENARIO_CHECK_TEST) {
                 start_request_thread(MENU_PROMPT_CLOSE);
@@ -766,9 +766,9 @@ static s32 dispatch_request(
                     }
                 }
                 if ((battle_check_outcome() < 0 || count != 0)
-                    && script_variable_get(EVENT_SCRIPT_VAR_BATTLE_NOT_STARTED) == 0) {
+                    && script_variable_get(SCRIPT_VAR_BATTLE_NOT_STARTED) == 0) {
                     if (option != MENU_SCENARIO_CHECK_TEST) {
-                        script_variable_set(EVENT_SCRIPT_VAR_CURRENT_EVENT, EVENT_ID_GAME_OVER);
+                        script_variable_set(SCRIPT_VAR_CURRENT_EVENT, EVENT_ID_GAME_OVER);
                         unit_view_request_mode(UNIT_VIEW_MODE_NONE, 0xFF, 0xFF);
                         g_menu_overlay_state = 1;
                         g_scenario_event_active = 1;
@@ -785,8 +785,8 @@ static s32 dispatch_request(
                             g_menu_overlay_state = 1;
                             script_start_current_event_thread();
                         } else {
-                            g_script_next_event_id = script_variable_get(EVENT_SCRIPT_VAR_CURRENT_EVENT);
-                            script_variable_set(EVENT_SCRIPT_VAR_CURRENT_EVENT, value);
+                            g_script_next_event_id = script_variable_get(SCRIPT_VAR_CURRENT_EVENT);
+                            script_variable_set(SCRIPT_VAR_CURRENT_EVENT, value);
                         }
                         return MENU_REQUEST_RESULT_EVENT;
                     }
@@ -794,14 +794,14 @@ static s32 dispatch_request(
                         start_request_thread(MENU_PROMPT_CLOSE);
                     }
                     return MENU_REQUEST_RESULT_DONE;
-                } else if (script_variable_get(EVENT_SCRIPT_VAR_BATTLE_NOT_STARTED) != 0) {
+                } else if (script_variable_get(SCRIPT_VAR_BATTLE_NOT_STARTED) != 0) {
                     if (option != MENU_SCENARIO_CHECK_TEST) {
                         unit_view_request_mode(UNIT_VIEW_MODE_NONE, 0xFF, 0xFF);
                         g_menu_overlay_state = 1;
-                        if (script_variable_get(EVENT_SCRIPT_VAR_WORLD_DEBUG_BATTLE_STYLE) != 0) {
-                            script_variable_set(EVENT_SCRIPT_VAR_CURRENT_EVENT, EVENT_ID_DEBUG_BATTLE_START);
+                        if (script_variable_get(SCRIPT_VAR_WORLD_DEBUG_BATTLE_STYLE) != 0) {
+                            script_variable_set(SCRIPT_VAR_CURRENT_EVENT, EVENT_ID_DEBUG_BATTLE_START);
                         } else {
-                            script_variable_set(EVENT_SCRIPT_VAR_CURRENT_EVENT, EVENT_ID_BATTLE_START);
+                            script_variable_set(SCRIPT_VAR_CURRENT_EVENT, EVENT_ID_BATTLE_START);
                         }
                         script_start_current_event_thread();
                     } else {
@@ -812,7 +812,7 @@ static s32 dispatch_request(
                     if (option != MENU_SCENARIO_CHECK_TEST) {
                         unit_view_request_mode(UNIT_VIEW_MODE_NONE, 0xFF, 0xFF);
                         g_menu_overlay_state = 1;
-                        script_variable_set(EVENT_SCRIPT_VAR_CURRENT_EVENT, EVENT_ID_BATTLE_WON);
+                        script_variable_set(SCRIPT_VAR_CURRENT_EVENT, EVENT_ID_BATTLE_WON);
                         g_scenario_event_active = 1;
                         script_start_current_event_thread();
                     } else {
@@ -958,8 +958,7 @@ static s32 dispatch_request(
             g_text_substitution_values[1] = option;
             item = item_get_data(option);
             g_text_substitution_values[2] = item->price >> 2;
-            script_variable_set(
-                EVENT_SCRIPT_VAR_WAR_FUNDS, (item->price >> 2) + script_variable_get(EVENT_SCRIPT_VAR_WAR_FUNDS));
+            script_variable_set(SCRIPT_VAR_WAR_FUNDS, (item->price >> 2) + script_variable_get(SCRIPT_VAR_WAR_FUNDS));
             start_request_thread(MENU_PROMPT_MOVE_FIND_ITEM_SOLD);
         } else {
             item_get_data(option);

@@ -57,10 +57,9 @@ s32 map_gns_apply_command(s32 phase, map_resource_t* record) {
              * the record's variable id and map state to their low bytes.
              */
             requested_layout = script_variable_get((u8)selected->command.script_variable_id) & 0xfff;
-            requested_layout_and_weather
-                = requested_layout | ((script_variable_get(EVENT_SCRIPT_VAR_WEATHER) & 7) << 12);
+            requested_layout_and_weather = requested_layout | ((script_variable_get(SCRIPT_VAR_WEATHER) & 7) << 12);
             if (map_gns_record_matches_state(selected->command.map_state_comparison, (u8)selected->command.map_state,
-                    requested_layout_and_weather | ((script_variable_get(EVENT_SCRIPT_VAR_TIME_OF_DAY) & 1) << 15))) {
+                    requested_layout_and_weather | ((script_variable_get(SCRIPT_VAR_TIME_OF_DAY) & 1) << 15))) {
                 map_gns_dispatch_resource(selected->command.resource_type, selected);
             }
         }

@@ -117,7 +117,7 @@ s32 script_load_next_event(void) {
         }
     } while (task_id != 15);
 
-    event_id = script_variable_get(EVENT_SCRIPT_VAR_CURRENT_EVENT);
+    event_id = script_variable_get(SCRIPT_VAR_CURRENT_EVENT);
     if (event_id == s_script_loaded_event_id) {
         return 0;
     }
@@ -230,13 +230,13 @@ void script_opcode_camera_thread(void) {
      * turns the short way. */
     if (g_camera_wrap_yaw_pending != 0) {
         g_camera_wrap_yaw_pending = 0;
-        angle = script_variable_get(EVENT_SCRIPT_VAR_CAMERA_YAW);
+        angle = script_variable_get(SCRIPT_VAR_CAMERA_YAW);
         yaw_delta = ((angle << 16) >> 16) - target[EVENT_CAMERA_COMPONENT_YAW];
         yaw = angle;
         if (ABS(yaw_delta + ONE) < ABS(yaw_delta)) {
             yaw = angle + ONE;
         }
-        script_variable_set(EVENT_SCRIPT_VAR_CAMERA_YAW, yaw);
+        script_variable_set(SCRIPT_VAR_CAMERA_YAW, yaw);
     }
 
     for (i = 0; i < EVENT_CAMERA_COMPONENT_COUNT; i++) {
@@ -785,7 +785,7 @@ static s16 choose_unblocked_yaw(s32 map_unit_id_a, s32 map_unit_id_b) {
         }
         bit <<= 1;
     }
-    return g_script_variables[EVENT_SCRIPT_VAR_CAMERA_YAW] + sign * best;
+    return g_script_variables[SCRIPT_VAR_CAMERA_YAW] + sign * best;
 }
 
 /* RelativeCamera: write its seven camera components, offset by the current camera variables
@@ -1403,7 +1403,7 @@ s32 battle_unit_status_staging_save(s32 battle_unit_id) {
         g_unit_status_staging_data->hp[battle_unit_id] = battle_unit->hp;
         g_unit_status_staging_data->team_flags[battle_unit_id] = battle_unit->team_flags;
         for (i = 0; i < STATUS_BYTE_COUNT; i++) {
-            if (script_variable_get(EVENT_SCRIPT_VAR_BATTLE_NOT_STARTED) != 0) {
+            if (script_variable_get(SCRIPT_VAR_BATTLE_NOT_STARTED) != 0) {
                 if ((battle_unit->primary_skillset >= SKILLSET_ID_MONSTER_FIRST
                         && battle_unit->primary_skillset < SKILLSET_ID_END)
                     || battle_unit->character_identity == CHARACTER_IDENTITY_ALTIMA_FIRST_FORM

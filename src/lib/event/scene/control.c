@@ -60,7 +60,7 @@ void script_process_status_commands(void) {
 }
 
 /* Set a unit's animation. Once the battle has started and script variable
- * EVENT_SCRIPT_VAR_SHOP_ITEM_AVAILABILITY is set, a unit that rides or carries
+ * SCRIPT_VAR_SHOP_ITEM_AVAILABILITY is set, a unit that rides or carries
  * another gets its status animation instead, and a unit standing in water of depth 2
  * or more uses the standing pose selector; both run on the main stack. Animations from
  * ANIMATION_SEQUENCE_EVTCHR_SLOT_0 up are always played as requested. */
@@ -69,8 +69,8 @@ void map_unit_set_event_animation(s32 map_unit_id, u32 animation) {
     battle_unit_t* battle_unit;
     s32 depth;
 
-    if (script_variable_get(EVENT_SCRIPT_VAR_BATTLE_NOT_STARTED) == 0
-        && script_variable_get(EVENT_SCRIPT_VAR_SHOP_ITEM_AVAILABILITY) != 0) {
+    if (script_variable_get(SCRIPT_VAR_BATTLE_NOT_STARTED) == 0
+        && script_variable_get(SCRIPT_VAR_SHOP_ITEM_AVAILABILITY) != 0) {
         battle_unit_id = map_unit_get_battle_unit_id(map_unit_id);
         if (battle_unit_id >= 0 && animation < ANIMATION_SEQUENCE_EVTCHR_SLOT_0) {
             battle_unit = battle_unit_get(battle_unit_id);
@@ -92,13 +92,13 @@ void map_unit_set_event_animation(s32 map_unit_id, u32 animation) {
 }
 
 /* Faces a unit, and its mount partner when one is linked, in a direction given in
- * sixteenths of a turn. Script variable EVENT_SCRIPT_VAR_BATTLE_NOT_STARTED
+ * sixteenths of a turn. Script variable SCRIPT_VAR_BATTLE_NOT_STARTED
  * suppresses the partner's update. */
 void map_unit_set_event_facing(s32 map_unit_id, s32 facing) {
     s32 battle_unit_id;
     battle_unit_t* battle_unit;
 
-    if (script_variable_get(EVENT_SCRIPT_VAR_BATTLE_NOT_STARTED) == 0) {
+    if (script_variable_get(SCRIPT_VAR_BATTLE_NOT_STARTED) == 0) {
         battle_unit_id = map_unit_get_battle_unit_id(map_unit_id);
         if (battle_unit_id >= 0) {
             battle_unit = battle_unit_get(battle_unit_id);
@@ -151,7 +151,7 @@ void fade_event_run_out(void) {
  * 0x19a..0x1a9; WORLD has no tutorial events and always returns 0. */
 s32 tutorial_is_current_event(void) {
 #ifdef FFT_BATTLE
-    s32 event_id = script_variable_get(EVENT_SCRIPT_VAR_CURRENT_EVENT);
+    s32 event_id = script_variable_get(SCRIPT_VAR_CURRENT_EVENT);
 
     return event_id >= EVENT_ID_TUTORIAL_FIRST && event_id < EVENT_ID_TUTORIAL_FIRST + 16;
 #else
@@ -225,15 +225,14 @@ void camera_wait_idle(void) {
 /* Reduce the yaw script variable to one turn [0, ONE). Adding ten whole turns first keeps
  * yaws down to -10 turns positive before the mask. */
 void camera_normalize_yaw(void) {
-    g_script_variables[EVENT_SCRIPT_VAR_CAMERA_YAW]
-        = (g_script_variables[EVENT_SCRIPT_VAR_CAMERA_YAW] + 10 * ONE) & (ONE - 1);
+    g_script_variables[SCRIPT_VAR_CAMERA_YAW] = (g_script_variables[SCRIPT_VAR_CAMERA_YAW] + 10 * ONE) & (ONE - 1);
 }
 
 /* Step the camera tilt by 0x10 per frame to the nearer of the two resting tilts, 0x12e
  * (low) or 0x1c0 (high), split at 0x177; then point the map's tilt target at the same
  * resting tilt, zoom the map in and restore the zoom variable to ONE. */
 void camera_settle_tilt_zoom(void) {
-    s32 current_tilt = g_script_variables[EVENT_SCRIPT_VAR_CAMERA_TILT];
+    s32 current_tilt = g_script_variables[SCRIPT_VAR_CAMERA_TILT];
     s32 target_tilt;
     s32 tilt_step;
     s32 tilt_target_mode = 0;
@@ -256,28 +255,28 @@ void camera_settle_tilt_zoom(void) {
 
     if (tilt_step < 0) {
         while (target_tilt < current_tilt) {
-            g_script_variables[EVENT_SCRIPT_VAR_CAMERA_TILT] = current_tilt;
+            g_script_variables[SCRIPT_VAR_CAMERA_TILT] = current_tilt;
             thread_yield();
             current_tilt += tilt_step;
         }
-        g_script_variables[EVENT_SCRIPT_VAR_CAMERA_TILT] = target_tilt;
+        g_script_variables[SCRIPT_VAR_CAMERA_TILT] = target_tilt;
     } else {
         while (current_tilt < target_tilt) {
-            g_script_variables[EVENT_SCRIPT_VAR_CAMERA_TILT] = current_tilt;
+            g_script_variables[SCRIPT_VAR_CAMERA_TILT] = current_tilt;
             thread_yield();
             current_tilt += tilt_step;
         }
-        g_script_variables[EVENT_SCRIPT_VAR_CAMERA_TILT] = target_tilt;
+        g_script_variables[SCRIPT_VAR_CAMERA_TILT] = target_tilt;
     }
 
     g_camera_tilt_target = tilt_target_mode + 1;
     g_camera_zoom_target = MAP_ZOOM_IN;
-    g_script_variables[EVENT_SCRIPT_VAR_CAMERA_ZOOM] = ONE;
+    g_script_variables[SCRIPT_VAR_CAMERA_ZOOM] = ONE;
 }
 
 /* Raise negative yaw by whole turns; retain positive values of ONE or greater. */
 s32 camera_get_nonnegative_yaw(void) {
-    s32 yaw = g_script_variables[EVENT_SCRIPT_VAR_CAMERA_YAW];
+    s32 yaw = g_script_variables[SCRIPT_VAR_CAMERA_YAW];
 
     while (yaw < 0) {
         yaw += ONE;
@@ -327,7 +326,7 @@ void script_update_event_input(u32 input) {
 
     if (input == 0
         || (tutorial_is_current_event() != 0
-            && (script_variable_get(EVENT_SCRIPT_VAR_DISABLED_CONTROLLER_INPUTS) & (PSX_PAD_UP | PSX_PAD_DOWN)) != 0)) {
+            && (script_variable_get(SCRIPT_VAR_DISABLED_CONTROLLER_INPUTS) & (PSX_PAD_UP | PSX_PAD_DOWN)) != 0)) {
         g_script_event_initial_repeat_counter = 0;
         g_script_event_repeat_counter = 0;
         g_script_event_secondary_repeat_counter = 0;

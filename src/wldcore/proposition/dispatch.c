@@ -186,10 +186,10 @@ void proposition_update_dispatch_confirm(menu_stack_record_t* level) {
         sound_play_effect(SOUND_SFX_CONFIRM);
         if (level->dispatch_confirm.row != 1) {
             script_variable_set(
-                EVENT_SCRIPT_VAR_WAR_FUNDS, script_variable_get(EVENT_SCRIPT_VAR_WAR_FUNDS) - g_proposition_gil_amount);
-            g_hud_value = script_variable_get(EVENT_SCRIPT_VAR_WAR_FUNDS);
-            script_variable_set(g_proposition_selected_row.id + (EVENT_SCRIPT_VAR_PROPOSITION_FIRST - 1),
-                script_variable_get(g_proposition_selected_row.id + (EVENT_SCRIPT_VAR_PROPOSITION_FIRST - 1))
+                SCRIPT_VAR_WAR_FUNDS, script_variable_get(SCRIPT_VAR_WAR_FUNDS) - g_proposition_gil_amount);
+            g_hud_value = script_variable_get(SCRIPT_VAR_WAR_FUNDS);
+            script_variable_set(g_proposition_selected_row.id + (SCRIPT_VAR_PROPOSITION_FIRST - 1),
+                script_variable_get(g_proposition_selected_row.id + (SCRIPT_VAR_PROPOSITION_FIRST - 1))
                     | PROPOSITION_VARIABLE_ATTEMPTED);
             g_proposition_active[g_proposition_count].flags = PROPOSITION_PROGRESS_DISPATCHED;
             g_proposition_active[g_proposition_count].proposition_id = g_proposition_selected_row.id - 1;
@@ -202,8 +202,8 @@ void proposition_update_dispatch_confirm(menu_stack_record_t* level) {
                 g_proposition_active[g_proposition_count].participant_indices[i] = s_proposition_send_units[i];
             }
             g_proposition_count++;
-            script_variable_set(g_proposition_selected_row.id + (EVENT_SCRIPT_VAR_PROPOSITION_FIRST - 1),
-                script_variable_get(g_proposition_selected_row.id + (EVENT_SCRIPT_VAR_PROPOSITION_FIRST - 1))
+            script_variable_set(g_proposition_selected_row.id + (SCRIPT_VAR_PROPOSITION_FIRST - 1),
+                script_variable_get(g_proposition_selected_row.id + (SCRIPT_VAR_PROPOSITION_FIRST - 1))
                     | PROPOSITION_VARIABLE_IN_PROGRESS);
         }
         goto block_tail;
@@ -230,7 +230,7 @@ void proposition_advance_day(void) {
             }
         }
     }
-    for (i = 0; i < EVENT_SCRIPT_VAR_PROPOSITION_COUNT; i++) {
+    for (i = 0; i < SCRIPT_VAR_PROPOSITION_COUNT; i++) {
         u32 value = g_proposition_states[i];
         s32 days = value & PROPOSITION_STATE_DAYS_MASK;
         if (days != 0) {

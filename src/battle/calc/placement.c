@@ -243,7 +243,7 @@ void battle_unit_load_entd(const entd_encounter_t* entd_data, s32 unused_mode) {
     g_reward_enemy_level_sum = 0;
     g_reward_highest_enemy_level = 0;
     party_calculate_highest_level();
-    free_spritesheets = script_variable_get(EVENT_SCRIPT_VAR_DEPLOYMENT_UNIT_LIMIT);
+    free_spritesheets = script_variable_get(SCRIPT_VAR_DEPLOYMENT_UNIT_LIMIT);
     free_spritesheets = (free_spritesheets < 10) ? 9 - free_spritesheets : 0;
     entd_unit_limit = free_spritesheets + 7;
     entd_unit_count = 0;

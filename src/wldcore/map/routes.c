@@ -63,7 +63,7 @@ typedef struct random_battle_road {
     u8 script_variable_id;         /* 0x17 */
 } random_battle_road_t;
 
-/* Per location choice, its offset from EVENT_SCRIPT_VAR_LOCATION_CHOICE_HIDDEN_FIRST: a set variable hides the
+/* Per location choice, its offset from SCRIPT_VAR_LOCATION_CHOICE_HIDDEN_FIRST: a set variable hides the
  * choice from the location menu (location_build_menu_entries). */
 extern u8 g_location_choice_hidden_offsets[];
 extern s32 g_travel_search_depth;
@@ -223,7 +223,7 @@ void world_map_init_dots(void) {
         color->b = 0x80;
         alternate_dot = g_world_map_dots[i].kind == 2;
         g_world_map_dots[i].render.sequence = alternate_dot + DISPLAY_OBJECT_ANIM_MAP_DOT;
-        if (script_variable_get(i + EVENT_SCRIPT_VAR_LOCATION_COLOR_FIRST) != 0) {
+        if (script_variable_get(i + SCRIPT_VAR_LOCATION_COLOR_FIRST) != 0) {
             if (i < LOCATION_FIELD_FIRST) {
                 g_world_map_dots[i].render.palette = 0xc;
             } else {
@@ -234,7 +234,7 @@ void world_map_init_dots(void) {
         }
         dot->render.anim_counter = 0;
         g_world_map_dots[i].render.frame_index = 0;
-        if (script_variable_get(i + EVENT_SCRIPT_VAR_LOCATION_VISIBLE_FIRST) == 0) {
+        if (script_variable_get(i + SCRIPT_VAR_LOCATION_VISIBLE_FIRST) == 0) {
             g_world_map_dots[i].render.flags |= DISPLAY_OBJECT_HIDDEN;
         }
         dot++;
@@ -249,7 +249,7 @@ void world_map_init_dots(void) {
 
 /* Projects every world-map dot and hides the ones that are off screen, all of
  * them while WORLD_MAP_FLAG_HIDE_MAP_DOTS is set, and those whose location
- * is not yet visible (EVENT_SCRIPT_VAR_LOCATION_VISIBLE_FIRST + location).
+ * is not yet visible (SCRIPT_VAR_LOCATION_VISIBLE_FIRST + location).
  *
  * The screen bounds are written as the target's unsigned range tests: x in
  * [-128, 128] and y in [-116, 120]. */
@@ -264,7 +264,7 @@ void world_map_project_dots(void) {
         g_world_map_dots[i].render.position.y = position.vy;
         if (position.vx < -128 || position.vx > 128 || position.vy < -116 || position.vy > 120
             || (g_world_map_flags & WORLD_MAP_FLAG_HIDE_MAP_DOTS)
-            || script_variable_get(i + EVENT_SCRIPT_VAR_LOCATION_VISIBLE_FIRST) == 0) {
+            || script_variable_get(i + SCRIPT_VAR_LOCATION_VISIBLE_FIRST) == 0) {
             g_world_map_dots[i].render.flags |= DISPLAY_OBJECT_HIDDEN;
         } else {
             g_world_map_dots[i].render.flags &= ~DISPLAY_OBJECT_HIDDEN;
@@ -346,7 +346,7 @@ s32 world_map_find_dot(point32_t point) {
     s32 value;
 
     for (i = 0; i < g_world_map_dot_count; i++) {
-        if (script_variable_get(i + EVENT_SCRIPT_VAR_LOCATION_VISIBLE_FIRST) == 0) {
+        if (script_variable_get(i + SCRIPT_VAR_LOCATION_VISIBLE_FIRST) == 0) {
             continue;
         }
         if (g_world_map_dots[i].render.flags & (DISPLAY_OBJECT_BLANK | DISPLAY_OBJECT_HIDDEN)) {
@@ -423,9 +423,9 @@ s32 world_map_get_dot_snap(point32_t point, s32* step_x, s32* step_y) {
  * the result as the panel's entry_count and pass the buffer as entries.
  *
  * The Deep Dungeon offers its floors (TEXT_ID_DEEP_DUNGEON_FLOOR_FIRST
- * + i), one more than EVENT_SCRIPT_VAR_DEEP_DUNGEON_LIST_LENGTH. A town offers
+ * + i), one more than SCRIPT_VAR_DEEP_DUNGEON_LIST_LENGTH. A town offers
  * the bar, shop and soldier office, and the fur shop as a fourth entry at
- * Dorter, Warjilis and Zarghidas once EVENT_SCRIPT_VAR_FUR_SHOP_ENABLED is
+ * Dorter, Warjilis and Zarghidas once SCRIPT_VAR_FUR_SHOP_ENABLED is
  * set. Other locations offer nothing.
  */
 s32 location_build_menu_entries(s32 location_id, s32* out) {
@@ -433,7 +433,7 @@ s32 location_build_menu_entries(s32 location_id, s32* out) {
     s32 i;
 
     if (location_id == LOCATION_DEEP_DUNGEON) {
-        count = script_variable_get(EVENT_SCRIPT_VAR_DEEP_DUNGEON_LIST_LENGTH) + 1;
+        count = script_variable_get(SCRIPT_VAR_DEEP_DUNGEON_LIST_LENGTH) + 1;
         for (i = 0; i < count; i++) {
             out[i] = TEXT_ID_DEEP_DUNGEON_FLOOR_FIRST + i;
         }
@@ -446,7 +446,7 @@ s32 location_build_menu_entries(s32 location_id, s32* out) {
         out[0] = TEXT_ID_BAR;
         out[1] = TEXT_ID_SHOP;
         out[2] = TEXT_ID_SOLDIER_OFFICE;
-        if (script_variable_get(EVENT_SCRIPT_VAR_FUR_SHOP_ENABLED) != 0
+        if (script_variable_get(SCRIPT_VAR_FUR_SHOP_ENABLED) != 0
             && (location_id == LOCATION_DORTER || location_id == LOCATION_WARJILIS
                 || location_id == LOCATION_ZARGHIDAS)) {
             out[count] = TEXT_ID_FUR_SHOP;
@@ -468,7 +468,7 @@ static s32 collect_location_choices(s32 location_id, s32* out) {
     if (location_id == LOCATION_MUROND_DEATH_CITY) {
         return -1;
     }
-    if (script_variable_get(location_id + EVENT_SCRIPT_VAR_LOCATION_COLOR_FIRST) != 0) {
+    if (script_variable_get(location_id + SCRIPT_VAR_LOCATION_COLOR_FIRST) != 0) {
         return 0;
     }
     if (!location_script_run(g_world_map_marker_state.marker.location_id, LOCATION_SCRIPT_ACTION_CHOICE)) {
@@ -489,8 +489,7 @@ static s32 collect_location_choices(s32 location_id, s32* out) {
     written = 0;
     for (i = 0; i < available; i++) {
         entry = g_location_script_state.choice_map_ids[i];
-        if (script_variable_get(
-                g_location_choice_hidden_offsets[entry - 1] + EVENT_SCRIPT_VAR_LOCATION_CHOICE_HIDDEN_FIRST)
+        if (script_variable_get(g_location_choice_hidden_offsets[entry - 1] + SCRIPT_VAR_LOCATION_CHOICE_HIDDEN_FIRST)
             == 0) {
             out[written++] = entry + (TEXT_ID_MAP_NAME_BASE - 1);
             if (written == 5) {
@@ -514,7 +513,7 @@ void world_map_stub_init(void) {
  * vertex was in bounds, and the last pair slides down to slots 0 and 1 so the
  * next pair closes the following segment. Nothing is drawn while
  * WORLD_MAP_FLAG_HIDE_MAP_ROUTES is set, and a route only once it is
- * revealed (EVENT_SCRIPT_VAR_PATH_VISIBLE_FIRST + route).
+ * revealed (SCRIPT_VAR_PATH_VISIBLE_FIRST + route).
  *
  * The count is sign-extended into count_tmp, which the loop guard tests before
  * the copy into count; the `j < count_tmp` guard leaves an unused compare
@@ -552,7 +551,7 @@ void world_map_draw_routes(GsOT* ot) {
     poly.clut = GetClut(0x10, 0x1E8);
 
     for (i = 0, vertex = verts; i < WORLD_MAP_ROUTE_COUNT; i++) {
-        if (script_variable_get(i + EVENT_SCRIPT_VAR_PATH_VISIBLE_FIRST) == 0) {
+        if (script_variable_get(i + SCRIPT_VAR_PATH_VISIBLE_FIRST) == 0) {
             continue;
         }
         slot = 0;
@@ -797,7 +796,7 @@ void world_map_draw_path_animation(GsOT* ot) {
 
 /* Depth-first search for the cheapest route path between two locations.
  *
- * Tries every revealed route (EVENT_SCRIPT_VAR_PATH_VISIBLE_FIRST + route) not already on
+ * Tries every revealed route (SCRIPT_VAR_PATH_VISIBLE_FIRST + route) not already on
  * the path; a route joining from and to completes the path, which is kept
  * when it is shorter, or as long but no more expensive, than the best one.
  * Other routes leaving from recurse from their far end. The frame is kept
@@ -831,7 +830,7 @@ static void find_path(s32 from, s32 to) {
             g_gfx_active_buffer_index = buffer_index;
             GsSetWorkBase(g_world_map_primitive_buffers + buffer_index * 0xE000);
         }
-        if (script_variable_get(route + EVENT_SCRIPT_VAR_PATH_VISIBLE_FIRST) == 0) {
+        if (script_variable_get(route + SCRIPT_VAR_PATH_VISIBLE_FIRST) == 0) {
             continue;
         }
         for (i = 0; i < g_travel_search_depth; i++) {
@@ -888,7 +887,7 @@ static void find_path(s32 from, s32 to) {
 
 /* Start travel from from_location to to_location. When the current location's
  * map script stages LoadEvent, that event becomes
- * EVENT_SCRIPT_VAR_CURRENT_EVENT and the event transition level is pushed;
+ * SCRIPT_VAR_CURRENT_EVENT and the event transition level is pushed;
  * returns 0. Otherwise a staged SetVar2 is applied and
  * find_path searches the cheapest path; when there is
  * one, its first leg starts: the marker turns to the leg's heading, the menu
@@ -907,7 +906,7 @@ s32 travel_start(s32 from_location, s32 to_location) {
         g_display_object_animated_pool[g_menu_stack_records[g_menu_stack_depth - 1].window_index].flags
             |= DISPLAY_OBJECT_HIDDEN;
         g_travel_next_map_id = 0;
-        script_variable_set(EVENT_SCRIPT_VAR_CURRENT_EVENT, g_location_script_state.args[0]);
+        script_variable_set(SCRIPT_VAR_CURRENT_EVENT, g_location_script_state.args[0]);
         world_map_open_event_transition(g_location_script_state.args[1]);
         g_world_map_flags |= WORLD_MAP_FLAG_HIDE_LOCATION_LABEL;
         return 0;
@@ -980,11 +979,11 @@ void travel_update(void) {
             g_world_map_marker_state.marker.position = g_travel.target_position;
             g_world_map_marker_state.flags |= WORLD_MAP_MARKER_UPDATE_POSITION | WORLD_MAP_MARKER_UPDATE_DIRECTION;
             g_world_map_marker_state.marker.location_id = g_travel.leg_end_location;
-            script_variable_set(EVENT_SCRIPT_VAR_LOCATION, g_travel.leg_end_location);
+            script_variable_set(SCRIPT_VAR_LOCATION, g_travel.leg_end_location);
             g_travel.route_index++;
             if (location_script_run(g_world_map_marker_state.marker.location_id, LOCATION_SCRIPT_ACTION_LOAD_EVENT)) {
                 g_travel_next_map_id = 0;
-                script_variable_set(EVENT_SCRIPT_VAR_CURRENT_EVENT, g_location_script_state.args[0]);
+                script_variable_set(SCRIPT_VAR_CURRENT_EVENT, g_location_script_state.args[0]);
                 world_map_open_event_transition(g_location_script_state.args[1]);
                 g_world_map_marker_state.angle = 0;
                 g_world_map_marker_state.flags &= ~WORLD_MAP_MARKER_ALTERNATE_DIRECTION_SET;
@@ -1000,10 +999,10 @@ void travel_update(void) {
                     g_travel.route_path.routes[g_travel.route_index - 1] & TRAVEL_PATH_ROUTE_MASK)) {
                 g_world_map_flags |= WORLD_MAP_FLAG_RANDOM_BATTLE;
                 g_travel_next_map_id = s_random_battle_map_id;
-                script_variable_set(EVENT_SCRIPT_VAR_CURRENT_ENTD, g_random_battle_entd_id);
-                script_variable_set(EVENT_SCRIPT_VAR_DEPLOYMENT_SQUAD_COUNT, 1);
-                script_variable_set(EVENT_SCRIPT_VAR_DEPLOYMENT_PRIMARY_SQUAD_ID, g_random_battle_squad_id);
-                script_variable_set(EVENT_SCRIPT_VAR_CURRENT_EVENT, 0);
+                script_variable_set(SCRIPT_VAR_CURRENT_ENTD, g_random_battle_entd_id);
+                script_variable_set(SCRIPT_VAR_DEPLOYMENT_SQUAD_COUNT, 1);
+                script_variable_set(SCRIPT_VAR_DEPLOYMENT_PRIMARY_SQUAD_ID, g_random_battle_squad_id);
+                script_variable_set(SCRIPT_VAR_CURRENT_EVENT, 0);
                 world_map_open_event_transition(EVENT_TRANSITION_MODE_SPIN);
                 g_world_map_marker_state.angle = 0;
                 g_world_map_marker_state.flags &= ~WORLD_MAP_MARKER_ALTERNATE_DIRECTION_SET;
@@ -1272,8 +1271,8 @@ static s32 roll_encounter(s32 location, s32 route) {
     return 0;
 }
 
-/* Places the player's map marker on EVENT_SCRIPT_VAR_LOCATION, queues it for
- * drawing, picks its palette from EVENT_SCRIPT_VAR_TOWN_BACKGROUND, then
+/* Places the player's map marker on SCRIPT_VAR_LOCATION, queues it for
+ * drawing, picks its palette from SCRIPT_VAR_TOWN_BACKGROUND, then
  * centers the projection on it and refreshes the camera.
  *
  * The map-dot position is copied as one SVECTOR, which reproduces the
@@ -1281,7 +1280,7 @@ static s32 roll_encounter(s32 location, s32 route) {
 void world_map_init_marker_and_camera(void) {
     VECTOR unused; /* unreferenced; reproduces the target's 0x38-byte frame */
     world_map_marker_t* marker;
-    s32 location_id = script_variable_get(EVENT_SCRIPT_VAR_LOCATION);
+    s32 location_id = script_variable_get(SCRIPT_VAR_LOCATION);
     s32 count;
     s32 background;
 
@@ -1302,7 +1301,7 @@ void world_map_init_marker_and_camera(void) {
     g_world_map_marker_state.marker.render.color.r = 0x80;
     g_world_map_marker_state.marker.render.color.g = 0x80;
     g_world_map_marker_state.marker.render.color.b = 0x80;
-    background = script_variable_get(EVENT_SCRIPT_VAR_TOWN_BACKGROUND);
+    background = script_variable_get(SCRIPT_VAR_TOWN_BACKGROUND);
     g_world_map_marker_state.marker.render.palette = 0;
     if (background == 1) {
         g_world_map_marker_state.marker.render.palette = 2;

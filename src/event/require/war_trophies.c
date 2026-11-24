@@ -139,16 +139,16 @@ static void collect_entries(void) {
                     item = item_get_data(*value_ptr);
                     price = item->price;
                     price /= 4;
-                    funds = script_variable_get(EVENT_SCRIPT_VAR_WAR_FUNDS);
-                    script_variable_set(EVENT_SCRIPT_VAR_WAR_FUNDS, funds + price);
+                    funds = script_variable_get(SCRIPT_VAR_WAR_FUNDS);
+                    script_variable_set(SCRIPT_VAR_WAR_FUNDS, funds + price);
                 } else {
                     s32 id = *value_ptr;
                     quantity_ptr = &g_item_quantities[id];
                     (*quantity_ptr)++;
                 }
             } else {
-                funds = script_variable_get(EVENT_SCRIPT_VAR_WAR_FUNDS);
-                script_variable_set(EVENT_SCRIPT_VAR_WAR_FUNDS, funds + *value_ptr);
+                funds = script_variable_get(SCRIPT_VAR_WAR_FUNDS);
+                script_variable_set(SCRIPT_VAR_WAR_FUNDS, funds + *value_ptr);
             }
             value_ptr++;
             type_ptr++;
@@ -352,7 +352,7 @@ void war_trophy_list_thread(void) {
 #define X0 (0x108 - j * 13 - (5 - digits) * 13 / 2)
 
 /*
- * Post-battle gil ticker: adds the war-result money to the war funds (EVENT_SCRIPT_VAR_WAR_FUNDS),
+ * Post-battle gil ticker: adds the war-result money to the war funds (SCRIPT_VAR_WAR_FUNDS),
  * starts the display-condition thread, splits the amount into up to six
  * digits and rolls their odometer strips through 32-pixel vertical slots.
  * Positions and speeds are q8 pixels; each 13-pixel-wide digit slows by 0x44
@@ -382,8 +382,8 @@ void war_trophy_gil_ticker_thread(void) {
 
     s_war_trophy_entry_count = 0;
     reward_find_war_trophies_and_bonus_money(&s_war_trophy_search_result);
-    script_variable_set(EVENT_SCRIPT_VAR_WAR_FUNDS,
-        script_variable_get(EVENT_SCRIPT_VAR_WAR_FUNDS) + s_war_trophy_search_result.level_sum_money);
+    script_variable_set(
+        SCRIPT_VAR_WAR_FUNDS, script_variable_get(SCRIPT_VAR_WAR_FUNDS) + s_war_trophy_search_result.level_sum_money);
     money = s_war_trophy_search_result.level_sum_money;
 
     thread_id = thread_resolve_slot(THREAD_SLOT_FIRST_IDLE);

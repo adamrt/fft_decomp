@@ -321,7 +321,7 @@ typedef enum world_map_marker_flag {
 } world_map_marker_flag_e;
 
 /* The player marker stores location and picture IDs, unlike static dot categories.
- * Its palette is 0, 2 or 3, selected by EVENT_SCRIPT_VAR_TOWN_BACKGROUND. */
+ * Its palette is 0, 2 or 3, selected by SCRIPT_VAR_TOWN_BACKGROUND. */
 typedef struct world_map_marker {
     s32 location_id;
     s32 picture_id;
@@ -350,7 +350,7 @@ s32 world_map_get_dot_snap(point32_t point, s32* step_x, s32* step_y);
 
 /* routes */
 /* World-map routes: g_world_map_routes and the flags from
- * EVENT_SCRIPT_VAR_PATH_VISIBLE_FIRST. */
+ * SCRIPT_VAR_PATH_VISIBLE_FIRST. */
 enum { WORLD_MAP_ROUTE_COUNT = 48 };
 
 /* Values of world_map_path_animation_t.flags. */

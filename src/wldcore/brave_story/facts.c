@@ -18,7 +18,7 @@
 
 static void open_fact_detail(s32 value);
 
-/* Open the Brave Story Facts list: one row per fact flag set (EVENT_SCRIPT_VAR_FACT_FIRST onward),
+/* Open the Brave Story Facts list: one row per fact flag set (SCRIPT_VAR_FACT_FIRST onward),
  * up to eight, hiding the parent's content panel. */
 void brave_story_open_fact_list(void) {
     window_panel_layout_t layout;
@@ -31,8 +31,8 @@ void brave_story_open_fact_list(void) {
 
     colors = g_menu_stack_row_text_colors;
     values = g_menu_stack_entry_values;
-    for (; i < EVENT_SCRIPT_VAR_FACT_COUNT; i++) {
-        if (script_variable_get(i + EVENT_SCRIPT_VAR_FACT_FIRST) != 0) {
+    for (; i < SCRIPT_VAR_FACT_COUNT; i++) {
+        if (script_variable_get(i + SCRIPT_VAR_FACT_FIRST) != 0) {
             *values = i + TEXT_ID_FACT_NAME_BASE;
             *colors = 0;
             colors++;

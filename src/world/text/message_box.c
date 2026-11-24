@@ -462,7 +462,7 @@ void message_box_thread(void) {
 
     thread_current_set_task(THREAD_TASK_MESSAGE_BOX);
     value_index = 0;
-    script_variable_base = EVENT_SCRIPT_VAR_SELECTED_DIALOG_OPTION;
+    script_variable_base = SCRIPT_VAR_SELECTED_DIALOG_OPTION;
     g_menu_screen_dialog_waiting = 0;
     param = thread_current_get_parameter_1();
     rec.box_type = param & 0x70;
@@ -509,10 +509,10 @@ void message_box_thread(void) {
     if (text[0] == TEXT_SET_PORTRAIT) {
         win[0].portrait_code = text[1];
         win[1].portrait_code = text[1];
-        script_variable_set(EVENT_SCRIPT_VAR_DIALOG_PORTRAIT, text[1]);
+        script_variable_set(SCRIPT_VAR_DIALOG_PORTRAIT, text[1]);
     } else {
-        win[0].portrait_code = script_variable_get(EVENT_SCRIPT_VAR_DIALOG_PORTRAIT);
-        win[1].portrait_code = script_variable_get(EVENT_SCRIPT_VAR_DIALOG_PORTRAIT);
+        win[0].portrait_code = script_variable_get(SCRIPT_VAR_DIALOG_PORTRAIT);
+        win[1].portrait_code = script_variable_get(SCRIPT_VAR_DIALOG_PORTRAIT);
     }
     win[0].is_message_box = 1;
     win[1].is_message_box = 1;
@@ -626,10 +626,10 @@ void message_box_thread(void) {
             if (text[0] == TEXT_SET_PORTRAIT) {
                 win[0].portrait_code = text[1];
                 win[1].portrait_code = text[1];
-                script_variable_set(EVENT_SCRIPT_VAR_DIALOG_PORTRAIT, text[1]);
+                script_variable_set(SCRIPT_VAR_DIALOG_PORTRAIT, text[1]);
             } else {
-                win[0].portrait_code = script_variable_get(EVENT_SCRIPT_VAR_DIALOG_PORTRAIT);
-                win[1].portrait_code = script_variable_get(EVENT_SCRIPT_VAR_DIALOG_PORTRAIT);
+                win[0].portrait_code = script_variable_get(SCRIPT_VAR_DIALOG_PORTRAIT);
+                win[1].portrait_code = script_variable_get(SCRIPT_VAR_DIALOG_PORTRAIT);
             }
             thread_yield();
             continue;
@@ -764,7 +764,7 @@ void message_box_thread(void) {
             NEXT();
             win[0].portrait_code = *text;
             win[1].portrait_code = *text;
-            script_variable_set(EVENT_SCRIPT_VAR_DIALOG_PORTRAIT, *text);
+            script_variable_set(SCRIPT_VAR_DIALOG_PORTRAIT, *text);
             NEXT();
         } else if (code == TEXT_SET_VARIABLE_BASE) {
             NEXT();
@@ -772,10 +772,10 @@ void message_box_thread(void) {
             NEXT();
         } else if (code == TEXT_STORE_VARIABLE) {
             NEXT();
-            i = script_variable_get(EVENT_SCRIPT_VAR_TEXT_STORE_INDEX);
+            i = script_variable_get(SCRIPT_VAR_TEXT_STORE_INDEX);
             if (i != 0) {
                 script_variable_set(script_variable_base + i * 10, *text);
-                script_variable_set(EVENT_SCRIPT_VAR_TEXT_STORE_INDEX, 0);
+                script_variable_set(SCRIPT_VAR_TEXT_STORE_INDEX, 0);
             } else {
                 script_variable_set(script_variable_base, *text);
             }

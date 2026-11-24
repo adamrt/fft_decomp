@@ -181,8 +181,8 @@ s32 map_update_load(s32 map_id, map_load_command_e command) {
                 for (r = 0; g_map_gns_records[r].resource_type < GNS_RECORD_COMMAND_SEPARATOR; r++) {
                     if (g_map_gns_records[r].resource_type == MAP_RESOURCE_MESH_PRIMARY) {
                         state = script_variable_get(g_map_gns_records[r].script_variable_id) & 0xfff;
-                        state |= (script_variable_get(EVENT_SCRIPT_VAR_WEATHER) & 7) << 12;
-                        state |= (script_variable_get(EVENT_SCRIPT_VAR_TIME_OF_DAY) & 1) << 15;
+                        state |= (script_variable_get(SCRIPT_VAR_WEATHER) & 7) << 12;
+                        state |= (script_variable_get(SCRIPT_VAR_TIME_OF_DAY) & 1) << 15;
                         if (map_gns_record_matches_state(
                                 g_map_gns_records[r].map_state_comparison, g_map_gns_records[r].map_state, state)) {
                             /* No braces: a braced body's block note lengthens this loop by one
@@ -208,8 +208,8 @@ s32 map_update_load(s32 map_id, map_load_command_e command) {
                 for (r = 0; g_map_gns_records[r].resource_type < GNS_RECORD_COMMAND_SEPARATOR; r++) {
                     if (g_map_gns_records[r].resource_type == MAP_RESOURCE_MESH_OVERRIDE) {
                         state = script_variable_get(g_map_gns_records[r].script_variable_id) & 0xfff;
-                        state |= (script_variable_get(EVENT_SCRIPT_VAR_WEATHER) & 7) << 12;
-                        state |= (script_variable_get(EVENT_SCRIPT_VAR_TIME_OF_DAY) & 1) << 15;
+                        state |= (script_variable_get(SCRIPT_VAR_WEATHER) & 7) << 12;
+                        state |= (script_variable_get(SCRIPT_VAR_TIME_OF_DAY) & 1) << 15;
                         if (map_gns_record_matches_state(
                                 g_map_gns_records[r].map_state_comparison, g_map_gns_records[r].map_state, state)) {
                             j = 0;
@@ -232,8 +232,8 @@ s32 map_update_load(s32 map_id, map_load_command_e command) {
                 /* Pass 3: the default texture (state 0 of the two map variables). */
                 for (r = 0; g_map_gns_records[r].resource_type < GNS_RECORD_COMMAND_SEPARATOR; r++) {
                     if (g_map_gns_records[r].resource_type == MAP_RESOURCE_TEXTURE
-                        && (g_map_gns_records[r].script_variable_id == EVENT_SCRIPT_VAR_WEATHER_AND_TIME
-                            || g_map_gns_records[r].script_variable_id == EVENT_SCRIPT_VAR_MAP_ARRANGEMENT)
+                        && (g_map_gns_records[r].script_variable_id == SCRIPT_VAR_WEATHER_AND_TIME
+                            || g_map_gns_records[r].script_variable_id == SCRIPT_VAR_MAP_ARRANGEMENT)
                         && g_map_gns_records[r].map_state == 0) {
                         diff = 0;
                         for (k = 0; k < 14; k++) {
@@ -250,13 +250,13 @@ s32 map_update_load(s32 map_id, map_load_command_e command) {
                  * choice for its type, or cancels it when that file is loaded. */
                 for (r = 0; g_map_gns_records[r].resource_type < GNS_RECORD_COMMAND_SEPARATOR; r++) {
                     if (g_map_gns_records[r].resource_type != GNS_RECORD_NONE
-                        && (g_map_gns_records[r].script_variable_id != EVENT_SCRIPT_VAR_WEATHER_AND_TIME
+                        && (g_map_gns_records[r].script_variable_id != SCRIPT_VAR_WEATHER_AND_TIME
                             || g_map_gns_records[r].map_state != 0)
-                        && (g_map_gns_records[r].script_variable_id != EVENT_SCRIPT_VAR_MAP_ARRANGEMENT
+                        && (g_map_gns_records[r].script_variable_id != SCRIPT_VAR_MAP_ARRANGEMENT
                             || g_map_gns_records[r].map_state != 0)) {
                         state = script_variable_get(g_map_gns_records[r].script_variable_id) & 0xfff;
-                        state |= (script_variable_get(EVENT_SCRIPT_VAR_WEATHER) & 7) << 12;
-                        state |= (script_variable_get(EVENT_SCRIPT_VAR_TIME_OF_DAY) & 1) << 15;
+                        state |= (script_variable_get(SCRIPT_VAR_WEATHER) & 7) << 12;
+                        state |= (script_variable_get(SCRIPT_VAR_TIME_OF_DAY) & 1) << 15;
                         if (map_gns_record_matches_state(
                                 g_map_gns_records[r].map_state_comparison, g_map_gns_records[r].map_state, state)) {
                             diff = 0;
@@ -479,8 +479,8 @@ s32 map_mesh_load_palette(s32 palette_mode) {
         for (i = 0; g_map_gns_records[i].resource_type < GNS_RECORD_COMMAND_SEPARATOR; i++) {
             if (g_map_gns_records[i].resource_type == MAP_RESOURCE_MESH_ALTERNATE) {
                 state = script_variable_get(g_map_gns_records[i].script_variable_id) & 0xfff;
-                state |= (script_variable_get(EVENT_SCRIPT_VAR_WEATHER) & 7) << 12;
-                state |= (script_variable_get(EVENT_SCRIPT_VAR_TIME_OF_DAY) & 1) << 15;
+                state |= (script_variable_get(SCRIPT_VAR_WEATHER) & 7) << 12;
+                state |= (script_variable_get(SCRIPT_VAR_TIME_OF_DAY) & 1) << 15;
                 if (map_gns_record_matches_state(
                         g_map_gns_records[i].map_state_comparison, g_map_gns_records[i].map_state, state)) {
                     g_map_selected_mesh_record = g_map_gns_records[i];

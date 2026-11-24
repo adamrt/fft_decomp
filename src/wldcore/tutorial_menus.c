@@ -478,20 +478,20 @@ void tutorial_suspend_battle_list(menu_stack_record_t* unused_level) {
  * choice turns the display off, closes the message box and moves to result 2.
  * When the message box has gone, the tutorial is marked viewed in
  * g_tutorial_progress_masks.battle, its event is set as
- * EVENT_SCRIPT_VAR_CURRENT_EVENT (with progress effects suppressed), the
+ * SCRIPT_VAR_CURRENT_EVENT (with progress effects suppressed), the
  * list cursor and weather are saved, and the world loop ends with
  * WORLD_MAP_FLAG_TUTORIAL_EVENT. */
 void tutorial_update_battle_list_input(menu_stack_record_t* level) {
     if (level->panel.result == 2) {
         if (thread_is_running(WORLD_MAP_THREAD_SLOT_MESSAGE) == 0) {
             bits_set_value(&g_tutorial_progress_masks.battle, g_window_panel_render_state.selected_index, 1);
-            script_variable_set(EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS, 1);
-            script_variable_set(EVENT_SCRIPT_VAR_CURRENT_EVENT,
-                s_tutorial_battle_event_ids[g_window_panel_render_state.selected_index]);
+            script_variable_set(SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS, 1);
+            script_variable_set(
+                SCRIPT_VAR_CURRENT_EVENT, s_tutorial_battle_event_ids[g_window_panel_render_state.selected_index]);
             menu_stack_store_cursor(MENU_STACK_CURSOR_SLOT_BATTLE_TUTORIALS);
             g_brave_story_saved_list_cursor_state = g_menu_stack_cursor_states[MENU_STACK_CURSOR_SLOT_BATTLE_TUTORIALS];
             g_world_map_flags = (g_world_map_flags | WORLD_MAP_FLAG_TUTORIAL_EVENT) ^ WORLD_MAP_FLAG_RUNNING;
-            g_brave_story_saved_weather_variable = script_variable_get(EVENT_SCRIPT_VAR_WEATHER);
+            g_brave_story_saved_weather_variable = script_variable_get(SCRIPT_VAR_WEATHER);
         }
         return;
     }

@@ -435,8 +435,8 @@ static void update_title_menu(controller_record_t* record) {
             /* A loaded save ends OPEN with 1 (the cursor) or, when it has a next scenario
              * and no formation return event, with 0. */
             g_system_runtime_flags ^= SYSTEM_RUNTIME_FLAG_RUNNING;
-            if (script_variable_get(EVENT_SCRIPT_VAR_FORMATION_RETURN_EVENT) != 0
-                || script_variable_get(EVENT_SCRIPT_VAR_NEXT_SCENARIO) == 0) {
+            if (script_variable_get(SCRIPT_VAR_FORMATION_RETURN_EVENT) != 0
+                || script_variable_get(SCRIPT_VAR_NEXT_SCENARIO) == 0) {
                 g_title_result = cursor;
                 return;
             }
@@ -1069,8 +1069,8 @@ static void update_birthday_confirmation(controller_record_t* record) {
             /* The date controller sits below this one on the controller stack. */
             month = g_controller_records[g_controller_depth - 2].birthday_date.month;
             day = g_controller_records[g_controller_depth - 2].birthday_date.day;
-            script_variable_set(EVENT_SCRIPT_VAR_PLAYER_BIRTH_MONTH, month);
-            script_variable_set(EVENT_SCRIPT_VAR_PLAYER_BIRTH_DAY, day);
+            script_variable_set(SCRIPT_VAR_PLAYER_BIRTH_MONTH, month);
+            script_variable_set(SCRIPT_VAR_PLAYER_BIRTH_DAY, day);
             value = calendar_date_to_day_index(month, day);
             calendar_date_to_zodiac(&month, &day);
             member = party_unit_get(0);

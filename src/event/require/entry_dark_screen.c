@@ -87,7 +87,7 @@ void require_dark_screen_entrypoint(void) {
 
     g_after_battle_thread_suspended_id = g_thread_current_id;
     g_text_section_pointers[TEXT_SECTION_UNIT_MESSAGE] = g_text_section_pointers[TEXT_SECTION_SKILLSET_NAMES_COPY];
-    if (script_variable_get(EVENT_SCRIPT_VAR_CURRENT_EVENT) != EVENT_ID_FINAL_BATTLE_WON) {
+    if (script_variable_get(SCRIPT_VAR_CURRENT_EVENT) != EVENT_ID_FINAL_BATTLE_WON) {
         conditions_load_banner_image(0);
     } else {
         conditions_load_banner_image(1);

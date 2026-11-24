@@ -212,9 +212,9 @@ void novel_restore_reading(s32 render_record) {
         g_novel_local_flags[i] = 0;
     }
 
-    script_variable_set(EVENT_SCRIPT_VAR_PENDING_SOUND_EFFECT, 0);
-    script_variable_set(EVENT_SCRIPT_VAR_PENDING_WEATHER_SOUND, 0);
-    script_variable_set(EVENT_SCRIPT_VAR_PENDING_MUSIC_TRACK, 0);
+    script_variable_set(SCRIPT_VAR_PENDING_SOUND_EFFECT, 0);
+    script_variable_set(SCRIPT_VAR_PENDING_WEATHER_SOUND, 0);
+    script_variable_set(SCRIPT_VAR_PENDING_MUSIC_TRACK, 0);
     g_display_object_gs_image_pool[g_novel_reading.picture_render_index].priority = 0xC;
     g_display_object_gs_image_pool[g_novel_reading.picture_render_index].flags |= DISPLAY_OBJECT_HIDDEN;
     g_display_object_gs_image_pool[g_novel_reading.picture_render_index].flags &= ~DISPLAY_OBJECT_POP_IN;
@@ -346,9 +346,9 @@ s32 novel_run_script(void) {
     s32 aborted;
 
     do {
-        sound_id = script_variable_get(EVENT_SCRIPT_VAR_PENDING_SOUND_EFFECT);
-        weather_sound_id = script_variable_get(EVENT_SCRIPT_VAR_PENDING_WEATHER_SOUND);
-        play_pending_sounds(sound_id, weather_sound_id, script_variable_get(EVENT_SCRIPT_VAR_PENDING_MUSIC_TRACK));
+        sound_id = script_variable_get(SCRIPT_VAR_PENDING_SOUND_EFFECT);
+        weather_sound_id = script_variable_get(SCRIPT_VAR_PENDING_WEATHER_SOUND);
+        play_pending_sounds(sound_id, weather_sound_id, script_variable_get(SCRIPT_VAR_PENDING_MUSIC_TRACK));
         update_choice_timer();
 
         if (g_novel_reading.state_flags & NOVEL_STATE_BRANCH) {
@@ -420,9 +420,9 @@ void novel_draw_history_text(s32 window_index, s32 text_id) {
         window_render_text_entry(window_index, text_id, point, g_window_image_buffer);
     }
     window_load_render_record_image(window_index, g_window_image_buffer);
-    script_variable_set(EVENT_SCRIPT_VAR_PENDING_SOUND_EFFECT, 0);
-    script_variable_set(EVENT_SCRIPT_VAR_PENDING_WEATHER_SOUND, 0);
-    script_variable_set(EVENT_SCRIPT_VAR_PENDING_MUSIC_TRACK, 0);
+    script_variable_set(SCRIPT_VAR_PENDING_SOUND_EFFECT, 0);
+    script_variable_set(SCRIPT_VAR_PENDING_WEATHER_SOUND, 0);
+    script_variable_set(SCRIPT_VAR_PENDING_MUSIC_TRACK, 0);
 }
 
 /* Consume the three pending audio script variables according to the reading's
@@ -458,9 +458,9 @@ static void play_pending_sounds(s32 sound_id, s32 weather_sound_id, s32 track) {
         }
         break;
     }
-    script_variable_set(EVENT_SCRIPT_VAR_PENDING_SOUND_EFFECT, 0);
-    script_variable_set(EVENT_SCRIPT_VAR_PENDING_WEATHER_SOUND, 0);
-    script_variable_set(EVENT_SCRIPT_VAR_PENDING_MUSIC_TRACK, 0);
+    script_variable_set(SCRIPT_VAR_PENDING_SOUND_EFFECT, 0);
+    script_variable_set(SCRIPT_VAR_PENDING_WEATHER_SOUND, 0);
+    script_variable_set(SCRIPT_VAR_PENDING_MUSIC_TRACK, 0);
 }
 
 enum { SOUND_QUAD_COMMAND_COUNT = 4, SOUND_QUAD_COMMAND_BASE = SUZUKI_SOUND_ID(SOUND_RESOURCE_SOUND_NOVEL, 0) };
@@ -627,7 +627,7 @@ static void novel_opcode_branch_if_dialog_option_equal(void) {
 static void branch_on_choice(s32 branch_if_equal) {
     u8 operand = (g_novel_reading.instruction >> 16);
 
-    if ((operand == script_variable_get(EVENT_SCRIPT_VAR_SELECTED_DIALOG_OPTION)) == branch_if_equal) {
+    if ((operand == script_variable_get(SCRIPT_VAR_SELECTED_DIALOG_OPTION)) == branch_if_equal) {
         g_novel_reading.section = (u8)(g_novel_reading.instruction >> 8);
         g_novel_reading.state_flags |= NOVEL_STATE_BRANCH;
     } else {
@@ -1309,7 +1309,7 @@ static void novel_opcode_set_menu_brightness(void) {
 extern u16 g_novel_counter_delta;
 
 /* NOVEL_OPCODE_ADD_COUNTER_DELTA_IF_CHOICE (0x33)
- * When EVENT_SCRIPT_VAR_SELECTED_DIALOG_OPTION equals
+ * When SCRIPT_VAR_SELECTED_DIALOG_OPTION equals
  * byte 3, add bytes 1-2 minus 0x8000 (an operand biased by 0x8000) to
  * g_novel_counter_delta. */
 static void novel_opcode_add_counter_delta_if_choice(void) {
@@ -1319,7 +1319,7 @@ static void novel_opcode_add_counter_delta_if_choice(void) {
     instruction = &g_novel_reading.instruction;
 
     expected = *instruction >> 24;
-    if (script_variable_get(EVENT_SCRIPT_VAR_SELECTED_DIALOG_OPTION) == expected) {
+    if (script_variable_get(SCRIPT_VAR_SELECTED_DIALOG_OPTION) == expected) {
         g_novel_counter_delta += (s32)((*instruction << 8) >> 16) - 0x8000;
     }
     g_novel_reading.state_flags |= NOVEL_STATE_FETCH;

@@ -62,10 +62,10 @@ static void process_pending_requests(void);
  * variable for one thread yield with every controller input disabled. */
 void tutorial_pulse_wait_value(s32 wait_value) {
     if (g_menu_input_mode == MENU_INPUT_TUTORIAL) {
-        script_variable_set(EVENT_SCRIPT_VAR_TUTORIAL_WAIT_VALUE, wait_value);
-        script_variable_set(EVENT_SCRIPT_VAR_DISABLED_CONTROLLER_INPUTS, 0xFFFF);
+        script_variable_set(SCRIPT_VAR_TUTORIAL_WAIT_VALUE, wait_value);
+        script_variable_set(SCRIPT_VAR_DISABLED_CONTROLLER_INPUTS, 0xFFFF);
         thread_yield();
-        script_variable_set(EVENT_SCRIPT_VAR_TUTORIAL_WAIT_VALUE, 0);
+        script_variable_set(SCRIPT_VAR_TUTORIAL_WAIT_VALUE, 0);
     }
 }
 
@@ -78,8 +78,8 @@ static void apply_input_overrides(u32* state) {
     }
 
     high = *state & 0xFFFF0000;
-    *state = *state & (script_variable_get(EVENT_SCRIPT_VAR_DISABLED_CONTROLLER_INPUTS) ^ 0xFFFF);
-    *state = high | (script_variable_get(EVENT_SCRIPT_VAR_FORCED_CONTROLLER_INPUTS) | *state);
+    *state = *state & (script_variable_get(SCRIPT_VAR_DISABLED_CONTROLLER_INPUTS) ^ 0xFFFF);
+    *state = high | (script_variable_get(SCRIPT_VAR_FORCED_CONTROLLER_INPUTS) | *state);
 }
 
 /* Route controller input to the running battle event thread. */
@@ -145,9 +145,9 @@ s32 script_update_event_frame(u32* ot, u32 buttons) {
         if (i == VARIANT_THREAD_TABLE_SLOT_COUNT) {
             finish_op = scenario_get_finish_operation();
             if (finish_op != 0) {
-                if (script_variable_get(EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS)) {
+                if (script_variable_get(SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS)) {
                     g_script_threads_idle = 0;
-                    script_variable_set(EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS, 0);
+                    script_variable_set(SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS, 0);
                     return SCRIPT_EVENT_FRAME_TO_WORLD;
                 }
             } else {
@@ -155,13 +155,13 @@ s32 script_update_event_frame(u32* ot, u32 buttons) {
                 g_menu_overlay_state = 0;
                 return SCRIPT_EVENT_FRAME_NO_FINISH;
             }
-            if (script_variable_get(EVENT_SCRIPT_VAR_CURRENT_EVENT) == EVENT_ID_FUNERAL) {
+            if (script_variable_get(SCRIPT_VAR_CURRENT_EVENT) == EVENT_ID_FUNERAL) {
                 return SCRIPT_EVENT_FRAME_ENDING;
             }
             /* The finish word holds the next event id in bits 0-7 and 10-11 (its bits 8-9);
              * the remaining high bits give the finish result. */
             next_event = ((finish_op & 0xC00) >> 2) | (finish_op & 0xFF);
-            script_variable_set(EVENT_SCRIPT_VAR_CURRENT_EVENT, next_event);
+            script_variable_set(SCRIPT_VAR_CURRENT_EVENT, next_event);
             finish_op = (finish_op & 0xF300) >> 8;
             g_script_threads_idle = 0;
             g_menu_overlay_state = 0;
@@ -174,8 +174,8 @@ s32 script_update_event_frame(u32* ot, u32 buttons) {
             if (finish_op == SCRIPT_FINISH_RESET) {
                 return SCRIPT_EVENT_FRAME_RESET;
             }
-            script_variable_set(EVENT_SCRIPT_VAR_CURRENT_EVENT, 0);
-            script_variable_set(EVENT_SCRIPT_VAR_CURRENT_ENTD, 0);
+            script_variable_set(SCRIPT_VAR_CURRENT_EVENT, 0);
+            script_variable_set(SCRIPT_VAR_CURRENT_ENTD, 0);
             g_encounter_selection_mode = ENCOUNTER_SELECTION_MAP_ID;
             return SCRIPT_EVENT_FRAME_TO_WORLD;
         }
@@ -187,7 +187,7 @@ s32 script_update_event_frame(u32* ot, u32 buttons) {
         g_script_unfiltered_controller_input = g_script_event_input;
         apply_input_overrides(&g_script_event_input);
         g_event_saved_input = g_script_event_input;
-        script_variable_set(EVENT_SCRIPT_VAR_FORCED_CONTROLLER_INPUTS, 0);
+        script_variable_set(SCRIPT_VAR_FORCED_CONTROLLER_INPUTS, 0);
     }
     if (g_event_map_reload_state >= 3) {
         g_event_map_reload_state = 0;
@@ -279,7 +279,7 @@ s32 script_update_event_frame(u32* ot, u32 buttons) {
         script_set_event_speed(1);
         /* The save menu runs frames of its own and changes the screen polarity; keep the event's. */
         polarity = g_gfx_screen_polarity;
-        script_variable_set(EVENT_SCRIPT_VAR_SAVE_IN_PROGRESS, 1);
+        script_variable_set(SCRIPT_VAR_SAVE_IN_PROGRESS, 1);
         card_entrypoint(0);
         g_overlay_companion_overlay_state = COMPANION_OVERLAY_STATE_IDLE;
         g_gfx_screen_polarity = polarity;
@@ -397,10 +397,10 @@ static void process_pending_requests(void) {
     }
     append_state = g_event_map_append_state;
     if (append_state == 1 && g_map_destruction_wait_state == 0) {
-        map_update_load(script_variable_get(EVENT_SCRIPT_VAR_CURRENT_MAP), MAP_LOAD_COMMAND_START_HELD);
+        map_update_load(script_variable_get(SCRIPT_VAR_CURRENT_MAP), MAP_LOAD_COMMAND_START_HELD);
         g_event_map_append_state++;
     } else if (append_state == 2
-        && map_update_load(script_variable_get(EVENT_SCRIPT_VAR_CURRENT_MAP), MAP_LOAD_COMMAND_POLL_HELD)
+        && map_update_load(script_variable_get(SCRIPT_VAR_CURRENT_MAP), MAP_LOAD_COMMAND_POLL_HELD)
             == MAP_LOAD_RESULT_HELD) {
         g_event_map_append_state++;
     }
@@ -411,7 +411,7 @@ static void process_pending_requests(void) {
         g_map_destruction_wait_state = destruction_state + 1;
         map_dispatch_data_command(MAP_DATA_COMMAND_RELEASE_GNS_HOLD, 1, 1, 1);
     } else if (destruction_state == 3
-        && map_update_load(script_variable_get(EVENT_SCRIPT_VAR_CURRENT_MAP), MAP_LOAD_COMMAND_POLL) == 0) {
+        && map_update_load(script_variable_get(SCRIPT_VAR_CURRENT_MAP), MAP_LOAD_COMMAND_POLL) == 0) {
         g_map_destruction_wait_state = 0;
     }
 
@@ -433,7 +433,7 @@ static void process_pending_requests(void) {
 
     time_of_day = g_event_pending_map_state;
     if (time_of_day != -1) {
-        script_variable_set(EVENT_SCRIPT_VAR_TIME_OF_DAY, time_of_day);
+        script_variable_set(SCRIPT_VAR_TIME_OF_DAY, time_of_day);
         weather_dispatch_command(MAP_WEATHER_COMMAND_APPLY_SCRIPT_WEATHER);
     }
 
@@ -516,17 +516,17 @@ static void process_pending_requests(void) {
 
 /* Load camera rotation, zoom and position back out of the script variables. */
 static void load_camera_from_script_variables(void) {
-    setVector(&g_camera_script_rotation, g_script_variables[EVENT_SCRIPT_VAR_CAMERA_TILT],
-        g_script_variables[EVENT_SCRIPT_VAR_CAMERA_YAW], g_script_variables[EVENT_SCRIPT_VAR_CAMERA_ROLL]);
+    setVector(&g_camera_script_rotation, g_script_variables[SCRIPT_VAR_CAMERA_TILT],
+        g_script_variables[SCRIPT_VAR_CAMERA_YAW], g_script_variables[SCRIPT_VAR_CAMERA_ROLL]);
     camera_set_rotation(&g_camera_script_rotation);
 
-    setVector(&s_camera_script_vector, g_script_variables[EVENT_SCRIPT_VAR_CAMERA_ZOOM],
-        g_script_variables[EVENT_SCRIPT_VAR_CAMERA_ZOOM], g_script_variables[EVENT_SCRIPT_VAR_CAMERA_ZOOM]);
+    setVector(&s_camera_script_vector, g_script_variables[SCRIPT_VAR_CAMERA_ZOOM],
+        g_script_variables[SCRIPT_VAR_CAMERA_ZOOM], g_script_variables[SCRIPT_VAR_CAMERA_ZOOM]);
     camera_set_zoom(&s_camera_script_vector);
 
-    s_camera_script_vector.vx = g_script_variables[EVENT_SCRIPT_VAR_CAMERA_X];
-    s_camera_script_vector.vy = g_camera_shake_z_offset * ONE + g_script_variables[EVENT_SCRIPT_VAR_CAMERA_Z];
-    s_camera_script_vector.vz = g_script_variables[EVENT_SCRIPT_VAR_CAMERA_Y];
+    s_camera_script_vector.vx = g_script_variables[SCRIPT_VAR_CAMERA_X];
+    s_camera_script_vector.vy = g_camera_shake_z_offset * ONE + g_script_variables[SCRIPT_VAR_CAMERA_Z];
+    s_camera_script_vector.vz = g_script_variables[SCRIPT_VAR_CAMERA_Y];
     camera_set_real_coords(&s_camera_script_vector);
 }
 
@@ -538,27 +538,27 @@ void camera_store_state_to_script_variables(void) {
     VECTOR* coords;
 
     rotation = camera_get_rotation();
-    g_script_variables[EVENT_SCRIPT_VAR_CAMERA_TILT] = rotation->vx;
-    g_script_variables[EVENT_SCRIPT_VAR_CAMERA_YAW] = rotation->vy;
+    g_script_variables[SCRIPT_VAR_CAMERA_TILT] = rotation->vx;
+    g_script_variables[SCRIPT_VAR_CAMERA_YAW] = rotation->vy;
     g_camera_published_rotation_ptr = rotation;
-    g_script_variables[EVENT_SCRIPT_VAR_CAMERA_ROLL] = rotation->vz;
+    g_script_variables[SCRIPT_VAR_CAMERA_ROLL] = rotation->vz;
 
     zoom = camera_get_zoom();
-    g_script_variables[EVENT_SCRIPT_VAR_CAMERA_ZOOM] = zoom->vx;
-    g_script_variables[EVENT_SCRIPT_VAR_CAMERA_ZOOM] = zoom->vy;
+    g_script_variables[SCRIPT_VAR_CAMERA_ZOOM] = zoom->vx;
+    g_script_variables[SCRIPT_VAR_CAMERA_ZOOM] = zoom->vy;
     s_camera_published_coords_ptr = zoom;
-    g_script_variables[EVENT_SCRIPT_VAR_CAMERA_ZOOM] = zoom->vz;
+    g_script_variables[SCRIPT_VAR_CAMERA_ZOOM] = zoom->vz;
 
     coords = camera_get_real_coords();
-    g_script_variables[EVENT_SCRIPT_VAR_CAMERA_X] = coords->vx;
-    g_script_variables[EVENT_SCRIPT_VAR_CAMERA_Z] = coords->vy - g_camera_shake_z_offset * ONE;
+    g_script_variables[SCRIPT_VAR_CAMERA_X] = coords->vx;
+    g_script_variables[SCRIPT_VAR_CAMERA_Z] = coords->vy - g_camera_shake_z_offset * ONE;
     s_camera_published_coords_ptr = coords;
     g_camera_shake_z_offset = 0;
-    g_script_variables[EVENT_SCRIPT_VAR_CAMERA_Y] = coords->vz;
+    g_script_variables[SCRIPT_VAR_CAMERA_Y] = coords->vz;
 }
 
 /* The raw weather script variable. weather_get_effective applies the
  * map's indoor and snow flags to it. */
 s32 weather_get_raw(void) {
-    return g_script_variables[EVENT_SCRIPT_VAR_WEATHER];
+    return g_script_variables[SCRIPT_VAR_WEATHER];
 }

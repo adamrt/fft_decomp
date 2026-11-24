@@ -91,7 +91,7 @@ s32 unit_return_zero_1(void) {
 
 /* Chooses the encounter's ENTD id and starts reading its ENTD file.
  *
- * The id is script variable EVENT_SCRIPT_VAR_CURRENT_ENTD unless
+ * The id is script variable SCRIPT_VAR_CURRENT_ENTD unless
  * g_encounter_selection_mode overrides it: 250, a random id 75..79, a random id
  * 1..59, or the map id when that is not 0. Returns encounter_start_file_load's result. */
 static s32 start_entd_open(void) {
@@ -100,7 +100,7 @@ static s32 start_entd_open(void) {
     s32 encounter_id;
     s32 selection_mode;
 
-    encounter_id = script_variable_get(EVENT_SCRIPT_VAR_CURRENT_ENTD);
+    encounter_id = script_variable_get(SCRIPT_VAR_CURRENT_ENTD);
     selection_mode = g_encounter_selection_mode;
     current_encounter_id = &g_encounter_current_id;
     *current_encounter_id = encounter_id;
@@ -161,9 +161,9 @@ static void randomize_weather_from_calendar(void) {
     s32 random_bucket;
     u8 selected_weather_period;
 
-    month = script_variable_get(EVENT_SCRIPT_VAR_MONTH);
-    day = script_variable_get(EVENT_SCRIPT_VAR_DAY);
-    weather = script_variable_get(EVENT_SCRIPT_VAR_WEATHER);
+    month = script_variable_get(SCRIPT_VAR_MONTH);
+    day = script_variable_get(SCRIPT_VAR_DAY);
+    weather = script_variable_get(SCRIPT_VAR_WEATHER);
 
     for (period = 0; period < WEATHER_CALENDAR_PERIOD_COUNT; period++) {
         if (month < period_end_month[period]) {
@@ -182,12 +182,12 @@ static void randomize_weather_from_calendar(void) {
     } else if (weather >= WEATHER_SNOW) {
         weather = WEATHER_STRONG_STORM;
     }
-    script_variable_set(EVENT_SCRIPT_VAR_WEATHER, weather);
+    script_variable_set(SCRIPT_VAR_WEATHER, weather);
 
     if ((rand() * 3) / 0x8000 != 0) {
-        script_variable_set(EVENT_SCRIPT_VAR_TIME_OF_DAY, TIME_OF_DAY_DAY);
+        script_variable_set(SCRIPT_VAR_TIME_OF_DAY, TIME_OF_DAY_DAY);
     } else {
-        script_variable_set(EVENT_SCRIPT_VAR_TIME_OF_DAY, TIME_OF_DAY_NIGHT);
+        script_variable_set(SCRIPT_VAR_TIME_OF_DAY, TIME_OF_DAY_NIGHT);
     }
 }
 
@@ -263,7 +263,7 @@ s32 map_update_init_sequence(s32 map_id, s32 step) {
         break;
     case 11:
         if (g_system_frontend_world_result == WORLD_MAP_RESULT_RANDOM_BATTLE
-            || script_variable_get(EVENT_SCRIPT_VAR_WORLD_DEBUG_BATTLE_STYLE) != 0) {
+            || script_variable_get(SCRIPT_VAR_WORLD_DEBUG_BATTLE_STYLE) != 0) {
             music_unload_current_scenario();
             /* Called with no argument: the sound id is whatever
              * music_unload_current_scenario left in $a0. */
@@ -352,7 +352,7 @@ s32 map_update_deployment_init_sequence(s32 map_id, s32 step, s32 deployment_run
         }
         break;
     case 7:
-        if (script_variable_get(EVENT_SCRIPT_VAR_WORLD_DEBUG_BATTLE_STYLE) != 0) {
+        if (script_variable_get(SCRIPT_VAR_WORLD_DEBUG_BATTLE_STYLE) != 0) {
             step++;
             break;
         }
@@ -387,7 +387,7 @@ s32 map_update_deployment_init_sequence(s32 map_id, s32 step, s32 deployment_run
         break;
     case 11:
         if (g_system_frontend_world_result == WORLD_MAP_RESULT_RANDOM_BATTLE
-            || script_variable_get(EVENT_SCRIPT_VAR_WORLD_DEBUG_BATTLE_STYLE) != 0) {
+            || script_variable_get(SCRIPT_VAR_WORLD_DEBUG_BATTLE_STYLE) != 0) {
             music_unload_current_scenario();
             /* Called with no argument: the sound id is whatever
              * music_unload_current_scenario left in $a0. */

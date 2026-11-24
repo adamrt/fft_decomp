@@ -43,8 +43,8 @@ void brave_story_open_unexplored_land_list(void) {
     s32 i; /* reused as the visible-row count, which the target keeps in $s0 */
     s32 record_index;
 
-    for (i = 0; i < EVENT_SCRIPT_VAR_UNEXPLORED_LAND_COUNT; i++) {
-        if (script_variable_get(i + EVENT_SCRIPT_VAR_UNEXPLORED_LAND_FIRST) != 0) {
+    for (i = 0; i < SCRIPT_VAR_UNEXPLORED_LAND_COUNT; i++) {
+        if (script_variable_get(i + SCRIPT_VAR_UNEXPLORED_LAND_FIRST) != 0) {
             g_menu_stack_entry_values[count] = i + TEXT_ID_UNEXPLORED_LAND_NAME_BASE;
             g_menu_stack_row_text_colors[count] = 0;
             count++;
@@ -290,7 +290,7 @@ void brave_story_update_unexplored_land_detail(menu_stack_record_t* level) {
 }
 
 /* Opens the Brave Story's treasure list: every treasure found
- * (EVENT_SCRIPT_VAR_TREASURE_FIRST + treasure set), by name
+ * (SCRIPT_VAR_TREASURE_FIRST + treasure set), by name
  * (TEXT_ID_TREASURE_NAME_BASE + treasure), up to eight rows at (0x88, 0x50),
  * 0x5a wide, and pushes MENU_STACK_LEVEL_BRAVE_STORY_TREASURES. Twin of
  * brave_story_open_unexplored_land_list. */
@@ -301,8 +301,8 @@ void brave_story_open_treasure_list(void) {
     s32 i; /* reused as the visible-row count, which the target keeps in $s0 */
     s32 record_index;
 
-    for (i = 0; i < EVENT_SCRIPT_VAR_TREASURE_COUNT; i++) {
-        if (script_variable_get(i + EVENT_SCRIPT_VAR_TREASURE_FIRST) != 0) {
+    for (i = 0; i < SCRIPT_VAR_TREASURE_COUNT; i++) {
+        if (script_variable_get(i + SCRIPT_VAR_TREASURE_FIRST) != 0) {
             g_menu_stack_entry_values[count] = i + TEXT_ID_TREASURE_NAME_BASE;
             g_menu_stack_row_text_colors[count] = 0;
             count++;

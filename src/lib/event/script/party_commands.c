@@ -76,7 +76,7 @@ void party_join_event_units(void) {
 /* CallFunction 2 and 7: stage a 365-day advance in the date-advance variable. The
  * calendar itself moves when that variable is consumed. */
 void calendar_request_year_advance(void) {
-    script_variable_set(EVENT_SCRIPT_VAR_DATE_ADVANCE, 365);
+    script_variable_set(SCRIPT_VAR_DATE_ADVANCE, 365);
 }
 
 /* CallFunction 3: raise the Brave of every blue-team unit by 10, capped at UNIT_BRAVE_FAITH_MAX. */

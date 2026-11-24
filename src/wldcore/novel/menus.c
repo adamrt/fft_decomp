@@ -780,9 +780,9 @@ void novel_update_history(menu_stack_record_t* level) {
                 box.stride = g_display_object_gs_image_pool[level->novel_history.render_index].bounds.w;
                 text_render_entry_past_choice_marks(text_id, g_window_image_buffer, &box);
                 window_load_render_record_image(level->novel_history.render_index, g_window_image_buffer);
-                script_variable_set(EVENT_SCRIPT_VAR_PENDING_SOUND_EFFECT, 0);
-                script_variable_set(EVENT_SCRIPT_VAR_PENDING_WEATHER_SOUND, 0);
-                script_variable_set(EVENT_SCRIPT_VAR_PENDING_MUSIC_TRACK, 0);
+                script_variable_set(SCRIPT_VAR_PENDING_SOUND_EFFECT, 0);
+                script_variable_set(SCRIPT_VAR_PENDING_WEATHER_SOUND, 0);
+                script_variable_set(SCRIPT_VAR_PENDING_MUSIC_TRACK, 0);
             }
             level->novel_history.step = 0;
             level->novel_history.phase = NOVEL_HISTORY_PHASE_BROWSE;

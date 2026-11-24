@@ -173,7 +173,7 @@ void attack_map_title_entrypoint(void) {
 void map_load_title_graphic(void) {
     s32 group;
     u8* image = menu_alloc_memory(0x2800);
-    s32 title = script_variable_get(EVENT_SCRIPT_VAR_CURRENT_MAP);
+    s32 title = script_variable_get(SCRIPT_VAR_CURRENT_MAP);
     s32 adjusted = title - 1;
     s32 group_input = adjusted;
 

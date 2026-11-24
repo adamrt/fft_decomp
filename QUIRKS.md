@@ -1067,7 +1067,7 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
   file load passes it as the first argument, which
   `map_start_file_load` ignores.
 - The Brave Story "Fact" row never appears:
-  `EVENT_SCRIPT_VAR_FACTS_ENABLED` (0x92) gates it
+  `SCRIPT_VAR_FACTS_ENABLED` (0x92) gates it
   (`build_menu_rows`), no code sets it, and the one
   event script that writes it, 0x075, stores 0 while setting facts
   0x1a4-0x1aa. The 24 fact names in WORLD.LZW are empty strings.

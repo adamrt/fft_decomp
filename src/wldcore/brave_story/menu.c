@@ -30,7 +30,7 @@
 
 /* Replay setup events in Record-list order. The existing
  * g_brave_story_event_ids pointer cell points at this table. */
-static u16 s_brave_story_replay_event_table[EVENT_SCRIPT_VAR_STORY_EVENT_COUNT] = {
+static u16 s_brave_story_replay_event_table[SCRIPT_VAR_STORY_EVENT_COUNT] = {
     0x7,
     0xd,
     0x18,
@@ -184,12 +184,12 @@ void brave_story_open_menu(void) {
 
     index = display_object_append_image(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].brave_story.casualty_image = index;
-    value = script_variable_get(EVENT_SCRIPT_VAR_INJURED);
+    value = script_variable_get(SCRIPT_VAR_INJURED);
     if (value >= 10000) {
         value = 9999;
     }
     g_text_substitution_values[0] = value;
-    value = script_variable_get(EVENT_SCRIPT_VAR_CASUALTIES);
+    value = script_variable_get(SCRIPT_VAR_CASUALTIES);
     if (value >= 10000) {
         value = 9999;
     }
@@ -254,7 +254,7 @@ void brave_story_open_menu(void) {
 }
 
 /* Build the Brave Story rows of the level brave_story_open_menu
- * pushes. The facts row is listed when EVENT_SCRIPT_VAR_FACTS_ENABLED and any
+ * pushes. The facts row is listed when SCRIPT_VAR_FACTS_ENABLED and any
  * fact flag are set; the story events and persons rows always; the
  * propositions row while any job is active or completed; the unexplored
  * lands and treasures rows once one is found; then Leave. The completion stars
@@ -266,10 +266,10 @@ static void build_menu_rows(void) {
     s32 i;
 
     g_menu_stack_records[g_menu_stack_depth].brave_story.entry_count = 0;
-    if (script_variable_get(EVENT_SCRIPT_VAR_FACTS_ENABLED) != 0) {
+    if (script_variable_get(SCRIPT_VAR_FACTS_ENABLED) != 0) {
         count = 0;
-        for (i = 0; i < EVENT_SCRIPT_VAR_FACT_COUNT; i++) {
-            if (script_variable_get(i + EVENT_SCRIPT_VAR_FACT_FIRST) != 0) {
+        for (i = 0; i < SCRIPT_VAR_FACT_COUNT; i++) {
+            if (script_variable_get(i + SCRIPT_VAR_FACT_FIRST) != 0) {
                 count++;
             }
         }
@@ -286,8 +286,8 @@ static void build_menu_rows(void) {
     g_menu_stack_records[g_menu_stack_depth].brave_story.entry_count += 2;
 
     count = g_proposition_count;
-    for (i = 0; i < EVENT_SCRIPT_VAR_PROPOSITION_COUNT; i++) {
-        if (script_variable_get(i + EVENT_SCRIPT_VAR_PROPOSITION_FIRST) & PROPOSITION_VARIABLE_COMPLETED) {
+    for (i = 0; i < SCRIPT_VAR_PROPOSITION_COUNT; i++) {
+        if (script_variable_get(i + SCRIPT_VAR_PROPOSITION_FIRST) & PROPOSITION_VARIABLE_COMPLETED) {
             count++;
         }
     }
@@ -301,8 +301,8 @@ static void build_menu_rows(void) {
     count = 0;
     g_display_object_animated_pool[g_menu_stack_records[g_menu_stack_depth].brave_story.land_completion_star].flags
         |= DISPLAY_OBJECT_BLANK;
-    for (i = 0; i < EVENT_SCRIPT_VAR_UNEXPLORED_LAND_COUNT; i++) {
-        if (script_variable_get(i + EVENT_SCRIPT_VAR_UNEXPLORED_LAND_FIRST) != 0) {
+    for (i = 0; i < SCRIPT_VAR_UNEXPLORED_LAND_COUNT; i++) {
+        if (script_variable_get(i + SCRIPT_VAR_UNEXPLORED_LAND_FIRST) != 0) {
             count++;
         }
     }
@@ -322,8 +322,8 @@ static void build_menu_rows(void) {
     count = 0;
     g_display_object_animated_pool[g_menu_stack_records[g_menu_stack_depth].brave_story.treasure_completion_star].flags
         |= DISPLAY_OBJECT_BLANK;
-    for (i = 0; i < EVENT_SCRIPT_VAR_TREASURE_COUNT; i++) {
-        if (script_variable_get(i + EVENT_SCRIPT_VAR_TREASURE_FIRST) != 0) {
+    for (i = 0; i < SCRIPT_VAR_TREASURE_COUNT; i++) {
+        if (script_variable_get(i + SCRIPT_VAR_TREASURE_FIRST) != 0) {
             count++;
         }
     }
@@ -332,7 +332,7 @@ static void build_menu_rows(void) {
         g_display_object_animated_pool[g_menu_stack_records[g_menu_stack_depth].brave_story.treasure_completion_star]
             .position.y = g_menu_stack_records[g_menu_stack_depth].brave_story.entry_count * 0x10 + 0xE;
         for (i = 0; i < 31; i++) {
-            if (script_variable_get(i + EVENT_SCRIPT_VAR_TREASURE_FIRST) != 0) {
+            if (script_variable_get(i + SCRIPT_VAR_TREASURE_FIRST) != 0) {
                 count++;
             }
         }
@@ -600,7 +600,7 @@ void brave_story_update_menu(menu_stack_record_t* level) {
 }
 
 /* Opens the Brave Story's Record list: every story event whose script
- * variable (EVENT_SCRIPT_VAR_STORY_EVENT_FIRST + index) is set, by name
+ * variable (SCRIPT_VAR_STORY_EVENT_FIRST + index) is set, by name
  * (TEXT_ID_STORY_EVENT_NAME_BASE + index), up to eight rows at (0x4c, 0x4f),
  * 0x94 wide, and pushes MENU_STACK_LEVEL_BRAVE_STORY_EVENTS. Twin of
  * brave_story_open_treasure_list, but walks the output arrays by pointer. */
@@ -618,8 +618,8 @@ static void open_event_list(void) {
     i = 0; /* zeroed ahead of the row pointers, as the target schedules it */
     colors = g_menu_stack_row_text_colors;
     values = g_menu_stack_entry_values;
-    for (; i < EVENT_SCRIPT_VAR_STORY_EVENT_COUNT; i++) {
-        if (script_variable_get(i + EVENT_SCRIPT_VAR_STORY_EVENT_FIRST) != 0) {
+    for (; i < SCRIPT_VAR_STORY_EVENT_COUNT; i++) {
+        if (script_variable_get(i + SCRIPT_VAR_STORY_EVENT_FIRST) != 0) {
             *values = i + TEXT_ID_STORY_EVENT_NAME_BASE;
             *colors = 0;
             colors++;
@@ -762,7 +762,7 @@ void brave_story_open_event_detail(s32 value) {
 }
 
 /* Input step of a story event's text page. Triangle replays the event: it
- * sets EVENT_SCRIPT_VAR_CURRENT_EVENT, suppresses progress effects and fades
+ * sets SCRIPT_VAR_CURRENT_EVENT, suppresses progress effects and fades
  * out, and once the fade ends the world loop stops with
  * WORLD_MAP_FLAG_STORY_EVENT_REPLAY, saving the list cursor and the weather
  * variable. When the text window closes, the story event list reopens. */
@@ -783,14 +783,14 @@ void brave_story_update_event_detail_input(menu_stack_record_t* level) {
             g_brave_story_saved_list_cursor_state = g_menu_stack_cursor_states[MENU_STACK_CURSOR_SLOT_EVENTS];
             g_world_map_flags = (flags ^ WORLD_MAP_FLAG_RUNNING) | WORLD_MAP_FLAG_STORY_EVENT_REPLAY;
             g_brave_story_replay_story_event_index = value;
-            g_brave_story_saved_weather_variable = script_variable_get(EVENT_SCRIPT_VAR_WEATHER);
+            g_brave_story_saved_weather_variable = script_variable_get(SCRIPT_VAR_WEATHER);
             return;
         }
     }
 
     if (g_world_map_input_new_button_presses & PSX_PAD_TRIANGLE) {
-        script_variable_set(EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS, 1);
-        script_variable_set(EVENT_SCRIPT_VAR_CURRENT_EVENT, g_brave_story_event_ids[level->story_event_index]);
+        script_variable_set(SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS, 1);
+        script_variable_set(SCRIPT_VAR_CURRENT_EVENT, g_brave_story_event_ids[level->story_event_index]);
         g_world_map_flags |= WORLD_MAP_FLAG_INPUT_BLOCKED;
         world_map_start_fade(WORLD_MAP_FADE_OUT, 0x10);
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0, -1, 0);
@@ -821,7 +821,7 @@ void brave_story_update_event_detail_input(menu_stack_record_t* level) {
 }
 
 /* Opens the Brave Story's Persons list: every person whose profile variable
- * (EVENT_SCRIPT_VAR_PERSON_PROFILE_FIRST + person) is set, by the name of that
+ * (SCRIPT_VAR_PERSON_PROFILE_FIRST + person) is set, by the name of that
  * profile (TEXT_ID_PERSON_PROFILE_NAME_BASE + person * 16 + profile), up to
  * eight rows at (0x80, 0x50), 0x60 wide; hides the injured/casualties record
  * and pushes MENU_STACK_LEVEL_BRAVE_STORY_PERSONS. Twin of
@@ -841,8 +841,8 @@ static void open_person_list(void) {
     i = 0; /* zeroed ahead of the row pointers, as the target schedules it */
     colors = g_menu_stack_row_text_colors;
     values = g_menu_stack_entry_values;
-    for (; i < EVENT_SCRIPT_VAR_PERSON_PROFILE_COUNT; i++) {
-        value = script_variable_get(i + EVENT_SCRIPT_VAR_PERSON_PROFILE_FIRST);
+    for (; i < SCRIPT_VAR_PERSON_PROFILE_COUNT; i++) {
+        value = script_variable_get(i + SCRIPT_VAR_PERSON_PROFILE_FIRST);
         if (value != 0) {
             *values = TEXT_ID_PERSON_PROFILE_NAME_BASE + (i << 4) + value;
             *colors = 0;
@@ -1009,7 +1009,7 @@ void brave_story_update_person_detail(menu_stack_record_t* level) {
             level->detail.timer++;
             return;
         }
-        script_variable_set(EVENT_SCRIPT_VAR_DIALOG_PORTRAIT, 0xFF);
+        script_variable_set(SCRIPT_VAR_DIALOG_PORTRAIT, 0xFF);
         entry = level->detail.value;
         g_text_window.image_position.y = 112;
         g_text_window.base.x = -122;
@@ -1031,7 +1031,7 @@ void brave_story_update_person_detail(menu_stack_record_t* level) {
         g_text_window.extra_render_index = -1;
         window_open_paged_text(&g_text_window);
         /* Rendering the text stores the portrait it names, if any, over the 0xff. */
-        value = script_variable_get(EVENT_SCRIPT_VAR_DIALOG_PORTRAIT);
+        value = script_variable_get(SCRIPT_VAR_DIALOG_PORTRAIT);
         render_index = level->detail.render_index;
         if (value != 0xFF) {
             portrait_build_wldface_poly(&portrait, value);

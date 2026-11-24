@@ -12,9 +12,9 @@
 /* Row kinds of the Brave Story list (build_menu_rows), named after the level each row
  * opens. */
 typedef enum brave_story_row {
-    BRAVE_STORY_ROW_FACTS = 0, /* EVENT_SCRIPT_VAR_FACT_FIRST */
+    BRAVE_STORY_ROW_FACTS = 0, /* SCRIPT_VAR_FACT_FIRST */
     BRAVE_STORY_ROW_EVENTS = 1,
-    BRAVE_STORY_ROW_PERSONS = 2, /* EVENT_SCRIPT_VAR_PERSON_PROFILE_FIRST */
+    BRAVE_STORY_ROW_PERSONS = 2, /* SCRIPT_VAR_PERSON_PROFILE_FIRST */
     BRAVE_STORY_ROW_PROPOSITIONS = 3,
     BRAVE_STORY_ROW_UNEXPLORED_LANDS = 4,
     BRAVE_STORY_ROW_TREASURES = 5,

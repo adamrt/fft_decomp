@@ -142,15 +142,15 @@ void script_execute_event(void) {
     }
 
     battle_unit_status_staging_clear();
-    if (script_variable_get(EVENT_SCRIPT_VAR_BATTLE_NOT_STARTED) != 0) {
+    if (script_variable_get(SCRIPT_VAR_BATTLE_NOT_STARTED) != 0) {
         battle_unit_status_staging_run(0, 0);
     } else {
         script_process_status_commands();
     }
 
-    script_variable_set(EVENT_SCRIPT_VAR_DISABLED_MENU_ACTIONS, 0);
-    script_variable_set(EVENT_SCRIPT_VAR_DISABLED_CONTROLLER_INPUTS, 0);
-    script_variable_set(EVENT_SCRIPT_VAR_FORCED_CONTROLLER_INPUTS, 0);
+    script_variable_set(SCRIPT_VAR_DISABLED_MENU_ACTIONS, 0);
+    script_variable_set(SCRIPT_VAR_DISABLED_CONTROLLER_INPUTS, 0);
+    script_variable_set(SCRIPT_VAR_FORCED_CONTROLLER_INPUTS, 0);
 
 restart_script:
     script_set_event_speed(1);
@@ -190,7 +190,7 @@ restart_script:
         }
         /* ---- Scenario progression: DismissUnit, CallFunction, BlueRemoveUnit, EventEnd ---- */
         else if (opcode == SCRIPT_OPCODE_DISMISS_UNIT) {
-            if (script_variable_get(EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS) == 0) {
+            if (script_variable_get(SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS) == 0) {
                 script_opcode_dismiss_unit(first_operand);
             }
         } else if (opcode == SCRIPT_OPCODE_CALL_FUNCTION) {
@@ -199,9 +199,9 @@ restart_script:
              * its changed value. Preserve that target-visible fallthrough. */
             thread_wait_frames(4);
 
-            if (script_variable_get(EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS) == 0) {
+            if (script_variable_get(SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS) == 0) {
                 if (operand_1 == EVENT_CALL_FUNCTION_JOIN_UNITS_SILENTLY) {
-                    if (script_variable_get(EVENT_SCRIPT_VAR_CURRENT_EVENT) < EVENT_ID_NEW_GAME_INVENTORY_END) {
+                    if (script_variable_get(SCRIPT_VAR_CURRENT_EVENT) < EVENT_ID_NEW_GAME_INVENTORY_END) {
                         item_init_new_game_inventory();
                     }
                     party_join_event_units();
@@ -216,17 +216,17 @@ restart_script:
                         thread_wait_inactive(operand_1);
                     }
 
-                    if (script_variable_get(EVENT_SCRIPT_VAR_CURRENT_EVENT) != EVENT_ID_EPILOGUE) {
-                        script_variable_set(EVENT_SCRIPT_VAR_NEXT_SCENARIO, 1);
+                    if (script_variable_get(SCRIPT_VAR_CURRENT_EVENT) != EVENT_ID_EPILOGUE) {
+                        script_variable_set(SCRIPT_VAR_NEXT_SCENARIO, 1);
                     }
-                    script_variable_set(EVENT_SCRIPT_VAR_SAVE_IN_PROGRESS, 1);
+                    script_variable_set(SCRIPT_VAR_SAVE_IN_PROGRESS, 1);
                     overlay_companion_load(COMPANION_OVERLAY_CARD);
                     g_overlay_companion_overlay_state = COMPANION_OVERLAY_STATE_CARD_SAVE;
                     do {
                         thread_yield();
                     } while (g_overlay_companion_overlay_state != COMPANION_OVERLAY_STATE_IDLE);
 
-                    script_variable_set(EVENT_SCRIPT_VAR_NEXT_SCENARIO, 0);
+                    script_variable_set(SCRIPT_VAR_NEXT_SCENARIO, 0);
                     for (operand_1 = 2; operand_1 < 15; operand_1++) {
                         thread_set_parameters(operand_1, 0, 0, 1);
                         g_thread_contexts[operand_1].task_id = THREAD_TASK_STOP_REQUEST;
@@ -259,11 +259,11 @@ restart_script:
             }
 
             if (operand_1 == EVENT_CALL_FUNCTION_MUTE_TEXT_AUDIO_CUE) {
-                script_variable_set(EVENT_SCRIPT_VAR_MUTE_TEXT_AUDIO_CUE, 1);
+                script_variable_set(SCRIPT_VAR_MUTE_TEXT_AUDIO_CUE, 1);
             }
 
             if (operand_1 == EVENT_CALL_FUNCTION_UNMUTE_TEXT_AUDIO_CUE) {
-                script_variable_set(EVENT_SCRIPT_VAR_MUTE_TEXT_AUDIO_CUE, 0);
+                script_variable_set(SCRIPT_VAR_MUTE_TEXT_AUDIO_CUE, 0);
             }
 
             if (operand_1 == EVENT_CALL_FUNCTION_ADVANCE_MAP_DESTRUCTION_AND_WAIT) {
@@ -362,7 +362,7 @@ restart_script:
             if (tutorial_is_current_event() != 0) {
                 fade_event_run_out();
                 g_game_options = g_game_options_saved;
-                script_variable_set(EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS, 0);
+                script_variable_set(SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS, 0);
                 battle_state_close_battle_to_world_enter(0x20);
             }
 
@@ -372,11 +372,11 @@ restart_script:
                 }
             }
 
-            operand_1 = script_variable_get(EVENT_SCRIPT_VAR_CURRENT_EVENT);
+            operand_1 = script_variable_get(SCRIPT_VAR_CURRENT_EVENT);
             if (operand_1 != EVENT_ID_OLAN_WOUNDED && operand_1 != EVENT_ID_BEOWULF_INVITATION) {
                 sprite_evtchr_init_slots();
             }
-            script_variable_set(EVENT_SCRIPT_VAR_BATTLE_NOT_STARTED, 0);
+            script_variable_set(SCRIPT_VAR_BATTLE_NOT_STARTED, 0);
 
             /* An event with no after-event code, outside events
              * 0x190..0x1a9, checks the scenario conditions and chains into
@@ -413,7 +413,7 @@ restart_script:
         /* ---- Flow control: forward and backward jumps ---- */
         else if (opcode == SCRIPT_OPCODE_UNKNOWN_DA) {
         } else if (opcode == SCRIPT_OPCODE_JUMP_FORWARD_IF_ZERO) {
-            if (g_script_variables[EVENT_SCRIPT_VAR_COMPARISON_RESULT] == 0) {
+            if (g_script_variables[SCRIPT_VAR_COMPARISON_RESULT] == 0) {
                 instruction_offset = script_find_jump_target(
                     instruction_offset + 2, SCRIPT_OPCODE_FORWARD_TARGET, SCRIPT_OPCODE_FORWARD_TARGET_EXIT, operand_1);
                 continue;
@@ -586,7 +586,7 @@ restart_script:
             g_event_effect_target_position.x = effect_instruction->x;
             g_event_effect_target_position.y = effect_instruction->y;
             g_event_effect_target_mode = effect_instruction->target_mode;
-            script_variable_set(EVENT_SCRIPT_VAR_CAMERA_ROLL, 0);
+            script_variable_set(SCRIPT_VAR_CAMERA_ROLL, 0);
             thread_wait_frames(2);
         } else if (opcode == SCRIPT_OPCODE_EFFECT_START) {
             do {
@@ -598,15 +598,14 @@ restart_script:
         }
         /* ---- Camera ---- */
         else if (opcode == SCRIPT_OPCODE_FOCUS) {
-            camera_store_yaw_band(g_script_variables[EVENT_SCRIPT_VAR_CAMERA_YAW]);
+            camera_store_yaw_band(g_script_variables[SCRIPT_VAR_CAMERA_YAW]);
             script_opcode_focus((event_focus_parameters_t*)parameters);
         } else if (opcode == SCRIPT_OPCODE_FOCUS_SPEED) {
             script_variables = g_script_variables;
-            script_opcode_focus_speed(parameters, &script_variables[EVENT_SCRIPT_VAR_CAMERA_X],
-                &script_variables[EVENT_SCRIPT_VAR_CAMERA_TILT]);
+            script_opcode_focus_speed(
+                parameters, &script_variables[SCRIPT_VAR_CAMERA_X], &script_variables[SCRIPT_VAR_CAMERA_TILT]);
         } else if (opcode == SCRIPT_OPCODE_RELATIVE_CAMERA) {
-            script_apply_relative_camera(
-                (event_camera_values_t*)parameters, &g_script_variables[EVENT_SCRIPT_VAR_CAMERA_X]);
+            script_apply_relative_camera((event_camera_values_t*)parameters, &g_script_variables[SCRIPT_VAR_CAMERA_X]);
         } else if (opcode == SCRIPT_OPCODE_CAMERA) {
             operand_1 = thread_resolve_slot(THREAD_SLOT_FIRST_IDLE);
             thread_start(operand_1, &script_opcode_camera_thread);
@@ -854,7 +853,7 @@ restart_script:
             draw_map_unit_id = script_resolve_map_unit_id(first_operand);
             if (draw_map_unit_id != EVENT_MAP_UNIT_ID_NONE) {
                 map_unit_show(draw_map_unit_id);
-                if (script_variable_get(EVENT_SCRIPT_VAR_CURRENT_EVENT) == EVENT_ID_LIMBERRY_CEMETERY_BATTLE) {
+                if (script_variable_get(SCRIPT_VAR_CURRENT_EVENT) == EVENT_ID_LIMBERRY_CEMETERY_BATTLE) {
                     status_queue_current_graphics(
                         map_unit_get_battle_unit_id(draw_map_unit_id), STATUS_DISPLAY_CHANGE_ADD);
                     g_thread_call_target = (void (*)(void))map_unit_update_display_for_script;
@@ -1003,10 +1002,10 @@ restart_script:
         } else if (opcode == SCRIPT_OPCODE_PLAY_TUNE) {
             music_play_tune(operand_1);
         } else if (opcode == SCRIPT_OPCODE_UNLOCK_DATE) {
-            if ((script_variable_get(EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS) == 0) && (operand_1 != 0)) {
-                date_month = script_variable_get(EVENT_SCRIPT_VAR_MONTH);
+            if ((script_variable_get(SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS) == 0) && (operand_1 != 0)) {
+                date_month = script_variable_get(SCRIPT_VAR_MONTH);
                 script_opcode_unlock_date(g_brave_story_treasure_acquisition_date_bits, operand_1 - 1, date_month,
-                    script_variable_get(EVENT_SCRIPT_VAR_DAY));
+                    script_variable_get(SCRIPT_VAR_DAY));
             }
         } else if (opcode == SCRIPT_OPCODE_TEMP_WEAPON) {
             thrown_item_map_unit_id = script_resolve_map_unit_id(first_operand);
@@ -1060,8 +1059,8 @@ restart_script:
             thread_set_parameters(operand_4, (s8)operand_1, (s8)operand_2, (s8)operand_3);
             thread_wait_inactive(operand_4);
         } else if (opcode == SCRIPT_OPCODE_SET_DATE_ADVANCE) {
-            if (script_variable_get(EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS) == 0) {
-                script_variable_set(EVENT_SCRIPT_VAR_DATE_ADVANCE, first_operand);
+            if (script_variable_get(SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS) == 0) {
+                script_variable_set(SCRIPT_VAR_DATE_ADVANCE, first_operand);
             }
         } else if (opcode == SCRIPT_OPCODE_TELEPORT_OUT) {
             script_opcode_teleport_out(first_operand, 1);

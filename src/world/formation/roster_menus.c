@@ -38,7 +38,7 @@ enum {
 /* Special identities whose Brave Story profile is marked when dismissed. */
 typedef struct dismiss_profile {
     s16 character_identity;
-    s16 variable_id; /* EVENT_SCRIPT_VAR_PERSON_PROFILE_FIRST range */
+    s16 variable_id; /* SCRIPT_VAR_PERSON_PROFILE_FIRST range */
 } dismiss_profile_t;
 
 static dismiss_profile_t s_dismiss_profiles[] = { { CHARACTER_IDENTITY_AGRIAS_JOIN, 0x3ce },

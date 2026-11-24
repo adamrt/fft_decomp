@@ -76,7 +76,7 @@ s32 tutorial_update(void);
 s32 tutorial_get_pad_buttons(void);
 
 /* tutorial events */
-/* The values tutorial_pulse_wait_value holds in EVENT_SCRIPT_VAR_TUTORIAL_WAIT_VALUE as a menu
+/* The values tutorial_pulse_wait_value holds in SCRIPT_VAR_TUTORIAL_WAIT_VALUE as a menu
  * screen opens, so that a tutorial script can wait for it. A system function pulses its own id
  * instead. */
 typedef enum script_tutorial_wait_value {

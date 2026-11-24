@@ -259,8 +259,7 @@ s32 after_battle_sell_equipment_over_limit(s32 battle_index) {
             unit->equipment[equipment_slot] = ITEM_ID_NOTHING;
             sale_value = item_get_data(item_id)->price;
             sale_value /= 4;
-            script_variable_set(
-                EVENT_SCRIPT_VAR_WAR_FUNDS, script_variable_get(EVENT_SCRIPT_VAR_WAR_FUNDS) + sale_value);
+            script_variable_set(SCRIPT_VAR_WAR_FUNDS, script_variable_get(SCRIPT_VAR_WAR_FUNDS) + sale_value);
             sold_equipment = 1;
         }
     }
@@ -286,8 +285,7 @@ s32 after_battle_store_or_sell_equipment(s32 battle_index) {
                 unit->equipment[equipment_slot] = ITEM_ID_NOTHING;
                 sale_value = item_get_data(item_id)->price;
                 sale_value /= 4;
-                script_variable_set(
-                    EVENT_SCRIPT_VAR_WAR_FUNDS, script_variable_get(EVENT_SCRIPT_VAR_WAR_FUNDS) + sale_value);
+                script_variable_set(SCRIPT_VAR_WAR_FUNDS, script_variable_get(SCRIPT_VAR_WAR_FUNDS) + sale_value);
                 sold_equipment = 1;
             } else {
                 g_item_quantities[item_id]++;
@@ -541,7 +539,7 @@ static s32 run_dismissal_selection(void) {
         message_group_index = 0;
         if (party_unit->sprite_set & CHARACTER_IDENTITY_HIGH_BIT_MASK) {
             message_id = ((party_unit->sprite_set - CHARACTER_IDENTITY_SELECTOR_FIRST) * 8)
-                + (script_variable_get(EVENT_SCRIPT_VAR_RANDOM_VALUE) & 7) + 0x1800;
+                + (script_variable_get(SCRIPT_VAR_RANDOM_VALUE) & 7) + 0x1800;
         } else {
             s32 identity_column;
             u8(*identity_group)[PARTY_MESSAGE_IDENTITIES_PER_GROUP];

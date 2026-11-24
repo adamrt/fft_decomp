@@ -694,7 +694,7 @@ static void open_result(s32 proposition) {
     party = &g_proposition_report.reporter_party_index;
     g_text_substitution_values[0] = *party + TEXT_ID_UNIT_NAME_BASE;
     message = 0x9C;
-    script_variable_set(EVENT_SCRIPT_VAR_DIALOG_PORTRAIT, portrait_get_party_unit_code(*party));
+    script_variable_set(SCRIPT_VAR_DIALOG_PORTRAIT, portrait_get_party_unit_code(*party));
     if (g_proposition_report.recalled != 0) {
         message = 0xA2;
     }
@@ -796,24 +796,24 @@ void proposition_update_result(menu_stack_record_t* level) {
     g_display_object_queue_count--;
     /* 0xFFFD clears PROPOSITION_VARIABLE_IN_PROGRESS from the 16-bit value. */
     proposition_flags = script_variable_get(g_proposition_active[level->proposition_result.proposition].proposition_id
-                            + EVENT_SCRIPT_VAR_PROPOSITION_FIRST)
+                            + SCRIPT_VAR_PROPOSITION_FIRST)
         & 0xFFFD;
     if (g_proposition_report.result == PROPOSITION_RESULT_SUCCESS) {
         proposition_flags |= PROPOSITION_VARIABLE_COMPLETED;
     }
 
     script_variable_set(
-        g_proposition_active[level->proposition_result.proposition].proposition_id + EVENT_SCRIPT_VAR_PROPOSITION_FIRST,
+        g_proposition_active[level->proposition_result.proposition].proposition_id + SCRIPT_VAR_PROPOSITION_FIRST,
         proposition_flags);
-    war_funds = script_variable_get(EVENT_SCRIPT_VAR_WAR_FUNDS) + g_proposition_gil_amount;
+    war_funds = script_variable_get(SCRIPT_VAR_WAR_FUNDS) + g_proposition_gil_amount;
     if (war_funds > EVENT_WAR_FUNDS_MAX) {
         war_funds = EVENT_WAR_FUNDS_MAX;
     }
 
-    script_variable_set(EVENT_SCRIPT_VAR_WAR_FUNDS, war_funds);
-    g_hud_value = script_variable_get(EVENT_SCRIPT_VAR_WAR_FUNDS);
-    day = script_variable_get(EVENT_SCRIPT_VAR_DAY);
-    month = script_variable_get(EVENT_SCRIPT_VAR_MONTH);
+    script_variable_set(SCRIPT_VAR_WAR_FUNDS, war_funds);
+    g_hud_value = script_variable_get(SCRIPT_VAR_WAR_FUNDS);
+    day = script_variable_get(SCRIPT_VAR_DAY);
+    month = script_variable_get(SCRIPT_VAR_MONTH);
     if (g_proposition_report.result == PROPOSITION_RESULT_SUCCESS) {
         date.day = day;
         date.month = month;
@@ -822,7 +822,7 @@ void proposition_update_result(menu_stack_record_t* level) {
     }
 
     if (g_proposition_report.reward_type == PROPOSITION_REWARD_TREASURE) {
-        script_variable_set(g_proposition_report.reward_index + EVENT_SCRIPT_VAR_TREASURE_FIRST, 1);
+        script_variable_set(g_proposition_report.reward_index + SCRIPT_VAR_TREASURE_FIRST, 1);
         date.day = day;
         date.month = month;
         calendar_write_date_bits(
@@ -830,7 +830,7 @@ void proposition_update_result(menu_stack_record_t* level) {
     }
 
     if (g_proposition_report.reward_type == PROPOSITION_REWARD_UNEXPLORED_LAND) {
-        script_variable_set(g_proposition_report.reward_index + EVENT_SCRIPT_VAR_UNEXPLORED_LAND_FIRST, 1);
+        script_variable_set(g_proposition_report.reward_index + SCRIPT_VAR_UNEXPLORED_LAND_FIRST, 1);
         date.day = day;
         date.month = month;
         calendar_write_date_bits(g_brave_story_land_discovery_date_bits, g_proposition_report.reward_index, &date);
@@ -980,7 +980,7 @@ static s32 update_report_message(proposition_report_level_t* state, s32 message)
             thread_start(WORLD_MAP_THREAD_SLOT_MESSAGE, message_box_thread);
         party_index = &g_proposition_report.reporter_party_index;
         g_text_substitution_values[0] = *party_index + TEXT_ID_UNIT_NAME_BASE;
-        script_variable_set(EVENT_SCRIPT_VAR_DIALOG_PORTRAIT, portrait_get_party_unit_code(*party_index));
+        script_variable_set(SCRIPT_VAR_DIALOG_PORTRAIT, portrait_get_party_unit_code(*party_index));
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19,
             proposition_adjust_message(message, *party_index) + TEXT_ID_WORLD_MESSAGE_BASE, 0);
     } else if (g_world_map_input_new_button_presses & PSX_PAD_CIRCLE) {

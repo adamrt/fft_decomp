@@ -30,7 +30,7 @@ typedef struct map_tile_coordinates {
 typedef char map_tile_coordinates_size_must_be_6[sizeof(map_tile_coordinates_t) == 6 ? 1 : -1];
 
 /* maps */
-/* Battle map ids: EVENT_SCRIPT_VAR_CURRENT_MAP and the index of
+/* Battle map ids: SCRIPT_VAR_CURRENT_MAP and the index of
  * g_map_gns_lba. Each is named as its map name text spells it
  * (TEXT_ID_MAP_NAME_BASE + id - 1); a map whose name repeats an earlier one
  * ends in its id. The ten floors of the Deep Dungeon

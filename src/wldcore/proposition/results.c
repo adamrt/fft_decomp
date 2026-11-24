@@ -90,7 +90,7 @@ s32 proposition_update_participant_message(proposition_report_level_t* state, s3
         thread_start(WORLD_MAP_THREAD_SLOT_MESSAGE, message_box_thread);
         g_text_substitution_values[0] = g_proposition_report.speaker_party_index + TEXT_ID_UNIT_NAME_BASE;
         script_variable_set(
-            EVENT_SCRIPT_VAR_DIALOG_PORTRAIT, portrait_get_party_unit_code(g_proposition_report.speaker_party_index));
+            SCRIPT_VAR_DIALOG_PORTRAIT, portrait_get_party_unit_code(g_proposition_report.speaker_party_index));
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19,
             proposition_adjust_message(message, g_proposition_report.speaker_party_index) + TEXT_ID_WORLD_MESSAGE_BASE,
             0);
@@ -318,7 +318,7 @@ void proposition_roll_bonus_reward(void) {
         g_proposition_report.reward_type = PROPOSITION_REWARD_TREASURE;
         count = 0;
         for (i = 0; i < 31; i++) {
-            if (script_variable_get(i + EVENT_SCRIPT_VAR_TREASURE_FIRST) == 0) {
+            if (script_variable_get(i + SCRIPT_VAR_TREASURE_FIRST) == 0) {
                 candidates[count] = i;
                 count++;
             }
@@ -327,7 +327,7 @@ void proposition_roll_bonus_reward(void) {
         count = 0;
         g_proposition_report.reward_type = discovery_kind;
         for (i = 0; i < 16; i++) {
-            if (script_variable_get(i + EVENT_SCRIPT_VAR_UNEXPLORED_LAND_FIRST) == 0) {
+            if (script_variable_get(i + SCRIPT_VAR_UNEXPLORED_LAND_FIRST) == 0) {
                 candidates[count] = i;
                 count++;
             }
@@ -559,7 +559,7 @@ s32 proposition_get_milestone_rank(void) {
     if (g_proposition_report.reward_type == PROPOSITION_REWARD_TREASURE) {
         count = 0;
         for (i = 0; i < 31; i++) {
-            if (script_variable_get(i + EVENT_SCRIPT_VAR_TREASURE_FIRST) != 0) {
+            if (script_variable_get(i + SCRIPT_VAR_TREASURE_FIRST) != 0) {
                 count++;
             }
         }
@@ -576,8 +576,8 @@ s32 proposition_get_milestone_rank(void) {
 
     if (g_proposition_report.reward_type == PROPOSITION_REWARD_UNEXPLORED_LAND) {
         count = 0;
-        for (i = 0; i < EVENT_SCRIPT_VAR_UNEXPLORED_LAND_COUNT; i++) {
-            if (script_variable_get(i + EVENT_SCRIPT_VAR_UNEXPLORED_LAND_FIRST) != 0) {
+        for (i = 0; i < SCRIPT_VAR_UNEXPLORED_LAND_COUNT; i++) {
+            if (script_variable_get(i + SCRIPT_VAR_UNEXPLORED_LAND_FIRST) != 0) {
                 count++;
             }
         }

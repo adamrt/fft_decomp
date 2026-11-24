@@ -44,20 +44,20 @@ s32 proposition_is_available_at(s32 index, s32 location) {
         }
     }
     if (entry.condition_flags & PROPOSITION_CONDITION_SHOP_AVAILABILITY) {
-        if (script_variable_get(EVENT_SCRIPT_VAR_SHOP_ITEM_AVAILABILITY) < entry.required_shop_availability) {
+        if (script_variable_get(SCRIPT_VAR_SHOP_ITEM_AVAILABILITY) < entry.required_shop_availability) {
             return 0;
         }
     }
     if (entry.condition_flags & PROPOSITION_CONDITION_ZODIAC_SIGN) {
-        month = script_variable_get(EVENT_SCRIPT_VAR_MONTH);
-        day = script_variable_get(EVENT_SCRIPT_VAR_DAY);
+        month = script_variable_get(SCRIPT_VAR_MONTH);
+        day = script_variable_get(SCRIPT_VAR_DAY);
         calendar_date_to_zodiac(&month, &day);
         if (month != entry.condition_value) {
             return 0;
         }
     }
     if (entry.condition_flags & PROPOSITION_CONDITION_STATUS) {
-        if (!(script_variable_get(entry.condition_value + EVENT_SCRIPT_VAR_PROPOSITION_FIRST)
+        if (!(script_variable_get(entry.condition_value + SCRIPT_VAR_PROPOSITION_FIRST)
                 & PROPOSITION_VARIABLE_COMPLETED)) {
             return 0;
         }

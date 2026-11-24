@@ -570,11 +570,11 @@ void save_image_build(s32 slot) {
     g_save_buffer_pointer->summary.job_id = unit->job_id;
     g_save_buffer_pointer->summary.level = unit->level;
 
-    day = script_variable_get(EVENT_SCRIPT_VAR_DAY);
-    month = script_variable_get(EVENT_SCRIPT_VAR_MONTH);
+    day = script_variable_get(SCRIPT_VAR_DAY);
+    month = script_variable_get(SCRIPT_VAR_MONTH);
     g_save_buffer_pointer->summary.date.day = day;
     g_save_buffer_pointer->summary.date.month = month;
-    g_save_buffer_pointer->summary.location = script_variable_get(EVENT_SCRIPT_VAR_LOCATION);
+    g_save_buffer_pointer->summary.location = script_variable_get(SCRIPT_VAR_LOCATION);
     g_save_buffer_pointer->summary.slot = 0xff;
     g_save_buffer_pointer->elapsed_seconds
         = g_save_play_time_minutes * 60 + g_save_play_time_seconds + g_save_play_time_hours * 3600;

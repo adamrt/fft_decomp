@@ -35,7 +35,7 @@ s32 battle_update_input(void) {
     map_unit_t* unit;
 
     g_input_current_buttons = PadRead(1);
-    if (script_variable_get(EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS)) {
+    if (script_variable_get(SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS)) {
         script_filter_controller_input(&g_input_current_buttons);
     }
 

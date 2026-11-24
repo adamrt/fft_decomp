@@ -31,8 +31,8 @@ void save_init_state(void) {
     g_menu_scroll_slow_step = value;
     g_menu_scroll_fast_step = value;
     value = s_game_options_defaults.value;
-    g_script_variable_storage[EVENT_SCRIPT_VAR_MONTH] = 1;
-    g_script_variable_storage[EVENT_SCRIPT_VAR_DAY] = 1;
+    g_script_variable_storage[SCRIPT_VAR_MONTH] = 1;
+    g_script_variable_storage[SCRIPT_VAR_DAY] = 1;
     g_input_repeat_initial_delay = 14;
     g_input_secondary_repeat_period = 10;
     g_menu_scroll_accel_delay = 32;

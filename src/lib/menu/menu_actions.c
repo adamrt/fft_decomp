@@ -39,7 +39,7 @@ s32 menu_can_accept_input(void) {
 /* Act on Circle for menu row row_index: start the row's menu thread one slot below the current
  * one, clear the selection, or for a negative action -n ask n menu threads from the current one up
  * to close. Stores the row as the entry's result and plays the confirm sound unless the action is
- * silent; in tutorial input mode rows disabled by EVENT_SCRIPT_VAR_DISABLED_MENU_ACTIONS do
+ * silent; in tutorial input mode rows disabled by SCRIPT_VAR_DISABLED_MENU_ACTIONS do
  * nothing. */
 void menu_handle_confirm_input(menu_entry_t* entry, s32 row_index) {
     s32 silent;
@@ -52,7 +52,7 @@ void menu_handle_confirm_input(menu_entry_t* entry, s32 row_index) {
     s16* result;
 
     if (g_menu_input_mode == MENU_INPUT_TUTORIAL
-        && ((script_variable_get(EVENT_SCRIPT_VAR_DISABLED_MENU_ACTIONS) >> row_index) & 1)) {
+        && ((script_variable_get(SCRIPT_VAR_DISABLED_MENU_ACTIONS) >> row_index) & 1)) {
         return;
     }
     silent = 0;

@@ -84,8 +84,8 @@ void deploy_init_roster(void) {
         g_deploy_current_squad_id = 0;
     }
 
-    if (script_variable_get(EVENT_SCRIPT_VAR_WORLD_DEBUG_BATTLE_STYLE) != 0) {
-        s32 map_id = script_variable_get(EVENT_SCRIPT_VAR_CURRENT_MAP);
+    if (script_variable_get(SCRIPT_VAR_WORLD_DEBUG_BATTLE_STYLE) != 0) {
+        s32 map_id = script_variable_get(SCRIPT_VAR_CURRENT_MAP);
 
         g_deploy_current_squad_id = 0;
         for (index = 0; index < 0x300; index++) {
@@ -97,20 +97,20 @@ void deploy_init_roster(void) {
         if (g_deploy_squad_data[g_deploy_current_squad_id].valid_tile_bitmap == 0) {
             g_deploy_current_squad_id = 0;
         }
-        script_variable_set(EVENT_SCRIPT_VAR_DEPLOYMENT_SQUAD_COUNT, 2);
-        script_variable_set(EVENT_SCRIPT_VAR_DEPLOYMENT_PRIMARY_SQUAD_ID, g_deploy_current_squad_id);
+        script_variable_set(SCRIPT_VAR_DEPLOYMENT_SQUAD_COUNT, 2);
+        script_variable_set(SCRIPT_VAR_DEPLOYMENT_PRIMARY_SQUAD_ID, g_deploy_current_squad_id);
         if (g_deploy_current_squad_id == 0) {
-            script_variable_set(EVENT_SCRIPT_VAR_DEPLOYMENT_SECONDARY_SQUAD_ID, 0);
+            script_variable_set(SCRIPT_VAR_DEPLOYMENT_SECONDARY_SQUAD_ID, 0);
         } else {
-            script_variable_set(EVENT_SCRIPT_VAR_DEPLOYMENT_SECONDARY_SQUAD_ID, g_deploy_current_squad_id + 1);
+            script_variable_set(SCRIPT_VAR_DEPLOYMENT_SECONDARY_SQUAD_ID, g_deploy_current_squad_id + 1);
         }
         script_variable_set(
-            EVENT_SCRIPT_VAR_DEPLOYMENT_UNIT_LIMIT, g_deploy_squad_data[g_deploy_current_squad_id].unit_limit);
+            SCRIPT_VAR_DEPLOYMENT_UNIT_LIMIT, g_deploy_squad_data[g_deploy_current_squad_id].unit_limit);
         g_deploy_squad_data[g_deploy_current_squad_id].unit_limit = 4;
     } else {
         g_encounter_selection_mode = ENCOUNTER_SELECTION_SCRIPT_VARIABLE;
-        g_deploy_current_squad_id = script_variable_get(EVENT_SCRIPT_VAR_DEPLOYMENT_PRIMARY_SQUAD_ID);
+        g_deploy_current_squad_id = script_variable_get(SCRIPT_VAR_DEPLOYMENT_PRIMARY_SQUAD_ID);
         script_variable_set(
-            EVENT_SCRIPT_VAR_DEPLOYMENT_UNIT_LIMIT, g_deploy_squad_data[g_deploy_current_squad_id].unit_limit);
+            SCRIPT_VAR_DEPLOYMENT_UNIT_LIMIT, g_deploy_squad_data[g_deploy_current_squad_id].unit_limit);
     }
 }

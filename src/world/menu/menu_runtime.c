@@ -175,14 +175,14 @@ void world_map_destination_list_thread(void) {
     s32 selected;
 
     for (i = 0, count = 0; i < LOCATION_COUNT; i++) {
-        if (script_variable_get(i + EVENT_SCRIPT_VAR_LOCATION_VISIBLE_FIRST) != 0) {
+        if (script_variable_get(i + SCRIPT_VAR_LOCATION_VISIBLE_FIRST) != 0) {
             g_world_map_destination_list_text_ids[count] = i + TEXT_ID_LOCATION_NAME_BASE;
-            if (script_variable_get(i + EVENT_SCRIPT_VAR_LOCATION_COLOR_FIRST) == 0) {
+            if (script_variable_get(i + SCRIPT_VAR_LOCATION_COLOR_FIRST) == 0) {
                 g_world_map_destination_list_row_colors[count] = 8;
             } else {
                 g_world_map_destination_list_row_colors[count] = 0;
             }
-            if (i == script_variable_get(EVENT_SCRIPT_VAR_LOCATION)) {
+            if (i == script_variable_get(SCRIPT_VAR_LOCATION)) {
                 g_world_map_destination_list_row_colors[count] = 4;
                 selected = count;
             }
@@ -225,7 +225,7 @@ void world_map_confirm_destination(void) {
         pending[0] = 0;
         value = g_world_map_destination_list_text_ids[selection] - TEXT_ID_LOCATION_NAME_BASE;
         pending[1] = value;
-        script_variable_set(EVENT_SCRIPT_VAR_CURRENT_MAP, value);
+        script_variable_set(SCRIPT_VAR_CURRENT_MAP, value);
         g_world_map_flags |= WORLD_MAP_FLAG_REQUEST_DESTINATION;
         thread_set_parameters(g_thread_current_id + 1, 0, 0, 1);
         thread_set_parameters(g_thread_current_id + 2, 0, 0, 1);
@@ -351,15 +351,15 @@ void menu_screen_init_open_text(void) {
     g_thread_call_target = (void (*)(void))file_load_into_buffer_checked;
     thread_call_on_main_stack(DISC_SECTOR_EVENT_OPEN_LZW, 0x5800, s_menu_text_file_buffer);
     menu_subsystems_reset();
-    script_variable_set(EVENT_SCRIPT_VAR_WORLD_DEBUG_BATTLE_STYLE, 0);
+    script_variable_set(SCRIPT_VAR_WORLD_DEBUG_BATTLE_STYLE, 0);
     g_menu_thread_menu_data = g_menu_screen_default_entries;
     for (i = 0; i < TEXT_SECTION_COUNT; i++) {
         g_text_section_pointers[i] = s_menu_text_file_buffer[i] + (u8*)&s_menu_text_file_buffer[TEXT_SECTION_COUNT];
     }
-    script_variable_set(EVENT_SCRIPT_VAR_RAMZA_MANDATORY_IN_SQUAD, 0);
-    script_variable_set(EVENT_SCRIPT_VAR_DEPLOYMENT_SQUAD_COUNT, 1);
-    script_variable_set(EVENT_SCRIPT_VAR_DEPLOYMENT_PRIMARY_SQUAD_ID, 0);
-    script_variable_set(EVENT_SCRIPT_VAR_DEPLOYMENT_SECONDARY_SQUAD_ID, 1);
+    script_variable_set(SCRIPT_VAR_RAMZA_MANDATORY_IN_SQUAD, 0);
+    script_variable_set(SCRIPT_VAR_DEPLOYMENT_SQUAD_COUNT, 1);
+    script_variable_set(SCRIPT_VAR_DEPLOYMENT_PRIMARY_SQUAD_ID, 0);
+    script_variable_set(SCRIPT_VAR_DEPLOYMENT_SECONDARY_SQUAD_ID, 1);
 }
 
 /*
@@ -376,16 +376,16 @@ void menu_screen_init_world_resources(void) {
     g_thread_call_target = (void (*)(void))file_load_into_buffer_checked;
     thread_call_on_main_stack(DISC_SECTOR_EVENT_WORLD_LZW, 0xE800, s_menu_text_file_buffer);
     menu_subsystems_reset();
-    script_variable_set(EVENT_SCRIPT_VAR_WORLD_DEBUG_BATTLE_STYLE, 0);
+    script_variable_set(SCRIPT_VAR_WORLD_DEBUG_BATTLE_STYLE, 0);
     g_menu_thread_menu_data = g_menu_screen_default_entries;
     for (i = 0; i < TEXT_SECTION_COUNT; i++) {
         g_text_section_pointers[i] = s_menu_text_file_buffer[i] + (u8*)&s_menu_text_file_buffer[TEXT_SECTION_COUNT];
     }
     g_text_section_pointers[TEXT_SECTION_LOCATION_NAMES] = g_world_map_location_names;
-    script_variable_set(EVENT_SCRIPT_VAR_RAMZA_MANDATORY_IN_SQUAD, 0);
-    script_variable_set(EVENT_SCRIPT_VAR_DEPLOYMENT_SQUAD_COUNT, 1);
-    script_variable_set(EVENT_SCRIPT_VAR_DEPLOYMENT_PRIMARY_SQUAD_ID, 0);
-    script_variable_set(EVENT_SCRIPT_VAR_DEPLOYMENT_SECONDARY_SQUAD_ID, 1);
+    script_variable_set(SCRIPT_VAR_RAMZA_MANDATORY_IN_SQUAD, 0);
+    script_variable_set(SCRIPT_VAR_DEPLOYMENT_SQUAD_COUNT, 1);
+    script_variable_set(SCRIPT_VAR_DEPLOYMENT_PRIMARY_SQUAD_ID, 0);
+    script_variable_set(SCRIPT_VAR_DEPLOYMENT_SECONDARY_SQUAD_ID, 1);
 }
 
 /*
@@ -406,16 +406,16 @@ void menu_screen_init_world_text(void) {
     g_thread_call_target = (void (*)(void))file_load_into_buffer_checked;
     thread_call_on_main_stack(DISC_SECTOR_EVENT_WORLD_LZW, 0xe800, s_menu_text_file_buffer);
     menu_subsystems_reset();
-    script_variable_set(EVENT_SCRIPT_VAR_WORLD_DEBUG_BATTLE_STYLE, 0);
+    script_variable_set(SCRIPT_VAR_WORLD_DEBUG_BATTLE_STYLE, 0);
     g_menu_thread_menu_data = g_menu_screen_default_entries;
     for (i = 0; i < TEXT_SECTION_COUNT; i++) {
         g_text_section_pointers[i] = s_menu_text_file_buffer[i] + (u8*)&s_menu_text_file_buffer[TEXT_SECTION_COUNT];
     }
     g_text_section_pointers[TEXT_SECTION_LOCATION_NAMES] = g_world_map_location_names;
-    script_variable_set(EVENT_SCRIPT_VAR_RAMZA_MANDATORY_IN_SQUAD, 0);
-    script_variable_set(EVENT_SCRIPT_VAR_DEPLOYMENT_SQUAD_COUNT, 1);
-    script_variable_set(EVENT_SCRIPT_VAR_DEPLOYMENT_PRIMARY_SQUAD_ID, 0);
-    script_variable_set(EVENT_SCRIPT_VAR_DEPLOYMENT_SECONDARY_SQUAD_ID, 1);
+    script_variable_set(SCRIPT_VAR_RAMZA_MANDATORY_IN_SQUAD, 0);
+    script_variable_set(SCRIPT_VAR_DEPLOYMENT_SQUAD_COUNT, 1);
+    script_variable_set(SCRIPT_VAR_DEPLOYMENT_PRIMARY_SQUAD_ID, 0);
+    script_variable_set(SCRIPT_VAR_DEPLOYMENT_SECONDARY_SQUAD_ID, 1);
 }
 
 /* Return from WLDCORE to the formation screen: unload the scenario music, reload the face text,
@@ -446,10 +446,10 @@ void formation_run_for_return_event(void) {
     menu_screen_reset_context();
     ClearImage(&g_menu_screen_clear_rect, 0, 0, 0);
     DrawSync(0);
-    script_variable_set(EVENT_SCRIPT_VAR_CURRENT_EVENT, script_variable_get(EVENT_SCRIPT_VAR_FORMATION_RETURN_EVENT));
-    script_variable_set(EVENT_SCRIPT_VAR_FORMATION_RETURN_EVENT, 0);
-    if (script_variable_get(EVENT_SCRIPT_VAR_NEXT_SCENARIO) != 0) {
-        script_variable_set(EVENT_SCRIPT_VAR_NEXT_SCENARIO, 0);
+    script_variable_set(SCRIPT_VAR_CURRENT_EVENT, script_variable_get(SCRIPT_VAR_FORMATION_RETURN_EVENT));
+    script_variable_set(SCRIPT_VAR_FORMATION_RETURN_EVENT, 0);
+    if (script_variable_get(SCRIPT_VAR_NEXT_SCENARIO) != 0) {
+        script_variable_set(SCRIPT_VAR_NEXT_SCENARIO, 0);
     }
 }
 
@@ -780,12 +780,12 @@ static void restore_map_layers(void) {
  * the next map. */
 void debug_battle_setup_thread(void) {
     g_world_map_flags += 3;
-    script_variable_set(EVENT_SCRIPT_VAR_WORLD_DEBUG_BATTLE_STYLE, 1);
-    script_variable_set(EVENT_SCRIPT_VAR_CURRENT_EVENT, 0);
-    script_variable_set(EVENT_SCRIPT_VAR_MAP_ARRANGEMENT, 0);
-    script_variable_set(EVENT_SCRIPT_VAR_WEATHER_AND_TIME, 0);
-    script_variable_set(EVENT_SCRIPT_VAR_WEATHER, 0);
-    script_variable_set(EVENT_SCRIPT_VAR_TIME_OF_DAY, 0);
+    script_variable_set(SCRIPT_VAR_WORLD_DEBUG_BATTLE_STYLE, 1);
+    script_variable_set(SCRIPT_VAR_CURRENT_EVENT, 0);
+    script_variable_set(SCRIPT_VAR_MAP_ARRANGEMENT, 0);
+    script_variable_set(SCRIPT_VAR_WEATHER_AND_TIME, 0);
+    script_variable_set(SCRIPT_VAR_WEATHER, 0);
+    script_variable_set(SCRIPT_VAR_TIME_OF_DAY, 0);
     g_travel_next_map_id = g_menu_screen_number_entry_value;
     thread_current_exit();
 }
@@ -1277,7 +1277,7 @@ s16 menu_screen_update_menu_frame(u32* otag, u32 input) {
         sound_play_sfx_on_free_channel(g_sound_pending_sfx_id);
     }
     if (g_command_pending_selection[0] == 0) {
-        script_variable_set(EVENT_SCRIPT_VAR_CURRENT_MAP, g_command_pending_selection[1]);
+        script_variable_set(SCRIPT_VAR_CURRENT_MAP, g_command_pending_selection[1]);
         g_world_map_flags |= WORLD_MAP_FLAG_REQUEST_DESTINATION;
     }
     if (g_menu_input_block_frames != 0) {

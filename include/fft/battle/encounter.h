@@ -10,7 +10,7 @@
 /* current encounter */
 /* g_encounter_selection_mode: which ENTD start_entd_open opens. */
 typedef enum encounter_selection {
-    ENCOUNTER_SELECTION_SCRIPT_VARIABLE = 0, /* EVENT_SCRIPT_VAR_CURRENT_ENTD */
+    ENCOUNTER_SELECTION_SCRIPT_VARIABLE = 0, /* SCRIPT_VAR_CURRENT_ENTD */
     ENCOUNTER_SELECTION_ENTD_250 = 1,
     ENCOUNTER_SELECTION_RANDOM_75_TO_79 = 2,
     ENCOUNTER_SELECTION_RANDOM_1_TO_59 = 3,

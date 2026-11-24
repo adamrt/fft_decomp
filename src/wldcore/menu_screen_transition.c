@@ -48,9 +48,9 @@ void world_map_open_screen_transition(menu_stack_level_e destination_level, s32 
         music_queue_wait_until_empty();
         music_queue_start_track(MUSIC_QUEUE_TRACK(2, MUSIC_BRAVE_STORY));
         world_map_suspend_cursor_level(&g_menu_stack_records[g_menu_stack_depth - 1]);
-        if (script_variable_get(EVENT_SCRIPT_VAR_FACTS_ENABLED) != 0) {
-            for (i = 0; i < EVENT_SCRIPT_VAR_FACT_COUNT; i++) {
-                if (script_variable_get(i + EVENT_SCRIPT_VAR_FACT_FIRST) != 0) {
+        if (script_variable_get(SCRIPT_VAR_FACTS_ENABLED) != 0) {
+            for (i = 0; i < SCRIPT_VAR_FACT_COUNT; i++) {
+                if (script_variable_get(i + SCRIPT_VAR_FACT_FIRST) != 0) {
                     count++;
                 }
             }

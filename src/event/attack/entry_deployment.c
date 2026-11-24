@@ -319,7 +319,7 @@ void attack_deployment_entrypoint(void) {
     LoadImage(&g_deploy_arrow_clut_rect, g_deploy_arrow_clut_data);
     thread_yield();
 
-    g_deploy_current_squad_id = script_variable_get(EVENT_SCRIPT_VAR_DEPLOYMENT_PRIMARY_SQUAD_ID);
+    g_deploy_current_squad_id = script_variable_get(SCRIPT_VAR_DEPLOYMENT_PRIMARY_SQUAD_ID);
     g_deploy_current_squad_data = &g_deploy_squad_data[g_deploy_current_squad_id];
     script_set_event_speed(1);
     g_fade_event_level = 0xff;
@@ -344,7 +344,7 @@ void attack_deployment_entrypoint(void) {
     build_valid_tiles(g_deploy_render_buffers[0].tiles[0]);
 
     /* When Ramza (roster id 0) must deploy, place him on the first valid tile. */
-    if (script_variable_get(EVENT_SCRIPT_VAR_RAMZA_MANDATORY_IN_SQUAD) != 0) {
+    if (script_variable_get(SCRIPT_VAR_RAMZA_MANDATORY_IN_SQUAD) != 0) {
         for (row = 0; row < 5; row++) {
             for (column = 0; column < 5; column++) {
                 if (g_deploy_valid_tiles[row][column] != 0) {
@@ -364,13 +364,12 @@ ramza_placed:
 
     /* transition: 0 for the first squad, 1 after CROSS went back a squad, 2 after START moved on. */
     transition = 0;
-    for (g_deploy_current_squad = 0;
-        g_deploy_current_squad < script_variable_get(EVENT_SCRIPT_VAR_DEPLOYMENT_SQUAD_COUNT);
+    for (g_deploy_current_squad = 0; g_deploy_current_squad < script_variable_get(SCRIPT_VAR_DEPLOYMENT_SQUAD_COUNT);
         g_deploy_current_squad++) {
         g_deploy_current_squad_id
-            = script_variable_get(g_deploy_current_squad + EVENT_SCRIPT_VAR_DEPLOYMENT_PRIMARY_SQUAD_ID);
+            = script_variable_get(g_deploy_current_squad + SCRIPT_VAR_DEPLOYMENT_PRIMARY_SQUAD_ID);
         g_deploy_current_squad_data = &g_deploy_squad_data[g_deploy_current_squad_id];
-        if (script_variable_get(EVENT_SCRIPT_VAR_WORLD_DEBUG_BATTLE_STYLE) != 0) {
+        if (script_variable_get(SCRIPT_VAR_WORLD_DEBUG_BATTLE_STYLE) != 0) {
             g_deploy_current_squad_data->unit_limit = 4;
         }
 
@@ -614,7 +613,7 @@ ramza_placed:
                     g_unit_panel_button_prompt_animation[4] = 7;
                     /* With another squad to fill and units left over, slide on to it; otherwise
                      * confirm the whole deployment. */
-                    if (script_variable_get(EVENT_SCRIPT_VAR_DEPLOYMENT_SQUAD_COUNT) - 1 != g_deploy_current_squad
+                    if (script_variable_get(SCRIPT_VAR_DEPLOYMENT_SQUAD_COUNT) - 1 != g_deploy_current_squad
                         && g_deploy_fieldable_unit_count > g_deploy_deployed_unit_count) {
                         s_deploy_menu_state = DEPLOY_MENU_HIDDEN;
                         for (i = 0; i < 5; i++) {
@@ -729,7 +728,7 @@ ramza_placed:
                         if (s_deploy_cursor_column[0] == s_deploy_cursor_column[1]
                             && s_deploy_cursor_row[0] == s_deploy_cursor_row[1]) {
                             if (g_deploy_roster_id_by_tile[row][column] == 0
-                                && script_variable_get(EVENT_SCRIPT_VAR_RAMZA_MANDATORY_IN_SQUAD) == 1) {
+                                && script_variable_get(SCRIPT_VAR_RAMZA_MANDATORY_IN_SQUAD) == 1) {
                                 g_sound_pending_sfx_id = SOUND_SFX_INVALID;
                                 s_deploy_menu_entries[DEPLOY_ENTRY_NOTICE].text_id = DEPLOY_NOTICE_RAMZA_REQUIRED;
                                 thread_start(DEPLOY_THREAD_SLOT_NOTICE, menu_icon_linked_entry_thread);
@@ -883,8 +882,8 @@ ramza_placed:
      * count per squad and write the second squad from slot 6. */
     slots = g_deploy_unit_map_coordinates;
     count = 0;
-    for (i = 0; i < script_variable_get(EVENT_SCRIPT_VAR_DEPLOYMENT_SQUAD_COUNT); i++) {
-        if (script_variable_get(EVENT_SCRIPT_VAR_WORLD_DEBUG_BATTLE_STYLE) != 0) {
+    for (i = 0; i < script_variable_get(SCRIPT_VAR_DEPLOYMENT_SQUAD_COUNT); i++) {
+        if (script_variable_get(SCRIPT_VAR_WORLD_DEBUG_BATTLE_STYLE) != 0) {
             count = 0;
             if (i == 1) {
                 slots = &g_deploy_unit_map_coordinates[6];
@@ -892,7 +891,7 @@ ramza_placed:
         }
         /* Dead store, kept from the original code. */
         g_deploy_current_squad_id = i;
-        g_deploy_current_squad_id = script_variable_get(i + EVENT_SCRIPT_VAR_DEPLOYMENT_PRIMARY_SQUAD_ID);
+        g_deploy_current_squad_id = script_variable_get(i + SCRIPT_VAR_DEPLOYMENT_PRIMARY_SQUAD_ID);
         g_deploy_current_squad_data = &g_deploy_squad_data[g_deploy_current_squad_id];
         flags = g_deploy_current_squad_data->orientation_flags;
         /* Grid rotation: the low nibble (stored 1-based) plus the high nibble, modulo 4. */
@@ -965,7 +964,7 @@ ramza_placed:
     }
 
     deploy_mark_finished();
-    script_variable_set(EVENT_SCRIPT_VAR_DEPLOYED_UNIT_COUNT, count);
+    script_variable_set(SCRIPT_VAR_DEPLOYED_UNIT_COUNT, count);
     thread_start(DEPLOY_THREAD_SLOT_SCREEN_GRAPHICS, attack_map_title_entrypoint);
     thread_set_parameters(DEPLOY_THREAD_SLOT_SCREEN_GRAPHICS, 0, 0, 0);
     thread_wait_inactive(DEPLOY_THREAD_SLOT_SCREEN_GRAPHICS);
@@ -1847,7 +1846,7 @@ static void labels_draw_thread(void) {
     while (1) {
         squad = g_deploy_current_squad;
         parity ^= 1;
-        if (g_deploy_current_squad >= script_variable_get(EVENT_SCRIPT_VAR_DEPLOYMENT_SQUAD_COUNT)) {
+        if (g_deploy_current_squad >= script_variable_get(SCRIPT_VAR_DEPLOYMENT_SQUAD_COUNT)) {
             squad--;
         }
         if (squad == 0) {

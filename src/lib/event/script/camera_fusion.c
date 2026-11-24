@@ -81,7 +81,7 @@ void camera_fusion_thread(void) {
     key_count++;
 
     cursor = script;
-    camera_store_yaw_band(g_script_variables[EVENT_SCRIPT_VAR_CAMERA_YAW]);
+    camera_store_yaw_band(g_script_variables[SCRIPT_VAR_CAMERA_YAW]);
 
     /* Key 0 is the camera as it stands. Each later key is the next CAMERA
      * instruction, after the Focus, RelativeCamera and FocusSpeed instructions
