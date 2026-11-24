@@ -56,7 +56,7 @@ typedef struct map_mesh_quad_normals {
     SVECTOR vertex[4];
 } map_mesh_quad_normals_t;
 
-/* polygon_flags of the textured map polygons (MAP_RESOURCE_POLYGON_FLAGS).
+/* polygon_flags of the textured map polygons (GNS_RESOURCE_POLYGON_FLAGS).
  * The four map_queue_ routines skip a polygon whose hide bit for the
  * camera yaw is set. No mesh file sets bits 0, 1 or 14. */
 enum {
@@ -202,7 +202,7 @@ typedef enum map_texture_animation_mode {
 enum { MAP_TEXTURE_ANIMATION_COUNT = 32 };
 
 /* Runtime copy of one 0x14-byte map texture animation instruction
- * (MAP_RESOURCE_TEXTURE_ANIMATIONS, 32 rows).
+ * (GNS_RESOURCE_TEXTURE_ANIMATIONS, 32 rows).
  * UV animations move a canvas-sized frame through VRAM with the DR_MOVE
  * packet of the same index; palette animations reload CLUT
  * canvas_x / 16 of MAP_CLUT_ROW_MAP from the palette frames at g_map_palette_animation_frames. */

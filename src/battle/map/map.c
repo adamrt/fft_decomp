@@ -33,6 +33,198 @@ void map_queue_textured_triangles(u32* otag, POLY_GT3* prims, s32 yaw, s32* unus
 void map_queue_untextured_quads(u32* otag, POLY_F4* prims, s32 yaw, s32* unused_count);
 void map_queue_untextured_triangles(u32* otag, POLY_F3* prims, s32 yaw, s32* unused_count);
 
+typedef enum map_gns_state_comparison {
+    GNS_MAP_STATE_EQUAL = 1,
+    GNS_MAP_STATE_REQUESTED_LESS_THAN_RECORD = 2,
+    GNS_MAP_STATE_REQUESTED_GREATER_THAN_RECORD = 3
+} map_gns_state_comparison_e;
+
+/* map_gns_record_t.resource_type: one id space for the GNS file rows, the mesh-file chunk slots (each ID indexes a
+ * 49-entry table of 32-bit byte offsets, so LIGHTING (0x19) is at 0x64), the loader's apply operations and the GNS
+ * command rows; dispatch_gns_resource switches over all of it. */
+typedef enum gns_resource_type {
+    GNS_RECORD_NONE = 0, /* empty file slot; also ends the command records */
+
+    /* Primary mesh data. */
+    GNS_RESOURCE_GEOMETRY_PRIMARY = 0x10,
+    GNS_RESOURCE_PALETTES = 0x11,       /* kept pending until GNS_RESOURCE_APPLY_PALETTES */
+    GNS_RESOURCE_UNSUPPORTED_12 = 0x12, /* raises exception 0x3ca */
+
+    /* Texture chunks and the complete external texture file. */
+    GNS_RESOURCE_TEXTURE_QUARTER_0 = 0x13, /* 64x256 texture strip at VRAM x 0x300 */
+    GNS_RESOURCE_TEXTURE_QUARTER_1 = 0x14,
+    GNS_RESOURCE_TEXTURE_QUARTER_2 = 0x15,
+    GNS_RESOURCE_TEXTURE_QUARTER_3 = 0x16,
+    GNS_RESOURCE_TEXTURE = 0x17,
+
+    /* Lighting, terrain, animations and map state. */
+    GNS_RESOURCE_LIGHTING = 0x19, /* kept pending until GNS_RESOURCE_APPLY_LIGHTING */
+    GNS_RESOURCE_TERRAIN = 0x1a,
+    GNS_RESOURCE_TEXTURE_ANIMATIONS = 0x1b,
+    GNS_RESOURCE_PALETTE_ANIMATION_FRAMES = 0x1c,
+    GNS_RESOURCE_MARKED_TILE_PALETTES = 0x1f, /* the sixteen CLUTs of MAP_CLUT_ROW_MARKED_TILES */
+    GNS_RESOURCE_STATE_RECORDS = 0x23,        /* map_state_record_t list */
+
+    /* Additional mesh parts and polygon flags. */
+    GNS_RESOURCE_GEOMETRY_PART_1 = 0x24, /* geometry of mesh parts 1-8 */
+    GNS_RESOURCE_GEOMETRY_PART_2 = 0x25,
+    GNS_RESOURCE_GEOMETRY_PART_3 = 0x26,
+    GNS_RESOURCE_GEOMETRY_PART_4 = 0x27,
+    GNS_RESOURCE_GEOMETRY_PART_5 = 0x28,
+    GNS_RESOURCE_GEOMETRY_PART_6 = 0x29,
+    GNS_RESOURCE_GEOMETRY_PART_7 = 0x2a,
+    GNS_RESOURCE_GEOMETRY_PART_8 = 0x2b,
+    GNS_RESOURCE_POLYGON_FLAGS = 0x2c,
+
+    /* External mesh files and repeated file-section rows. */
+    GNS_RESOURCE_MESH_PRIMARY = 0x2e,
+    GNS_RESOURCE_MESH_OVERRIDE = 0x2f,
+    GNS_RESOURCE_MESH_ALTERNATE = 0x30,
+    GNS_RESOURCE_FILLER = 0x31,    /* repeated file-section rows; the loader still visits them */
+    GNS_RESOURCE_TABLE_COUNT = 49, /* 0x31: the mesh-file offsets and the pending and loaded slots */
+
+    /* The loader's own operations, issued after a texture load; never in a file. */
+    GNS_RESOURCE_APPLY_LIGHTING = 0x32,
+    GNS_RESOURCE_APPLY_PALETTES = 0x33,
+
+    /* The separator ending the file rows, then the command rows after it. */
+    GNS_RECORD_COMMAND_SEPARATOR = 0x80,
+    GNS_COMMAND_SET_CAMERA_POSITION = 0x83,
+    GNS_COMMAND_SET_CAMERA_ROTATION = 0x84,
+    GNS_COMMAND_SET_INDOOR = 0x85,
+    GNS_COMMAND_SET_OUTDOOR = 0x86,
+    GNS_COMMAND_UNHANDLED_87 = 0x87, /* rows of this type are in 14 maps' files; the dispatcher has no case for it */
+    GNS_COMMAND_CLEAR_SNOW = 0x88,
+    GNS_COMMAND_SET_SNOW = 0x89,
+    GNS_COMMAND_UNHANDLED_8A = 0x8a, /* 28-byte rows; forwarded unconditionally and ignored by the dispatcher */
+    GNS_COMMAND_SET_WEATHER_MODIFIER = 0x8b
+} gns_resource_type_e;
+
+/* File-load payload at +0x06 of a GNS row. The loader compares all fourteen
+ * bytes, including the fixed markers, before deciding whether to reload.
+ * 32-bit fields remain byte arrays so enclosing rows retain 16-bit alignment. */
+typedef union map_gns_load_info {
+    struct {
+        u16 _unused_00;         /* 0x3333 in file rows */
+        u8 disc_lba_le[4];      /* row +0x08; absolute LBA, including its high 16 bits */
+        u8 byte_length_le[4];   /* row +0x0c; sector-rounded byte count */
+        u8 _unused_0a[3];       /* 55 66 77 in file rows */
+        u8 file_present_marker; /* 0x88 in file rows; zero means no file */
+    } fields;
+    u8 bytes[14];
+} map_gns_load_info_t;
+typedef char map_gns_load_info_size_must_be_14[sizeof(map_gns_load_info_t) == 14 ? 1 : -1];
+
+/* A 20-byte row from the file section of MAPnnn.GNS, before the 0x80 separator. Resource type 0x31 marks repeated
+ * filler rows. For mesh records, the loader compares map_state against a request assembled from the low 12 bits of
+ * the script variable at offset 0, weather in bits 12-14, and time-of-day in bit 15. The two bytes at 4 also form
+ * the conventional little-endian GNS record type (for example, 0x2e01 for a primary mesh); the game reads them
+ * separately: the low byte selects the state comparison and the high byte selects the resource type. In all 2,987
+ * pre-separator rows of the USA disc, +0x06 is 0x3333 and +0x10..+0x13 are 55 66 77 88. The loader compares those
+ * bytes when checking whether a file changed, and tests +0x13 for a nonzero marker. Record copies use lwl/lwr pairs;
+ * keep the record aligned to 16 bits. */
+typedef struct map_gns_record {
+    s16 script_variable_id;
+    s16 map_state;
+    u8 map_state_comparison; /* 0x04; map_gns_state_comparison_e */
+    u8 resource_type;        /* 0x05; gns_resource_type_e */
+    map_gns_load_info_t load_info;
+} map_gns_record_t;
+typedef char map_gns_record_size_must_be_20[(sizeof(map_gns_record_t) == 20) ? 1 : -1];
+
+/* Command rows after the 0x80 separator reuse the 20-byte prefix, but +0x08
+ * is a byte stride (0x14 or 0x1c), not a disc LBA. The 0x1c rows have eight
+ * more payload bytes after this prefix. +0x06/+0x09..+0x0b are zero in the
+ * USA disc's command rows. */
+typedef struct map_gns_command_record_prefix {
+    u16 script_variable_id;  /* 0x00 */
+    s16 map_state;           /* 0x02 */
+    u8 map_state_comparison; /* 0x04; map_gns_state_comparison_e */
+    u8 resource_type;        /* 0x05; gns_resource_type_e command */
+    u16 _unused_06;
+    u8 record_byte_length; /* 0x08 */
+    u8 _unused_09;
+    u16 _unused_0a;
+    SVECTOR payload; /* 0x0c; followed by more bytes for 0x1c rows */
+} map_gns_command_record_prefix_t;
+typedef char map_gns_command_record_prefix_size_must_be_20[(sizeof(map_gns_command_record_prefix_t) == 20) ? 1 : -1];
+
+/* Mesh files begin with 49 byte offsets indexed by gns_resource_type_e.
+ * The dispatcher visits IDs 0x10..0x30; zero means the chunk is absent.
+ * Reserved offsets are zero on the USA disc. MAP000.5 alone has an embedded
+ * texture quarter at resource ID 0x13. */
+typedef u32 map_mesh_file_header_t[GNS_RESOURCE_TABLE_COUNT];
+typedef char map_mesh_file_header_size_must_be_196[(sizeof(map_mesh_file_header_t) == 196) ? 1 : -1];
+
+/* Terrain chunk: two dimensions followed by two fixed 256-tile layers. */
+typedef struct map_terrain_resource {
+    u8 width;                   /* 0x0000; map x dimension */
+    u8 depth;                   /* 0x0001; map y dimension */
+    map_tile_t tiles[2][0x100]; /* 0x0002; tile levels 0 and 1 */
+} map_terrain_resource_t;
+typedef char map_terrain_resource_size_must_be_4098[sizeof(map_terrain_resource_t) == 4098 ? 1 : -1];
+
+/* Packed lighting: two matrices of nine 16-bit entries followed by three RGB colors. */
+typedef struct map_light_resource {
+    s16 color[3][3];         /* 0x00 */
+    s16 direction[3][3];     /* 0x12 */
+    rgb24_t ambient;         /* 0x24 */
+    rgb24_t gradient_top;    /* 0x27 */
+    rgb24_t gradient_bottom; /* 0x2a */
+} map_light_resource_t;
+
+/* Polygon-render properties: the 0x380-byte prefix is not consumed here. */
+typedef struct map_polygon_flags_resource {
+    u8 _unused_0000[0x380];
+    u16 textured_triangles[512];  /* 0x0380 */
+    u16 textured_quads[768];      /* 0x0780 */
+    u16 untextured_triangles[64]; /* 0x0d80 */
+    u16 untextured_quads[256];    /* 0x0e00 */
+} map_polygon_flags_resource_t;
+typedef char map_polygon_flags_resource_size_must_be_4096[sizeof(map_polygon_flags_resource_t) == 4096 ? 1 : -1];
+
+/* Nested records in GNS_RESOURCE_STATE_RECORDS, a mesh-file chunk at slot 0x23. */
+typedef enum map_mesh_animation_record_type {
+    MAP_MESH_ANIMATION_RECORD_END = 0,
+    MAP_MESH_ANIMATION_RECORD_KEYFRAMES = 1,
+    MAP_MESH_ANIMATION_RECORD_INSTRUCTIONS = 2,
+    MAP_MESH_ANIMATION_RECORD_PART_PROPERTIES = 3
+} map_mesh_animation_record_type_e;
+
+/* One PART_PROPERTIES entry of a map state record. */
+typedef struct map_mesh_part_property {
+    u8 parent;
+    u8 _unused_01[3];
+} map_mesh_part_property_t;
+typedef char map_mesh_part_property_size_must_be_4[sizeof(map_mesh_part_property_t) == 4 ? 1 : -1];
+
+/* Animation record header. END occupies only the four-byte type word; the other
+ * types add a count or packed dimensions followed by a variable payload. */
+typedef struct map_state_record {
+    u32 type;   /* map_mesh_animation_record_type_e */
+    u32 count;  /* types 1/3: entry count; type 2: packed instruction/state dimensions */
+    u8 data[0]; /* 0x08; variable-length payload selected by type */
+} map_state_record_t;
+typedef char map_state_record_size_must_be_8[sizeof(map_state_record_t) == 8 ? 1 : -1];
+
+/* resource_type selects a serialized prefix or block; file offsets locate
+ * variable-length chunks within the loaded resource. */
+typedef union map_resource {
+    map_mesh_geometry_t geometry;
+    map_polygon_flags_resource_t polygon_flags;
+    map_mesh_file_header_t mesh_file;
+    map_light_resource_t lighting;
+    map_terrain_resource_t terrain;
+    map_texture_animation_t texture_animations[MAP_TEXTURE_ANIMATION_COUNT];
+    map_state_record_t state_record;
+    map_gns_record_t gns_records[150];
+    map_gns_command_record_prefix_t command;
+    s16 command_halfwords[10]; /* 16-bit view of the 20-byte command prefix. */
+    clut_t clut;
+    u32 texture_words[0]; /* Variable-length image data consumed by LoadImage. */
+    u8 bytes[0];          /* Byte offsets in files and variable-length command payloads. */
+} map_resource_t;
+
 /* Weather particles of g_weather_particles: snow
  * (WEATHER_COMMAND_INIT_SNOW_PARTICLES) uses all 64, rain
  * (WEATHER_COMMAND_INIT_RAIN_PARTICLES) fills two sets of 32. */
@@ -243,8 +435,8 @@ extern u32 g_map_gns_record_cursor;
 extern map_gns_record_t g_map_loaded_gns_records[GNS_RESOURCE_TABLE_COUNT];
 extern u8 g_map_gns_dispatch_held;
 
-/* Resources read but not yet applied: the palette and lighting data wait for MAP_RESOURCE_APPLY_PALETTES and
- * MAP_RESOURCE_APPLY_LIGHTING, and the texture flags mark the whole texture or the quarters read into the
+/* Resources read but not yet applied: the palette and lighting data wait for GNS_RESOURCE_APPLY_PALETTES and
+ * GNS_RESOURCE_APPLY_LIGHTING, and the texture flags mark the whole texture or the quarters read into the
  * load buffer, uploaded after the texture read completes. */
 extern u8 g_map_palette_pending;
 extern u8 g_map_pending_palette_data[0x200];
@@ -3287,7 +3479,7 @@ static s32 dispatch_gns_resource(u8 resource_type, map_resource_t* data) {
     /* Let queued drawing finish before a resource replaces data the GPU may still be reading. */
     while (DrawSync(1)) { }
     switch (resource_type) {
-    case MAP_RESOURCE_GEOMETRY_PRIMARY:
+    case GNS_RESOURCE_GEOMETRY_PRIMARY:
         g_map_textured_triangle_count = 0;
         g_map_textured_quad_count = 0;
         g_map_untextured_triangle_count = 0;
@@ -3309,39 +3501,39 @@ static s32 dispatch_gns_resource(u8 resource_type, map_resource_t* data) {
         g_map_primary_untextured_triangle_count = g_map_untextured_triangle_count;
         g_map_primary_untextured_quad_count = g_map_untextured_quad_count;
         break;
-    case MAP_RESOURCE_GEOMETRY_PART_1:
+    case GNS_RESOURCE_GEOMETRY_PART_1:
         s_map_mesh_part_geometry[1] = &data->geometry;
         append_mesh_geometry(&data->geometry, &g_map_mesh_parts[1]);
         break;
-    case MAP_RESOURCE_GEOMETRY_PART_2:
+    case GNS_RESOURCE_GEOMETRY_PART_2:
         s_map_mesh_part_geometry[2] = &data->geometry;
         append_mesh_geometry(&data->geometry, &g_map_mesh_parts[2]);
         break;
-    case MAP_RESOURCE_GEOMETRY_PART_3:
+    case GNS_RESOURCE_GEOMETRY_PART_3:
         s_map_mesh_part_geometry[3] = &data->geometry;
         append_mesh_geometry(&data->geometry, &g_map_mesh_parts[3]);
         break;
-    case MAP_RESOURCE_GEOMETRY_PART_4:
+    case GNS_RESOURCE_GEOMETRY_PART_4:
         s_map_mesh_part_geometry[4] = &data->geometry;
         append_mesh_geometry(&data->geometry, &g_map_mesh_parts[4]);
         break;
-    case MAP_RESOURCE_GEOMETRY_PART_5:
+    case GNS_RESOURCE_GEOMETRY_PART_5:
         s_map_mesh_part_geometry[5] = &data->geometry;
         append_mesh_geometry(&data->geometry, &g_map_mesh_parts[5]);
         break;
-    case MAP_RESOURCE_GEOMETRY_PART_6:
+    case GNS_RESOURCE_GEOMETRY_PART_6:
         s_map_mesh_part_geometry[6] = &data->geometry;
         append_mesh_geometry(&data->geometry, &g_map_mesh_parts[6]);
         break;
-    case MAP_RESOURCE_GEOMETRY_PART_7:
+    case GNS_RESOURCE_GEOMETRY_PART_7:
         s_map_mesh_part_geometry[7] = &data->geometry;
         append_mesh_geometry(&data->geometry, &g_map_mesh_parts[7]);
         break;
-    case MAP_RESOURCE_GEOMETRY_PART_8:
+    case GNS_RESOURCE_GEOMETRY_PART_8:
         s_map_mesh_part_geometry[8] = &data->geometry;
         append_mesh_geometry(&data->geometry, &g_map_mesh_parts[8]);
         break;
-    case MAP_RESOURCE_POLYGON_FLAGS:
+    case GNS_RESOURCE_POLYGON_FLAGS:
         polygon_flags = data->polygon_flags.textured_triangles;
         for (i = 0; i < RENDER_TEXTURED_TRIANGLE_COUNT; i++) {
             flags = *polygon_flags++;
@@ -3418,13 +3610,13 @@ static s32 dispatch_gns_resource(u8 resource_type, map_resource_t* data) {
 
         dispatch_polygon_flag_command(MAP_POLYGON_FLAG_COMMAND_RESET_ACTIVE);
         break;
-    case MAP_RESOURCE_PALETTES:
+    case GNS_RESOURCE_PALETTES:
         g_map_palette_pending = 1;
         for (i = 0; i < 0x200; i++) {
             g_map_pending_palette_data[i] = data->bytes[i];
         }
         break;
-    case MAP_RESOURCE_APPLY_PALETTES:
+    case GNS_RESOURCE_APPLY_PALETTES:
         g_map_vram_load_rect.y = MAP_CLUT_ROWS_Y + MAP_CLUT_ROW_MAP;
         g_map_vram_load_rect.w = 256;
         g_map_palette_pending = 0;
@@ -3432,17 +3624,17 @@ static s32 dispatch_gns_resource(u8 resource_type, map_resource_t* data) {
         g_map_vram_load_rect.h = 1;
         map_palette_load_data(data->clut, MAP_CLUT_ROW_MAP, 0, 1);
         break;
-    case MAP_RESOURCE_MARKED_TILE_PALETTES:
+    case GNS_RESOURCE_MARKED_TILE_PALETTES:
         g_map_vram_load_rect.y = MAP_CLUT_ROWS_Y + MAP_CLUT_ROW_MARKED_TILES;
         g_map_vram_load_rect.w = 256;
         g_map_vram_load_rect.x = 0;
         g_map_vram_load_rect.h = 1;
         map_palette_load_data(data->clut, MAP_CLUT_ROW_MARKED_TILES, 0, 1);
         break;
-    case MAP_RESOURCE_UNSUPPORTED_12:
+    case GNS_RESOURCE_UNSUPPORTED_12:
         system_report_error(2, 0x3ca);
         break;
-    case MAP_RESOURCE_TEXTURE_QUARTER_0:
+    case GNS_RESOURCE_TEXTURE_QUARTER_0:
         g_map_vram_load_rect.x = 768;
         g_map_vram_load_rect.w = 64;
         g_map_vram_load_rect.y = 0;
@@ -3450,7 +3642,7 @@ static s32 dispatch_gns_resource(u8 resource_type, map_resource_t* data) {
         LoadImage(&g_map_vram_load_rect, data->texture_words);
         while (DrawSync(1)) { }
         break;
-    case MAP_RESOURCE_TEXTURE_QUARTER_1:
+    case GNS_RESOURCE_TEXTURE_QUARTER_1:
         g_map_vram_load_rect.x = 832;
         g_map_vram_load_rect.w = 64;
         g_map_vram_load_rect.y = 0;
@@ -3458,7 +3650,7 @@ static s32 dispatch_gns_resource(u8 resource_type, map_resource_t* data) {
         LoadImage(&g_map_vram_load_rect, data->texture_words);
         while (DrawSync(1)) { }
         break;
-    case MAP_RESOURCE_TEXTURE_QUARTER_2:
+    case GNS_RESOURCE_TEXTURE_QUARTER_2:
         g_map_vram_load_rect.x = 896;
         g_map_vram_load_rect.w = 64;
         g_map_vram_load_rect.y = 0;
@@ -3466,7 +3658,7 @@ static s32 dispatch_gns_resource(u8 resource_type, map_resource_t* data) {
         LoadImage(&g_map_vram_load_rect, data->texture_words);
         while (DrawSync(1)) { }
         break;
-    case MAP_RESOURCE_TEXTURE_QUARTER_3:
+    case GNS_RESOURCE_TEXTURE_QUARTER_3:
         g_map_vram_load_rect.x = 960;
         g_map_vram_load_rect.w = 64;
         g_map_vram_load_rect.y = 0;
@@ -3474,19 +3666,19 @@ static s32 dispatch_gns_resource(u8 resource_type, map_resource_t* data) {
         LoadImage(&g_map_vram_load_rect, data->texture_words);
         while (DrawSync(1)) { }
         break;
-    case MAP_RESOURCE_TEXTURE:
+    case GNS_RESOURCE_TEXTURE:
         /* A full texture is four 0x8000-byte quarters, uploaded side by side from VRAM x 0x300. */
         if (g_map_texture_quarter_0_pending) {
-            dispatch_gns_resource(MAP_RESOURCE_TEXTURE_QUARTER_0, data);
+            dispatch_gns_resource(GNS_RESOURCE_TEXTURE_QUARTER_0, data);
         }
         if (g_map_texture_quarter_1_pending) {
-            dispatch_gns_resource(MAP_RESOURCE_TEXTURE_QUARTER_1, (map_resource_t*)(data->bytes + 0x8000));
+            dispatch_gns_resource(GNS_RESOURCE_TEXTURE_QUARTER_1, (map_resource_t*)(data->bytes + 0x8000));
         }
         if (g_map_texture_quarter_2_pending) {
-            dispatch_gns_resource(MAP_RESOURCE_TEXTURE_QUARTER_2, (map_resource_t*)(data->bytes + 0x10000));
+            dispatch_gns_resource(GNS_RESOURCE_TEXTURE_QUARTER_2, (map_resource_t*)(data->bytes + 0x10000));
         }
         if (s_map_texture_quarter_3_pending) {
-            dispatch_gns_resource(MAP_RESOURCE_TEXTURE_QUARTER_3, (map_resource_t*)(data->bytes + 0x18000));
+            dispatch_gns_resource(GNS_RESOURCE_TEXTURE_QUARTER_3, (map_resource_t*)(data->bytes + 0x18000));
         }
 
         g_map_texture_quarter_0_pending = 0;
@@ -3495,22 +3687,22 @@ static s32 dispatch_gns_resource(u8 resource_type, map_resource_t* data) {
         s_map_texture_quarter_3_pending = 0;
         g_map_texture_pending = 0;
         break;
-    case MAP_RESOURCE_MESH_PRIMARY:
-    case MAP_RESOURCE_MESH_OVERRIDE:
-    case MAP_RESOURCE_MESH_ALTERNATE:
-        for (i = MAP_RESOURCE_GEOMETRY_PRIMARY; i < GNS_RESOURCE_TABLE_COUNT; i++) {
+    case GNS_RESOURCE_MESH_PRIMARY:
+    case GNS_RESOURCE_MESH_OVERRIDE:
+    case GNS_RESOURCE_MESH_ALTERNATE:
+        for (i = GNS_RESOURCE_GEOMETRY_PRIMARY; i < GNS_RESOURCE_TABLE_COUNT; i++) {
             if (data->mesh_file[i]) {
                 dispatch_gns_resource(i, (map_resource_t*)(data->bytes + data->mesh_file[i]));
             }
         }
         break;
-    case MAP_RESOURCE_LIGHTING:
+    case GNS_RESOURCE_LIGHTING:
         g_map_lighting_pending = 1;
         for (i = 0; i < 45; i++) {
             g_map_pending_lighting_data[i] = data->bytes[i];
         }
         break;
-    case MAP_RESOURCE_APPLY_LIGHTING:
+    case GNS_RESOURCE_APPLY_LIGHTING:
         light = &data->lighting;
         g_map_lighting_pending = 0;
         setVector(&g_map_light_rotation, 0, 0, 0);
@@ -3553,7 +3745,7 @@ static s32 dispatch_gns_resource(u8 resource_type, map_resource_t* data) {
             = g_map_background_gradient_colors.colors[MAP_BACKGROUND_GRADIENT_BOTTOM];
         map_light_dispatch_command(MAP_LIGHT_COMMAND_SAVE_BACKGROUND_GRADIENT, 0);
         break;
-    case MAP_RESOURCE_TEXTURE_ANIMATIONS:
+    case GNS_RESOURCE_TEXTURE_ANIMATIONS:
         source = data->texture_animations;
         for (i = 0; i < MAP_TEXTURE_ANIMATION_COUNT; i++) {
             s_map_texture_animation_cycle_handles[i] = 0;
@@ -3574,20 +3766,20 @@ static s32 dispatch_gns_resource(u8 resource_type, map_resource_t* data) {
             }
         }
         break;
-    case MAP_RESOURCE_PALETTE_ANIMATION_FRAMES:
+    case GNS_RESOURCE_PALETTE_ANIMATION_FRAMES:
         for (i = 0; i < 0x100; i++) {
             /* Palette-bank indexing changes the native 16-bit copy loop. */
             ((u16*)g_map_palette_animation_frames)[i] = ((u16*)data->clut)[i];
         }
         break;
-    case MAP_RESOURCE_TERRAIN: {
+    case GNS_RESOURCE_TERRAIN: {
         map_terrain_resource_t* terrain = &data->terrain;
         g_map_tile_width = terrain->width;
         g_map_tile_depth = terrain->depth;
         map_copy_tile_data(data->bytes);
         break;
     }
-    case MAP_RESOURCE_STATE_RECORDS:
+    case GNS_RESOURCE_STATE_RECORDS:
         cursor = &data->state_record;
         while (cursor->type != MAP_MESH_ANIMATION_RECORD_END) {
             cursor = load_mesh_animation_record(cursor);
@@ -3885,7 +4077,7 @@ s32 map_update_load(s32 map_id, map_load_command_e command) {
                 /* Pass 1: primary meshes. A row whose comparison holds forgets
                  * what is loaded for its type, so it is always read again. */
                 for (r = 0; g_map_gns_records[r].resource_type < GNS_RECORD_COMMAND_SEPARATOR; r++) {
-                    if (g_map_gns_records[r].resource_type == MAP_RESOURCE_MESH_PRIMARY) {
+                    if (g_map_gns_records[r].resource_type == GNS_RESOURCE_MESH_PRIMARY) {
                         state = script_variable_get(g_map_gns_records[r].script_variable_id) & 0xfff;
                         state |= (script_variable_get(SCRIPT_VAR_WEATHER) & 7) << 12;
                         state |= (script_variable_get(SCRIPT_VAR_TIME_OF_DAY) & 1) << 15;
@@ -3912,7 +4104,7 @@ s32 map_update_load(s32 map_id, map_load_command_e command) {
 
                 /* Pass 2: override meshes, by the same rule. */
                 for (r = 0; g_map_gns_records[r].resource_type < GNS_RECORD_COMMAND_SEPARATOR; r++) {
-                    if (g_map_gns_records[r].resource_type == MAP_RESOURCE_MESH_OVERRIDE) {
+                    if (g_map_gns_records[r].resource_type == GNS_RESOURCE_MESH_OVERRIDE) {
                         state = script_variable_get(g_map_gns_records[r].script_variable_id) & 0xfff;
                         state |= (script_variable_get(SCRIPT_VAR_WEATHER) & 7) << 12;
                         state |= (script_variable_get(SCRIPT_VAR_TIME_OF_DAY) & 1) << 15;
@@ -3937,7 +4129,7 @@ s32 map_update_load(s32 map_id, map_load_command_e command) {
 
                 /* Pass 3: the default texture (state 0 of the two map variables). */
                 for (r = 0; g_map_gns_records[r].resource_type < GNS_RECORD_COMMAND_SEPARATOR; r++) {
-                    if (g_map_gns_records[r].resource_type == MAP_RESOURCE_TEXTURE
+                    if (g_map_gns_records[r].resource_type == GNS_RESOURCE_TEXTURE
                         && (g_map_gns_records[r].script_variable_id == SCRIPT_VAR_WEATHER_AND_TIME
                             || g_map_gns_records[r].script_variable_id == SCRIPT_VAR_MAP_ARRANGEMENT)
                         && g_map_gns_records[r].map_state == 0) {
@@ -3993,47 +4185,47 @@ s32 map_update_load(s32 map_id, map_load_command_e command) {
 
                 if (g_map_gns_record_cursor < GNS_RESOURCE_TABLE_COUNT) {
                     /* Clear the 32 20-byte entries the dispatcher copies, so a shorter file leaves the rest zero. */
-                    if (g_map_gns_record_cursor == MAP_RESOURCE_TEXTURE_ANIMATIONS) {
+                    if (g_map_gns_record_cursor == GNS_RESOURCE_TEXTURE_ANIMATIONS) {
                         bzero(g_map_data_load_buffer, 0x280);
                     }
                     start_file_load(s_map_directory_path, &s_map_pending_gns_records[g_map_gns_record_cursor].load_info,
                         g_map_data_load_buffer, g_map_gns_record_cursor);
                     g_map_resource_load_state = MAP_LOAD_STATE_RESOURCE_FILE;
-                } else if (s_map_pending_gns_records[MAP_RESOURCE_UNSUPPORTED_12].resource_type != GNS_RECORD_NONE) {
+                } else if (s_map_pending_gns_records[GNS_RESOURCE_UNSUPPORTED_12].resource_type != GNS_RECORD_NONE) {
                     system_report_error(2, 0x3cb);
-                    s_map_pending_gns_records[MAP_RESOURCE_UNSUPPORTED_12].resource_type = GNS_RECORD_NONE;
-                } else if (s_map_pending_gns_records[MAP_RESOURCE_TEXTURE_QUARTER_0].resource_type != GNS_RECORD_NONE) {
-                    s_map_pending_gns_records[MAP_RESOURCE_TEXTURE_QUARTER_0].resource_type = GNS_RECORD_NONE;
+                    s_map_pending_gns_records[GNS_RESOURCE_UNSUPPORTED_12].resource_type = GNS_RECORD_NONE;
+                } else if (s_map_pending_gns_records[GNS_RESOURCE_TEXTURE_QUARTER_0].resource_type != GNS_RECORD_NONE) {
+                    s_map_pending_gns_records[GNS_RESOURCE_TEXTURE_QUARTER_0].resource_type = GNS_RECORD_NONE;
                     start_file_load(s_map_directory_path,
-                        &s_map_pending_gns_records[MAP_RESOURCE_TEXTURE_QUARTER_0].load_info,
-                        g_map_data_load_buffer->bytes + 0x8000, MAP_RESOURCE_TEXTURE_QUARTER_0);
+                        &s_map_pending_gns_records[GNS_RESOURCE_TEXTURE_QUARTER_0].load_info,
+                        g_map_data_load_buffer->bytes + 0x8000, GNS_RESOURCE_TEXTURE_QUARTER_0);
                     g_map_texture_quarter_0_pending = 1;
                     g_map_texture_pending = 1;
-                } else if (s_map_pending_gns_records[MAP_RESOURCE_TEXTURE_QUARTER_1].resource_type != GNS_RECORD_NONE) {
-                    s_map_pending_gns_records[MAP_RESOURCE_TEXTURE_QUARTER_1].resource_type = GNS_RECORD_NONE;
+                } else if (s_map_pending_gns_records[GNS_RESOURCE_TEXTURE_QUARTER_1].resource_type != GNS_RECORD_NONE) {
+                    s_map_pending_gns_records[GNS_RESOURCE_TEXTURE_QUARTER_1].resource_type = GNS_RECORD_NONE;
                     start_file_load(s_map_directory_path,
-                        &s_map_pending_gns_records[MAP_RESOURCE_TEXTURE_QUARTER_1].load_info,
-                        g_map_data_load_buffer->bytes + 0x10000, MAP_RESOURCE_TEXTURE_QUARTER_1);
+                        &s_map_pending_gns_records[GNS_RESOURCE_TEXTURE_QUARTER_1].load_info,
+                        g_map_data_load_buffer->bytes + 0x10000, GNS_RESOURCE_TEXTURE_QUARTER_1);
                     g_map_texture_quarter_1_pending = 1;
                     g_map_texture_pending = 1;
-                } else if (s_map_pending_gns_records[MAP_RESOURCE_TEXTURE_QUARTER_2].resource_type != GNS_RECORD_NONE) {
-                    s_map_pending_gns_records[MAP_RESOURCE_TEXTURE_QUARTER_2].resource_type = GNS_RECORD_NONE;
+                } else if (s_map_pending_gns_records[GNS_RESOURCE_TEXTURE_QUARTER_2].resource_type != GNS_RECORD_NONE) {
+                    s_map_pending_gns_records[GNS_RESOURCE_TEXTURE_QUARTER_2].resource_type = GNS_RECORD_NONE;
                     start_file_load(s_map_directory_path,
-                        &s_map_pending_gns_records[MAP_RESOURCE_TEXTURE_QUARTER_2].load_info,
-                        g_map_data_load_buffer->bytes + 0x18000, MAP_RESOURCE_TEXTURE_QUARTER_2);
+                        &s_map_pending_gns_records[GNS_RESOURCE_TEXTURE_QUARTER_2].load_info,
+                        g_map_data_load_buffer->bytes + 0x18000, GNS_RESOURCE_TEXTURE_QUARTER_2);
                     g_map_texture_quarter_2_pending = 1;
                     g_map_texture_pending = 1;
-                } else if (s_map_pending_gns_records[MAP_RESOURCE_TEXTURE_QUARTER_3].resource_type != GNS_RECORD_NONE) {
-                    s_map_pending_gns_records[MAP_RESOURCE_TEXTURE_QUARTER_3].resource_type = GNS_RECORD_NONE;
+                } else if (s_map_pending_gns_records[GNS_RESOURCE_TEXTURE_QUARTER_3].resource_type != GNS_RECORD_NONE) {
+                    s_map_pending_gns_records[GNS_RESOURCE_TEXTURE_QUARTER_3].resource_type = GNS_RECORD_NONE;
                     start_file_load(s_map_directory_path,
-                        &s_map_pending_gns_records[MAP_RESOURCE_TEXTURE_QUARTER_3].load_info,
-                        g_map_data_load_buffer->bytes + 0x20000, MAP_RESOURCE_TEXTURE_QUARTER_3);
+                        &s_map_pending_gns_records[GNS_RESOURCE_TEXTURE_QUARTER_3].load_info,
+                        g_map_data_load_buffer->bytes + 0x20000, GNS_RESOURCE_TEXTURE_QUARTER_3);
                     s_map_texture_quarter_3_pending = 1;
                     g_map_texture_pending = 1;
-                } else if (s_map_pending_gns_records[MAP_RESOURCE_TEXTURE].resource_type != GNS_RECORD_NONE) {
-                    s_map_pending_gns_records[MAP_RESOURCE_TEXTURE].resource_type = GNS_RECORD_NONE;
-                    start_file_load(s_map_directory_path, &s_map_pending_gns_records[MAP_RESOURCE_TEXTURE].load_info,
-                        g_map_data_load_buffer, MAP_RESOURCE_TEXTURE);
+                } else if (s_map_pending_gns_records[GNS_RESOURCE_TEXTURE].resource_type != GNS_RECORD_NONE) {
+                    s_map_pending_gns_records[GNS_RESOURCE_TEXTURE].resource_type = GNS_RECORD_NONE;
+                    start_file_load(s_map_directory_path, &s_map_pending_gns_records[GNS_RESOURCE_TEXTURE].load_info,
+                        g_map_data_load_buffer, GNS_RESOURCE_TEXTURE);
                     g_map_texture_quarter_0_pending = 1;
                     g_map_texture_quarter_1_pending = 1;
                     g_map_texture_quarter_2_pending = 1;
@@ -4096,7 +4288,7 @@ s32 map_update_load(s32 map_id, map_load_command_e command) {
         case MAP_LOAD_STATE_APPLY_LIGHTING:
             if (file_get_load_state() == 0) {
                 if (g_map_lighting_pending) {
-                    dispatch_gns_resource(MAP_RESOURCE_APPLY_LIGHTING, (map_resource_t*)g_map_pending_lighting_data);
+                    dispatch_gns_resource(GNS_RESOURCE_APPLY_LIGHTING, (map_resource_t*)g_map_pending_lighting_data);
                 }
                 g_map_lighting_pending = 0;
                 g_map_resource_load_state = MAP_LOAD_STATE_APPLY_TEXTURE;
@@ -4104,10 +4296,10 @@ s32 map_update_load(s32 map_id, map_load_command_e command) {
             break;
         case MAP_LOAD_STATE_APPLY_TEXTURE:
             if (g_map_texture_pending) {
-                dispatch_gns_resource(MAP_RESOURCE_TEXTURE, g_map_data_load_buffer);
+                dispatch_gns_resource(GNS_RESOURCE_TEXTURE, g_map_data_load_buffer);
             }
             if (g_map_palette_pending) {
-                dispatch_gns_resource(MAP_RESOURCE_APPLY_PALETTES, (map_resource_t*)g_map_pending_palette_data);
+                dispatch_gns_resource(GNS_RESOURCE_APPLY_PALETTES, (map_resource_t*)g_map_pending_palette_data);
             }
             g_map_resource_load_state = MAP_LOAD_STATE_IDLE;
             break;
@@ -4175,12 +4367,12 @@ s32 map_mesh_load_palette(s32 palette_mode) {
     switch (g_map_mesh_load_state) {
     case MAP_MESH_LOAD_IDLE:
         for (i = 0; g_map_gns_records[i].resource_type < GNS_RECORD_COMMAND_SEPARATOR; i++) {
-            if (g_map_gns_records[i].resource_type == MAP_RESOURCE_MESH_PRIMARY) {
+            if (g_map_gns_records[i].resource_type == GNS_RESOURCE_MESH_PRIMARY) {
                 g_map_selected_mesh_record = g_map_gns_records[i];
             }
         }
         for (i = 0; g_map_gns_records[i].resource_type < GNS_RECORD_COMMAND_SEPARATOR; i++) {
-            if (g_map_gns_records[i].resource_type == MAP_RESOURCE_MESH_ALTERNATE) {
+            if (g_map_gns_records[i].resource_type == GNS_RESOURCE_MESH_ALTERNATE) {
                 state = script_variable_get(g_map_gns_records[i].script_variable_id) & 0xfff;
                 state |= (script_variable_get(SCRIPT_VAR_WEATHER) & 7) << 12;
                 state |= (script_variable_get(SCRIPT_VAR_TIME_OF_DAY) & 1) << 15;
@@ -4195,7 +4387,7 @@ s32 map_mesh_load_palette(s32 palette_mode) {
             system_report_error(2, 0x3c9);
         }
         start_file_load(s_map_directory_path, &g_map_selected_mesh_record.load_info, g_map_mesh_load_buffer,
-            MAP_RESOURCE_MESH_ALTERNATE);
+            GNS_RESOURCE_MESH_ALTERNATE);
         g_map_mesh_load_state = MAP_MESH_LOAD_WAITING;
         break;
 
@@ -4206,7 +4398,7 @@ s32 map_mesh_load_palette(s32 palette_mode) {
 
             mesh_data = g_map_mesh_load_buffer;
             /* Retail scales this byte offset as a 32-bit-element index. */
-            mesh_data_offset = mesh_data->mesh_file[MAP_RESOURCE_PALETTES] * 4;
+            mesh_data_offset = mesh_data->mesh_file[GNS_RESOURCE_PALETTES] * 4;
             mesh_data = (map_resource_t*)(mesh_data->bytes + mesh_data_offset);
             map_palette_set_colors(palette_mode, MAP_CLUT_ROW_MARKED_TILES, 0, 1, mesh_data->clut);
             heap_free(g_map_mesh_load_buffer);
