@@ -164,13 +164,13 @@ static u8 s_suzuki_smd_note_semitones[228] = { NOTE_SEMITONE(0), NOTE_SEMITONE(1
  * per tick.
  *
  * A channel whose event_ticks has run out runs opcode handlers from
- * g_suzuki_smd_opcode_handlers until a note, Rest or Fermata sets
+ * s_suzuki_smd_opcode_handlers until a note, Rest or Fermata sets
  * SUZUKI_CHANNEL_SOUNDING or SUZUKI_CHANNEL_KEYED_OFF. A byte below
  * SUZUKI_SMD_OPCODE_FIRST is a note's velocity; the next byte indexes the
  * note tables for the key and a duration (0 reads an explicit length byte).
  * The reader then looks ahead without changing the channel: it follows End
  * Bar and the repeat opcodes (Coda, To Coda) on a local view of the repeat
- * stack and skips other opcodes by g_suzuki_smd_opcode_lengths, so
+ * stack and skips other opcodes by s_suzuki_smd_opcode_lengths, so
  * SUZUKI_CHANNEL_NOTE_FOLLOWS records whether a note comes next; a Rest or
  * Slur On/Off clears SUZUKI_CHANNEL_TIED and a Fermata sets it. gate_time
  * scales the length into note_ticks in sixteenths. On key-on (the previous
@@ -382,7 +382,7 @@ u8* suzuki_smd_fermata(u8* note_data, suzuki_music_t* music, suzuki_music_channe
 }
 
 /* SMD opcode 0x8A "Nop": a separate copy of suzuki_smd_no_instruction, with
- * length 1 in g_suzuki_smd_opcode_lengths. */
+ * length 1 in s_suzuki_smd_opcode_lengths. */
 u8* suzuki_smd_opcode_8a(u8* note_data, suzuki_music_t* music, suzuki_music_channel_t* channel) {
     return note_data;
 }
@@ -405,7 +405,7 @@ u8* suzuki_smd_opcode_8e(u8* note_data, suzuki_music_t* music, suzuki_music_chan
 }
 
 /* SMD opcode 0x8F "Nop": a separate copy of suzuki_smd_no_instruction, with
- * length 1 in g_suzuki_smd_opcode_lengths. */
+ * length 1 in s_suzuki_smd_opcode_lengths. */
 u8* suzuki_smd_opcode_8f(u8* note_data, suzuki_music_t* music, suzuki_music_channel_t* channel) {
     return note_data;
 }
@@ -553,7 +553,7 @@ u8* suzuki_smd_play_sfx(u8* note_data, suzuki_music_t* music, suzuki_music_chann
 }
 
 /* SMD opcode 0x9D: stop the sound effect with the little-endian sound id.
- * It consumes two parameter bytes; g_suzuki_smd_opcode_lengths gives it three. */
+ * It consumes two parameter bytes; s_suzuki_smd_opcode_lengths gives it three. */
 u8* suzuki_smd_stop_sfx(u8* note_data, suzuki_music_t* music, suzuki_music_channel_t* channel) {
     suzuki_sound_stop_sfx_channels(note_data[0] | (note_data[1] << 8));
     return note_data + 2;

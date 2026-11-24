@@ -105,7 +105,7 @@ static u8 alloc_secondary_record(void) {
 
 /* Take secondary effect record id (1-16) off the active chain, free its work
  * block and append it to the end of the free chain headed by
- * g_effect_secondary_free_head: the inverse of
+ * s_effect_secondary_free_head: the inverse of
  * alloc_secondary_record. An id outside 1-16 only reaches the
  * empty report hook with code 0x67.
  *

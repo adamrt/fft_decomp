@@ -56,7 +56,6 @@ typedef enum menu_screen_context {
 
 extern s16 g_menu_screen_context_id; /* town location ID or menu_screen_context_e */
 extern s8 g_menu_screen_music_slot;  /* formation music slot */
-extern menu_input_state_t g_menu_screen_input_state;
 
 /* Alias for the first 32-bit field retained for the target's separate absolute store. */
 extern s32 g_menu_screen_new_buttons;

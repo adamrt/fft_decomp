@@ -2064,7 +2064,6 @@ data:
   - {addr: 0x801aecb4, name: s_help_controller_state_ptr}
   - {addr: 0x801aecb8, name: s_help_topic_text_ids}
   - {addr: 0x801aecc0, name: g_text_saved_pointers}
-  - {addr: 0x801aed44, name: g_menu_screen_input_state}
   - {addr: 0x801aed44, name: g_menu_screen_new_buttons}
   - {addr: 0x801aed48, name: g_menu_screen_current_input}
   - {addr: 0x801aed4c, name: g_menu_screen_previous_input}
@@ -2085,7 +2084,6 @@ data:
   - {addr: 0x801c0030, name: s_menu_panel_backdrop_packets}
   - {addr: 0x801c0520, name: g_menu_framebuffer_y}
   - {addr: 0x801c0524, name: g_menu_input_controller}
-  - {addr: 0x801c0528, name: g_menu_screen_input_frame_state}
   - {addr: 0x801c0528, name: s_screen_input_frame_new}
   - {addr: 0x801c052c, name: s_screen_input_frame_current}
   - {addr: 0x801c0530, name: s_screen_input_frame_previous}

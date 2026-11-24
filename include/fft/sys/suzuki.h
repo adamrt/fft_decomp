@@ -307,13 +307,13 @@ typedef enum suzuki_voice_mask_request {
 /* SMD instruction bytes. A byte below SUZUKI_SMD_OPCODE_FIRST starts a note:
  * it is the velocity, the next byte indexes g_suzuki_smd_note_semitones and
  * g_suzuki_smd_note_durations, and a length byte follows when that duration
- * is 0. Every other byte is an opcode; g_suzuki_smd_opcode_handlers and
- * g_suzuki_smd_opcode_lengths are indexed by opcode - SUZUKI_SMD_OPCODE_FIRST.
+ * is 0. Every other byte is an opcode; s_suzuki_smd_opcode_handlers and
+ * s_suzuki_smd_opcode_lengths are indexed by opcode - SUZUKI_SMD_OPCODE_FIRST.
  *
  * Each comment lists the parameter bytes after the opcode. The handler of
  * SUZUKI_SMD_OPCODE_X is suzuki_smd_x unless the comment names another. The 37
  * opcodes without an enumerator share suzuki_smd_no_instruction and have
- * length 0 in g_suzuki_smd_opcode_lengths, so the look-ahead of
+ * length 0 in s_suzuki_smd_opcode_lengths, so the look-ahead of
  * suzuki_smd_read_instructions would never get past one. */
 typedef enum suzuki_smd_opcode {
     SUZUKI_SMD_OPCODE_FIRST = 0x80,
@@ -334,7 +334,7 @@ typedef enum suzuki_smd_opcode {
     SUZUKI_SMD_OPCODE_CODA = 0x99,           /* closes the section: jumps back while passes remain */
     SUZUKI_SMD_OPCODE_TO_CODA = 0x9a,        /* on the last pass, jumps past the section's Coda */
     SUZUKI_SMD_OPCODE_PLAY_SFX = 0x9c,       /* sound id low, high, volume */
-    /* Sound id low, high. g_suzuki_smd_opcode_lengths counts three parameter
+    /* Sound id low, high. s_suzuki_smd_opcode_lengths counts three parameter
      * bytes, one more than the handler consumes. */
     SUZUKI_SMD_OPCODE_STOP_SFX = 0x9d,
     SUZUKI_SMD_OPCODE_PLAY_VFX = 0x9e,           /* sound low, high, stream: continues in a loaded sound resource */
@@ -589,7 +589,7 @@ typedef enum suzuki_snapshot_mode {
     SUZUKI_SNAPSHOT_RESTORE = 2
 } suzuki_snapshot_mode_e;
 
-/* SMD opcode handler, called through g_suzuki_smd_opcode_handlers with the
+/* SMD opcode handler, called through s_suzuki_smd_opcode_handlers with the
  * byte after the opcode; it returns the next read position. */
 typedef u8* (*suzuki_smd_handler_t)(u8* note_data, suzuki_music_t* music, suzuki_music_channel_t* channel);
 

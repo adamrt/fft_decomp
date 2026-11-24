@@ -143,7 +143,7 @@ static void novel_opcode_push_operand_history(void);
  * The layout is a matching constraint, not evidence of a second state object. */
 typedef struct novel_state {
     u32 instruction; /* 0x00 */
-    u16 state_flags; /* 0x04; g_novel_state_flags; novel_state_flag_e */
+    u16 state_flags; /* 0x04; novel_state_flag_e */
     u8 _unused_06[0x0e];
     s16 render_index; /* 0x14 */
     s16 picture;      /* 0x16 */

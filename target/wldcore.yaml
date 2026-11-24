@@ -632,7 +632,6 @@ data:
   - {addr: 0x800d483c, name: s_random_battle_map_id}
   - {addr: 0x800d4840, name: g_novel_reading}
   - {addr: 0x800d4848, name: g_novel_state}
-  - {addr: 0x800d484c, name: g_novel_state_flags}
   - {addr: 0x800d4852, name: g_novel_counter_delta}
   - {addr: 0x800d4860, name: g_novel_history_0}
   - {addr: 0x800d4862, name: g_novel_history_1}
