@@ -31,34 +31,21 @@ static u8 s_menu_buffer_allocation_map[VARIANT_MENU_BUFFER_PAGE_COUNT];
 /* Reset the menu arena allocator: every allocation slot unused (-1), every arena page free, and
  * the three typewriter glyph slots unowned. */
 void menu_init_buffer_allocator(void) {
-    s32 fill;
-    s32 slot;
-    s32 count;
-    u8* byte;
-    s32* first;
-    s32* second;
+    s32 i;
+    u8* page;
 
-    /* One counter local shared by the last two loops and each counter set
-     * before its pointer: this reproduces the target's register assignment
-     * without pins. */
-    fill = -1;
-    for (slot = MENU_BUFFER_ALLOCATION_COUNT - 1; slot >= 0; slot--) {
-        s_menu_allocator_slot_records[slot].buffer = (u8*)fill;
+    for (i = MENU_BUFFER_ALLOCATION_COUNT - 1; i >= 0; i--) {
+        s_menu_allocator_slot_records[i].buffer = (u8*)-1;
     }
-    count = VARIANT_MENU_BUFFER_PAGE_COUNT - 1;
-    byte = &s_menu_buffer_allocation_map[VARIANT_MENU_BUFFER_PAGE_COUNT - 1];
-    for (; count >= 0; count--) {
-        *byte = 0;
-        byte--;
+    /* The original clears the map through a walking pointer, set after its counter. */
+    i = VARIANT_MENU_BUFFER_PAGE_COUNT - 1;
+    page = &s_menu_buffer_allocation_map[VARIANT_MENU_BUFFER_PAGE_COUNT - 1];
+    for (; i >= 0; i--) {
+        *page-- = 0;
     }
-    count = 0;
-    second = g_text_slot_glyph_counts;
-    first = g_text_slot_owner_thread_ids;
-    for (; count < 3; count++) {
-        *first = 0;
-        *second = 0;
-        second++;
-        first++;
+    for (i = 0; i < 3; i++) {
+        g_text_slot_owner_thread_ids[i] = 0;
+        g_text_slot_glyph_counts[i] = 0;
     }
 }
 
@@ -123,39 +110,21 @@ void* menu_alloc_buffer(s32 bytes) {
  * pointer that no slot records stops the current thread. */
 void menu_free_memory(void* buffer_pointer) {
     u32 buffer = (u32)buffer_pointer;
-    u32 first_page;
-    s32* page_count_cursor;
-    menu_allocation_t* allocation;
-    s32* page_count_end;
-    u8* allocation_grid;
-    s32 invalid_buffer;
+    s32 first_page;
+    s32 slot;
     s32 page;
 
     if (buffer < (u32)g_heap_companion_overlay_load_address && buffer != -1) {
-        invalid_buffer = -1;
         first_page = (buffer - (u32)s_menu_buffer_arena) >> 8;
-        allocation_grid = s_menu_buffer_allocation_map;
-        /* A separate page-count cursor preserves the native count-field base. */
-        page_count_cursor = &s_menu_allocator_slot_records[0].page_count;
-        allocation = s_menu_allocator_slot_records;
-        page_count_end = &s_menu_allocator_slot_records[MENU_BUFFER_ALLOCATION_COUNT].page_count;
-        for (;;) {
-            if ((u32)allocation->buffer == buffer) {
-                allocation->buffer = (u8*)invalid_buffer;
-                /* Written as (index + base) + grid so the two addu operands
-                 * come out in the target's order; the page count is reloaded
-                 * each iteration because the byte store may alias it. */
-                for (page = 0; page < *page_count_cursor; page++) {
-                    *(u8*)((page + first_page) + (u32)allocation_grid) = 0;
+        for (slot = 0; slot < MENU_BUFFER_ALLOCATION_COUNT; slot++) {
+            if ((u32)s_menu_allocator_slot_records[slot].buffer == buffer) {
+                s_menu_allocator_slot_records[slot].buffer = (u8*)-1;
+                for (page = 0; page < s_menu_allocator_slot_records[slot].page_count; page++) {
+                    s_menu_buffer_allocation_map[page + first_page] = 0;
                 }
                 return;
             }
-            page_count_cursor += sizeof(menu_allocation_t) / sizeof(*page_count_cursor);
-            allocation++;
-            if ((s32)page_count_cursor >= (s32)page_count_end) {
-                thread_current_exit();
-                return;
-            }
         }
+        thread_current_exit();
     }
 }

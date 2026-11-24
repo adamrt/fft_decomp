@@ -37,11 +37,9 @@ static void size_entry_to_text(menu_entry_t* entry, s16* width, s16* height, s32
 
     *out_pad = 0;
     text_measure_pixels(width, height, text);
-    if (pad_short != 0) {
-        if (*width < 8 && *height == 1) {
-            *out_pad = (8 - *width) * 5;
-            *width = 8;
-        }
+    if (pad_short != 0 && *width < 8 && *height == 1) {
+        *out_pad = (8 - *width) * 5;
+        *width = 8;
     }
     padded = *width + 0x18;
     *width = padded + (padded & 3);
@@ -80,7 +78,6 @@ void menu_icon_timed_thread(void) {
         hold = 1;
         g_message_duration_frames &= 0xFF;
     }
-    i = 0;
     param = (menu_entry_t*)thread_current_get_parameter_1();
     size_entry_to_text(param, &width, &height, &pad, 1);
     menu_build_window_sprites(&rect, param, &records[0]);
@@ -90,7 +87,7 @@ void menu_icon_timed_thread(void) {
     menu_text_set_origin(pad + 8, 9);
     text_render_entry_to_image(param->text_id, buffer, &g_menu_window_text_pen);
     LoadImage(&rect, (u32*)buffer);
-    for (;; i++) {
+    for (i = 0;; i++) {
         thread_yield();
         if (i == 0) {
             menu_free_memory(buffer);
@@ -102,7 +99,7 @@ void menu_icon_timed_thread(void) {
             g_script_event_input = PSX_PAD_CIRCLE;
             g_sound_suppressed = 1;
         }
-        if (menu_should_close_thread(&g_script_event_input) != 0) {
+        if (menu_should_close_thread(&g_script_event_input)) {
             break;
         }
         /* Retail bug: unset is never assigned. The linked-entry thread tests its linked
@@ -169,7 +166,7 @@ void menu_icon_linked_entry_thread(void) {
         if (i == 0) {
             menu_free_memory(buffer);
         }
-        if (menu_should_close_thread(&g_script_event_input) != 0) {
+        if (menu_should_close_thread(&g_script_event_input)) {
             break;
         }
         if (linked_index >= 0) {
@@ -198,9 +195,9 @@ void menu_input_thread(void) {
     menu_entry_t* menu = (menu_entry_t*)thread_current_get_parameter_1();
 
     g_sound_suppressed = 1;
-    while (1) {
+    for (;;) {
         thread_yield();
-        if (menu_should_close_thread(&g_script_event_input) != 0) {
+        if (menu_should_close_thread(&g_script_event_input)) {
             break;
         }
         menu_handle_action(menu, 0);

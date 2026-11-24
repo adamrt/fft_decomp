@@ -10,7 +10,7 @@
  * the last page contains fewer entries.
  */
 void menu_scroll_list_by_page(menu_vertical_scroll_direction_e direction, const menu_instruction_t* menu) {
-    u8 unused[8];
+    u8 unused[8]; /* never touched; keeps the original stack frame */
     s32 previous_base;
     s16 base;
     s16 row_offset;

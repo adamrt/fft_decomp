@@ -1,11 +1,21 @@
 /* The option menu's value picker thread for one game option. */
 
 #include "fft/menu/menu.h"
+#include "fft/menu/menu_input.h"
 #include "fft/menu/menu_text.h"
+#include "fft/menu/menu_window.h"
+#include "fft/menu/option.h"
 #include "fft/script/script.h"
+#include "fft/sys/input.h"
 #include "fft/sys/memory.h"
 #include "fft/sys/sound.h"
+#include "fft/sys/suzuki.h"
+#include "fft/sys/thread.h"
 #include "fft/text/text.h"
+#include "psx/libgpu.h"
+#include "psx/pad.h"
+#include "psx/types.h"
+
 /* Two dead-store conditionals are zero-instruction allocation devices: flow deletes each body,
  * post-reload jump deletes each branch, but both stay visible to register allocation.
  * - `if (height <= 0)`: the sixth height reference (6 refs/54 insns) ties the render
@@ -15,16 +25,6 @@
  *   `i = 0`, so the slt result pseudo keeps its flow refs, gets no register, and reload gives
  *   it the target's second unreferenced 8-byte slot (frame 0x60; the text loop's entry test
  *   supplies the first). */
-
-#include "fft/menu/menu_input.h"
-#include "fft/menu/menu_window.h"
-#include "fft/menu/option.h"
-#include "fft/sys/input.h"
-#include "fft/sys/suzuki.h"
-#include "fft/sys/thread.h"
-#include "psx/libgpu.h"
-#include "psx/pad.h"
-#include "psx/types.h"
 
 extern menu_entry_t g_option_icon_thread_param;
 static menu_icon_record_t s_option_picker_icon_records[2];

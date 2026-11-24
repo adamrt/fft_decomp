@@ -220,15 +220,12 @@ void text_draw_number_entries(u8* buffer, const menu_number_entry_t* entries, gl
  * origin, without zero padding (a longer number runs on to the left). Moves origin and
  * clears the text palette offset afterward. */
 void text_draw_number(s32 value, u8 digit_count, u8* image, glyph_blit_t* origin) {
-    s16 cell;
-
     origin->rect.x += (digit_count - 1) * 6;
     do {
         text_render_glyph_to_4bpp_image(
             g_text_glyph_bitmap_data + (value % 10) * TEXT_GLYPH_BYTES, image, origin, g_menu_text_palette_offset);
-        value = value / 10;
-        cell = origin->rect.x;
-        origin->rect.x = cell - 6;
+        value /= 10;
+        origin->rect.x -= 6;
     } while (value != 0);
     g_menu_text_palette_offset = 0;
 }
@@ -266,8 +263,8 @@ void text_draw_large_number_glyphs(s32 value, s32 format, u8* pixels, glyph_blit
         text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, src, pos);
         pos->rect.x += 7;
     }
-    if ((format & 0x800) || (format & 0x400)) {
-        if (format & 0x400) {
+    if ((format & MENU_DECIMAL_SIGN_MINUS) || (format & MENU_DECIMAL_SIGN_PLUS)) {
+        if (format & MENU_DECIMAL_SIGN_PLUS) {
             src->rect.x = 0xC8;
         } else {
             src->rect.x = 0xBA;

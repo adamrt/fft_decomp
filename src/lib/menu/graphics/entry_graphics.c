@@ -135,7 +135,7 @@ void menu_select_sprite_clut(void* packet) {
     s32 clut;
     texture_primitive_t* primitive = packet;
 
-    if (thread_is_previous_running() != 0 || g_menu_input_lock_mode == 1) {
+    if (thread_is_previous_running() || g_menu_input_lock_mode == 1) {
         clut = MENU_CLUT_DIMMED;
     } else {
         clut = MENU_CLUT_NORMAL;
@@ -148,7 +148,7 @@ void menu_select_sprite_clut(void* packet) {
 void menu_select_icon_sprite_clut(SPRT* sprite) {
     s32 clut;
 
-    if (thread_is_previous_running() != 0 || g_menu_input_lock_mode == 1) {
+    if (thread_is_previous_running() || g_menu_input_lock_mode == 1) {
         clut = 0x7c7c;
     } else {
         clut = 0x7cbc;
@@ -159,7 +159,7 @@ void menu_select_icon_sprite_clut(SPRT* sprite) {
 /* Choose the CLUTs of the four menu-frame sprites: the dimmed set while the
  * previous thread is running or g_menu_input_lock_mode is 1. */
 void menu_select_icon_cluts(menu_icon_sprites_t* frame) {
-    if (thread_is_previous_running() != 0 || g_menu_input_lock_mode == 1) {
+    if (thread_is_previous_running() || g_menu_input_lock_mode == 1) {
         frame->sprites[0].clut = MENU_CLUT_DIMMED;
         frame->sprites[1].clut = 0x7dfc;
         frame->sprites[2].clut = 0x7e3c;
@@ -219,7 +219,7 @@ void menu_update_icon_cursor_sprites(menu_entry_t* param, menu_icon_sprites_t* r
             thread->task_words[MENU_CURSOR_THREAD_WORD_BOB_ACTIVE] = 2;
             thread->task_words[MENU_CURSOR_THREAD_WORD_BOB_TIMER] = 0;
         }
-        if (thread_is_previous_running() == 0 && g_menu_input_lock_mode == 0) {
+        if (!thread_is_previous_running() && g_menu_input_lock_mode == 0) {
             if (thread->task_words[MENU_CURSOR_THREAD_WORD_BOB_ACTIVE] != 0
                 && thread->task_words[MENU_CURSOR_THREAD_WORD_BOB_TIMER] >= 0x1B) {
                 thread->task_words[MENU_CURSOR_THREAD_WORD_BOB_ACTIVE] = 0;
@@ -264,11 +264,12 @@ static void copy_sprite_layout(const menu_entry_t* entry, SPRT* sprite, s32 unus
 void menu_zoom_sprite(const void* unused_source, SPRT* sprite, s32 step) {
     s32 scale;
     s32 offset;
+
     if (step < 12) {
         scale = s_menu_cursor_zoom_percentages[step];
         offset = sprite->w * scale / 200;
-        sprite->x0 = (sprite->w / 2) + sprite->x0 - offset;
-        sprite->u0 = (sprite->w / 2) + sprite->u0 - offset;
+        sprite->x0 = sprite->w / 2 + sprite->x0 - offset;
+        sprite->u0 = sprite->w / 2 + sprite->u0 - offset;
         sprite->x0 &= ~1;
         sprite->u0 &= ~1;
         offset = sprite->h * scale / 200;
@@ -316,8 +317,8 @@ void gfx_build_scaled_draw_area_pair_swapped(
     packets->rects[0].x = width / 2 + packets->rects[0].x - offset;
     offset = height * percent / 200;
     packets->rects[0].y = height / 2 + packets->rects[0].y - offset;
-    packets->rects[0].w = (packets->rects[0].w * percent) / 100;
-    packets->rects[0].h = (packets->rects[0].h * percent) / 100;
+    packets->rects[0].w = packets->rects[0].w * percent / 100;
+    packets->rects[0].h = packets->rects[0].h * percent / 100;
     if (upper_half != 0) {
         packets->rects[1].y = 0;
     } else {

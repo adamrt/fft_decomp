@@ -94,18 +94,18 @@ void item_list_rebuild_category(s32 category) {
     s32 i;
     s16 item;
     s32 type;
-    s32 cat;
+    s32 list_category;
 
     for (i = 1; i < ITEM_ID_END; i++) {
         item = i;
         type = item_list_get_category(item);
-        cat = 0;
+        list_category = 0;
         if (type != ITEM_MENU_CATEGORY_WEAPON) {
-            cat = type - 1;
+            list_category = type - 1;
         }
-        if (category == cat) {
+        if (category == list_category) {
             if (item_get_total_count(item) != 0) {
-                if (is_in_category_list(i, category) == 0) {
+                if (!is_in_category_list(i, category)) {
                     prepend_to_category_list(i, category);
                 }
             } else {

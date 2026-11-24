@@ -20,10 +20,11 @@ void menu_draw_text_columns(menu_entry_t* entry, s32* row_offset, u8* buffer) {
             if (layout->mode[column] == MENU_TEXT_COLUMN_HIDDEN) {
                 continue;
             }
-            if ((layout->text_ids[column][index] & 0x7FF) == 0x7FF) {
+            if ((layout->text_ids[column][index] & TEXT_ID_ENTRY_MASK) == TEXT_ID_ENTRY_MASK) {
                 continue;
             }
-            menu_text_set_origin(layout->x[column], row * 0x10);
+            menu_text_set_origin(layout->x[column], row * 16);
+            /* Always true after the test above, but the bytes keep it. */
             if (layout->mode[column] != MENU_TEXT_COLUMN_HIDDEN) {
                 g_menu_text_palette_offset = layout->text_colors[column][index];
             }

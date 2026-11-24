@@ -113,7 +113,7 @@ void unit_panel_set_numeric_frame_dimmed_colors(unit_panel_numeric_frame_t* menu
     LINE_F2* line;
 
     for (index = 0, line = menu->lines; index < 12; index++, line++) {
-        palette_index = (s_status_screen_numbers_palette_indices[index] + PALETTE_COLOR_COUNT);
+        palette_index = s_status_screen_numbers_palette_indices[index] + PALETTE_COLOR_COUNT;
         line->r0 = g_menu_palette_colors.colors[palette_index].red << 3;
         line->g0 = g_menu_palette_colors.colors[palette_index].green << 3;
         line->b0 = g_menu_palette_colors.colors[palette_index].blue << 3;

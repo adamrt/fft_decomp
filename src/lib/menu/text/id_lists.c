@@ -54,16 +54,14 @@ void menu_text_render_encoded_ids_to_image(u8* image, const text_image_bounds_t*
         position.y = bounds->y + line * bounds->line_height;
         style = 0;
         if (text_ids[k] & 0x2000) {
-            col = 0;
-            glyph_entry = &text_ids[k];
-            for (; col < 8; col++) {
+            for (col = 0, glyph_entry = &text_ids[k]; col < 8; col++) {
                 position.x
                     += menu_text_render_glyph_to_4bpp_image(glyph, image, &position, (*glyph_entry >> 14) | style);
             }
         } else {
             text = menu_text_find_entry_by_index(text_table, text_ids[k] & 0xFFF, 2);
             code = *text++;
-            if (code < 0xFE) {
+            if (code < TEXT_END_WAIT_FOR_CONFIRM) {
                 text_entry = &text_ids[k];
                 do {
                     if (code == TEXT_NEWLINE || col >= max_chars) {
@@ -86,7 +84,7 @@ void menu_text_render_encoded_ids_to_image(u8* image, const text_image_bounds_t*
                         style = *text++ >> 2;
                     }
                     code = *text++;
-                } while (code < 0xFE);
+                } while (code < TEXT_END_WAIT_FOR_CONFIRM);
             }
         }
         line++;

@@ -22,7 +22,7 @@ void menu_managed_thread_stop(s32 thread_id) {
 void menu_thread_stop_and_wait(s32 id) {
     u32 otag;
 
-    while (thread_is_running(id) != 0) {
+    while (thread_is_running(id)) {
         menu_thread_request_stop(id);
         menu_input_update_event_state(&otag, 0, 0);
     }
@@ -36,7 +36,7 @@ void menu_thread_stop_and_wait(s32 id) {
  * the thread is still running, 0 once it has ended. */
 s32 menu_managed_thread_start(s32 thread_id, menu_entry_t* descriptor) {
     if (s_menu_managed_thread_state == 0) {
-        if (thread_is_running(thread_id) != 0) {
+        if (thread_is_running(thread_id)) {
             return 1;
         }
         g_menu_thread_menu_data = descriptor;

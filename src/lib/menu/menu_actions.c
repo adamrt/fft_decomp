@@ -29,7 +29,7 @@ s32 menu_can_accept_input(void) {
         return 0;
     }
 #endif
-    if (thread_is_previous_running() != 0 || thread_current_get_parameter_3() != 0 || g_menu_input_lock_mode != 0
+    if (thread_is_previous_running() || thread_current_get_parameter_3() != 0 || g_menu_input_lock_mode != 0
         || g_help_open != 0 || g_menu_input_block_frames != 0) {
         return 0;
     }
@@ -56,7 +56,7 @@ void menu_handle_action(menu_entry_t* entry, s32 row_index) {
         return;
     }
     silent = 0;
-    if ((g_script_event_input & PSX_PAD_CIRCLE) && menu_can_accept_input() != 0) {
+    if ((g_script_event_input & PSX_PAD_CIRCLE) && menu_can_accept_input()) {
         if (g_thread_contexts[g_thread_current_id].task_words[MENU_CURSOR_THREAD_WORD_BOB_ACTIVE] == 0) {
             g_thread_contexts[g_thread_current_id].task_words[MENU_CURSOR_THREAD_WORD_BOB_ACTIVE] = 2;
             g_thread_contexts[g_thread_current_id].task_words[MENU_CURSOR_THREAD_WORD_BOB_TIMER] = 0;
@@ -93,7 +93,7 @@ void menu_handle_action(menu_entry_t* entry, s32 row_index) {
                 if (thread_id == THREAD_SLOT_MENU) {
                     for (j = 0; j < target; j++) {
                         menu_thread_id = THREAD_SLOT_MENU - j;
-                        if (thread_is_running_asm(menu_thread_id) != 0) {
+                        if (thread_is_running_asm(menu_thread_id)) {
                             g_command_pending_selection[j]
                                 = ((menu_entry_t*)g_thread_contexts[menu_thread_id].function_parameter_1)
                                       ->selected_index;
@@ -113,29 +113,29 @@ void menu_handle_action(menu_entry_t* entry, s32 row_index) {
 
 /* While the menu may accept input, move a row cursor with Up and Down, wrapping
  * between row 0 and the entry's max_row_index, and play the cursor sound. */
-void menu_update_row_cursor(menu_entry_t* ctx, s32* sel) {
-    s32 selection;
-    s32 max;
-    s32 cur;
+void menu_update_row_cursor(menu_entry_t* entry, s32* cursor) {
+    s32 up_row;
+    s32 last_row;
+    s32 down_row;
 
-    if (menu_can_accept_input() != 0) {
+    if (menu_can_accept_input()) {
         if (g_script_event_input & PSX_PAD_UP) {
-            selection = *sel;
-            if (selection == 0) {
-                selection = ctx->max_row_index;
+            up_row = *cursor;
+            if (up_row == 0) {
+                up_row = entry->max_row_index;
             } else {
-                selection = selection - 1;
+                up_row--;
             }
-            *sel = selection;
+            *cursor = up_row;
             sound_queue_cursor();
         }
         if (g_script_event_input & PSX_PAD_DOWN) {
-            max = ctx->max_row_index;
-            cur = *sel;
-            if (cur == max) {
-                *sel = 0;
+            last_row = entry->max_row_index;
+            down_row = *cursor;
+            if (down_row == last_row) {
+                *cursor = 0;
             } else {
-                *sel = cur + 1;
+                *cursor = down_row + 1;
             }
             sound_queue_cursor();
         }
@@ -156,7 +156,7 @@ void menu_handle_cancel_input(menu_entry_t* context) {
     if (!(g_script_event_input & PSX_PAD_CROSS)) {
         return;
     }
-    if (menu_can_accept_input() == 0) {
+    if (!menu_can_accept_input()) {
         return;
     }
     count = context->thread_count;
@@ -194,7 +194,7 @@ s32 menu_should_close_thread(u32* input) {
     s32 i;
 
 #ifdef FFT_WORLD
-    if (g_thread_contexts[THREAD_SCREEN_SLOT_TEXT].is_running == 0 && menu_can_accept_input() != 0
+    if (g_thread_contexts[THREAD_SCREEN_SLOT_TEXT].is_running == 0 && menu_can_accept_input()
         && (*input & PSX_PAD_SELECT)) {
         parameter = (menu_entry_t*)thread_current_get_parameter_1();
         if (parameter->select_text_table != 0) {
@@ -212,7 +212,7 @@ s32 menu_should_close_thread(u32* input) {
         return 0;
     }
     for (i = 0; i < VARIANT_THREAD_TABLE_SLOT_COUNT; i++) {
-        if (i != g_thread_current_id && thread_is_running_asm(i) != 0
+        if (i != g_thread_current_id && thread_is_running_asm(i)
             && g_thread_contexts[i].task_id == THREAD_TASK_STOP_REQUEST) {
             *input = 0;
             break;

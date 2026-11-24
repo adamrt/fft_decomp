@@ -32,19 +32,10 @@ static RECT s_menu_panel_texture_windows[7] = { { 0, 0, 16, 16 }, { 0, 0, 16, 16
  * addressing. */
 void menu_window_frame_thread(void) {
     RECT texture;
-    /* Keeping both stride fields live retains their descriptor bases. */
     menu_panel_frame_t* prim = g_menu_scratch_buffer.panel_frames;
-    s32* source_stride = &g_text_glyph_source.stride;
-    s32* dest_stride = &g_text_glyph_dest.stride;
     urect16_t* menu;
     s32 texture_u;
     s32 texture_v;
-    /* The two border thicknesses feed both the primitive fields and the
-     * argument registers throughout, even though
-     * menu_init_scaled_draw_area_packets takes only the primitive pointer
-     * and reads none of them. */
-    s32 border_wide;
-    s32 border_thin;
     s32 span;
     s32 index;
     s32 frame;
@@ -55,8 +46,8 @@ void menu_window_frame_thread(void) {
     texture.w = 0x80;
     texture.h = 0x10;
     gfx_alloc_texture_rect(&texture, &prim->texture_prim, (u32*)-1);
-    *source_stride = 0x100;
-    *dest_stride = 0x80;
+    g_text_glyph_source.stride = 0x100;
+    g_text_glyph_dest.stride = 0x80;
 
     /* Copy the border pieces from the menu glyph sheet into one 128x16 image and upload it. */
     text_set_blit_source_rect(8, 8, 0x20, 0x10);
@@ -92,63 +83,59 @@ void menu_window_frame_thread(void) {
 
     /* Sprite 0 fills the interior and sprites 1-4 are the right, left, top and bottom edges;
      * each tiles its piece through its own texture window. */
-    border_wide = 0x10;
-    border_thin = 8;
     prim->sprites[0].x0 = menu->x + 8;
     prim->sprites[0].y0 = menu->y + 0x10;
-    /* The subtractions go through an s32 temporary: assigning the difference
-     * straight into the 16-bit field lets combine narrow it to HImode, where
-     * the negative constant no longer fits an addiu and is loaded instead. */
+    /* An s32 temporary keeps each difference from being narrowed to 16 bits, which loads the constant. */
     span = menu->w - 0x18;
     prim->sprites[0].w = span;
     span = menu->h - 0x20;
     prim->sprites[0].h = span;
     prim->sprites[1].x0 = menu->x + menu->w - 0x10;
     prim->sprites[1].y0 = menu->y + 0x10;
-    prim->sprites[1].w = border_wide;
+    prim->sprites[1].w = 16;
     span = menu->h - 0x20;
     prim->sprites[1].h = span;
     prim->sprites[2].x0 = menu->x;
     prim->sprites[2].y0 = menu->y + 0x10;
-    prim->sprites[2].w = border_thin;
+    prim->sprites[2].w = 8;
     span = menu->h - 0x20;
     prim->sprites[2].h = span;
     prim->sprites[3].x0 = menu->x + 8;
     prim->sprites[3].y0 = menu->y;
     span = menu->w - 0x18;
     prim->sprites[3].w = span;
-    prim->sprites[3].h = border_wide;
+    prim->sprites[3].h = 16;
     prim->sprites[4].x0 = menu->x + 8;
     prim->sprites[4].y0 = menu->y + menu->h - 0x10;
     span = menu->w - 0x18;
     prim->sprites[4].w = span;
-    prim->sprites[4].h = border_wide;
+    prim->sprites[4].h = 16;
 
     /* Sprites 5-8 are the corners, cut from the corner pieces of the uploaded image. */
     prim->sprites[5].x0 = menu->x;
     prim->sprites[5].y0 = menu->y;
     prim->sprites[5].u0 = texture_u + 0x28;
     prim->sprites[5].v0 = texture_v;
-    prim->sprites[5].w = border_thin;
-    prim->sprites[5].h = border_wide;
+    prim->sprites[5].w = 8;
+    prim->sprites[5].h = 16;
     prim->sprites[6].x0 = menu->x;
     prim->sprites[6].y0 = menu->y + menu->h - 0x10;
     prim->sprites[6].u0 = texture_u + 0x58;
     prim->sprites[6].v0 = texture_v;
-    prim->sprites[6].w = border_thin;
-    prim->sprites[6].h = border_wide;
+    prim->sprites[6].w = 8;
+    prim->sprites[6].h = 16;
     prim->sprites[7].x0 = menu->x + menu->w - 0x10;
     prim->sprites[7].y0 = menu->y;
     prim->sprites[7].u0 = texture_u + 0x40;
     prim->sprites[7].v0 = texture_v;
-    prim->sprites[7].w = border_thin;
-    prim->sprites[7].h = border_wide;
+    prim->sprites[7].w = 8;
+    prim->sprites[7].h = 16;
     prim->sprites[8].x0 = menu->x + menu->w - 0x10;
     prim->sprites[8].y0 = menu->y + menu->h - 0x10;
     prim->sprites[8].u0 = texture_u + 0x70;
     prim->sprites[8].v0 = texture_v;
-    prim->sprites[8].w = border_thin;
-    prim->sprites[8].h = border_wide;
+    prim->sprites[8].w = 8;
+    prim->sprites[8].h = 16;
 
     menu_init_scaled_draw_area_packets(&prim->draw_areas);
     mem_copy_bytes_nonempty(
@@ -159,10 +146,7 @@ void menu_window_frame_thread(void) {
         prim = &g_menu_scratch_buffer.panel_frames[frame & 1];
         gfx_build_scaled_draw_area_pair_swapped(&prim->draw_areas, (const RECT*)menu, frame, g_gfx_screen_polarity);
 
-        /* The CLUT id the nine border sprites are drawn with this frame, which
-         * the target keeps in this variable's register once the texture column
-         * is dead. A separate local is allocated a different callee-saved
-         * register and does not reproduce the target. */
+        /* texture_u is reused for this frame's border CLUT; a separate local changes the registers. */
         texture_u = MENU_CLUT_DIMMED;
         if (thread_current_get_parameter_2() == 0 && g_menu_input_lock_mode == 0) {
             texture_u = MENU_CLUT_NORMAL;

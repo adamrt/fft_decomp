@@ -29,7 +29,7 @@ menu_instruction_t* menu_opcode_03_draw_tile(menu_instruction_t* cmd) {
     } else {
         y = g_menu_list_row_height * g_menu_list_row_index + cmd->tile.y + g_menu_list_scroll_offset;
         if (g_menu_list_scroll_offset < 0) {
-            y = y - g_menu_list_row_height;
+            y -= g_menu_list_row_height;
         }
     }
     rect.x = cmd->tile.x;
@@ -111,7 +111,7 @@ menu_instruction_t* menu_opcode_06_draw_callback_quad(menu_instruction_t* cmd) {
     } else {
         row = g_menu_scroll_base_index + g_menu_list_row_index;
         if (g_menu_list_scroll_offset < 0) {
-            row -= 1;
+            row--;
         }
     }
 

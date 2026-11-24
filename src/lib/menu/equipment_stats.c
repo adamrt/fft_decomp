@@ -94,7 +94,7 @@ void item_list_build_stat_preview(
     if (item_id > 0
 #ifdef FFT_WORLD
         /* EQUIP omits this upper-bound check. */
-        && item_id <= ITEM_ID_END - 1
+        && item_id < ITEM_ID_END
 #endif
     ) {
         attribute = g_item_primary_data[item_id].attributes;
@@ -157,24 +157,23 @@ void equipment_calculate_swap_delta(
 /* Store base minus scaled detail stats; inputs may alias the output. */
 static void subtract_scaled_stat_preview(
     unit_panel_record_t* out, const unit_panel_record_t* scaled, const unit_panel_record_t* base, s32 scale) {
-    out->state.move = base->state.move - (scale * scaled->state.move);
-    out->state.speed = base->state.speed - (scale * scaled->state.speed);
-    out->state.jump = base->state.jump - (scale * scaled->state.jump);
-    out->state.right_weapon_power = base->state.right_weapon_power - (scale * scaled->state.right_weapon_power);
-    out->state.left_weapon_power = base->state.left_weapon_power - (scale * scaled->state.left_weapon_power);
-    out->state.right_weapon_evade = base->state.right_weapon_evade - (scale * scaled->state.right_weapon_evade);
-    out->state.left_weapon_evade = base->state.left_weapon_evade - (scale * scaled->state.left_weapon_evade);
-    out->state.physical_attack = base->state.physical_attack - (scale * scaled->state.physical_attack);
-    out->state.physical_class_evade = base->state.physical_class_evade - (scale * scaled->state.physical_class_evade);
-    out->state.physical_shield_evade
-        = base->state.physical_shield_evade - (scale * scaled->state.physical_shield_evade);
+    out->state.move = base->state.move - scale * scaled->state.move;
+    out->state.speed = base->state.speed - scale * scaled->state.speed;
+    out->state.jump = base->state.jump - scale * scaled->state.jump;
+    out->state.right_weapon_power = base->state.right_weapon_power - scale * scaled->state.right_weapon_power;
+    out->state.left_weapon_power = base->state.left_weapon_power - scale * scaled->state.left_weapon_power;
+    out->state.right_weapon_evade = base->state.right_weapon_evade - scale * scaled->state.right_weapon_evade;
+    out->state.left_weapon_evade = base->state.left_weapon_evade - scale * scaled->state.left_weapon_evade;
+    out->state.physical_attack = base->state.physical_attack - scale * scaled->state.physical_attack;
+    out->state.physical_class_evade = base->state.physical_class_evade - scale * scaled->state.physical_class_evade;
+    out->state.physical_shield_evade = base->state.physical_shield_evade - scale * scaled->state.physical_shield_evade;
     out->state.physical_accessory_evade
-        = base->state.physical_accessory_evade - (scale * scaled->state.physical_accessory_evade);
-    out->state.magical_attack = base->state.magical_attack - (scale * scaled->state.magical_attack);
-    out->state.magical_class_evade = base->state.magical_class_evade - (scale * scaled->state.magical_class_evade);
-    out->state.magical_shield_evade = base->state.magical_shield_evade - (scale * scaled->state.magical_shield_evade);
+        = base->state.physical_accessory_evade - scale * scaled->state.physical_accessory_evade;
+    out->state.magical_attack = base->state.magical_attack - scale * scaled->state.magical_attack;
+    out->state.magical_class_evade = base->state.magical_class_evade - scale * scaled->state.magical_class_evade;
+    out->state.magical_shield_evade = base->state.magical_shield_evade - scale * scaled->state.magical_shield_evade;
     out->state.magical_accessory_evade
-        = base->state.magical_accessory_evade - (scale * scaled->state.magical_accessory_evade);
+        = base->state.magical_accessory_evade - scale * scaled->state.magical_accessory_evade;
 }
 
 /* Sum the stat changes of swapping each of the five equipment slots from `from_items` to `to_items`. */
@@ -188,7 +187,8 @@ void equipment_calculate_loadout_delta(unit_panel_record_t* detail_total, unit_p
     clear_stat_preview(summary_total, detail_total);
 
     for (i = 0; i < 5; i++) {
-        equipment_calculate_swap_delta(&detail_delta, &summary_delta, from_items[i] & 0x3FF, to_items[i] & 0x3FF, i);
+        equipment_calculate_swap_delta(
+            &detail_delta, &summary_delta, from_items[i] & ITEM_ENTRY_ID_MASK, to_items[i] & ITEM_ENTRY_ID_MASK, i);
         subtract_scaled_stat_preview(detail_total, detail_total, &detail_delta, -1);
         summary_total->gauges[MENU_UNIT_STATUS_GAUGE_HP].bonus += summary_delta.gauges[MENU_UNIT_STATUS_GAUGE_HP].bonus;
         summary_total->gauges[MENU_UNIT_STATUS_GAUGE_MP].bonus += summary_delta.gauges[MENU_UNIT_STATUS_GAUGE_MP].bonus;

@@ -74,7 +74,7 @@ s32 ability_list_get_ct(s32 index) {
         result = MENU_NUMBER_VALUE_DASHES;
     } else {
         result = g_ability_list_selected_ability_secondary_data.range->ct;
-        result = (100 / result) + ((100 % result) != 0);
+        result = 100 / result + (100 % result != 0);
     }
     if (entry >> ABILITY_LIST_ENTRY_DISABLED_SHIFT) {
         result |= MENU_NUMBER_VALUE_DISABLED;

@@ -32,23 +32,28 @@ void gfx_set_scaled_poly_ft4_8bpp(POLY_FT4* poly, const point16_t* texture, cons
     s32 height_quotient;
 
     xoff_quotient = xoff / ONE;
-    if (xoff % ONE >= ONE / 2)
+    if (xoff % ONE >= ONE / 2) {
         round_xoff = 1;
+    }
     yoff_quotient = yoff / ONE;
-    if (yoff % ONE >= ONE / 2)
+    if (yoff % ONE >= ONE / 2) {
         round_yoff = 1;
+    }
     width_quotient = width / ONE;
-    if (width % ONE >= ONE / 2)
+    if (width % ONE >= ONE / 2) {
         round_width = 1;
+    }
     height_quotient = height / ONE;
-    if (height % ONE >= ONE / 2)
+    if (height % ONE >= ONE / 2) {
         round_height = 1;
+    }
     xoff = xoff_quotient + round_xoff;
     yoff = yoff_quotient + round_yoff;
     width = width_quotient + round_width;
     height = height_quotient + round_height;
-    if (width < 0)
+    if (width < 0) {
         width = -width;
+    }
     if (height < 0)
         height = -height;
 
@@ -83,11 +88,11 @@ void zodiac_build_primitives(zodiac_draw_context_t* context, POLY_FT4* poly) {
         x *= context->scale_x;
         y = g_zodiac_sprite_scales[i].y;
         y *= context->scale_y;
-        if (x % ONE >= 0x800) {
-            x += 1;
+        if (x % ONE >= ONE / 2) {
+            x++;
         }
-        if (y % ONE >= 0x800) {
-            y += 1;
+        if (y % ONE >= ONE / 2) {
+            y++;
         }
         x /= ONE;
         y /= ONE;

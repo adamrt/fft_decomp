@@ -1,5 +1,6 @@
 /* Counting the characters of an encoded text string. */
 
+#include "fft/text/text.h"
 #include "psx/types.h"
 
 /* Count the characters of a 0xFE-terminated text string; bytes 0xD0..0xDF
@@ -7,15 +8,13 @@
 s32 text_count_encoded_glyphs(const u8* data) {
     s32 count = 0;
 
-    if (*data != 0xfe) {
-        do {
-            if (*data >= 0xd0 && *data <= 0xdf) {
-                data += 2;
-            } else {
-                data++;
-            }
-            count++;
-        } while (*data != 0xfe);
+    while (*data != TEXT_END_WAIT_FOR_CONFIRM) {
+        if (*data >= TEXT_EXTENDED_GLYPH_PREFIX_FIRST && *data <= TEXT_EXTENDED_GLYPH_PREFIX_LAST) {
+            data += 2;
+        } else {
+            data++;
+        }
+        count++;
     }
     return count;
 }

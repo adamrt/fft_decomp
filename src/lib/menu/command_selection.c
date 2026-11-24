@@ -619,7 +619,7 @@ void command_act_menu_thread(void) {
         }
         for (;;) {
             thread_yield();
-            if (thread_is_running_asm(g_thread_current_id - 1) == 0) {
+            if (!thread_is_running_asm(g_thread_current_id - 1)) {
                 thread_current_exit();
             }
         }

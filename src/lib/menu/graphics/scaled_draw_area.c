@@ -39,12 +39,12 @@ void menu_build_scaled_draw_area_packets(
     packet->rects[0].x -= 0x80;
     packet->rects[0].x += position->x;
     packet->rects[0].y += position->y;
-    scaled = (w * percent) / 200;
+    scaled = w * percent / 200;
     packet->rects[0].x = w / 2 + packet->rects[0].x - scaled;
-    scaled = (h * percent) / 200;
+    scaled = h * percent / 200;
     packet->rects[0].y = h / 2 + packet->rects[0].y - scaled;
-    packet->rects[0].w = (packet->rects[0].w * percent) / 100;
-    packet->rects[0].h = (packet->rects[0].h * percent) / 100;
+    packet->rects[0].w = packet->rects[0].w * percent / 100;
+    packet->rects[0].h = packet->rects[0].h * percent / 100;
     if (upper_half != 0) {
         packet->rects[1].y = 0;
     } else {

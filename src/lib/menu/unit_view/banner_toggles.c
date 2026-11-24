@@ -8,7 +8,7 @@
 /* Open the unit status panel thread if it is not already running, or with enable 0 ask it to stop. */
 void unit_panel_toggle_banner_thread(s32 enable) {
     if (enable != 0) {
-        if (thread_is_running(THREAD_SCREEN_SLOT_UNIT_STATUS) == 0) {
+        if (!thread_is_running(THREAD_SCREEN_SLOT_UNIT_STATUS)) {
             thread_start(THREAD_SCREEN_SLOT_UNIT_STATUS, unit_panel_banner_thread);
             thread_set_parameters(THREAD_SCREEN_SLOT_UNIT_STATUS, &g_unit_panel_status_display_thread_params, 0, 0);
         }
@@ -22,7 +22,7 @@ void unit_panel_toggle_banner_thread(s32 enable) {
  * to stop. */
 void unit_panel_toggle_comparison_thread(s32 enable) {
     if (enable != 0) {
-        if (thread_is_running(THREAD_SCREEN_SLOT_COMPARISON_STATUS) == 0) {
+        if (!thread_is_running(THREAD_SCREEN_SLOT_COMPARISON_STATUS)) {
             thread_start(THREAD_SCREEN_SLOT_COMPARISON_STATUS, unit_panel_banner_thread);
             thread_set_parameters(
                 THREAD_SCREEN_SLOT_COMPARISON_STATUS, &g_unit_panel_comparison_display_thread_params, 0, 0);

@@ -40,10 +40,10 @@ void zodiac_build_sprite_polygon(POLY_FT4* poly, point16_t* texture_page, const 
         rh = 1;
     }
 
-    ox = (ox / ONE) + rx;
-    oy = (oy / ONE) + ry;
-    w = (w / ONE) + rw;
-    h = (h / ONE) + rh;
+    ox = ox / ONE + rx;
+    oy = oy / ONE + ry;
+    w = w / ONE + rw;
+    h = h / ONE + rh;
     if (w < 0) {
         w = -w;
     }

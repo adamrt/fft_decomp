@@ -34,7 +34,7 @@ void item_list_draw_status_list(s16 item_id) {
 
     bits_primary_init_reader(g_item_attributes[attribute].immunity);
     for (i = 0; i < STATUS_COUNT; i++) {
-        if (bits_primary_read(1) != 0) {
+        if (bits_primary_read(1)) {
             count++;
         }
     }
@@ -50,6 +50,7 @@ void item_list_draw_status_list(s16 item_id) {
     if (count >= 13) {
         count = 12;
     }
+    /* `bit` doubles as the column's bottom y: a separate local changes the bytes. */
     bit = 0xC2;
     if (g_menu_selected_slot == MENU_EQUIPMENT_SLOT_BODY) {
         bit = 0xDA;
@@ -64,7 +65,7 @@ void item_list_draw_status_list(s16 item_id) {
         if (drawn >= count) {
             break;
         }
-        if (bits_primary_read(1) != 0) {
+        if (bits_primary_read(1)) {
             rect.x = x - 7;
             rect.y = y + 1;
             rect.w = 8;
@@ -88,7 +89,7 @@ void item_list_draw_status_list(s16 item_id) {
         }
         bit = bits_primary_read(1);
         bit |= bits_secondary_read(1);
-        if (bit != 0) {
+        if (bit) {
             rect.x = x - 8;
             rect.y = y + 1;
             rect.w = 8;

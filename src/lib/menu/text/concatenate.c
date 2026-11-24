@@ -13,15 +13,15 @@ void text_concatenate_entries(const u8* text_table, u8* out, const s16* text_ids
     if (*text_ids != -1) {
         ids = text_ids;
         do {
-            src = menu_text_find_entry_by_index(text_table, *ids & 0x7FF, 1);
-            while (*src != 0xFE) {
+            src = menu_text_find_entry_by_index(text_table, *ids & TEXT_ID_ENTRY_MASK, 1);
+            while (*src != TEXT_END_WAIT_FOR_CONFIRM) {
                 *out = *src;
                 src++;
                 out++;
             }
             ids++;
             if (separate != 0) {
-                *out = 0xF8;
+                *out = TEXT_NEWLINE;
                 out++;
             }
         } while (*ids != -1);
@@ -30,5 +30,5 @@ void text_concatenate_entries(const u8* text_table, u8* out, const s16* text_ids
     if (separate != 0) {
         out--;
     }
-    *out = 0xFE;
+    *out = TEXT_END_WAIT_FOR_CONFIRM;
 }

@@ -4649,11 +4649,6 @@ void helpmenu_battle_entrypoint(void) {
     thread_t* scan_thread;
     menu_entry_t* request;
     thread_t* self;
-    unit_panel_summary_t* setup_banner;
-    unit_panel_unit_t* setup_unit_data;
-    unit_panel_record_t* setup_billboard;
-    map_selected_tile_t* setup_cursor_tile;
-    s32 missing_value;
     s32 value_id;
 
     u_mid = 0xB8;
@@ -4664,10 +4659,6 @@ void helpmenu_battle_entrypoint(void) {
     /* Save the text section pointers for close_help to restore, and point the help sections into the
      * help text data. */
     mem_copy_bytes_nonempty(g_text_saved_pointers, g_text_section_pointers, sizeof(g_text_saved_pointers));
-    setup_banner = &g_help_active_banner;
-    setup_unit_data = &g_help_active_unit_data;
-    setup_billboard = &g_help_billboard;
-    setup_cursor_tile = &g_help_menu_cursor_tile;
     g_text_section_pointers[HELP_TEXT_SECTION_UNIT_STATUS]
         = s_help_data_base + s_help_text_section_offsets[HELP_TEXT_SECTION_UNIT_STATUS];
     g_text_section_pointers[HELP_TEXT_SECTION_MENU_COMMANDS]
@@ -4686,7 +4677,8 @@ void helpmenu_battle_entrypoint(void) {
         = s_help_data_base + s_help_text_section_offsets[HELP_TEXT_SECTION_STATUSES];
 
     self = &g_threads[g_thread_current_id];
-    unit_panel_copy_billboard_out(setup_banner, setup_unit_data, setup_billboard, setup_cursor_tile);
+    unit_panel_copy_billboard_out(
+        &g_help_active_banner, &g_help_active_unit_data, &g_help_billboard, &g_help_menu_cursor_tile);
     /* This fixed lower-menu 16-bit slot can contain another overlay's data. */
     if ((g_unit_panel_selected_unit_stat_summary.team_kind != 0) || (g_menu_post_battle_unit_changes_active != 0)) {
         g_help_after_battle_navigation[2].destination[2] = 7;
@@ -4712,17 +4704,16 @@ void helpmenu_battle_entrypoint(void) {
      * entry at once. */
     if (help_thread_id < 9) {
         frame = help_thread_id;
-        missing_value = -1;
         scan_thread = &g_threads[frame];
         for (; frame < 9; frame++) {
             request = (menu_entry_t*)scan_thread->function_parameter_1;
-            if (request->select_text_table != missing_value) {
+            if (request->select_text_table != -1) {
                 break;
             }
             scan_thread++;
         }
         if (frame != 9) {
-            if (g_help_active_text_id_tables == (u16* const*)missing_value) {
+            if (g_help_active_text_id_tables == (u16* const*)-1) {
                 g_help_active_text_id_tables = g_help_menu_text_id_tables;
             }
             /* A help text id holds its section in bits 11-15 above the entry (HELP_TEXT_ID_*_BASE). */
@@ -5015,17 +5006,17 @@ void helpmenu_battle_entrypoint(void) {
 
             setXY4(&cursor_quads[buffer_index], x, y + bob, x + 0x10, y + bob, x, y + bob + 0x10, x + 0x10,
                 y + bob + 0x10);
-            setXY4(shadow_quads + buffer_index, x + 2, y + bob + 2, x + 0x12, y + bob + 2, x + 2, y + bob + 0x12,
+            setXY4(&shadow_quads[buffer_index], x + 2, y + bob + 2, x + 0x12, y + bob + 2, x + 2, y + bob + 0x12,
                 x + 0x12, y + bob + 0x12);
         } else {
             u = 0xA8;
-            setUV4(cursor_quads + buffer_index, u, 0, u_mid, 0, 0xA8, 0x10, u_mid, 0x10);
+            setUV4(&cursor_quads[buffer_index], u, 0, u_mid, 0, 0xA8, 0x10, u_mid, 0x10);
             u = 0xB8;
-            setUV4(shadow_quads + buffer_index, u, 0, 0xC8, 0, u_mid, 0x10, 0xC8, 0x10);
-            setXY4(cursor_quads + buffer_index, x + bob, y, x + bob + 0x10, y, x + bob, y + 0x10, x + bob + 0x10,
+            setUV4(&shadow_quads[buffer_index], u, 0, 0xC8, 0, u_mid, 0x10, 0xC8, 0x10);
+            setXY4(&cursor_quads[buffer_index], x + bob, y, x + bob + 0x10, y, x + bob, y + 0x10, x + bob + 0x10,
                 y + 0x10);
             shadow_offset = bob + 2;
-            setXY4(shadow_quads + buffer_index, x + shadow_offset, y + 2, x + shadow_offset + 0x10, y + 2,
+            setXY4(&shadow_quads[buffer_index], x + shadow_offset, y + 2, x + shadow_offset + 0x10, y + 2,
                 x + shadow_offset, y + 0x12, x + shadow_offset + 0x10, y + 0x12);
         }
 

@@ -15,17 +15,12 @@
  * its render state. The scroll base is reset only when the selected index
  * is 0. */
 void menu_scrollable_list_init_core(const s16* entries, s32 selected_index, u8* text_table) {
-    s32 first;
-
     g_menu_list_entries = entries;
     g_menu_list_text_table = text_table;
     if (entries != 0) {
-        first = entries[0];
         g_menu_list_entry_count = 0;
-        if (first != -1) {
-            do {
-                g_menu_list_entry_count = g_menu_list_entry_count + 1;
-            } while (entries[g_menu_list_entry_count] != -1);
+        while (entries[g_menu_list_entry_count] != -1) {
+            g_menu_list_entry_count++;
         }
     }
     g_menu_list_selected_index = selected_index;

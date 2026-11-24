@@ -37,23 +37,28 @@ static void fill_billboard(battle_unit_t* unit, unit_panel_summary_t* output) {
 
     output->level = unit->level;
     output->team_kind = 0;
-    if (unit->initial_team_flags & UNIT_TEAM_MASK)
+    if (unit->initial_team_flags & UNIT_TEAM_MASK) {
         output->team_kind = 1;
-    if (!(unit->initial_team_flags & UNIT_TEAM_OR_PLAYER_CONTROL_MASK))
+    }
+    if (!(unit->initial_team_flags & UNIT_TEAM_OR_PLAYER_CONTROL_MASK)) {
         output->team_kind = 2;
-    if (unit->auto_battle_setting != AI_AUTOBATTLE_MANUAL)
+    }
+    if (unit->auto_battle_setting != AI_AUTOBATTLE_MANUAL) {
         output->team_kind = 3;
+    }
     output->experience = unit->experience;
     value = unit->max_hp;
     output->gauges[MENU_UNIT_STATUS_GAUGE_HP].max = value;
-    if (value == 0)
+    if (value == 0) {
         output->gauges[MENU_UNIT_STATUS_GAUGE_HP].max = value + 1;
+    }
     output->gauges[MENU_UNIT_STATUS_GAUGE_HP].value = unit->hp;
     output->gauges[MENU_UNIT_STATUS_GAUGE_HP].bonus = 0;
     value = unit->max_mp;
     output->gauges[MENU_UNIT_STATUS_GAUGE_MP].max = value;
-    if (value == 0)
+    if (value == 0) {
         output->gauges[MENU_UNIT_STATUS_GAUGE_MP].max = value + 1;
+    }
     output->gauges[MENU_UNIT_STATUS_GAUGE_MP].value = unit->mp;
     output->gauges[MENU_UNIT_STATUS_GAUGE_MP].bonus = 0;
     output->gauges[MENU_UNIT_STATUS_GAUGE_CT].max = UNIT_TURN_CT_THRESHOLD;
@@ -66,16 +71,18 @@ static void fill_billboard(battle_unit_t* unit, unit_panel_summary_t* output) {
 #if defined(FFT_BATTLE) || defined(FFT_EVENT_DEBUGCHR)
     g_thread_call_target = (void (*)(void))at_list_find_unit;
     output->list_index = thread_call_on_main_stack(unit);
-    if (unit->has_turn != 0)
+    if (unit->has_turn) {
         output->gauges[MENU_UNIT_STATUS_GAUGE_CT].value = UNIT_TURN_CT_THRESHOLD;
+    }
 #endif
 #ifndef FFT_EVENT_REQUIRE
-    if (output->list_index >= 0)
+    if (output->list_index >= 0) {
         output->list_index++;
+    }
     output->unit_count = BATTLE_UNIT_SLOT_COUNT;
     count = 0;
     for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
-        if (map_unit_exists(i) != 0) {
+        if (map_unit_exists(i)) {
             unit_id = map_unit_get_battle_unit_id(i);
             unit = battle_unit_get(unit_id);
             unit = battle_unit_find_by_unit_id(unit->unit_id, &resolved_id);
@@ -107,8 +114,9 @@ void unit_panel_load_selected(void) {
     }
 
     unit = battle_unit_get(g_unit_panel_selected_unit.battle_unit_id);
-    if (unit == 0)
+    if (unit == 0) {
         return;
+    }
     fill_billboard(unit, &g_unit_panel_selected_unit_status);
 
     g_unit_panel_selected_unit.job_id = unit->job_id;
@@ -129,20 +137,23 @@ void unit_panel_load_selected(void) {
     fields->physical_class_evade = unit->equipment_stats[UNIT_EQUIPMENT_STAT_CLASS_PHYSICAL_EVADE];
     fields->physical_shield_evade = unit->equipment_stats[UNIT_EQUIPMENT_STAT_RIGHT_SHIELD_PHYSICAL_EVADE];
     if (unit->equipment_stats[UNIT_EQUIPMENT_STAT_RIGHT_SHIELD_PHYSICAL_EVADE]
-        <= unit->equipment_stats[UNIT_EQUIPMENT_STAT_LEFT_SHIELD_PHYSICAL_EVADE])
+        <= unit->equipment_stats[UNIT_EQUIPMENT_STAT_LEFT_SHIELD_PHYSICAL_EVADE]) {
         fields->physical_shield_evade = unit->equipment_stats[UNIT_EQUIPMENT_STAT_LEFT_SHIELD_PHYSICAL_EVADE];
+    }
     fields->physical_accessory_evade = unit->equipment_stats[UNIT_EQUIPMENT_STAT_ACCESSORY_PHYSICAL_EVADE];
 
     fields->magical_attack = unit->attributes[UNIT_ATTRIBUTE_MAGIC_ATTACK];
     fields->magical_class_evade = 0;
     fields->magical_shield_evade = unit->equipment_stats[UNIT_EQUIPMENT_STAT_RIGHT_SHIELD_MAGIC_EVADE];
     if (unit->equipment_stats[UNIT_EQUIPMENT_STAT_RIGHT_SHIELD_MAGIC_EVADE]
-        <= unit->equipment_stats[UNIT_EQUIPMENT_STAT_LEFT_SHIELD_MAGIC_EVADE])
+        <= unit->equipment_stats[UNIT_EQUIPMENT_STAT_LEFT_SHIELD_MAGIC_EVADE]) {
         fields->magical_shield_evade = unit->equipment_stats[UNIT_EQUIPMENT_STAT_LEFT_SHIELD_MAGIC_EVADE];
+    }
     fields->magical_accessory_evade = unit->equipment_stats[UNIT_EQUIPMENT_STAT_ACCESSORY_MAGIC_EVADE];
 
-    for (i = 4; i >= 0; i--)
+    for (i = 4; i >= 0; i--) {
         fields->equipment[i] = 0;
+    }
 
     if (!(unit->unit_flags & UNIT_FLAG_MONSTER)) {
         fields->equipment[0] = unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON] != ITEM_ID_NONE
@@ -157,63 +168,71 @@ void unit_panel_load_selected(void) {
     }
 
     for (i = 0; i < 5; i++) {
-        if (fields->equipment[i] == ITEM_ID_NOTHING || fields->equipment[i] == ITEM_ID_NONE)
+        if (fields->equipment[i] == ITEM_ID_NOTHING || fields->equipment[i] == ITEM_ID_NONE) {
             fields->equipment[i] = -1;
+        }
     }
 
     fields->generic_monster = 0;
-    if (unit->primary_skillset >= SKILLSET_ID_MONSTER_FIRST && unit->primary_skillset < SKILLSET_ID_END)
+    if (unit->primary_skillset >= SKILLSET_ID_MONSTER_FIRST && unit->primary_skillset < SKILLSET_ID_END) {
         fields->generic_monster = 1;
+    }
 
     if (fields->generic_monster != 0) {
         ability_ids = ability_build_skillset_list(unit->primary_skillset, SKILLSET_ABILITY_FILTER_ACTION);
-        i = 0;
-        do {
+        for (i = 0; i < 5; i++) {
             fields->ability_ids[i] = *ability_ids++;
-            i++;
-        } while (i < 5);
+        }
 
         /* The fourth ability (index 3) stays only when the monster skill check passes; the
          * check runs on the main stack. */
         g_thread_call_target = skillset_count_monster_supporters;
-        if (thread_call_on_main_stack(unit) == 0)
+        if (thread_call_on_main_stack(unit) == 0) {
             fields->ability_ids[3] = 0;
+        }
 
         output_index = 0;
         for (item_id = 0; item_id < 5; item_id++) {
-            if (fields->ability_ids[item_id] != 0)
+            if (fields->ability_ids[item_id] != 0) {
                 fields->ability_ids[output_index++] = fields->ability_ids[item_id];
+            }
         }
-        while (output_index < 5)
+        while (output_index < 5) {
             fields->ability_ids[output_index++] = 0;
+        }
     } else {
         /* Both name marks are overwritten when the names are refilled and copied at the end. */
         field_value = unit->primary_skillset;
         fields->ability_ids[0] = field_value;
-        if (field_value == 0)
+        if (field_value == 0) {
             g_unit_panel_billboard_skillset_name[0] = 0xfe;
+        }
         field_value = unit->secondary_skillset;
         fields->ability_ids[1] = field_value;
-        if (field_value == 0)
+        if (field_value == 0) {
             g_unit_panel_billboard_secondary_skillset_name[1] = 0xfe;
+        }
         fields->ability_ids[2] = unit->abilities.reaction;
         fields->ability_ids[3] = unit->abilities.support;
         fields->ability_ids[4] = unit->abilities.movement;
     }
 
-    /* Empty ability rows become -1, as empty equipment slots do. */
+    /* Empty ability rows become -1, as empty equipment slots do. The bytes need the staged
+     * row value and `list_value - 1` rather than a plain -1. */
     for (i = 0; i < 5; i++) {
         list_value = fields->ability_ids[i];
-        if (list_value == 0)
+        if (list_value == 0) {
             fields->ability_ids[i] = list_value - 1;
+        }
     }
 
     /* Two hands applies only when exactly one hand holds an item. */
     item_id = ITEM_ID_NOTHING;
     fields->two_hands = 0;
     if (fields->equipment[0] != -1) {
-        if (fields->equipment[1] == -1)
+        if (fields->equipment[1] == -1) {
             item_id = fields->equipment[0];
+        }
     } else if (fields->equipment[1] != -1) {
         item_id = fields->equipment[1];
     }
@@ -224,8 +243,9 @@ void unit_panel_load_selected(void) {
             item_flags = g_item_weapon_data[item_id].flags;
             if ((item_flags & WEAPON_FLAG_FORCED_TWO_HANDS)
                 || ((unit->ability_flags.support[2] & UNIT_SUPPORT_SET_3_TWO_HANDS)
-                    && (item_flags & WEAPON_FLAG_TWO_HANDS_COMPATIBLE)))
+                    && (item_flags & WEAPON_FLAG_TWO_HANDS_COMPATIBLE))) {
                 fields->two_hands = 1;
+            }
         }
     }
 

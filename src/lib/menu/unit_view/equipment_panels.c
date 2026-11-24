@@ -80,8 +80,7 @@ void unit_panel_equipment_ability_thread(void) {
     screen->frame.sprites[1].clut = 0x7cbc;
     mem_copy_bytes_nonempty(&screen[1], screen, sizeof(unit_panel_buffer_t));
 
-    frame = 0;
-    for (;;) {
+    for (frame = 0;; frame++) {
         screen = &base[frame & 1];
 
         /* The label layout follows the unit: two-handed adds 2, a monster adds 1. */
@@ -181,8 +180,7 @@ void unit_panel_equipment_ability_thread(void) {
 #else
         /* The other overlays derive the field offset from screen polarity. */
         field_y = g_gfx_screen_polarity * 0xf0;
-        mask = field_y ^ 0xf0;
-        mask = -(mask != 0);
+        mask = -(field_y != 0xf0);
         g_gfx_draw_offset_y = mask & 0xf0;
         menu_build_scaled_draw_area_packets(
             &screen->portrait, &g_unit_panel_character_status_draw_area_rect, frame, field_y, &thread->position);
@@ -234,7 +232,6 @@ void unit_panel_equipment_ability_thread(void) {
         if (thread_current_get_parameter_3() != 0) {
             break;
         }
-        frame++;
     }
 
     thread_yield();

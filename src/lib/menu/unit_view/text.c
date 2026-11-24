@@ -24,13 +24,14 @@ void unit_panel_set_colors(unit_panel_frame_t* primitives, const unit_panel_thre
     if (state->style == 1 || g_menu_input_lock_mode == 1) {
         clut = 0x7dfc;
         for (i = 11; i >= 0; i--) {
-            (primitives->sprites + i)->clut = clut;
+            primitives->sprites[i].clut = clut;
         }
         for (i = 12; i < 19; i++) {
-            (primitives->sprites + i)->clut = MENU_CLUT_DIMMED;
+            primitives->sprites[i].clut = MENU_CLUT_DIMMED;
         }
         primitives->sprites[0].clut = 0x7c7c;
         primitives->sprites[1].clut = 0x7c7c;
+        /* The tints address `sprites + i + 19`: indexing sprites[i + 19] changes the bytes. */
         for (i = 0; i < 5; i++) {
             SetShadeTex(&primitives->sprites[i + 19], 0);
             (primitives->sprites + i + 19)->r0 = 0x40;
@@ -40,10 +41,10 @@ void unit_panel_set_colors(unit_panel_frame_t* primitives, const unit_panel_thre
     } else {
         clut = 0x7d7c;
         for (i = 11; i >= 0; i--) {
-            (primitives->sprites + i)->clut = clut;
+            primitives->sprites[i].clut = clut;
         }
         for (i = 12; i < 19; i++) {
-            (primitives->sprites + i)->clut = MENU_CLUT_NORMAL;
+            primitives->sprites[i].clut = MENU_CLUT_NORMAL;
         }
         primitives->sprites[0].clut = 0x7cbc;
         primitives->sprites[1].clut = 0x7cbc;
@@ -102,6 +103,7 @@ void menu_text_render_decimal_entry_list(u8* pixels, const menu_number_entry_t* 
     for (i = 0; i < count; entries++, i++, out->color = 0) {
         s32 amount = *entries->value;
         s32 flags;
+
         out->rect.x = entries->x;
         out->rect.y = entries->y;
         flags = entries->format;
@@ -189,7 +191,8 @@ static void render_decimal_value(s32 value, s32 flags, u8* pixels, glyph_blit_t*
     if (flags & MENU_DECIMAL_SIGN_MINUS) {
         digits--;
     }
-    /* Retail gives every rung the same width, so the value is always placed as one digit. */
+    /* Retail gives every rung the same width, so the value is always placed as one digit; the
+     * bytes keep the comparisons. */
     if (value < 10) {
         min_digits = 1;
     } else if (value < 100) {

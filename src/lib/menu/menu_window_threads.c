@@ -60,7 +60,7 @@ void menu_icon_list_thread(void) {
             image_pending_free = 0;
         }
         state->selected_index = cursor;
-        if (menu_should_close_thread(g_menu_input_controller) != 0) {
+        if (menu_should_close_thread(g_menu_input_controller)) {
             break;
         }
         menu_update_row_cursor(state, &cursor);
@@ -90,11 +90,7 @@ void menu_text_entry_wait_thread(void) {
     u16 header_id;
     u16 text_id;
 
-    {
-        menu_text_binding_t* binding = entry->context;
-
-        binding->prepare();
-    }
+    ((menu_text_binding_t*)entry->context)->prepare();
     input = script_get_controller_input_pointer(0);
     text_id = entry->text_id;
     text_binding = entry->context;
@@ -144,7 +140,7 @@ void menu_icon_strip_thread(void) {
             menu_free_memory(buffer);
             image_pending_free = 0;
         }
-        if (menu_should_close_thread(&input) != 0) {
+        if (menu_should_close_thread(&input)) {
             break;
         }
         record = &records[i & 1];

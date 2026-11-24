@@ -326,14 +326,12 @@ void command_check_row_restrictions(s32 menu, s32 value, s32 check_unit) {
         if (battle_unit_get_action_restriction(unit) == UNIT_ACTION_RESTRICTION_DEEP_WATER) {
             message = 0x1003;
             mode = 2;
+        } else if (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_FROG)] & STATUS_BYTE_MASK(STATUS_ID_FROG)) {
+            message = 0x1007;
+            mode = 2;
         } else {
-            if (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_FROG)] & STATUS_BYTE_MASK(STATUS_ID_FROG)) {
-                message = 0x1007;
-                mode = 2;
-            } else {
-                mode = 2;
-                message = g_command_restriction_message_ids[menu] + 0x1000;
-            }
+            mode = 2;
+            message = g_command_restriction_message_ids[menu] + 0x1000;
         }
     }
     if (message == 0 && menu == ACTION_MENU_TYPE_MATH_SKILL) {
@@ -405,18 +403,14 @@ void command_validate_ability_thread(void) {
             message = 0x1009;
         }
     }
-    if (g_menu_active_menu == ACTION_MENU_TYPE_ITEM_INVENTORY) {
-        if (entry != 0) {
-            message = 0x100B;
-        }
+    if (g_menu_active_menu == ACTION_MENU_TYPE_ITEM_INVENTORY && entry != 0) {
+        message = 0x100B;
     }
     if (g_menu_active_menu == ACTION_MENU_TYPE_WEAPON_INVENTORY && entry != 0) {
         message = 0x100C;
     }
-    if (g_menu_active_menu == ACTION_MENU_TYPE_KATANA_INVENTORY) {
-        if (entry != 0) {
-            message = 0x100D;
-        }
+    if (g_menu_active_menu == ACTION_MENU_TYPE_KATANA_INVENTORY && entry != 0) {
+        message = 0x100D;
     }
     g_menu_result = -4;
     if (message != 0) {
@@ -485,6 +479,7 @@ s32 command_resolve_selection(void) {
                         g_command_selected_command.data.action.item_id = g_crystal_pickup_item;
                         option = MENU_SELECTION_NONE;
                     } else if (menu == MENU_COMMAND_ID_MESSAGE_YES_NO || menu >= 0x64) {
+                        /* Pointer sums: indexing map[option + 1] changes the address arithmetic. */
                         command = *(g_command_maps[i].map + option + 1);
                         option = MENU_SELECTION_NONE;
                     } else {
@@ -509,6 +504,7 @@ s32 command_resolve_selection(void) {
         }
         if (command == 12) {
             if (option < 3) {
+                /* Two partial sums: a single expression orders the additions differently. */
                 s32 option_offset = (option - 1) * 2;
                 s32 adjusted_item = item + 12;
 
@@ -561,7 +557,7 @@ static void request_thread(void) {
     }
     thread_wait_inactive(THREAD_SLOT_MENU);
     if (g_menu_input_mode == MENU_INPUT_PLAYER) {
-        while (thread_is_running_asm(THREAD_SLOT_EVENT) != 0) {
+        while (thread_is_running_asm(THREAD_SLOT_EVENT)) {
             if (g_thread_contexts[THREAD_SLOT_EVENT].task_id == THREAD_TASK_EXECUTE_EVENT) {
                 thread_current_exit();
             }
@@ -599,14 +595,14 @@ static void start_request_thread(s32 system_function) {
 /* Confirm the current menu action, recording the auto-battle mode it selects. */
 void auto_battle_confirm_thread(void) {
     battle_unit_t* attacker;
-    s32 menu;
+    s32 row;
     menu_entry_t* parameter = (menu_entry_t*)thread_current_get_parameter_1();
 
     attacker = unit_panel_get_selected_battle_unit();
-    menu = g_menu_thread_menu_data[MENU_COMMAND_ID_AUTO_BATTLE].selected_index;
-    if (menu == 3) {
+    row = g_menu_thread_menu_data[MENU_COMMAND_ID_AUTO_BATTLE].selected_index;
+    if (row == 3) {
         attacker->auto_battle_setting = AI_AUTOBATTLE_FADING_LIFE;
-    } else if (menu == 4) {
+    } else if (row == 4) {
         attacker->auto_battle_setting = AI_AUTOBATTLE_RETREAT;
     }
     g_menu_set_auto_battle_row_actions = -3;
@@ -618,6 +614,7 @@ void auto_battle_confirm_thread(void) {
  * its auto-battle setting. */
 void auto_battle_store_target(s32 target_id, s32 battle_unit_id) {
     battle_unit_t* battle_unit = battle_unit_get(battle_unit_id);
+
     battle_unit->auto_battle_target = target_id;
     battle_unit->auto_battle_setting = g_command_resolved_command;
 }
@@ -754,7 +751,7 @@ static s32 dispatch_request(
             }
             return MENU_REQUEST_RESULT_DONE;
         } else if (option != MENU_SCENARIO_CHECK_SKIP) {
-            if (thread_is_running_asm(THREAD_SLOT_EVENT) != 0) {
+            if (thread_is_running_asm(THREAD_SLOT_EVENT)) {
                 system_report(7, 3);
                 if (option != MENU_SCENARIO_CHECK_TEST) {
                     start_request_thread(MENU_PROMPT_CLOSE);
@@ -959,7 +956,7 @@ static s32 dispatch_request(
     } else if (command == MENU_REQUEST_MOVE_FIND_ITEM) {
         /* With 99 already held, the found item is sold for a quarter of its price instead. The
          * discarded data pointer lookups are retail. */
-        if (item_get_total_quantity(option, 1) == 0x63) {
+        if (item_get_total_quantity(option, 1) == 99) {
             item_get_data(option);
             g_text_substitution_values[0] = option;
             g_text_substitution_values[1] = option;
@@ -1005,19 +1002,19 @@ static s32 dispatch_request(
             start_request_thread(MENU_PROMPT_POST_ACTION_RESULT);
         } else if (option == ACTION_DISPLAY_IMAGE_GIL) {
             g_text_substitution_values[0] = parameter < 0 ? -parameter : parameter;
-            s_request_entries[MENU_PROMPT_POST_ACTION_RESULT].text_id = 0x508F;
+            entry->text_id = 0x508F;
             start_request_thread(MENU_PROMPT_POST_ACTION_RESULT);
         } else if (option == ACTION_DISPLAY_IMAGE_EXP) {
             g_text_substitution_values[0] = parameter & 0x7F;
-            s_request_entries[MENU_PROMPT_POST_ACTION_RESULT].text_id = 0x508E;
+            entry->text_id = 0x508E;
             start_request_thread(MENU_PROMPT_POST_ACTION_RESULT);
         } else if (option == ACTION_DISPLAY_IMAGE_STOLEN || option == ACTION_DISPLAY_IMAGE_BROKEN) {
             if (parameter & 0x8000) {
                 g_text_substitution_values[0] = (parameter & 0xFF) + TEXT_ID_ITEM_NAME_BASE;
-                s_request_entries[MENU_PROMPT_POST_ACTION_RESULT].text_id = 0x509B;
+                entry->text_id = 0x509B;
             } else {
                 g_text_substitution_values[0] = parameter + TEXT_ID_ITEM_NAME_BASE;
-                s_request_entries[MENU_PROMPT_POST_ACTION_RESULT].text_id = option + 0x5074;
+                entry->text_id = option + 0x5074;
             }
             start_request_thread(MENU_PROMPT_POST_ACTION_RESULT);
         } else {

@@ -44,6 +44,7 @@ u8* menu_build_window_image(s32 width, s32 height, RECT* rect, s32 mode, s32 tai
     s32 src_index;
     u16* row;
 
+    /* Rounding up through words and a flag matches; one expression does not. */
     words = width & 3;
     partial = words != 0;
     words = (width >> 2) + partial;
@@ -204,7 +205,7 @@ u8* menu_build_and_upload_window_frame_image(s32 width, s32 height, RECT* rect, 
                 }
             }
         }
-        row = (u16*)(buffer + (i - first) * words * sizeof(u16));
+        row = (u16*)buffer + (i - first) * words;
         row[words - 1] = src[src_index + 9];
         row[words - 2] = src[src_index + 8];
         menu_build_window_image_row(src, row, words, src_index);

@@ -86,6 +86,7 @@ void menu_update_panel_fade(void) {
             gfx_draw_or_append_gpu_primitive(&frame->top[8 - i]);
             gfx_draw_or_append_gpu_primitive(&frame->bottom[i]);
         }
+        /* Indexed again rather than through `frame`, as the bytes require. */
         gfx_draw_or_append_gpu_primitive(&s_menu_panel_fade_frames[g_menu_packet_buffer_index].center);
         gfx_draw_or_append_gpu_primitive(&s_menu_panel_fade_frames[g_menu_packet_buffer_index].draw_mode);
     }

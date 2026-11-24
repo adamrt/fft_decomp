@@ -91,7 +91,7 @@ void crystal_pickup_run_menus(void) {
         u8* flag_byte = &context->learned_abilities[byte_index];
 
         for (bit_index = 0; bit_index < 8; bit_index++) {
-            if ((*flag_byte & mask) != 0) {
+            if (*flag_byte & mask) {
                 /* Separate statement: written as one expression, fold
                  * reassociates the ability-name base with `byte_index * 8` and loop.c turns
                  * the pair into a strength-reduced giv. */
@@ -109,14 +109,14 @@ void crystal_pickup_run_menus(void) {
     menu->text_image.source.w = 0x70;
     menu->inner_width = 0x70;
     if (value_count < 8) {
-        menu_text_layout_t* layout;
-        layout = menu->context;
+        menu_text_layout_t* layout = menu->context;
+
         layout->row_count = value_count;
         layout = menu->context;
         layout->hidden_rows = 0;
     } else {
-        menu_text_layout_t* layout;
-        layout = menu->context;
+        menu_text_layout_t* layout = menu->context;
+
         layout->row_count = 8;
         layout = menu->context;
         layout->hidden_rows = value_count - 8;
@@ -141,7 +141,7 @@ void crystal_pickup_run_menus(void) {
     g_crystal_pickup_item = 0;
     if (context->result == CRYSTAL_PICKUP_TREASURE) {
         /* At the 99 limit, message 0x101b also shows a quarter of the item's price. */
-        if (item_get_total_quantity(context->treasure_item, 1) == 0x63) {
+        if (item_get_total_quantity(context->treasure_item, 1) == 99) {
             g_text_substitution_values[0] = context->treasure_item;
             g_text_substitution_values[1] = context->treasure_item;
             message_id = 0x101b;
@@ -197,16 +197,16 @@ void crystal_pickup_run_menus(void) {
                 THREAD_BORROWED_SLOT_AT_LIST_MENU, (s32)&g_menu_thread_menu_data[MENU_CRYSTAL_PICKUP_AT_LIST], 0, 0);
             for (;;) {
                 thread_yield();
-                if (thread_is_running_asm(g_thread_current_id - 3) != 0) {
+                if (thread_is_running_asm(g_thread_current_id - 3)) {
                     thread_start(THREAD_BORROWED_SLOT_AT_LIST_MENU_CHILD, thread_wait_forever);
                 } else {
                     thread_suspend(THREAD_BORROWED_SLOT_AT_LIST_MENU_CHILD);
                 }
-                if (thread_is_running_asm(g_thread_current_id - 1) == 0) {
+                if (!thread_is_running_asm(g_thread_current_id - 1)) {
                     break;
                 }
                 g_crystal_pickup_controller_input = script_get_controller_input_pointer(0);
-                if ((*g_crystal_pickup_controller_input & PSX_PAD_SELECT) != 0) {
+                if (*g_crystal_pickup_controller_input & PSX_PAD_SELECT) {
                     help_menu_start_thread();
                 }
             }
@@ -219,10 +219,9 @@ void crystal_pickup_run_menus(void) {
                 break;
             }
             /* Backing out of the list returns to the choice when both are offered. */
-            if (g_crystal_pickup_menu_result == 1 || (g_crystal_pickup_menu_result & 0xff) == 0xff) {
-                if (context->result == (CRYSTAL_PICKUP_CRYSTAL | CRYSTAL_PICKUP_LEARNED)) {
-                    continue;
-                }
+            if ((g_crystal_pickup_menu_result == 1 || (g_crystal_pickup_menu_result & 0xff) == 0xff)
+                && context->result == (CRYSTAL_PICKUP_CRYSTAL | CRYSTAL_PICKUP_LEARNED)) {
+                continue;
             }
         }
 
@@ -238,7 +237,7 @@ void crystal_pickup_run_menus(void) {
                 g_crystal_pickup_action = 2;
                 break;
             }
-            if (context->result != 2) {
+            if (context->result != CRYSTAL_PICKUP_CRYSTAL) {
                 continue;
             }
         }
@@ -296,12 +295,10 @@ static void init_at_list(menu_entry_t* menu) {
 
         g_at_list_indices[index] = index + 1;
         unit = battle_unit_get(s_at_list_descriptors[index].unit_code & AT_UNIT_ID_MASK);
-        if ((s_at_list_descriptors[index].unit_code & AT_ACTION_ENTRY) != 0) {
+        if (s_at_list_descriptors[index].unit_code & AT_ACTION_ENTRY) {
             *text++ = 0xd9;
             *text++ = 0xbe;
         }
-        /* The pointer must lead the index in the sum to match the target's
-         * operand order on the address add. */
         for (name_index = 0; name_index < UNIT_NAME_SIZE; name_index++) {
             u8 character = unit->name[name_index];
             *text = character;
@@ -310,30 +307,31 @@ static void init_at_list(menu_entry_t* menu) {
             }
             text++;
         }
-        if ((s_at_list_descriptors[index].unit_code & AT_ACTION_ENTRY) != 0) {
+        if (s_at_list_descriptors[index].unit_code & AT_ACTION_ENTRY) {
             *text++ = 0xd9;
             *text++ = 0xbf;
         }
         *text++ = 0xfe;
 
-        if ((s_at_list_descriptors[index].unit_code & AT_ACTION_ENTRY) != 0) {
+        if (s_at_list_descriptors[index].unit_code & AT_ACTION_ENTRY) {
             g_at_list_secondary_text_ids[entry_count] = index - 0x800;
         } else {
             g_at_list_primary_text_ids[entry_count] = index - 0x800;
         }
 
-        if ((s_at_list_descriptors[index].unit_code & AT_ACTION_ENTRY) == 0) {
+        if (!(s_at_list_descriptors[index].unit_code & AT_ACTION_ENTRY)) {
             g_at_list_secondary_text_ids[entry_count] = TEXT_ID_ABILITY_NAME_BASE;
         } else {
             has_special_entry = 1;
-            if ((s_at_list_descriptors[index].unit_code & AT_JUMP) != 0) {
+            if (s_at_list_descriptors[index].unit_code & AT_JUMP) {
                 g_at_list_primary_text_ids[entry_count] = 0xb012;
             } else {
-                s32 value = s_at_list_descriptors[index].action_id_low;
-                if ((s_at_list_descriptors[index].unit_code & AT_ABILITY_ID_HIGH_BIT) != 0) {
-                    value += 0x100;
+                s32 ability_id = s_at_list_descriptors[index].action_id_low;
+
+                if (s_at_list_descriptors[index].unit_code & AT_ABILITY_ID_HIGH_BIT) {
+                    ability_id += 0x100;
                 }
-                g_at_list_primary_text_ids[entry_count] = value + TEXT_ID_ABILITY_NAME_BASE;
+                g_at_list_primary_text_ids[entry_count] = ability_id + TEXT_ID_ABILITY_NAME_BASE;
             }
         }
 
@@ -438,8 +436,7 @@ void at_list_start_thread(void) {
     thread_set_parameters(g_thread_current_id - 2, (s32)list, 0, 0);
     do {
         thread_yield();
-    } while (
-        thread_is_running_asm(g_thread_current_id - 2) != 0 || thread_is_running_asm(g_thread_current_id - 3) != 0);
+    } while (thread_is_running_asm(g_thread_current_id - 2) || thread_is_running_asm(g_thread_current_id - 3));
     g_menu_thread_menu_data = saved;
     thread_current_exit();
 }

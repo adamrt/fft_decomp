@@ -23,11 +23,11 @@ enum { PORTRAIT_FORMATION_ICON = 0x100 };
 
 /* Other menu overlays leave the quad alone when either suppress bit is set. */
 void portrait_build_poly(s32 portrait_id, POLY_FT4* poly) {
-    if ((portrait_id & PORTRAIT_CODE_SUPPRESS_MASK) == 0) {
+    if (!(portrait_id & PORTRAIT_CODE_SUPPRESS_MASK)) {
         portrait_build_unit_poly(poly, portrait_id);
     }
 #    if defined(FFT_EVENT_ATTACK) || defined(FFT_EVENT_REQUIRE)
-    if ((portrait_id & PORTRAIT_FORMATION_ICON) != 0) {
+    if (portrait_id & PORTRAIT_FORMATION_ICON) {
         portrait_build_party_poly(poly, portrait_id & 0xff);
     }
 #    endif

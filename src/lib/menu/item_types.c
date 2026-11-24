@@ -7,7 +7,7 @@
 
 /* Return an item's type from the item data table; only the low ten bits of item_id are used. */
 s32 item_get_type(s32 item_id) {
-    return g_item_primary_data[item_id & 0x3ff].type;
+    return g_item_primary_data[item_id & ITEM_ENTRY_ID_MASK].type;
 }
 
 /* The texture origin of each item type's 12x12 icon, read by item_list_build_type_icon. */

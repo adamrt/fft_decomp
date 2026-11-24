@@ -28,7 +28,11 @@ void menu_input_update_controller(void) {
     u32 current_input;
     u32 filtered_input;
     s32* counter_base;
-    u32 speed, initial_delay, secondary_repeat_period, repeat_period;
+    u32 speed;
+    u32 initial_delay;
+    u32 secondary_repeat_period;
+    u32 repeat_period;
+
     speed = 2;
     initial_delay = g_input_repeat_initial_delay / speed;
     repeat_period = g_input_repeat_period / speed;

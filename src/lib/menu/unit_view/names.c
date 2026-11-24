@@ -31,12 +31,11 @@ void text_build_unit_name_list(void) {
     s32 length;
 
     text_init_section_pointers();
-    unit_id = 0;
-    output = g_text_section_pointers[TEXT_SECTION_ROSTER_UNIT_NAMES];
-    for (; unit_id < BATTLE_UNIT_SLOT_COUNT; unit_id++) {
+    for (unit_id = 0, output = g_text_section_pointers[TEXT_SECTION_ROSTER_UNIT_NAMES];
+        unit_id < BATTLE_UNIT_SLOT_COUNT; unit_id++) {
         unit = battle_unit_get(unit_id);
         if (unit->active_battle_unit_id == UNIT_ACTIVE_BATTLE_UNIT_ID_NONE) {
-            *output++ = 0xfe;
+            *output++ = TEXT_END_WAIT_FOR_CONFIRM;
         } else {
             length = 0;
             do {
@@ -45,7 +44,7 @@ void text_build_unit_name_list(void) {
                 if ((value & 0xfe) != 0xfe) {
                     output++;
                     if (length == 15) {
-                        *output++ = 0xfe;
+                        *output++ = TEXT_END_WAIT_FOR_CONFIRM;
                     }
                 } else {
                     output++;

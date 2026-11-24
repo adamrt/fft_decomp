@@ -35,19 +35,19 @@ u8* menu_text_update_page_scroll(menu_entry_t* menu, s32* first_row, s32* render
         return 0;
     }
 
-    if (((*held & PSX_PAD_SQUARE) == 0)
-        && (g_threads[g_thread_current_id].task_words[MENU_LIST_THREAD_WORD_REDRAW_REQUEST] == 0)) {
+    if (!(*held & PSX_PAD_SQUARE)
+        && g_threads[g_thread_current_id].task_words[MENU_LIST_THREAD_WORD_REDRAW_REQUEST] == 0) {
         return 0;
     }
 
-    if ((*pressed & PSX_PAD_UP) != 0 && *first_row != 0) {
+    if ((*pressed & PSX_PAD_UP) && *first_row != 0) {
         *first_row -= layout->row_count;
         if (*first_row < 0) {
             *first_row = 0;
         }
         changed = 1;
         g_sound_pending_sfx_id = SOUND_SFX_CURSOR_MOVE;
-    } else if ((*pressed & PSX_PAD_DOWN) != 0 && *first_row != layout->hidden_rows) {
+    } else if ((*pressed & PSX_PAD_DOWN) && *first_row != layout->hidden_rows) {
         *first_row += layout->row_count;
         if (*first_row > layout->hidden_rows) {
             *first_row = layout->hidden_rows;
@@ -63,7 +63,7 @@ u8* menu_text_update_page_scroll(menu_entry_t* menu, s32* first_row, s32* render
         return 0;
     }
 
-    mem_zero_words(g_menu_render_buffer, (menu->inner_width * menu->inner_height) / 2);
+    mem_zero_words(g_menu_render_buffer, menu->inner_width * menu->inner_height / 2);
     menu_draw_text_columns(menu, first_row, g_menu_render_buffer);
     *render_pending = 0;
     LoadImage(&source, (u32*)g_menu_render_buffer);

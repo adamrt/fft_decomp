@@ -101,14 +101,12 @@ void auto_battle_settings_thread(void) {
     menu_build_window_sprites(&rect, param, &records[0]);
     mem_copy_bytes_nonempty(&records[1], &records[0], sizeof(records[1]));
     image_pending_free = 0;
-    i = 0;
-    color = g_auto_battle_option_colors;
-    for (;; i++) {
+    for (i = 0, color = g_auto_battle_option_colors;; i++) {
         record = &records[i & 1];
         if (i == 0 || (g_script_event_input & PSX_PAD_CIRCLE)) {
             buffer = menu_build_and_upload_window_frame_image(
                 param->inner_width, param->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
-            if (((g_script_event_input & PSX_PAD_CIRCLE) && thread_is_previous_running() == 0) || i == 0) {
+            if (((g_script_event_input & PSX_PAD_CIRCLE) && !thread_is_previous_running()) || i == 0) {
                 selected = cursor;
                 if (selected == 0) {
                     before = command_get_menu_id_by_battle_unit_id(g_unit_panel_selected_unit.battle_unit_id);
@@ -159,7 +157,7 @@ void auto_battle_settings_thread(void) {
             image_pending_free = 0;
         }
         param->selected_index = cursor;
-        if (menu_should_close_thread(&g_script_event_input) != 0) {
+        if (menu_should_close_thread(&g_script_event_input)) {
             break;
         }
         menu_update_row_cursor(param, &cursor);
@@ -211,7 +209,7 @@ void menu_icon_selection_thread(void) {
             records[0].bob_active = 0;
             records[1].bob_active = 0;
         }
-        if (menu_should_close_thread(&g_script_event_input) != 0) {
+        if (menu_should_close_thread(&g_script_event_input)) {
             break;
         }
         menu_handle_action(param, cursor);
@@ -255,7 +253,7 @@ static void build_ability_preview(void) {
     g_command_selected_command.data.action.targeting_type = TARGET_TYPE_TILE;
     entry = &g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_PREVIEW_AT_LIST];
 
-    if ((text_id & 0xf800) == TEXT_ID_ABILITY_NAME_BASE) {
+    if ((text_id & TEXT_ID_SECTION_MASK) == TEXT_ID_ABILITY_NAME_BASE) {
         staged_item = 0;
         g_command_selected_command.data.action.ability_id = text_id - TEXT_ID_ABILITY_NAME_BASE;
     } else {
@@ -310,7 +308,7 @@ static void build_ability_preview(void) {
         work->entry_numbers[index] = index + 1;
         battle_unit = battle_unit_get(slot->unit_code & AT_UNIT_ID_MASK);
         /* Action rows wrap the unit name in the 0xd9be/0xd9bf glyph pair. */
-        if ((slot->unit_code & AT_ACTION_ENTRY) != 0) {
+        if (slot->unit_code & AT_ACTION_ENTRY) {
             *text++ = 0xd9;
             *text++ = 0xbe;
         }
@@ -322,7 +320,7 @@ static void build_ability_preview(void) {
             }
             text++;
         }
-        if ((slot->unit_code & AT_ACTION_ENTRY) != 0) {
+        if (slot->unit_code & AT_ACTION_ENTRY) {
             *text++ = 0xd9;
             *text++ = 0xbf;
         }
@@ -330,12 +328,12 @@ static void build_ability_preview(void) {
 
         /* Text id 0xf800 + index is entry `index` of the AT list section, the name just
          * written: unit rows show it in the first text column, action rows in the second. */
-        if ((slot->unit_code & AT_ACTION_ENTRY) != 0) {
+        if (slot->unit_code & AT_ACTION_ENTRY) {
             work->secondary_text_ids[count] = index - 0x800;
         } else {
             work->primary_text_ids[count] = index - 0x800;
         }
-        if ((slot->unit_code & AT_ACTION_ENTRY) == 0) {
+        if (!(slot->unit_code & AT_ACTION_ENTRY)) {
             work->secondary_text_ids[count] = TEXT_ID_ABILITY_NAME_BASE;
         } else {
             s32 action_text_id;
@@ -343,14 +341,14 @@ static void build_ability_preview(void) {
 
             /* The action's name: the jump text, the staged item's name or the ability's. */
             bracketed = 1;
-            if ((slot->unit_code & AT_JUMP) != 0) {
+            if (slot->unit_code & AT_JUMP) {
                 action_text_id = 0xb012;
             } else {
                 action_id = slot->action_id_low;
                 if (index == 0 && staged_item != 0) {
-                    action_text_id = action_id + 0x3800;
+                    action_text_id = action_id + TEXT_ID_ITEM_NAME_BASE;
                 } else {
-                    if ((slot->unit_code & AT_ABILITY_ID_HIGH_BIT) != 0) {
+                    if (slot->unit_code & AT_ABILITY_ID_HIGH_BIT) {
                         action_id += 0x100;
                     }
                     action_text_id = action_id + TEXT_ID_ABILITY_NAME_BASE;
@@ -375,7 +373,8 @@ static void build_ability_preview(void) {
     g_at_list_layout.columns.mode[0] = MENU_TEXT_COLUMN_NUMBER_GLYPHS;
     g_at_list_layout.columns.mode[1] = MENU_TEXT_COLUMN_TEXT;
     g_at_list_layout.columns.mode[2] = MENU_TEXT_COLUMN_TEXT;
-    /* Action rows need the wide window and the second text column. */
+    /* Action rows need the wide window and the second text column. Each block below reads
+     * entry->context into its own local: one shared local changes the register allocation. */
     if (bracketed != 0) {
         menu_scroll_text_layout_t* layout = entry->context;
 

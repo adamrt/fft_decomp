@@ -17,11 +17,7 @@ static u8 s_gfx_increasing_fade_active;
 /* Return the active screen fades as bits: 1 while fading in (decreasing), 2 while fading out
  * (increasing), 0 when neither runs. */
 s32 fade_menu_get_state(void) {
-    s32 second = s_gfx_increasing_fade_active;
-    s32 first = s_gfx_decreasing_fade_active;
-
-    second *= 2;
-    return first + second;
+    return s_gfx_decreasing_fade_active + s_gfx_increasing_fade_active * 2;
 }
 
 /* Start the fade from intensity 0xf0 down to zero (the screen fades in). */
@@ -50,6 +46,7 @@ s32 fade_menu_update_in(void) {
             result = 0;
         }
         menu_gfx_enqueue_draw_mode(0, 0, GetTPage(0, 2, 0x100, 0), 0, g_gfx_otag_count - 2);
+        /* The block's color pointer is required by the bytes; direct stores differ. */
         {
             rgb24_t* color = &g_gfx_fade_color;
 
@@ -66,7 +63,7 @@ s32 fade_menu_update_in(void) {
  * tile over the screen. Returns 0 on the call that reaches 0xff and ends the
  * fade, 1 otherwise (also when no fade is active). */
 s32 fade_menu_update_out(void) {
-    u32 stack_padding[4];
+    u32 stack_padding[4]; /* never touched; keeps the original stack frame */
     s32 result = 1;
     s32 speed = menu_get_event_speed();
 
@@ -78,6 +75,7 @@ s32 fade_menu_update_out(void) {
             g_gfx_fade_intensity = 0xff;
         }
         menu_gfx_enqueue_draw_mode(0, 0, GetTPage(0, 2, 0x100, 0), 0, g_gfx_otag_count - 2);
+        /* The block's color pointer is required by the bytes; direct stores differ. */
         {
             rgb24_t* color = &g_gfx_fade_color;
 

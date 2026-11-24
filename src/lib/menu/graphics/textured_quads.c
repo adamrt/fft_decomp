@@ -16,9 +16,7 @@
  * `color` the quad is shaded with it. */
 void menu_gfx_enqueue_textured_quad_rect(
     RECT* rect, menu_icon_source_t* tex, rgb24_t* color, s32 semitrans, s32 ot_index) {
-    POLY_FT4* poly;
-
-    poly = &g_menu_gfx_context->textured_quads[g_menu_gfx_poly_ft4_count++];
+    POLY_FT4* poly = &g_menu_gfx_context->textured_quads[g_menu_gfx_poly_ft4_count++];
 
     if (color != 0) {
         SetShadeTex(poly, 0);
@@ -74,9 +72,7 @@ void menu_gfx_enqueue_textured_quad_list(const menu_sprite_cell_t* quads, const 
  * ordering table entry otag_index. With `color` the quad is shaded with it. */
 void menu_gfx_enqueue_textured_quad(
     const RECT* rect, s32 u, s32 v, const rgb24_t* color, s32 semitrans, u16 texture_page, u16 clut, s32 otag_index) {
-    POLY_FT4* poly;
-
-    poly = &g_menu_gfx_context->textured_quads[g_menu_gfx_poly_ft4_count++];
+    POLY_FT4* poly = &g_menu_gfx_context->textured_quads[g_menu_gfx_poly_ft4_count++];
 
     if (color != 0) {
         SetShadeTex(poly, 0);

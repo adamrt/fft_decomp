@@ -553,8 +553,6 @@ static s32 display_action_preview(
         *digits_x += 2;
     } else if ((exp = s_unit_view_preview_target_action->exp_change) != 0
         && (s_unit_view_preview_target_action->attack_type & ACTION_TYPE_PSEUDO_STATUS)) {
-        s32 number_x;
-
         image = ACTION_DISPLAY_IMAGE_EXP;
         value = exp;
         /* Retail reverses the signs of gil's preview: an EXP loss (Steal Exp.'s target) shows the
@@ -565,9 +563,7 @@ static s32 display_action_preview(
         } else {
             panel[0].format = MENU_DECIMAL_SIGN_MINUS | 3;
         }
-        number_x = panel[0].x;
-        number_x -= 8;
-        panel[0].x = number_x;
+        panel[0].x -= 8;
         *label_x -= 8;
     } else if ((s_unit_view_preview_target_action->special_effect
                    & (ACTION_SPECIAL_EFFECT_LEVEL_UP | ACTION_SPECIAL_EFFECT_LEVEL_DOWN))
@@ -664,7 +660,7 @@ static s32 display_action_preview(
             if (value & ACTION_STAT_CHANGE_INCREASE) {
                 panel[0].format = MENU_DECIMAL_SIGN_PLUS | 2;
                 if (image == ACTION_DISPLAY_IMAGE_CT && value == 0xff) {
-                    value = 0x64;
+                    value = 100;
                     panel[0].format = 3;
                     *label_x = *label_x; /* reloads and rewrites x, as the target does */
                     panel[0].x -= 8;

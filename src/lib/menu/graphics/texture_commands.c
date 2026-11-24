@@ -146,7 +146,8 @@ menu_instruction_t* menu_opcode_11_draw_background_tiles(menu_instruction_t* com
         }
     }
 
-    command = (menu_instruction_t*)((u8*)command + command->header.length);
+    /* Returning the call directly saves an instruction the original spends. */
+    command = menu_next_instruction(command);
     return command;
 }
 #endif
@@ -169,7 +170,9 @@ menu_instruction_t* menu_opcode_0a_set_clut(menu_instruction_t* command) {
         g_menu_gfx_clut_id = GetClut(
             command->clut.normal_x_div_16 << 4, command->clut.normal_y_low | (command->clut.normal_y_high << 8));
     }
-    return menu_next_instruction(command);
+    /* Returning the call directly saves an instruction the original spends. */
+    command = menu_next_instruction(command);
+    return command;
 }
 
 /* Select the texture page and blend rate. */

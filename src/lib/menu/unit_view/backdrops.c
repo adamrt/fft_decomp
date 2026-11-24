@@ -127,9 +127,8 @@ draw_panels:
                     s_menu_panel_backdrop_fade_work[i] -= 0xc;
                 }
                 k = 8 - j;
-                (k + prims->top)->r0 = s_menu_panel_backdrop_fade_work[i];
-                (k + prims->top)->g0 = s_menu_panel_backdrop_fade_work[i];
-                (k + prims->top)->b0 = s_menu_panel_backdrop_fade_work[i];
+                setRGB0(&prims->top[k], s_menu_panel_backdrop_fade_work[i], s_menu_panel_backdrop_fade_work[i],
+                    s_menu_panel_backdrop_fade_work[i]);
                 setRGB0(&prims->bottom[j], s_menu_panel_backdrop_fade_work[i], s_menu_panel_backdrop_fade_work[i],
                     s_menu_panel_backdrop_fade_work[i]);
                 gfx_draw_or_append_gpu_primitive(&prims->top[k]);

@@ -13,14 +13,11 @@
  */
 void gfx_enqueue_gouraud_textured_quad(
     const textured_rect_source_t* rect, const rgb24_t* color, s32 semitrans, s32 otag_index) {
-    POLY_GT4* poly;
-
-    poly = &g_menu_gfx_context->gouraud_textured_quads[g_menu_gfx_poly_gt4_count++];
+    POLY_GT4* poly = &g_menu_gfx_context->gouraud_textured_quads[g_menu_gfx_poly_gt4_count++];
 
     SetSemiTrans(poly, semitrans);
-
-    setXY4(poly, rect->x + 0x80, rect->y, (rect->x + 0x80) + rect->w, rect->y, rect->x + 0x80, rect->y + rect->h,
-        (rect->x + 0x80) + rect->w, rect->y + rect->h);
+    setXY4(poly, rect->x + 0x80, rect->y, rect->x + 0x80 + rect->w, rect->y, rect->x + 0x80, rect->y + rect->h,
+        rect->x + 0x80 + rect->w, rect->y + rect->h);
 
     setUV4(poly, rect->u, rect->v, rect->u + rect->w, rect->v, rect->u, rect->v + rect->h, rect->u + rect->w,
         rect->v + rect->h);

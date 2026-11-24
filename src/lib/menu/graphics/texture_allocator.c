@@ -111,17 +111,16 @@ void gfx_free_texture_rect(RECT* rect) {
     s32 x;
     s32 y;
     s32 i;
-    s32 value;
+
     if (rect->x != -1 && rect != (void*)-1) {
         s_gfx_free_rect_pixels[0] = (rect->x - 0x1c0) * 4;
         s_gfx_free_rect_pixels[1] = rect->y & 0xff;
         s_gfx_free_rect_pixels[2] = rect->w * 4;
         s_gfx_free_rect_pixels[3] = rect->h;
         for (i = 0; i < 4; i++) {
-            value = s_gfx_free_rect_pixels[i] >> 4;
-            s_gfx_free_rect_cells[i] = value;
+            s_gfx_free_rect_cells[i] = s_gfx_free_rect_pixels[i] >> 4;
             if (s_gfx_free_rect_pixels[i] & 0xf) {
-                s_gfx_free_rect_cells[i] = value + 1;
+                s_gfx_free_rect_cells[i]++;
             }
         }
         for (y = s_gfx_free_rect_cells[1]; y < s_gfx_free_rect_cells[1] + s_gfx_free_rect_cells[3]; y++) {

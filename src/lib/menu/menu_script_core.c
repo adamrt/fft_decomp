@@ -33,10 +33,8 @@ void menu_script_run(void* script, s32 flags) {
     g_menu_gfx_semitransparency = 0;
     g_menu_script_input = flags;
     g_gfx_otag_index_locked = 0;
-    if (instruction->header.opcode != MENU_SCRIPT_END) {
-        do {
-            instruction = g_menu_opcode_handlers[instruction->header.opcode](instruction);
-        } while (instruction->header.opcode != MENU_SCRIPT_END);
+    while (instruction->header.opcode != MENU_SCRIPT_END) {
+        instruction = g_menu_opcode_handlers[instruction->header.opcode](instruction);
     }
 }
 
@@ -67,7 +65,7 @@ menu_instruction_t* menu_opcode_01_if_group(menu_instruction_t* cmd) {
     } else {
         row = g_menu_scroll_base_index + g_menu_list_row_index;
         if (g_menu_list_scroll_offset < 0) {
-            row -= 1;
+            row--;
         }
     }
     cmd = menu_next_instruction(cmd);

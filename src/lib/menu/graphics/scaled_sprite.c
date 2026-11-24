@@ -21,11 +21,11 @@ void gfx_set_scaled_poly_ft4_4bpp(POLY_FT4* poly, const point16_t* texture_page,
     s32 h;
 
     scale_x = scale->x;
-    dx = (sprite_rect->offset.x * scale_x) / ONE;
+    dx = sprite_rect->offset.x * scale_x / ONE;
     scale_y = scale->y;
-    dy = (sprite_rect->offset.y * scale_y) / ONE;
-    w = (sprite_rect->source.w * scale_x) / ONE;
-    h = (sprite_rect->source.h * scale_y) / ONE;
+    dy = sprite_rect->offset.y * scale_y / ONE;
+    w = sprite_rect->source.w * scale_x / ONE;
+    h = sprite_rect->source.h * scale_y / ONE;
     if (w < 0) {
         w = -w;
     }

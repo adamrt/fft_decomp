@@ -9,7 +9,7 @@
 /* Start a dialog with the packed dialog type, text ID and speaker selector
  * only when its scheduler slot is idle. */
 void menu_text_thread_start_if_idle(s32 thread_id, s32 dialog_type, s32 text_id, s32 speaker_id) {
-    if (thread_is_running(thread_id) == 0) {
+    if (!thread_is_running(thread_id)) {
         thread_start(thread_id, message_dialog_thread);
         thread_set_parameters(thread_id, dialog_type, text_id, speaker_id);
     }
@@ -26,11 +26,9 @@ extern s32 g_menu_text_active_key;
 s32 menu_text_thread_start_or_poll(s32 thread_id, s32 dialog_type, s32 text_id, s32 speaker_id, s32 y_offset) {
     s32 status = thread_is_running(thread_id);
 
-    if (status == 0) {
-        if (g_menu_text_active_key == text_id) {
-            g_menu_text_active_key = 0;
-            return 0;
-        }
+    if (status == 0 && g_menu_text_active_key == text_id) {
+        g_menu_text_active_key = 0;
+        return 0;
     }
     if (g_menu_text_active_key == 0) {
         thread_start(thread_id, message_dialog_thread);
