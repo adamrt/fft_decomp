@@ -113,7 +113,6 @@ extern u8 g_formation_unit_count;
 s16 formation_build_record_list(s32 item_id, formation_unit_t** unused_list, formation_record_list_mode_e mode);
 void formation_unit_build_record(
     const struct battle_unit* unit, struct formation_unit* record, const struct party_unit* party);
-void formation_rebuild_lists(void);
 s32 formation_unit_find_by_roster_slot(s16 roster_slot);
 void formation_unit_copy_to_preview(s16 index, s32 unused_slot);
 void formation_save_records(void);

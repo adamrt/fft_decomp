@@ -113,7 +113,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
 - `display_action_preview`: a skipped
   preview leaves `s_unit_view_preview_target_action` null, and its
   `attack_accuracy` is read (from kernel RAM) before the null test.
-- `formation_rebuild_lists`: the Soldier Office (shop
+- The Formation screen's `rebuild_lists` (`src/world/formation/screen.c`): the Soldier Office (shop
   0x65) lists only monsters, yet `formation_init_menu_state` stages unit
   0 even when that list is empty; with no earlier list since WORLD loaded, the
   pointer is 0, so the "restore HP/MP" stores copy kernel RAM 0x10/0x16 to

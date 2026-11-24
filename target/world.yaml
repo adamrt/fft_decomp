@@ -78,9 +78,7 @@ units:
   - {name: menu_window_threads, source: src/lib/menu/menu_window_threads.c}
   - {name: thread_state, source: src/world/event/input.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, bss: [{addr: 0x801c0528, size: 24, hash: 9d908ecfb6b256de}]}
   - {name: menu_panel_backdrops, source: src/lib/menu/unit_view/backdrops.c, data: [{addr: 0x8018aa68, size: 32, hash: 66687aadf862bd77}], bss: [{addr: 0x801c0030, size: 1264, hash: e448b18d634ce66c}]}
-  - {name: formation_init_display, source: src/world/formation/display.c, profile: gcc-2.6.3_O1_aspsx-2.34, data: [{addr: 0x8018bb50, size: 1408, hash: d277279fc1b0c76a}, {addr: 0x8018c0d0, size: 8, hash: e2d93ece070c6ba5}]}
-  - {name: input_lockout, source: src/world/menu/input_lockout.c, profile: gcc-2.6.3_O1_aspsx-2.34}
-  - {name: formation_screen, source: src/world/formation/screen.c, profile: gcc-2.6.3_O1_aspsx-2.34, bss: [{addr: 0x8018bad4, size: 1, hash: 6e340b9cffb37a98}]}
+  - {name: formation_screen, source: src/world/formation/screen.c, profile: gcc-2.6.3_O1_aspsx-2.34, data: [{addr: 0x8018bb50, size: 1408, hash: d277279fc1b0c76a}, {addr: 0x8018c0d0, size: 8, hash: e2d93ece070c6ba5}], bss: [{addr: 0x8018bad4, size: 1, hash: 6e340b9cffb37a98}]}
   - {name: banner_toggles, source: src/lib/menu/unit_view/banner_toggles.c, profile: gcc-2.6.3_O1_aspsx-2.34}
   - {name: panel_toggles, source: src/world/formation/panel_control.c, profile: gcc-2.6.3_O1_aspsx-2.34}
   - {name: formation_grid, source: src/world/formation/grid.c, profile: gcc-2.6.3_O1_aspsx-2.34, data: [{addr: 0x8018c704, size: 60, hash: c095164e74c2ecf1}, {addr: 0x8018c740, size: 4, hash: c379451c75a2813d}, {addr: 0x8018c744, size: 12, hash: 1d20c89ea5a44018}, {addr: 0x8018c750, size: 12, hash: 5861b9bcdd5acbd6}, {addr: 0x8018c75c, size: 12, hash: 2ff0fd78112d9482}, {addr: 0x8018c768, size: 20, hash: ba872646a4176ce7}, {addr: 0x8018c77c, size: 20, hash: 135cdf93c7edfc76}], bss: [{addr: 0x801c8338, size: 4, hash: df3f619804a92fdb}, {addr: 0x801c833c, size: 1, hash: 6e340b9cffb37a98}]}
@@ -704,13 +702,13 @@ functions:
   - {addr: 0x801128e0, size: 908, name: menu_input_update_event_state, hash: af5af8099faa9908, unit: thread_state}
   - {addr: 0x80112c6c, size: 28, name: menu_thread_is_running, hash: 22d1fa2a224de3cd, unit: thread_state}
   - {addr: 0x80112c88, size: 1236, name: unit_panel_draw_backdrops, hash: 98480b1c862dca4f, unit: menu_panel_backdrops}
-  - {addr: 0x8011315c, size: 648, name: formation_init_display, hash: 03e723ed2bcd8184, unit: formation_init_display}
-  - {addr: 0x801133e4, size: 148, name: formation_rebuild_lists, hash: 97da11e8f7fbbc2b, unit: formation_init_display}
-  - {addr: 0x80113478, size: 112, name: menu_screen_check_busy, hash: 09c2bf94c7f79101, unit: formation_init_display}
-  - {addr: 0x801134e8, size: 88, name: message_box_show_with_sound, hash: f4355019c7b2ad8b, unit: formation_init_display}
-  - {addr: 0x80113540, size: 64, name: formation_unit_show_message, hash: faa146ebb4a3f05f, unit: formation_init_display}
-  - {addr: 0x80113580, size: 136, name: menu_screen_update_input_lockout, hash: 389745ef47daebf8, unit: input_lockout}
-  - {addr: 0x80113608, size: 16, name: menu_screen_get_input_lockout, hash: 6a0b74a2f27fae10, unit: input_lockout}
+  - {addr: 0x8011315c, size: 648, name: formation_init_display, hash: 03e723ed2bcd8184, unit: formation_screen}
+  - {addr: 0x801133e4, size: 148, name: rebuild_lists, hash: 97da11e8f7fbbc2b, unit: formation_screen}
+  - {addr: 0x80113478, size: 112, name: menu_screen_check_busy, hash: 09c2bf94c7f79101, unit: formation_screen}
+  - {addr: 0x801134e8, size: 88, name: message_box_show_with_sound, hash: f4355019c7b2ad8b, unit: formation_screen}
+  - {addr: 0x80113540, size: 64, name: formation_unit_show_message, hash: faa146ebb4a3f05f, unit: formation_screen}
+  - {addr: 0x80113580, size: 136, name: menu_screen_update_input_lockout, hash: 389745ef47daebf8, unit: formation_screen}
+  - {addr: 0x80113608, size: 16, name: menu_screen_get_input_lockout, hash: 6a0b74a2f27fae10, unit: formation_screen}
   - {addr: 0x80113618, size: 200, name: menu_screen_filter_buttons, hash: c935cacdebe4befb, unit: formation_screen}
   - {addr: 0x801136e0, size: 104, name: update_selection_slide, hash: 59374152ce46afa8, unit: formation_screen}
   - {addr: 0x80113748, size: 1676, name: formation_run_screen, hash: 59c8ead0459b32db, unit: formation_screen}
