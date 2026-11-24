@@ -84,7 +84,8 @@ s32 equipment_is_two_handing_weapon(const s16* slots, s32 two_hands_support) {
 
 /* Returns 1 for a job id in either special-monster range: from
  * JOB_ID_SPECIAL_MONSTER_1_FIRST up to the first generic job, or the
- * block that starts at JOB_ID_SPECIAL_MONSTER_2_FIRST. */
+ * block that starts at JOB_ID_SPECIAL_MONSTER_2_FIRST. BUNIT's own copy, inside this unit's object; JOBSTTS and
+ * WORLD compile the same body from src/lib/job.c. */
 s32 job_is_special_monster(s32 job_id) {
     s32 result = job_id >= JOB_ID_SPECIAL_MONSTER_1_FIRST && job_id < JOB_ID_GENERIC_FIRST;
 

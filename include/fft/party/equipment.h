@@ -147,7 +147,8 @@ extern u32* g_equipment_gfx_current_ot;
 extern u16 g_equipment_gfx_draw_area_capacity;
 extern u16 g_equipment_gfx_draw_move_capacity;
 
-/* LINE_G2 and LINE_G3 capacities; volatile keeps their load order in menu_gfx_init_contexts. */
+/* LINE_G2 and LINE_G3 capacities, read in that order by menu_gfx_init_contexts. Volatile: gcc 2.6.3 keeps two loads in
+ * order only when both are volatile, and the target puts the second in the first's delay slot. */
 extern volatile u16 g_equipment_gfx_line_g2_capacity;
 extern volatile u16 g_equipment_gfx_line_g3_capacity;
 

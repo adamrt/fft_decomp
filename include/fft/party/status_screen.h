@@ -89,7 +89,8 @@ extern u16 g_status_screen_gfx_draw_area_capacity;
 extern u16 g_status_screen_gfx_draw_move_capacity;
 extern u16 g_status_screen_gfx_background_texture_page;
 
-/* LINE_G2 and LINE_G3 capacities; volatile keeps their load order in status_screen_gfx_init_contexts. */
+/* LINE_G2 and LINE_G3 capacities, read in that order by status_screen_gfx_init_contexts. Volatile: gcc 2.6.3 keeps two
+ * loads in order only when both are volatile, and the target puts the second in the first's delay slot. */
 extern volatile u16 g_status_screen_gfx_line_g2_capacity;
 extern volatile u16 g_status_screen_gfx_line_g3_capacity;
 

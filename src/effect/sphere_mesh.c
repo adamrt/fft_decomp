@@ -84,6 +84,8 @@ s32 effect_sphere_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_i
     s32 k;
     s32 n;
     s32 extent;
+    VECTOR* upper;
+    VECTOR* lower;
     s32 sin0;
     s32 sin45;
     s32 cos0;
@@ -218,50 +220,38 @@ s32 effect_sphere_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_i
         cos0 = rcos(work->spin);
         cos45 = rcos(work->spin + (ONE / SPHERE_MESH_SEGMENT_COUNT));
 
-        /* Rows 4 - i and 4 + i share one scaled ring, mirrored above and below the middle row; row
-         * heights are proportional to the radius (k). Points 0 and 1 come from the two angles and the
-         * other six are quarter turns of them. The target recomputes the radius at each use; a
-         * shared local changes the code. */
-        k = (radius + (work->radius_offset >> 8)) / 4;
+        /* Rows 4 - i and 4 + i share one ring, mirrored above and below the middle row. For a radius R, ring i's
+         * radius is R * scale[i] (the scales are sqrt(1 - (i/4)^2), Q12) and its height is i * R/4, the ring
+         * spacing k, scaled by growth.vy (Q8): a sphere. Points 0 and 1 come from the two angles and the other six
+         * are quarter turns of them. The target recomputes R at each use; a shared local changes the code. */
+        k = (radius + (work->radius_offset >> 8)) / SPHERE_MESH_MIDDLE_ROW;
         for (i = 0; i < SPHERE_MESH_RING_SCALE_COUNT; i++) {
+            upper = points[SPHERE_MESH_MIDDLE_ROW + i];
+            lower = points[SPHERE_MESH_MIDDLE_ROW - i];
             extent
                 = (((cos0 * g_effect_sphere_mesh_ring_scales[i]) >> 12) * (radius + (work->radius_offset >> 8))) >> 12;
-            points[SPHERE_MESH_MIDDLE_ROW + i][0].vx = points[SPHERE_MESH_MIDDLE_ROW + i][2].vz
-                = points[SPHERE_MESH_MIDDLE_ROW - i][0].vx = points[SPHERE_MESH_MIDDLE_ROW - i][2].vz = extent;
+            upper[0].vx = upper[2].vz = lower[0].vx = lower[2].vz = extent;
             extent = -extent;
-            points[SPHERE_MESH_MIDDLE_ROW + i][4].vx = points[SPHERE_MESH_MIDDLE_ROW + i][6].vz
-                = points[SPHERE_MESH_MIDDLE_ROW - i][4].vx = points[SPHERE_MESH_MIDDLE_ROW - i][6].vz = extent;
+            upper[4].vx = upper[6].vz = lower[4].vx = lower[6].vz = extent;
             extent
                 = (((sin0 * g_effect_sphere_mesh_ring_scales[i]) >> 12) * (radius + (work->radius_offset >> 8))) >> 12;
-            points[SPHERE_MESH_MIDDLE_ROW + i][0].vz = points[SPHERE_MESH_MIDDLE_ROW + i][6].vx
-                = points[SPHERE_MESH_MIDDLE_ROW - i][0].vz = points[SPHERE_MESH_MIDDLE_ROW - i][6].vx = extent;
+            upper[0].vz = upper[6].vx = lower[0].vz = lower[6].vx = extent;
             extent = -extent;
-            points[SPHERE_MESH_MIDDLE_ROW + i][2].vx = points[SPHERE_MESH_MIDDLE_ROW + i][4].vz
-                = points[SPHERE_MESH_MIDDLE_ROW - i][2].vx = points[SPHERE_MESH_MIDDLE_ROW - i][4].vz = extent;
+            upper[2].vx = upper[4].vz = lower[2].vx = lower[4].vz = extent;
             extent
                 = (((cos45 * g_effect_sphere_mesh_ring_scales[i]) >> 12) * (radius + (work->radius_offset >> 8))) >> 12;
-            points[SPHERE_MESH_MIDDLE_ROW + i][1].vx = points[SPHERE_MESH_MIDDLE_ROW + i][3].vz
-                = points[SPHERE_MESH_MIDDLE_ROW - i][1].vx = points[SPHERE_MESH_MIDDLE_ROW - i][3].vz = extent;
+            upper[1].vx = upper[3].vz = lower[1].vx = lower[3].vz = extent;
             extent = -extent;
-            points[SPHERE_MESH_MIDDLE_ROW + i][5].vx = points[SPHERE_MESH_MIDDLE_ROW + i][7].vz
-                = points[SPHERE_MESH_MIDDLE_ROW - i][5].vx = points[SPHERE_MESH_MIDDLE_ROW - i][7].vz = extent;
+            upper[5].vx = upper[7].vz = lower[5].vx = lower[7].vz = extent;
             extent
                 = (((sin45 * g_effect_sphere_mesh_ring_scales[i]) >> 12) * (radius + (work->radius_offset >> 8))) >> 12;
-            points[SPHERE_MESH_MIDDLE_ROW + i][1].vz = points[SPHERE_MESH_MIDDLE_ROW + i][7].vx
-                = points[SPHERE_MESH_MIDDLE_ROW - i][1].vz = points[SPHERE_MESH_MIDDLE_ROW - i][7].vx = extent;
+            upper[1].vz = upper[7].vx = lower[1].vz = lower[7].vx = extent;
             extent = -extent;
-            points[SPHERE_MESH_MIDDLE_ROW + i][3].vx = points[SPHERE_MESH_MIDDLE_ROW + i][5].vz
-                = points[SPHERE_MESH_MIDDLE_ROW - i][3].vx = points[SPHERE_MESH_MIDDLE_ROW - i][5].vz = extent;
-            points[SPHERE_MESH_MIDDLE_ROW + i][0].vy = points[SPHERE_MESH_MIDDLE_ROW + i][1].vy
-                = points[SPHERE_MESH_MIDDLE_ROW + i][2].vy = points[SPHERE_MESH_MIDDLE_ROW + i][3].vy
-                = points[SPHERE_MESH_MIDDLE_ROW + i][4].vy = points[SPHERE_MESH_MIDDLE_ROW + i][5].vy
-                = points[SPHERE_MESH_MIDDLE_ROW + i][6].vy = points[SPHERE_MESH_MIDDLE_ROW + i][7].vy
-                = (i * k * growth.vy) >> 8;
-            points[SPHERE_MESH_MIDDLE_ROW - i][0].vy = points[SPHERE_MESH_MIDDLE_ROW - i][1].vy
-                = points[SPHERE_MESH_MIDDLE_ROW - i][2].vy = points[SPHERE_MESH_MIDDLE_ROW - i][3].vy
-                = points[SPHERE_MESH_MIDDLE_ROW - i][4].vy = points[SPHERE_MESH_MIDDLE_ROW - i][5].vy
-                = points[SPHERE_MESH_MIDDLE_ROW - i][6].vy = points[SPHERE_MESH_MIDDLE_ROW - i][7].vy
-                = -((i * k * growth.vy) >> 8);
+            upper[3].vx = upper[5].vz = lower[3].vx = lower[5].vz = extent;
+            upper[0].vy = upper[1].vy = upper[2].vy = upper[3].vy = upper[4].vy = upper[5].vy = upper[6].vy
+                = upper[7].vy = (i * k * growth.vy) >> 8;
+            lower[0].vy = lower[1].vy = lower[2].vy = lower[3].vy = lower[4].vy = lower[5].vy = lower[6].vy
+                = lower[7].vy = -((i * k * growth.vy) >> 8);
             growth.vy += growth_step.vy;
         }
 

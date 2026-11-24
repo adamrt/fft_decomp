@@ -90,8 +90,8 @@ extern u16 g_menu_screen_line_g3_capacity;
 extern u16 g_menu_screen_poly_f4_count;
 extern u16 g_menu_screen_draw_area_count;
 
-/* Volatile: menu_gfx_init_contexts must read the draw-area count
- * after the draw-move count, as the target does. */
+/* Draw-area count, which menu_gfx_init_contexts reads after the draw-move count. Volatile: gcc 2.6.3 keeps two loads in
+ * order only when both are volatile, and the target puts the second in the first's delay slot. */
 extern volatile u16 g_menu_screen_draw_area_capacity;
 
 /* Draw move count; volatile for the same read order as g_menu_screen_draw_area_capacity. */

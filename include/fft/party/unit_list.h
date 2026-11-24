@@ -154,7 +154,8 @@ void unit_list_update_help_cursor(s16 mode);
 extern u16 g_unit_list_gfx_draw_area_capacity;
 extern u16 g_unit_list_gfx_draw_move_capacity;
 
-/* Volatile capacity reads preserve the original packet-binder load scheduling. */
+/* LINE_G2 and LINE_G3 capacities, read in that order by the context initializer. Volatile: gcc 2.6.3 keeps two loads in
+ * order only when both are volatile, and the target puts the second in the first's delay slot. */
 extern volatile u16 g_unit_list_gfx_line_g2_capacity;
 extern volatile u16 g_unit_list_gfx_line_g3_capacity;
 
