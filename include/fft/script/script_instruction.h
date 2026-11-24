@@ -646,7 +646,7 @@ typedef enum script_camera_component {
 
 enum { SCRIPT_CAMERA_POSITION_COMPONENT_COUNT = 3, SCRIPT_CAMERA_COMPONENT_COUNT = 7 };
 
-/* The event byte is widened into a 32-bit setting; bitfield reads change the extraction order. */
+/* The operand byte is widened into a 32-bit setting; bitfield reads change the extraction order. */
 enum {
     SCRIPT_CAMERA_SPEED_CURVE_MODE_MASK = 0x03,
     SCRIPT_CAMERA_SPEED_CURVE_GROUP_MASK = 0x0c,

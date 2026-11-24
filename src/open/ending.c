@@ -29,33 +29,33 @@ typedef struct ending_glyph_metrics {
 /* Serialized ending-script opcodes, in the order of g_ending_opcode_handlers. */
 typedef enum ending_opcode {
     ENDING_OPCODE_END = 0x00,
-    ENDING_OPCODE_POSITIONED_TEXT = 0x01,
-    ENDING_OPCODE_SCROLL_SPEED = 0x02,
-    ENDING_OPCODE_REVEAL_SCREEN = 0x03,
-    ENDING_OPCODE_HIDE_SCREEN = 0x04,
+    ENDING_OPCODE_CREATE_POSITIONED_TEXT = 0x01,
+    ENDING_OPCODE_SET_SCROLL_SPEED = 0x02,
+    ENDING_OPCODE_START_SCREEN_FADE_IN = 0x03,
+    ENDING_OPCODE_START_SCREEN_FADE_OUT = 0x04,
     ENDING_OPCODE_WAIT_FRAMES = 0x05,
-    ENDING_OPCODE_WAIT_SCROLL = 0x06,
+    ENDING_OPCODE_WAIT_FOR_SCROLL = 0x06,
     ENDING_OPCODE_START_XA_AUDIO = 0x07,
-    ENDING_OPCODE_FADE_IN_AUDIO = 0x08,
-    ENDING_OPCODE_FADE_OUT_AUDIO = 0x09,
+    ENDING_OPCODE_START_AUDIO_FADE_IN = 0x08,
+    ENDING_OPCODE_START_AUDIO_FADE_OUT = 0x09,
     ENDING_OPCODE_STOP_XA_AUDIO = 0x0a,
     ENDING_OPCODE_LOAD_OPNTEX_FRAME = 0x0b,
-    ENDING_OPCODE_FADE_IN_PICTURE = 0x0c,
-    ENDING_OPCODE_FADE_OUT_PICTURE = 0x0d,
-    ENDING_OPCODE_WAIT_XA_AUDIO_IDLE = 0x0e,
+    ENDING_OPCODE_START_OPNTEX_FADE_IN = 0x0c,
+    ENDING_OPCODE_START_OPNTEX_FADE_OUT = 0x0d,
+    ENDING_OPCODE_WAIT_FOR_XA_AUDIO_IDLE = 0x0e,
     ENDING_OPCODE_START_OPNTEX_SEQUENCE = 0x0f
 } ending_opcode_e;
 
-static void ending_opcode_end_script(s16* unused_entry);
-static void ending_opcode_create_positioned_text_record(s16* command);
+static void ending_opcode_end(s16* unused_entry);
+static void ending_opcode_create_positioned_text(s16* command);
 static void ending_opcode_set_scroll_speed(s16* command);
-static void ending_opcode_start_overlay_fade_out(s16* command);
-static void ending_opcode_start_overlay_fade_in(s16* command);
+static void ending_opcode_start_screen_fade_in(s16* command);
+static void ending_opcode_start_screen_fade_out(s16* command);
 static void ending_opcode_wait_frames(s16* entry);
 static void ending_opcode_wait_for_scroll(s16* entry);
 static void ending_opcode_start_xa_audio(s16* command);
-static void ending_opcode_start_sound_fade_in(s16* command);
-static void ending_opcode_start_sound_fade_out(s16* command);
+static void ending_opcode_start_audio_fade_in(s16* command);
+static void ending_opcode_start_audio_fade_out(s16* command);
 static void ending_opcode_stop_xa_audio(s16* unused_entry);
 static void ending_opcode_load_opntex_frame(s16* command);
 static void ending_opcode_start_opntex_fade_in(s16* command);
@@ -76,16 +76,16 @@ extern u8* g_ending_script_initial_data_base;
 /* Ending bytecode opcodes 0x00 through 0x0f. */
 typedef void (*ending_opcode_handler_t)(s16* entry);
 static ending_opcode_handler_t s_ending_opcode_handlers[16] = {
-    ending_opcode_end_script,
-    ending_opcode_create_positioned_text_record,
+    ending_opcode_end,
+    ending_opcode_create_positioned_text,
     ending_opcode_set_scroll_speed,
-    ending_opcode_start_overlay_fade_out,
-    ending_opcode_start_overlay_fade_in,
+    ending_opcode_start_screen_fade_in,
+    ending_opcode_start_screen_fade_out,
     ending_opcode_wait_frames,
     ending_opcode_wait_for_scroll,
     ending_opcode_start_xa_audio,
-    ending_opcode_start_sound_fade_in,
-    ending_opcode_start_sound_fade_out,
+    ending_opcode_start_audio_fade_in,
+    ending_opcode_start_audio_fade_out,
     ending_opcode_stop_xa_audio,
     ending_opcode_load_opntex_frame,
     ending_opcode_start_opntex_fade_in,
@@ -790,7 +790,7 @@ void ending_update_script(controller_record_t* unused_record) {
  * End the script. It yields for the frame while the XA start or stop
  * sequence runs; after that it clears ENDING_SCRIPT_DISPATCH_RUNNING, which stops
  * the dispatcher. Two bytes. */
-static void ending_opcode_end_script(s16* unused_entry) {
+static void ending_opcode_end(s16* unused_entry) {
     u32 state = g_ending_script_state.dispatch.flags;
 
     if (state & (ENDING_SCRIPT_DISPATCH_XA_STOPPING | ENDING_SCRIPT_DISPATCH_XA_STARTING)) {
@@ -801,13 +801,13 @@ static void ending_opcode_end_script(s16* unused_entry) {
     }
 }
 
-/* ENDING_OPCODE_POSITIONED_TEXT (0x01)
+/* ENDING_OPCODE_CREATE_POSITIONED_TEXT (0x01)
  * Create and position a text record from an ending-script command
  * (opcode, x, y, text offset). Eight bytes.
  *
  * A coordinate of -1 centers the record on its last glyph's extent. X bit 0x100
  * instead centers the glyph selected by its low byte. */
-static void ending_opcode_create_positioned_text_record(s16* command) {
+static void ending_opcode_create_positioned_text(s16* command) {
     s32 x;
     s32 y;
     s32 index;
@@ -846,7 +846,7 @@ static void ending_opcode_create_positioned_text_record(s16* command) {
     g_ending_script_state.dispatch.cursor.byte_offset += 8;
 }
 
-/* ENDING_OPCODE_SCROLL_SPEED (0x02)
+/* ENDING_OPCODE_SET_SCROLL_SPEED (0x02)
  * Set the text scroll speed to command[1] (1/256 pixel per frame,
  * negative for upward) and zero the fraction and the scrolled-distance counter.
  * Four bytes. */
@@ -859,20 +859,20 @@ static void ending_opcode_set_scroll_speed(s16* command) {
     g_ending_script_state.dispatch.cursor.byte_offset += 4;
 }
 
-/* ENDING_OPCODE_REVEAL_SCREEN (0x03)
+/* ENDING_OPCODE_START_SCREEN_FADE_IN (0x03)
  * Reveal the screen over command[1] frames, with the overlay in
  * ordering-table entry 2. Four bytes. */
-static void ending_opcode_start_overlay_fade_out(s16* command) {
+static void ending_opcode_start_screen_fade_in(s16* command) {
     command++;
     g_fade_tile.ot_index = 2;
     fade_tile_start_in(*command);
     g_ending_script_state.dispatch.cursor.byte_offset += 4;
 }
 
-/* ENDING_OPCODE_HIDE_SCREEN (0x04)
+/* ENDING_OPCODE_START_SCREEN_FADE_OUT (0x04)
  * Fade the screen to black over command[1] frames, with the overlay in
  * ordering-table entry 2. Four bytes. */
-static void ending_opcode_start_overlay_fade_in(s16* command) {
+static void ending_opcode_start_screen_fade_out(s16* command) {
     command++;
     g_fade_tile.ot_index = 2;
     fade_tile_start_out(*command);
@@ -904,7 +904,7 @@ static void ending_opcode_wait_frames(s16* entry) {
     }
 }
 
-/* ENDING_OPCODE_WAIT_SCROLL (0x06)
+/* ENDING_OPCODE_WAIT_FOR_SCROLL (0x06)
  * Wait until the text has scrolled command[1] pixels, counted from the
  * call that arms the wait. Four bytes. */
 static void ending_opcode_wait_for_scroll(s16* entry) {
@@ -959,25 +959,25 @@ static void ending_opcode_start_xa_audio(s16* command) {
     sound_set_cd_mix_and_volume(0, 1);
 }
 
-/* ENDING_OPCODE_FADE_IN_AUDIO (0x08)
+/* ENDING_OPCODE_START_AUDIO_FADE_IN (0x08)
  * Fade the CD audio in at mix level 0x7a over command[1] * 4 ticks.
  * Four bytes.
  *
  * `command` is not const, matching the script handler type: GCC 2.7.2 marks a
  * load through a const pointer unchanging and would schedule it above the
  * prologue's ra save. */
-static void ending_opcode_start_sound_fade_in(s16* command) {
+static void ending_opcode_start_audio_fade_in(s16* command) {
     sound_set_cd_mix_and_volume(0x7a, command[1] * 4);
     g_ending_script_state.dispatch.cursor.byte_offset += 4;
 }
 
-/* ENDING_OPCODE_FADE_OUT_AUDIO (0x09)
+/* ENDING_OPCODE_START_AUDIO_FADE_OUT (0x09)
  * Fade the CD audio out over command[1] * 4 ticks. Four bytes.
  *
  * `command` is not const, matching the script handler type: GCC 2.7.2 marks a
  * load through a const pointer unchanging and would schedule it above the
  * prologue's ra save. */
-static void ending_opcode_start_sound_fade_out(s16* command) {
+static void ending_opcode_start_audio_fade_out(s16* command) {
     sound_set_cd_mix_and_volume(0, command[1] * 4);
     g_ending_script_state.dispatch.cursor.byte_offset += 4;
 }
@@ -1018,7 +1018,7 @@ static void ending_opcode_load_opntex_frame(s16* command) {
     g_ending_script_state.dispatch.cursor.byte_offset += 4;
 }
 
-/* ENDING_OPCODE_FADE_IN_PICTURE (0x0c)
+/* ENDING_OPCODE_START_OPNTEX_FADE_IN (0x0c)
  * Fade the OPNTEX picture in over command[1] frames (intensity 0 to
  * 0x80). Four bytes. */
 static void ending_opcode_start_opntex_fade_in(s16* command) {
@@ -1031,7 +1031,7 @@ static void ending_opcode_start_opntex_fade_in(s16* command) {
     g_ending_script_state.dispatch.cursor.byte_offset += 4;
 }
 
-/* ENDING_OPCODE_FADE_OUT_PICTURE (0x0d)
+/* ENDING_OPCODE_START_OPNTEX_FADE_OUT (0x0d)
  * Fade the OPNTEX picture out over command[1] frames (intensity 0x80
  * to 0). Four bytes. */
 static void ending_opcode_start_opntex_fade_out(s16* command) {
@@ -1044,7 +1044,7 @@ static void ending_opcode_start_opntex_fade_out(s16* command) {
     g_ending_script_state.dispatch.cursor.byte_offset += 4;
 }
 
-/* ENDING_OPCODE_WAIT_XA_AUDIO_IDLE (0x0e)
+/* ENDING_OPCODE_WAIT_FOR_XA_AUDIO_IDLE (0x0e)
  * Yield each frame until the XA audio is neither playing, starting nor
  * stopping. Two bytes. */
 static void ending_opcode_wait_for_xa_audio_idle(s16* unused_entry) {

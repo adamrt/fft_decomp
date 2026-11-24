@@ -432,7 +432,7 @@ restart_script:
         } else if (opcode == SCRIPT_OPCODE_UNKNOWN_D8) {
         } else if (opcode == SCRIPT_OPCODE_BACK_TARGET_BARRIER) {
         } else if (opcode == SCRIPT_OPCODE_UNKNOWN_DC) {
-            g_script_opcode_dc_value = 13;
+            g_script_unknown_dc_value = 13;
         }
         /* ---- Dialogue and portraits ---- */
         else if (opcode == SCRIPT_OPCODE_DISPLAY_MESSAGE) {

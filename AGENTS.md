@@ -165,9 +165,12 @@ preserving every original byte.
 - A bytecode machine's handler is `<machine>_opcode_<instruction>`
   (`script_opcode_walk_to`), and the machine's `<machine>_opcode_e` enum
   names each opcode as `<MACHINE>_OPCODE_<INSTRUCTION>`; the handler's
-  comment lists the opcodes it handles as `MENU_OPCODE_QUAD (0x04)`.
-  "Opcode" is only for an instruction stream a dispatcher decodes; request
-  codes and single records are commands.
+  comment lists the opcodes it handles as `MENU_OPCODE_QUAD (0x04)`. Handler
+  and enum use the same instruction words. Only separate identical bodies
+  (`effect_opcode_nop_2c`, `effect_opcode_nop_2d`) keep the opcode in their
+  names, since nothing else tells them apart. "Opcode" is only for an
+  instruction stream a dispatcher decodes; request codes and single records
+  are commands.
 - Program entrypoints are `<program>_entrypoint` or
   `<program>_<role>_entrypoint` for independent entrances to one overlay
   (`open_title_entrypoint`). Identify them from the callers that enter the

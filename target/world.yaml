@@ -1221,7 +1221,7 @@ data:
   - {addr: 0x8015327c, name: g_threads}
   - {addr: 0x80153280, name: g_script_variables}
   - {addr: 0x80153284, name: g_menu_window_text_pen}
-  - {addr: 0x80153294, name: g_script_opcode_dc_value}
+  - {addr: 0x80153294, name: g_script_unknown_dc_value}
   - {addr: 0x80153298, name: g_sound_pending_sfx_id}
   - {addr: 0x801532a0, name: g_sound_suppressed}
   - {addr: 0x801532a4, name: g_sound_music_volume_transition_request}

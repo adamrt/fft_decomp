@@ -281,7 +281,7 @@ void script_update_event_input(u32 buttons);
 void script_load_event_input_state(const struct menu_input_state* saved);
 
 /* debug */
-extern s16 g_script_opcode_dc_value; /* SCRIPT_OPCODE_UNKNOWN_DC stores 13; nothing reads it */
+extern s16 g_script_unknown_dc_value; /* SCRIPT_OPCODE_UNKNOWN_DC stores 13; nothing reads it */
 
 void script_opcode_debug_pause(void);
 

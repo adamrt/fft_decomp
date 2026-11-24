@@ -136,16 +136,16 @@ functions:
   - {addr: 0x8006f988, size: 136, name: movie_update_fftend, hash: df1c60f300df0a2c, unit: ending}
   - {addr: 0x8006fa10, size: 144, name: start_script, hash: d38b74485501d567, unit: ending}
   - {addr: 0x8006faa0, size: 88, name: ending_update_script, hash: c31c968e8b96aab5, unit: ending}
-  - {addr: 0x8006faf8, size: 72, name: ending_opcode_end_script, hash: 5abc662795697b2e, unit: ending}
-  - {addr: 0x8006fb40, size: 548, name: ending_opcode_create_positioned_text_record, hash: 79ffee469a0e46ff, unit: ending}
+  - {addr: 0x8006faf8, size: 72, name: ending_opcode_end, hash: 5abc662795697b2e, unit: ending}
+  - {addr: 0x8006fb40, size: 548, name: ending_opcode_create_positioned_text, hash: 79ffee469a0e46ff, unit: ending}
   - {addr: 0x8006fd64, size: 56, name: ending_opcode_set_scroll_speed, hash: 022baf84860eb042, unit: ending}
-  - {addr: 0x8006fd9c, size: 68, name: ending_opcode_start_overlay_fade_out, hash: 8b4cecdc94072c05, unit: ending}
-  - {addr: 0x8006fde0, size: 68, name: ending_opcode_start_overlay_fade_in, hash: 6c979a6c306bfedc, unit: ending}
+  - {addr: 0x8006fd9c, size: 68, name: ending_opcode_start_screen_fade_in, hash: 8b4cecdc94072c05, unit: ending}
+  - {addr: 0x8006fde0, size: 68, name: ending_opcode_start_screen_fade_out, hash: 6c979a6c306bfedc, unit: ending}
   - {addr: 0x8006fe24, size: 144, name: ending_opcode_wait_frames, hash: 8db29caed7e75f80, unit: ending}
   - {addr: 0x8006feb4, size: 128, name: ending_opcode_wait_for_scroll, hash: 970c9c390ea7fcc4, unit: ending}
   - {addr: 0x8006ff34, size: 176, name: ending_opcode_start_xa_audio, hash: aeffca5ff068f70b, unit: ending}
-  - {addr: 0x8006ffe4, size: 60, name: ending_opcode_start_sound_fade_in, hash: 721878b86ef21ca2, unit: ending}
-  - {addr: 0x80070020, size: 60, name: ending_opcode_start_sound_fade_out, hash: 814bce2be3c9e22d, unit: ending}
+  - {addr: 0x8006ffe4, size: 60, name: ending_opcode_start_audio_fade_in, hash: 721878b86ef21ca2, unit: ending}
+  - {addr: 0x80070020, size: 60, name: ending_opcode_start_audio_fade_out, hash: 814bce2be3c9e22d, unit: ending}
   - {addr: 0x8007005c, size: 164, name: ending_opcode_stop_xa_audio, hash: 0c8b8bcfc224018a, unit: ending}
   - {addr: 0x80070100, size: 96, name: ending_opcode_load_opntex_frame, hash: 5841d3ac770689b8, unit: ending}
   - {addr: 0x80070160, size: 76, name: ending_opcode_start_opntex_fade_in, hash: f38fc77944fcfc9e, unit: ending}

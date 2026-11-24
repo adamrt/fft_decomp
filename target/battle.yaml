@@ -2423,7 +2423,7 @@ data:
   - {addr: 0x80165f98, name: g_threads}
   - {addr: 0x80165f9c, name: g_script_variables}
   - {addr: 0x80165fa0, name: g_menu_window_text_pen}
-  - {addr: 0x80165fb0, name: g_script_opcode_dc_value}
+  - {addr: 0x80165fb0, name: g_script_unknown_dc_value}
   - {addr: 0x80165fb4, name: g_sound_pending_sfx_id}
   - {addr: 0x80165fb8, name: g_sound_music_set_track_request}
   - {addr: 0x80165fbc, name: g_sound_suppressed}
