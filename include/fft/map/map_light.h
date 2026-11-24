@@ -78,7 +78,7 @@ typedef enum map_light_back_color_command {
 
 /* Only SET/GET define a result (stored RGB pointer, or null for SET while
  * disabled). Other command paths leave the target return register unspecified. */
-s32* map_light_dispatch_back_color_command(s32 command, s32 red, s32 green, s32 blue);
+s32* map_light_dispatch_back_color_command(s32 command, s32 r, s32 g, s32 b);
 
 /* script lighting */
 void map_light_reset_script_light(void);

@@ -384,11 +384,11 @@ typedef enum rain_phase {
     WEATHER_RAIN_SPLASH_HIDDEN = 2
 } rain_phase_e;
 
-/* Current and saved GTE background colors are three adjacent 32-bit channels. */
+/* The current and saved GTE back color, one 32-bit channel each as SetBackColor takes them. */
 typedef struct back_color {
-    s32 red;
-    s32 green;
-    s32 blue;
+    s32 r;
+    s32 g;
+    s32 b;
 } back_color_t;
 typedef char back_color_size_must_be_12[sizeof(back_color_t) == 12 ? 1 : -1];
 
@@ -611,7 +611,7 @@ static void set_light_matrices(MATRIX* first, MATRIX* second) {
  *
  * DISABLE, RESTORE and a command with no case return the unset `result`. Every
  * caller issues SET and ignores the result. */
-s32* map_light_dispatch_back_color_command(s32 command, s32 value_1, s32 value_2, s32 value_3) {
+s32* map_light_dispatch_back_color_command(s32 command, s32 r, s32 g, s32 b) {
     /* Left unset on the DISABLE, RESTORE and default paths. */
     s32* result;
 
@@ -622,22 +622,22 @@ s32* map_light_dispatch_back_color_command(s32 command, s32 value_1, s32 value_2
         if (g_map_back_color_disabled == 1) {
             return 0;
         }
-        stored_values = &g_map_back_color.red;
-        *stored_values = value_1;
-        g_map_back_color.green = value_2;
-        g_map_back_color.blue = value_3;
-        SetBackColor(value_1, value_2, value_3);
+        stored_values = &g_map_back_color.r;
+        *stored_values = r;
+        g_map_back_color.g = g;
+        g_map_back_color.b = b;
+        SetBackColor(r, g, b);
         return stored_values;
     }
     case MAP_LIGHT_BACK_COLOR_GET:
-        result = &g_map_back_color.red;
+        result = &g_map_back_color.r;
         break;
     case MAP_LIGHT_BACK_COLOR_DISABLE:
         SetBackColor(0, 0, 0);
         g_map_back_color_disabled = 1;
         return result;
     case MAP_LIGHT_BACK_COLOR_RESTORE:
-        SetBackColor(g_map_back_color.red, g_map_back_color.green, g_map_back_color.blue);
+        SetBackColor(g_map_back_color.r, g_map_back_color.g, g_map_back_color.b);
         g_map_back_color_disabled = 0;
         return result;
     }
@@ -784,27 +784,27 @@ void* map_light_dispatch_command(map_light_command_e command, void* data) {
             = g_map_saved_background_gradient_second;
         break;
     case MAP_LIGHT_COMMAND_SET_AMBIENT_COLOR:
-        g_map_back_color.red = ((CVECTOR*)data)->r;
-        g_map_back_color.green = ((CVECTOR*)data)->g;
-        g_map_back_color.blue = ((CVECTOR*)data)->b;
-        SetBackColor(g_map_back_color.red, g_map_back_color.green, g_map_back_color.blue);
+        g_map_back_color.r = ((CVECTOR*)data)->r;
+        g_map_back_color.g = ((CVECTOR*)data)->g;
+        g_map_back_color.b = ((CVECTOR*)data)->b;
+        SetBackColor(g_map_back_color.r, g_map_back_color.g, g_map_back_color.b);
         break;
     case MAP_LIGHT_COMMAND_SAVE_AMBIENT_COLOR:
-        g_map_saved_back_color.red = g_map_back_color.red;
-        g_map_saved_back_color.green = g_map_back_color.green;
-        g_map_saved_back_color.blue = g_map_back_color.blue;
+        g_map_saved_back_color.r = g_map_back_color.r;
+        g_map_saved_back_color.g = g_map_back_color.g;
+        g_map_saved_back_color.b = g_map_back_color.b;
         break;
     case MAP_LIGHT_COMMAND_RESTORE_AMBIENT_COLOR:
-        g_map_back_color.red = g_map_saved_back_color.red;
-        g_map_back_color.green = g_map_saved_back_color.green;
-        g_map_back_color.blue = g_map_saved_back_color.blue;
+        g_map_back_color.r = g_map_saved_back_color.r;
+        g_map_back_color.g = g_map_saved_back_color.g;
+        g_map_back_color.b = g_map_saved_back_color.b;
         break;
     case MAP_LIGHT_COMMAND_GET_AMBIENT_COLOR: {
         CVECTOR* color = &g_map_cached_back_color;
 
-        color->r = g_map_back_color.red;
-        g_map_cached_back_color.g = g_map_back_color.green;
-        g_map_cached_back_color.b = g_map_back_color.blue;
+        color->r = g_map_back_color.r;
+        g_map_cached_back_color.g = g_map_back_color.g;
+        g_map_cached_back_color.b = g_map_back_color.b;
         result = color;
         break;
     }
@@ -921,7 +921,7 @@ void map_draw(MATRIX* camera) {
         }
         if (s_weather_lightning_state.timer == 0x39 || s_weather_lightning_state.timer == 0x33) {
             SetColorMatrix(&s_weather_lightning_state.color_matrices[0]);
-            SetBackColor(g_map_back_color.red, g_map_back_color.green, g_map_back_color.blue);
+            SetBackColor(g_map_back_color.r, g_map_back_color.g, g_map_back_color.b);
         }
     }
 
@@ -2341,7 +2341,7 @@ void weather_dispatch_command(u8 command) {
     case WEATHER_COMMAND_RESTORE_LIGHTING:
         map_light_dispatch_command(MAP_LIGHT_COMMAND_RESTORE_BACKGROUND_GRADIENT, 0);
         SetColorMatrix(s_weather_lightning_state.color_matrices);
-        SetBackColor(g_map_back_color.red, g_map_back_color.green, g_map_back_color.blue);
+        SetBackColor(g_map_back_color.r, g_map_back_color.g, g_map_back_color.b);
         break;
     case WEATHER_COMMAND_APPLY_SCRIPT_WEATHER:
         weather = script_variable_get(SCRIPT_VAR_WEATHER);
