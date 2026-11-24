@@ -34,7 +34,7 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-extern u8 g_menu_screen_text_shop_menu_labels_data[];
+extern u8 g_menu_screen_text_shop_menu_labels_data[240];
 extern menu_entry_t g_shop_main_menu_thread_data;
 extern u8 g_shop_background_visible;
 

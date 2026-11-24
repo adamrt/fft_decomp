@@ -32,7 +32,7 @@ extern u8 g_terrain_tile_info_pairs[64][2];
 /* Set while a menu thread forces event speed 2; the previous speed is saved. */
 extern u16 g_menu_vsync_interval_forced;
 extern u16 g_menu_saved_vsync_interval;
-extern u8 g_text_glyph_bitmaps[];
+extern u8 g_text_glyph_bitmaps[2200 * TEXT_GLYPH_BYTES]; /* EVENT/FONT.BIN's 2200 glyphs */
 static void store_selected_tile_data(void);
 
 /* Reset the menu library for a battle's setup: subsystem pointers, palette and text, the

@@ -14,7 +14,7 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-extern u16 g_map_palette_modified_colors[][MAP_CLUT_ROW_COLOR_COUNT];
+extern u16 g_map_palette_modified_colors[MAP_CLUT_ROW_COUNT][MAP_CLUT_ROW_COLOR_COUNT];
 
 /* [map_clut_row_e][color] */
 

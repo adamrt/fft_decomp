@@ -114,8 +114,8 @@ extern u8 g_save_write_unread_flag;
 /* WORLD slot list */
 /* Encoded captions addressed directly by build_slot_description,
  * immediately after the 15 save-file pointers at g_save_file_names. */
-extern u8 g_save_slot_text_table[];
-extern s16 g_save_slot_description_row_ids[];
+extern u8 g_save_slot_text_table[248];
+extern s16 g_save_slot_description_row_ids[4];
 extern menu_draw_number_command_t g_save_slot_number_command;
 extern menu_draw_number_command_t g_save_playtime_hours_command;
 extern menu_draw_number_command_t g_save_playtime_minutes_command;

@@ -28,7 +28,7 @@
 extern s16 g_formation_ability_category;
 
 /* menu_ability_category_e */
-extern s16 g_formation_ability_learn_job_name_list[];
+extern s16 g_formation_ability_learn_job_name_list[2]; /* one job name, then -1 */
 extern menu_entry_t g_formation_ability_learn_confirm_menu[2];
 
 /* Nonzero while the learn-confirmation menu thread (thread 6) is running. */
@@ -37,7 +37,7 @@ extern s8 g_formation_ability_view_step;
 
 /* menu_job_list_step_e */
 extern u8 g_formation_ability_view_confirm_prompt_state;
-extern s16 g_formation_ability_view_job_names[];
+extern s16 g_formation_ability_view_job_names[2]; /* one job name, then -1 */
 
 /* Byte-aligned display streams; each extent includes the terminating opcode. */
 extern u8 g_formation_ability_list_script[493];

@@ -22,7 +22,7 @@
 #include "psx/types.h"
 
 /* scrolling-list state */
-extern menu_list_page_t g_formation_ability_list_pages[][2];
+extern menu_list_page_t g_formation_ability_list_pages[THREAD_ID_COUNT][2];
 extern s32 g_menu_screen_scrolling_list_depth;
 
 /*

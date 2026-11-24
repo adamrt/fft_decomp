@@ -20,9 +20,9 @@
 
 /* sound_sfx_e by the weapon's item_type_e (0x20 entries each): the swing, the
  * hit, and the hit a shield or Golem stops (action_play_weapon_sfx). */
-extern u8 g_action_weapon_swing_sfx_ids[];
-extern u8 g_action_weapon_hit_sfx_ids[];
-extern u8 g_action_shield_deflect_sfx_ids[];
+extern u8 g_action_weapon_swing_sfx_ids[ITEM_TYPE_SHURIKEN];
+extern u8 g_action_weapon_hit_sfx_ids[ITEM_TYPE_SHURIKEN];
+extern u8 g_action_shield_deflect_sfx_ids[ITEM_TYPE_SHURIKEN];
 extern clut_t g_sprite_weapon_clut;
 
 /* Two animation_e for each set: the one that starts a charge and
@@ -32,7 +32,7 @@ static u8 s_animation_ability_charge_sets[ANIMATION_CHARGE_SET_COUNT][ANIMATION_
           0x2a, 0x22, 0x2a, 0x2b, 0x2a, 0x22, 0, 0x28, 0, 0x29, 0, 0x75, 0x2a, 0x2b, 0, 0x16, 0, 0x22, 0, 0 };
 
 /* Three animation_e variants per item_type_e; animation_select_weapon_attack chooses the column. */
-extern u8 g_animation_weapon_attacks[][3];
+extern u8 g_animation_weapon_attacks[ITEM_TYPE_SHURIKEN][3];
 
 /* Play the weapon swing sound (`hit` 0) or the sound of each strike target's
  * outcome (`hit` 1).

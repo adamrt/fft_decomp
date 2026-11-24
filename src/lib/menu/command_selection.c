@@ -30,8 +30,8 @@ typedef enum menu_math_skill_list {
     MENU_MATH_SKILL_LIST_ATTRIBUTES = 2 /* skillset_load_math_attributes */
 } menu_math_skill_list_e;
 
-extern s16 g_command_skillset_row_actions[];
-extern u8 g_command_skillset_disabled_flags[]; /* per-row grayed flag */
+extern s16 g_command_skillset_row_actions[12];
+extern u8 g_command_skillset_disabled_flags[6]; /* per-row grayed flag */
 static s16 s_command_action_slot_selected_option;
 
 /* The selected row and scroll position of an ability list. */

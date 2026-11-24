@@ -25,7 +25,7 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-extern u8 g_menu_screen_text_name_entry_keys_data[];
+extern u8 g_menu_screen_text_name_entry_keys_data[8];
 
 /* screen */
 typedef enum name_entry_state {
@@ -57,13 +57,13 @@ typedef enum name_entry_key {
     NAME_ENTRY_KEY_CURSOR_RIGHT = -5
 } name_entry_key_e;
 
-extern s16 g_name_entry_text_row_ids[];
-extern u8 g_name_entry_character_rows[];
-extern s16 g_name_entry_key_codes[];
-extern s16 g_name_entry_key_ids[];
-extern u8 g_name_entry_char_to_special_column[];
-extern u8 g_name_entry_special_to_char_column[];
-extern u8 g_name_entry_cursor_x_positions[];
+extern s16 g_name_entry_text_row_ids[2];
+extern u8 g_name_entry_character_rows[82];
+extern s16 g_name_entry_key_codes[5]; /* special key 5 opens the confirmation instead */
+extern s16 g_name_entry_key_ids[10];
+extern u8 g_name_entry_char_to_special_column[11];
+extern u8 g_name_entry_special_to_char_column[6];
+extern u8 g_name_entry_cursor_x_positions[6];
 extern u8 g_name_entry_cursor;
 extern u8 g_name_entry_cursor_index;
 extern u8 g_name_entry_list_cursor;

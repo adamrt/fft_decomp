@@ -43,8 +43,8 @@ extern rgb24_t g_formation_saved_sprite_color;
 extern rgb24_t g_formation_normal_sprite_color;
 extern oriented_quad_t g_formation_label_leaving;
 extern oriented_quad_t g_formation_label_missing;
-extern menu_sprite_cell_t g_formation_label_tiles[];
-extern menu_sprite_cell_t g_formation_label_tiles_bottom[];
+extern menu_sprite_cell_t g_formation_label_tiles[8];
+extern menu_sprite_cell_t g_formation_label_tiles_bottom[8];
 extern u8 g_formation_grid_transition_frame;
 extern u8 g_formation_grid_return_frame;
 extern u8 g_formation_grid_return_done;
@@ -69,10 +69,10 @@ extern u16 g_menu_screen_hp_gauge_clut;
 extern u16 g_menu_screen_mp_gauge_clut;
 extern u16 g_menu_screen_ct_gauge_clut;
 extern u16 g_menu_screen_background_clut;
-extern menu_button_piece_t g_menu_screen_button_pieces[];
+extern menu_button_piece_t g_menu_screen_button_pieces[76]; /* g_menu_button_piece_starts ends at 76 */
 
 /* Per-piece 4.12 fixed-point x/y scale; a negative factor flips that axis. */
-extern point16_t g_menu_screen_button_piece_scales[];
+extern point16_t g_menu_screen_button_piece_scales[76];
 
 /* Screen x and texture u of one background tile; two alternating rows of four. */
 typedef struct background_tile {

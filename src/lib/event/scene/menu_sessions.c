@@ -27,7 +27,7 @@
 
 extern u16 g_unit_view_cached_battle_unit_id;
 extern u16 g_unit_view_cached_comparison_id;
-extern u8 g_menu_panel_fade_modes[];
+extern u8 g_menu_panel_fade_modes[UNIT_VIEW_MODE_NUMERIC_SUMMARY + 1];
 
 /* Desired threads for one unit-view mode: four native entrypoints, scheduler slots, and task IDs.
  * UNIT_VIEW_NO_THREAD leaves that slot stopped after any previous task exits. */

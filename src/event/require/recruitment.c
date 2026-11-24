@@ -35,7 +35,7 @@
 extern s32 g_unit_panel_status_display_origin_x;
 extern s32 g_unit_panel_character_status_origin_x;
 extern s32 g_unit_panel_numbers_origin_x;
-extern u8 g_party_removable_flags[];
+extern u8 g_party_removable_flags[PARTY_ROSTER_SLOT_COUNT];
 extern RECT g_party_portrait_move_rect;
 extern s16 g_party_portrait_destination;
 extern RECT g_party_palette_move_rect;

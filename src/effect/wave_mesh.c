@@ -16,7 +16,7 @@
 
 /* Overlay-local vertex brightness rows (12-bit fixed): brightness_row selects
  * the row, the quad row (0-8) the column. */
-extern u32 g_effect_wave_mesh_brightness_table[][9];
+extern u32 g_effect_wave_mesh_brightness_table[7][9];
 
 /* Work block of the 8x8 wave mesh, allocated in phase 1. The four wave phases
  * are 4096-per-turn angles; the emitter record's spawn spread (x, y) and

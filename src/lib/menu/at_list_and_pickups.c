@@ -31,7 +31,7 @@ typedef enum crystal_pickup_entry {
 
 extern menu_entry_t g_crystal_pickup_menu[MENU_CRYSTAL_PICKUP_ENTRY_COUNT];
 extern menu_text_layout_t g_crystal_pickup_list_layout;
-extern s16 g_crystal_pickup_row_colors[];
+extern s16 g_crystal_pickup_row_colors[512];
 extern u32* g_crystal_pickup_controller_input;
 extern s16 g_crystal_pickup_menu_result;
 extern s16 g_crystal_pickup_choice_result;
@@ -44,9 +44,9 @@ extern menu_entry_t g_at_list_state;
 extern menu_text_layout_t g_at_list_entry_table;
 extern u8 g_at_list_text[];
 extern s16 g_at_list_indices[];
-extern s16 g_at_list_primary_text_ids[];
+extern s16 g_at_list_primary_text_ids[512];
 extern s16 g_at_list_secondary_text_ids[];
-extern s16 g_at_list_row_text_colors[];
+extern s16 g_at_list_row_text_colors[256];
 
 /* Give other event work one turn before terminating this thread. */
 void thread_stop_after_yield(void) {

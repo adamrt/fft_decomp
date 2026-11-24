@@ -24,19 +24,19 @@
 #include "psx/types.h"
 
 /* Overlay load bookkeeping and disc tables. */
-extern s32 g_overlay_companion_executable_lbas[];
-extern s32 g_overlay_companion_executable_sizes[];
-extern s32 g_overlay_companion_executable_offsets[];
+extern s32 g_overlay_companion_executable_lbas[COMPANION_OVERLAY_BUNIT_SECOND_HALF + 1];
+extern s32 g_overlay_companion_executable_sizes[COMPANION_OVERLAY_BUNIT_SECOND_HALF + 1];
+extern s32 g_overlay_companion_executable_offsets[COMPANION_OVERLAY_BUNIT_SECOND_HALF + 1];
 extern s32 g_overlay_companion_data_file_request_index;
 static s32 s_overlay_companion_data_file_loading;
 static s32 s_overlay_companion_executable_loading;
-extern s32 g_overlay_companion_data_file_lbas[];
-extern s32 g_overlay_companion_data_file_sizes[];
+extern s32 g_overlay_companion_data_file_lbas[16];
+extern s32 g_overlay_companion_data_file_sizes[16];
 extern u8* g_overlay_companion_data_file_buffer;
 
 /* Menu threads and panel rendering. */
 extern s32 g_menu_building_thread_started;
-extern u8 g_menu_idle_action_window_x[];
+extern u8 g_menu_idle_action_window_x[56 * 2]; /* two bytes per g_command_idle_action_entries entry */
 extern u8 g_command_restore_unit_id;
 
 /* Non-blocking two-step file load driven by g_thread_call_target:

@@ -26,7 +26,7 @@ extern u16 g_menu_screen_texture_page;
 extern s16 g_menu_screen_row_height;
 extern s32 g_menu_screen_scroll_row_offset;
 extern textured_quad_source_t g_menu_screen_vertical_cursor_quad;
-extern s16 g_menu_screen_list_row_text_ids[];
+extern s16 g_menu_screen_list_row_text_ids[2];
 extern s16 g_menu_screen_list_visible_rows;
 extern s16 g_menu_screen_list_row_record_count;
 extern u16 g_menu_screen_list_image_width;

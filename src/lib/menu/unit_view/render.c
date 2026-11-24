@@ -44,6 +44,7 @@ typedef struct menu_quad_colors {
     u32 _unused_00;
     CVECTOR vertex[4]; /* 0x04; one color per POLY_GT4 corner */
 } menu_quad_colors_t;
+typedef char menu_quad_colors_size_must_be_20[sizeof(menu_quad_colors_t) == 20 ? 1 : -1];
 
 /* One of the two 0x144-byte packet pages of the display (g_unit_view_height_display_pages): five Gouraud textured
  * quads, two sprites and the two draw-mode packets that select their texture windows. Provisional. */
@@ -147,19 +148,19 @@ static unit_view_stats_page_t s_unit_view_stats_panel_pages[8];
 extern u16 g_unit_view_hovered_stats_frame_count;
 extern u8 g_unit_view_stats_first_page_by_mode[4];
 extern u16 g_unit_view_stats_bounce_step;
-extern u16 g_unit_view_stats_bounce_offsets[];
-extern CVECTOR g_unit_view_stats_gauge_colors[];
-extern image_layout_t g_unit_view_stats_icon_image_params[];
-extern u16 g_unit_view_stats_quad_clut_pairs[][2];
-extern image_layout_t* g_unit_view_stats_quad_image_params_by_mode[];
-extern u16 g_unit_view_stats_sprite_clut_pairs[][2];
-extern image_layout_t* g_unit_view_stats_sprite_image_params_by_mode[];
+extern u16 g_unit_view_stats_bounce_offsets[13];              /* steps 1-0xB read; symmetric, 0 at both ends */
+extern CVECTOR g_unit_view_stats_gauge_colors[12];            /* four corners for each of the three bars */
+extern image_layout_t g_unit_view_stats_icon_image_params[4]; /* by team_kind */
+extern u16 g_unit_view_stats_quad_clut_pairs[4][2];
+extern image_layout_t* g_unit_view_stats_quad_image_params_by_mode[4]; /* by unit_stats_panel_e */
+extern u16 g_unit_view_stats_sprite_clut_pairs[7][2];
+extern image_layout_t* g_unit_view_stats_sprite_image_params_by_mode[4]; /* by unit_stats_panel_e */
 
 /* unit summary */
 extern RECT g_unit_view_summary_panel_rect;
 extern menu_unit_number_images_t g_unit_view_summary_digit_images;
 extern menu_numeric_frame_slot_t g_unit_view_summary_numeric_frames[];
-extern image_layout_t g_unit_view_summary_sprite_image_params[];
+extern image_layout_t g_unit_view_summary_sprite_image_params[7];
 extern image_layout_t g_unit_view_summary_portrait_image_params;
 
 static s32 display_action_preview(POLY_FT4* unused_primitive, const point16_t* unused_base_load,

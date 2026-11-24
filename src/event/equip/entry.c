@@ -17,7 +17,7 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-extern s16 g_equipment_unit_initial_equipment[];
+extern s16 g_equipment_unit_initial_equipment[5];
 static u8 s_equipment_text_restore_pending;
 
 /* Start the item numeric panel thread when `enable` is set and the thread is

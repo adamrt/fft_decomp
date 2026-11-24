@@ -26,8 +26,8 @@ static s8 s_equipment_slot_item_browser_initialized;
 
 /* List index whose stat preview was last built; -1 forces a rebuild. */
 extern s8 g_equipment_slot_item_browser_previewed_index;
-extern s8 g_equipment_substate; /* menu_item_list_state_e */
-extern u8 g_equipment_status_label_image[];
+extern s8 g_equipment_substate;                        /* menu_item_list_state_e */
+extern u8 g_equipment_status_label_image[64 * 2 * 11]; /* its RECT: 64 x 11 halfwords */
 extern RECT g_equipment_status_label_image_rect;
 
 /* Byte-aligned display streams, including the terminating opcode. */

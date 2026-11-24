@@ -8,8 +8,8 @@
 #include "psx/gte_inline.h"
 #include "psx/types.h"
 
-extern file_extent_t g_sprite_sp2_files[];
-extern file_extent_t g_sprite_worker8_sp2_files[];
+extern file_extent_t g_sprite_sp2_files[SPRITE_SHEET_ID_COUNT];
+extern file_extent_t g_sprite_worker8_sp2_files[4];
 
 static s32 s_sprite_compressed_nibble_phase;
 static s32 s_sprite_compressed_offset;

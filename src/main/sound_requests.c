@@ -9,9 +9,9 @@
 #include "psx/libetc.h"
 #include "psx/types.h"
 
-extern u8 g_sound_system_sed_data[];
-extern u8 g_sound_env_sed_data[];
-static s32 s_sound_background_sfx_id; /* the background sound sound_play_background started, 0 for none */
+extern u8 g_sound_system_sed_data[0x2400]; /* SYSTEM_SED_SIZE less the 0x400 its last sector overruns */
+extern u8 g_sound_env_sed_data[0xc00];     /* ENV_SED_SIZE less the 0x400 the last sector spills */
+static s32 s_sound_background_sfx_id;      /* the background sound sound_play_background started, 0 for none */
 
 /* Scenario-music playback state. current_music is the Suzuki music record of
  * the playing scenario music: music_stop hands it straight

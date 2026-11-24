@@ -12,7 +12,7 @@
 
 /* Status image rectangles, indexed by status id, that item_list_draw_status_list draws in the item detail panel's
  * status column. */
-extern RECT g_unit_panel_status_display_image_rects[];
+extern RECT g_unit_panel_status_display_image_rects[STATUS_COUNT];
 
 /* Draw the item detail panel's status column: immunity icons, then the
  * innate/starting status icons.

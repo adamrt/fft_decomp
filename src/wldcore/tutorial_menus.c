@@ -28,6 +28,7 @@ typedef struct tutorial_progress_masks {
     u32 formation; /* the formation tutorials */
     u32 battle;    /* the battle tutorials */
 } tutorial_progress_masks_t;
+typedef char tutorial_progress_masks_size_must_be_8[(sizeof(tutorial_progress_masks_t) == 8) ? 1 : -1];
 
 extern tutorial_progress_masks_t g_tutorial_progress_masks;
 

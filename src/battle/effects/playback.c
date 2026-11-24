@@ -65,7 +65,7 @@ extern struct suzuki_sound_resource* g_effect_sound_section_ptr;
 extern s32 g_effect_sound_data_base;
 
 /* Per-channel call counts. */
-extern u8 g_effect_sound_call_counts[];
+extern u8 g_effect_sound_call_counts[4];
 
 extern effect_palette_section_t* g_effect_palette_ptr;
 extern const u8* g_effect_script;
@@ -77,7 +77,7 @@ extern u8 g_effect_secondary_charge_id;
 
 /* Secondary-animation id per charge animation set, indexed by the low 16 bits of the
  * caller's packed argument. */
-extern u8 g_effect_secondary_by_charge_animation[];
+extern u8 g_effect_secondary_by_charge_animation[ANIMATION_CHARGE_SET_COUNT];
 
 /* Ability effect loading and playback. */
 extern u32 g_heap_battle_end_address;

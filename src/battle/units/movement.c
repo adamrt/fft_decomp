@@ -23,7 +23,6 @@ extern u8 g_move_step_destination_edge_height;
 extern s16 g_move_step_target_world_y;
 
 /* move_step_phase_e by step direction: the phase each kind of step enters. */
-extern u8 g_move_step_float_to_center_phases[];
 
 /* The two map tiles of the step in progress, refreshed by get_step_tiles
  * from the unit's movement value. Step starters receive the tile pointers; the geometry readers use the
@@ -37,6 +36,7 @@ extern map_unit_t* g_move_step_tile_occupant;
 extern unit_height_data_t g_move_step_tile_occupant_height;
 static s32 s_move_displacement_direction;
 
+static u8 s_move_step_float_to_center_phases[4] = { 0x2c, 0x30, 0x34, 0x38 };
 static u8 s_walk_to_center_phases[4] = { MOVE_STEP_PHASE_WALK_TO_CENTER_SOUTH, MOVE_STEP_PHASE_WALK_TO_CENTER_EAST,
     MOVE_STEP_PHASE_WALK_TO_CENTER_NORTH, MOVE_STEP_PHASE_WALK_TO_CENTER_WEST };
 
@@ -2090,7 +2090,7 @@ static void update_float_to_edge_phase(map_unit_t* unit) {
             + g_move_step_destination_tile->depth_half_height.half_height * unit->destination_edge_scale;
         if (g_move_step_current_edge_height + 1 >= g_move_step_destination_edge_height) {
             start_float(unit, g_move_step_current_tile, g_move_step_destination_tile);
-            unit->step_phase = g_move_step_float_to_center_phases[direction];
+            unit->step_phase = s_move_step_float_to_center_phases[direction];
         } else {
             unit->step_speed = 0x2000;
             start_float_jump(unit, g_move_step_current_tile, g_move_step_destination_tile);
@@ -2149,7 +2149,7 @@ static void update_float_jump_phase(map_unit_t* unit) {
         if (unit->world_coords.vy >= (s16)map_unit_calculate_height_from_world_coords(unit)) {
             unit->velocity.vy = 0;
             start_float(unit, g_move_step_current_tile, g_move_step_destination_tile);
-            unit->step_phase = g_move_step_float_to_center_phases[direction];
+            unit->step_phase = s_move_step_float_to_center_phases[direction];
         }
     }
 }

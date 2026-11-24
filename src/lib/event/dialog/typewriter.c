@@ -21,9 +21,9 @@
 
 s32 g_text_slot_owner_thread_ids[3];
 s32 g_text_slot_glyph_counts[3];
+static u8 s_text_slot_source_columns[3];
 extern s32 g_text_glyphs_per_wait;
-extern u8 g_text_slot_source_columns[];
-extern u8 g_text_slot_row_pitches[];
+extern u8 g_text_slot_row_pitches[3];
 
 /* Typed views for this scanner; each expansion re-reads the event-block base. */
 #define DISPLAY_MESSAGE_INSTRUCTION_AT(base, offset) ((event_display_message_instruction_t*)((base) + (offset)))
@@ -232,7 +232,7 @@ void message_draw_glyph_timed(s32 pen_x, s32 pen_y, s32 delay) {
                     if (g_text_slot_owner_thread_ids[row] == 0) {
                         slot = row;
                         g_text_slot_owner_thread_ids[row] = g_thread_current_id;
-                        g_text_slot_source_columns[slot] = 0;
+                        s_text_slot_source_columns[slot] = 0;
                         g_text_slot_row_pitches[slot] = 0;
                         break;
                     }
@@ -280,7 +280,7 @@ void message_draw_glyph_timed(s32 pen_x, s32 pen_y, s32 delay) {
             for (i = 0; i < 14; i++) {
                 j = offset / 2;
                 offset += g_text_slot_row_pitches[slot];
-                s_message_typewriter_column_scratch[i] = (previous + j)[g_text_slot_source_columns[slot]];
+                s_message_typewriter_column_scratch[i] = (previous + j)[s_text_slot_source_columns[slot]];
             }
             for (i = 0; i < 14; i++) {
                 image[i * pitch / 2] = s_message_typewriter_column_scratch[i];
@@ -291,17 +291,17 @@ void message_draw_glyph_timed(s32 pen_x, s32 pen_y, s32 delay) {
         next_glyph = request->glyph;
         next_kind = g_text_glyph_widths[next_glyph];
         if (next_kind == 4 || next_glyph == TEXT_SPACE) {
-            g_text_slot_source_columns[slot] = phase == 2 ? 2 : 1;
+            s_text_slot_source_columns[slot] = phase == 2 ? 2 : 1;
         } else if (next_kind == 2) {
             if (phase == 2) {
-                g_text_slot_source_columns[slot] = 1;
+                s_text_slot_source_columns[slot] = 1;
             } else {
-                g_text_slot_source_columns[slot] = 0;
+                s_text_slot_source_columns[slot] = 0;
             }
         } else if (next_kind == 6) {
-            g_text_slot_source_columns[slot] = phase == 2 ? 3 : 2;
+            s_text_slot_source_columns[slot] = phase == 2 ? 3 : 2;
         } else {
-            g_text_slot_source_columns[slot] = phase == 2 ? 5 : 4;
+            s_text_slot_source_columns[slot] = phase == 2 ? 5 : 4;
         }
         g_text_slot_row_pitches[slot] = pitch;
 

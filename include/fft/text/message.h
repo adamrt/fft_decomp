@@ -59,7 +59,7 @@ typedef enum message_block {
     MESSAGE_BLOCK_PROPOSITION_REPORT_FIRST = 16 /* one block per proposition id */
 } message_block_e;
 
-extern s32 g_message_block_loaded; /* the block in g_message_block_buffer */
+extern s32 g_message_block_loaded; /* the block in s_message_block_buffer */
 
 void message_load_block_if_changed(s32 block);
 

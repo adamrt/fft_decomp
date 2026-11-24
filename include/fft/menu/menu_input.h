@@ -88,6 +88,7 @@ typedef struct menu_input_timing_profile {
     u8 scroll_slow_step;   /* copied to g_menu_scroll_slow_step */
     u8 scroll_fast_step;   /* copied to g_menu_scroll_fast_step */
 } menu_input_timing_profile_t;
+typedef char menu_input_timing_profile_size_must_be_6[(sizeof(menu_input_timing_profile_t) == 6) ? 1 : -1];
 
 extern u8 g_menu_scroll_accel_delay;
 extern u8 g_menu_scroll_slow_step;
@@ -115,6 +116,7 @@ typedef struct menu_button_piece {
     u16 x_offset; /* 0x08 */
     u16 y_offset; /* 0x0a */
 } menu_button_piece_t;
+typedef char menu_button_piece_size_must_be_12[(sizeof(menu_button_piece_t) == 12) ? 1 : -1];
 
 extern u16 g_menu_button_clut;
 

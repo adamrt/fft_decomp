@@ -6,7 +6,7 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-extern u16 g_menu_screen_draw_area_scale_percent[];
+extern u16 g_menu_screen_draw_area_scale_percent[12];
 
 /*
  * WORLD's copy of menu_build_scaled_draw_area_packets, beside its copy of the OPTION.OUT list

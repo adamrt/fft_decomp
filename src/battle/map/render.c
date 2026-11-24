@@ -136,9 +136,9 @@ extern CVECTOR g_map_cached_back_color;
 extern u8 g_map_polygon_flag_clear_countdown;
 
 /* Mesh animation streams and the currently selected part. */
-extern map_mesh_keyframe_t g_map_mesh_animation_keyframes[];
+extern map_mesh_keyframe_t g_map_mesh_animation_keyframes[129]; /* index 0 unused; parts 1-8 reach 0x80 */
 extern mesh_instruction_list_t g_map_mesh_animation_instructions[9];
-extern s32 g_map_mesh_part_animation_states[];
+extern s32 g_map_mesh_part_animation_states[9];
 extern map_texture_animation_t g_map_texture_animations[MAP_TEXTURE_ANIMATION_COUNT];
 extern s32 g_map_primary_textured_quad_count;
 extern s32 g_map_primary_textured_triangle_count;

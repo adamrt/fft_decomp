@@ -22,7 +22,7 @@
 /* RECT[1] (right panel) of g_unit_panel_equipment_origins. Kept as its own symbol: spelling it as an element lets
  * GCC derive the table base from this address and changes unit_panel_ability_thread. */
 extern RECT g_equipment_right_panel_frame_rect;
-extern unit_panel_buffer_t g_unit_panel_frames_b[];
+static unit_panel_buffer_t s_unit_panel_frames_b[2];
 
 /* Equipment panel thread (task THREAD_TASK_STATUS_PANEL): lists the five equipped item
  * names and draws their icons in a double-buffered unit_panel_buffer_t frame.
@@ -59,10 +59,10 @@ void unit_panel_equipment_thread(void) {
         u = 0;
     } else {
         text = g_unit_panel_text_image_b;
-        screen = g_unit_panel_frames_b;
+        screen = s_unit_panel_frames_b;
         state = &g_item_preview_stat_detail.state;
         upload = &g_unit_panel_text_upload_rect_b;
-        base = g_unit_panel_frames_b;
+        base = s_unit_panel_frames_b;
         u = 0x50;
     }
 
@@ -226,10 +226,10 @@ void unit_panel_ability_thread(void) {
         u = 0;
     } else {
         text = g_unit_panel_text_image_b;
-        screen = g_unit_panel_frames_b;
+        screen = s_unit_panel_frames_b;
         state = &g_item_preview_stat_detail.state;
         upload = &g_unit_panel_text_upload_rect_b;
-        base = g_unit_panel_frames_b;
+        base = s_unit_panel_frames_b;
         u = 0x50;
     }
 

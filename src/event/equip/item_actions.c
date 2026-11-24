@@ -17,17 +17,17 @@
 #include "psx/types.h"
 
 extern s8 g_equipment_type_order_ready;
-extern oriented_quad_t g_equipment_slot_marker_rects[];
+extern oriented_quad_t g_equipment_slot_marker_rects[MENU_EQUIPMENT_SLOT_COUNT];
 extern oriented_quad_t g_equipment_secondary_slot_marker;
-extern u8 g_equipment_slot_marker_x[];
+extern u8 g_equipment_slot_marker_x[MENU_EQUIPMENT_SLOT_COUNT];
 extern u8 g_equipment_item_list_has_multiple_entries;
 extern s8 g_equipment_item_action_menu_active;
 static menu_entry_t* s_equipment_item_action_active_menu;
+static s16 s_equipment_item_type_order[8]; /* a working copy of one s8[8] list in menu_sort_orders_t */
+static menu_entry_t* s_equipment_item_type_order_active_menu;
 extern menu_entry_t g_equipment_item_action_menu_single_item;
 extern s16 g_equipment_text_redraw_flag;
-extern s16 g_equipment_item_type_order[];
 extern u8 g_equipment_item_type_order_names[];
-extern menu_entry_t* g_equipment_item_type_order_active_menu;
 extern menu_entry_t g_equipment_type_order_menu_hand_body;
 extern menu_entry_t g_equipment_type_order_menu_other_slots;
 
@@ -100,8 +100,8 @@ s8 item_list_update_sort_menu(void) {
         g_text_section_pointers[TEXT_SECTION_COMPOSED_TEXT] = g_equipment_item_type_order_names;
         g_equipment_type_order_menu_hand_body.selected_index = 0;
         g_equipment_type_order_menu_other_slots.selected_index = 0;
-        item_list_load_sort_order(g_menu_selected_slot + 1, g_equipment_item_type_order);
-        for (i = 0; (names[i] = g_equipment_item_type_order[i]) != -1; i++) {
+        item_list_load_sort_order(g_menu_selected_slot + 1, s_equipment_item_type_order);
+        for (i = 0; (names[i] = s_equipment_item_type_order[i]) != -1; i++) {
             names[i] += 3;
         }
         text_concatenate_entries(g_text_data, g_equipment_item_type_order_names, names, 1);
@@ -109,13 +109,13 @@ s8 item_list_update_sort_menu(void) {
         g_equipment_type_order_ready = 1;
     }
     if (g_menu_selected_slot == MENU_EQUIPMENT_SLOT_RIGHT_HAND || g_menu_selected_slot == MENU_EQUIPMENT_SLOT_BODY) {
-        g_equipment_item_type_order_active_menu = &g_equipment_type_order_menu_hand_body;
+        s_equipment_item_type_order_active_menu = &g_equipment_type_order_menu_hand_body;
     } else {
-        g_equipment_item_type_order_active_menu = &g_equipment_type_order_menu_other_slots;
+        s_equipment_item_type_order_active_menu = &g_equipment_type_order_menu_other_slots;
     }
     /* i doubles as the help-text id (in HELP_TEXT_SECTION_MENU_COMMANDS: types 0-3 at 0x32 on,
      * 4 at 0x37, 5 at 0x39); the target reuses the same register. */
-    i = g_equipment_item_type_order[g_equipment_item_type_order_active_menu->selected_index];
+    i = s_equipment_item_type_order[s_equipment_item_type_order_active_menu->selected_index];
     if (i < 4) {
         i += 0x32;
     }
@@ -128,14 +128,14 @@ s8 item_list_update_sort_menu(void) {
     picked = g_equipment_result_rows[2]; /* type-order row picked in the sub-menu, or -1 */
     g_help_message_text_id = i + HELP_TEXT_ID_MENU_COMMAND_BASE;
     if (picked != -1) {
-        first = g_equipment_item_type_order[picked];
+        first = s_equipment_item_type_order[picked];
         for (i = picked - 1; i >= 0; i--) {
-            g_equipment_item_type_order[i + 1] = g_equipment_item_type_order[i];
+            s_equipment_item_type_order[i + 1] = s_equipment_item_type_order[i];
         }
-        g_equipment_item_type_order[0] = first;
+        s_equipment_item_type_order[0] = first;
         equipment_reset_selection_results();
-        item_list_store_sort_order(g_menu_selected_slot + 1, g_equipment_item_type_order);
-        for (i = 0; (names[i] = g_equipment_item_type_order[i]) != -1; i++) {
+        item_list_store_sort_order(g_menu_selected_slot + 1, s_equipment_item_type_order);
+        for (i = 0; (names[i] = s_equipment_item_type_order[i]) != -1; i++) {
             names[i] += 3;
         }
         text_concatenate_entries(g_text_data, g_equipment_item_type_order_names, names, 1);
@@ -152,7 +152,7 @@ s8 item_list_update_sort_menu(void) {
             &g_unit_panel_selected_unit_stat_summary, &g_item_preview_stat_detail, 0);
         g_unit_panel_preview_stats_thread_params.redraw_request = 1;
     }
-    if (menu_managed_thread_start(EQUIPMENT_THREAD_SLOT_POPUP_MENU, g_equipment_item_type_order_active_menu) == 0) {
+    if (menu_managed_thread_start(EQUIPMENT_THREAD_SLOT_POPUP_MENU, s_equipment_item_type_order_active_menu) == 0) {
         g_equipment_type_order_ready = 0;
         return MENU_ITEM_LIST_STATE_ACTION;
     }

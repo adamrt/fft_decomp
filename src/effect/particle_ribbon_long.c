@@ -21,7 +21,7 @@
 /* The long ribbon variant: 17-point trails, up to 4 per spawn. */
 enum { EFFECT_PARTICLE_RIBBON_LONG_SLOTS = 4, EFFECT_PARTICLE_RIBBON_LONG_POINTS = 17 };
 
-extern u32 g_effect_particle_ribbon_long_brightness_table[][EFFECT_PARTICLE_RIBBON_LONG_POINTS];
+extern u32 g_effect_particle_ribbon_long_brightness_table[7][EFFECT_PARTICLE_RIBBON_LONG_POINTS];
 
 /* One long ribbon: the short layout with 16 quads per buffer and a 17-point
  * trail. */

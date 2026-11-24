@@ -47,7 +47,7 @@ typedef char effect_textured_quad_grid_work_size_must_match_variant[sizeof(effec
 
 /* The overlay's vertex brightness rows (12-bit fixed): a row per brightness setting, a column per quad row edge.
  * Declared here because its width follows the build's grid size. */
-extern u32 g_effect_textured_quad_grid_brightness_table[][QUAD_GRID_SIZE + 1];
+extern u32 g_effect_textured_quad_grid_brightness_table[7][QUAD_GRID_SIZE + 1];
 
 /*
  * Phase handler for a scrolling textured quad grid.

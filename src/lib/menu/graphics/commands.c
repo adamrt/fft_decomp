@@ -12,7 +12,7 @@
 
 extern menu_sprite_command_t g_menu_script_quad_command;
 extern menu_window_command_t g_menu_window_interior_command;
-extern s16 g_gfx_window_zoom_percent[];
+extern s16 g_gfx_window_zoom_percent[4];
 
 /* Only EQUIP links the flat-tile and line instructions. */
 #ifdef FFT_EVENT_EQUIP

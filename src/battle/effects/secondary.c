@@ -222,13 +222,13 @@ extern charge_params_t g_effect_charge_line_params[2];
 
 /* Interleaved x/y offsets for eight direction sectors, then the first pair again. */
 extern s16 g_effect_charge_line_direction_offsets[18];
-extern u8 g_effect_charge_line_fade_levels[];
+extern u8 g_effect_charge_line_fade_levels[4 * EFFECT_CHARGE_LINE_FADE_STEPS];
 
 /* Spell-charge trail color of each effect_element_index_e. */
 extern rgb24_t g_effect_charge_trail_colors[EFFECT_ELEMENT_INDEX_COUNT];
 
 /* Brightness (out of 128) of each of a summon-charge ring's ten slots, newest point first. */
-extern u8 g_effect_summon_ring_brightness[];
+extern u8 g_effect_summon_ring_brightness[10];
 
 /* Six RGB byte triples, packed into both CLUT images as 15-bit colors. */
 extern rgb24_t g_effect_reflect_palette_colors[6];

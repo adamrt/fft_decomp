@@ -21,7 +21,7 @@
 /* The short ribbon variant: 9-point trails, up to 8 per spawn. */
 enum { EFFECT_PARTICLE_RIBBON_SHORT_SLOTS = 8, EFFECT_PARTICLE_RIBBON_SHORT_POINTS = 9 };
 
-extern u32 g_effect_particle_ribbon_short_brightness_table[][EFFECT_PARTICLE_RIBBON_SHORT_POINTS];
+extern u32 g_effect_particle_ribbon_short_brightness_table[6][EFFECT_PARTICLE_RIBBON_SHORT_POINTS];
 
 /* One short ribbon: a particle and the double-buffered quad strip drawn along
  * its recent path, one quad per pair of adjacent trail points. */

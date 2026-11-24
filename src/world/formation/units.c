@@ -15,7 +15,7 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-extern texture_source_t g_formation_sprite_sources[];
+extern texture_source_t g_formation_sprite_sources[84];
 
 /* Fixed character identities select sprite sources here; jobs below 0x35 use the same mapping. */
 extern u8 g_formation_sprite_index_by_identity[];

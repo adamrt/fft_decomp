@@ -75,8 +75,9 @@ extern oriented_quad_t g_unit_list_dot_sprite;
 extern oriented_quad_t g_unit_list_shadow_sprite;
 extern s8 g_unit_list_dot_glow_direction;
 extern s8 g_unit_list_dot_glow_timer;
-extern menu_button_piece_t g_unit_list_slot_sprite_entries[];
+extern menu_button_piece_t g_unit_list_slot_sprite_entries[29];
 
+static u8 s_unit_list_cursor_trail_brightness[8] = { 0x14, 0x23, 0x32, 0x41, 0x50, 0x5a, 0x64, 0x80 };
 /* SHP frame-part size codes, in their encoded order. Kept mutable because
  * const changes the original load/store scheduling in the sprite builder. */
 static sprite_size_t s_unit_list_sprite_cell_sizes[16]
@@ -84,7 +85,7 @@ static sprite_size_t s_unit_list_sprite_cell_sizes[16]
           { 32, 24 }, { 32, 32 }, { 32, 40 }, { 40, 16 }, { 40, 32 }, { 48, 48 }, { 56, 56 } };
 
 /* Signed 4.12 x/y scale pair per sprite entry; a negative scale flips the quad. */
-extern point16_t g_unit_list_button_piece_scales[];
+extern point16_t g_unit_list_button_piece_scales[30]; /* one more than the 29 pieces */
 
 /* cursor trail */
 /* Oriented-quad descriptors for the two cursor halves. */
@@ -94,7 +95,6 @@ extern oriented_quad_t g_unit_list_cursor_shadow_sprite;
 /* Rhombus-cursor trail, oldest point first; x == -1 marks an empty slot
  * (init_cursor_trail clears all eight). */
 extern point16_t g_unit_list_cursor_trail_points[8];
-extern u8 g_unit_list_cursor_trail_brightness[];
 
 /* row shading */
 extern u16 g_unit_list_gfx_background_clut;
@@ -834,7 +834,7 @@ static void init_cursor_trail(void) {
  * The newest point eases a quarter of the way toward target each frame and
  * snaps to it when the eased value's magnitude equals the previous value.
  * Each point far enough from the last drawn one is drawn as four oriented
- * quads per cursor layer, faded by g_unit_list_cursor_trail_brightness except for the newest point.
+ * quads per cursor layer, faded by s_unit_list_cursor_trail_brightness except for the newest point.
  * abs() matters: GCC expands it to the single-insn abssi2, which keeps each
  * loop body one basic block as in the target. */
 static void update_cursor_trail(point16_t* target) {
@@ -871,7 +871,7 @@ static void update_cursor_trail(point16_t* target) {
     }
     last = 1000;
     for (i = 7; i >= 0; i--) {
-        rgb.r = rgb.g = rgb.b = g_unit_list_cursor_trail_brightness[i];
+        rgb.r = rgb.g = rgb.b = s_unit_list_cursor_trail_brightness[i];
         x = g_unit_list_cursor_trail_points[i].x;
         sum = x + g_unit_list_cursor_trail_points[i].y;
         if (abs(sum - last) < 5) {

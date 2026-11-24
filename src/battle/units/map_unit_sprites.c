@@ -131,8 +131,8 @@ extern s32 g_animation_layer_priorities[24][4];
 
 /* By sprite_shp_type_e: the frame a unit is left on when its sequence ends or its attack image is taken away, seen
  * from behind and from the front. */
-extern u8 g_animation_targeted_frame_back[];
-extern u8 g_animation_targeted_frame_front[];
+extern u8 g_animation_targeted_frame_back[9]; /* one per s_shp_files entry */
+extern u8 g_animation_targeted_frame_front[9];
 
 /* Set before allocation and read acceptance: a failed request can be skipped
  * on the next step because its ID already matches. */

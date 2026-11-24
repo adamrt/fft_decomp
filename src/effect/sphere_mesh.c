@@ -20,7 +20,7 @@
 
 /* Overlay-local vertex brightness rows (12-bit fixed): brightness_row selects
  * the row, the lattice row (0-8) the column. */
-extern u32 g_effect_sphere_mesh_brightness_table[][9];
+extern u32 g_effect_sphere_mesh_brightness_table[6][9];
 
 /* Overlay-local ring scale per lattice row pair (12-bit fixed): row 4 - i and
  * row 4 + i share g_effect_sphere_mesh_ring_scales[i]. */

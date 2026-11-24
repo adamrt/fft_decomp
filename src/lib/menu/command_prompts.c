@@ -55,7 +55,6 @@ extern s32 g_command_used_item_id;
 /* Spell announcements and scenario handoff. */
 extern s32 g_script_next_event_id;
 extern s32 g_announcement_spell_quote_last_ability_id;
-extern u8 g_announcement_spell_quote_exception_skillsets[];
 
 /* Handed to the crystal pickup panel thread as its second parameter. Nothing stores to it and the thread
  * does not read the parameter. */
@@ -81,6 +80,7 @@ typedef struct request_entry {
 } request_entry_t;
 typedef char request_entry_size_must_be_20[(sizeof(request_entry_t) == 20) ? 1 : -1];
 
+static u8 s_announcement_spell_quote_exception_skillsets[8] = { 1, 2, 3, 4, 0x12, 6, 0x14, 0xff };
 /* System-menu requests: callbacks and their initial message/selection parameters. */
 static request_entry_t s_request_entries[51] = {
     { MENU_COMMAND_ID_MESSAGE_YES_NO, 0x8004, MENU_COMMAND_ID_MESSAGE, MENU_COMMAND_ID_MESSAGE_YES_NO, 1, { 0, 0 },
@@ -443,15 +443,15 @@ void command_validate_ability_thread(void) {
     thread_current_exit();
 }
 
-/* 1 when the skillset is in g_announcement_spell_quote_exception_skillsets (ended by SKILLSET_ID_NONE).
+/* 1 when the skillset is in s_announcement_spell_quote_exception_skillsets (ended by SKILLSET_ID_NONE).
  * announcement_select shows no spell quote and no ability name for such skillsets,
  * except Item and Throw, whose names still show. */
 static s32 check_quote_exception(s32 skillset_id) {
     s32 i;
     s32 found = 0;
 
-    for (i = 0; g_announcement_spell_quote_exception_skillsets[i] != SKILLSET_ID_NONE; i++) {
-        if (g_announcement_spell_quote_exception_skillsets[i] == skillset_id) {
+    for (i = 0; s_announcement_spell_quote_exception_skillsets[i] != SKILLSET_ID_NONE; i++) {
+        if (s_announcement_spell_quote_exception_skillsets[i] == skillset_id) {
             found = 1;
             break;
         }

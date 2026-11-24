@@ -21,9 +21,9 @@ extern u8 g_unit_list_thread_running;
 
 /* help cursor */
 extern help_navigation_record_t* g_unit_list_help_nodes;
-extern help_navigation_record_t g_unit_list_help_nodes_unit_browse[];
-extern help_navigation_record_t g_unit_list_help_nodes_banner_top[];
-extern help_navigation_record_t g_unit_list_help_nodes_banner_bottom[];
+extern help_navigation_record_t g_unit_list_help_nodes_unit_browse[31];
+extern help_navigation_record_t g_unit_list_help_nodes_banner_top[12];
+extern help_navigation_record_t g_unit_list_help_nodes_banner_bottom[12];
 extern u8 g_unit_list_help_node_index;
 static u16 s_unit_list_help_cursor_anim_state;
 static u8 s_unit_list_help_cursor_initialized;

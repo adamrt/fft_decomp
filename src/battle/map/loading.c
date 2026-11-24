@@ -40,7 +40,7 @@ typedef enum gns_load_phase {
 typedef enum mesh_load_state { MAP_MESH_LOAD_IDLE = 0, MAP_MESH_LOAD_WAITING = 0x8d } mesh_load_state_e;
 
 /* Pending map resources and the loader phases. */
-extern char g_map_directory_path[];
+extern char g_map_directory_path[19]; /* the 18-character GNS directory path and its NUL */
 extern map_resource_t* g_map_mesh_load_buffer;
 static gns_load_phase_e s_map_gns_load_phase;
 static resource_load_state_e s_map_resource_load_state;

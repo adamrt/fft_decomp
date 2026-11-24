@@ -98,7 +98,7 @@ extern novel_state_t g_novel_state;
 
 /* Scalar flag access retains the original bases in opcodes 2e and 33. */
 extern u16 g_novel_state_flags;
-extern u32 g_novel_local_flags[];
+extern u32 g_novel_local_flags[1];
 extern s32 g_novel_wait_counter;
 extern s32 g_novel_wait_frames;
 extern s32 g_novel_countdown_section;

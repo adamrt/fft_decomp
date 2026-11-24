@@ -6,7 +6,7 @@
 #include "fft/world/proposition.h"
 #include "psx/types.h"
 
-extern calendar_date_t g_brave_story_birthday_table[];
+extern calendar_date_t g_brave_story_birthday_table[64];
 
 calendar_date_t* g_brave_story_birthdays = g_brave_story_birthday_table;
 

@@ -7,7 +7,7 @@
 
 /* The owned items of each list category (0 weapons and shields, then headgear, body armor, accessories and
  * other: the menu category minus one), byte lists ending in a terminator. */
-extern u8* g_item_category_lists[];
+extern u8* g_item_category_lists[5];
 
 static s32 is_in_category_list(s32 item_id, s32 category_index);
 static void prepend_to_category_list(s32 item_id, s32 category_index);

@@ -11,7 +11,7 @@ s32 item_get_type(s32 item_id) {
 }
 
 /* The texture origin of each item type's 12x12 icon, read by item_list_build_type_icon. */
-extern uv8_t g_item_type_icon_origins[];
+extern uv8_t g_item_type_icon_origins[ITEM_TYPE_COUNT];
 
 /* Texture cell of an item type's 12x12 icon. */
 void item_list_build_type_icon(s32 item_type, menu_icon_source_t* output) {

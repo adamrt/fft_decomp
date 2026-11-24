@@ -20,26 +20,26 @@
 #include "psx/types.h"
 
 /* banner drawing data */
-extern CVECTOR g_formation_panel_bar_colors[];
-extern image_layout_t g_formation_summary_label_sprite_params[];
-extern image_layout_t g_formation_summary_value_sprite_params[];
+extern CVECTOR g_formation_panel_bar_colors[3 * 4]; /* three gauge bars, four corners each */
+extern image_layout_t g_formation_summary_label_sprite_params[7];
+extern image_layout_t g_formation_summary_value_sprite_params[4];
 extern RECT g_formation_status_panel_origin;
-extern image_layout_t g_formation_status_sprite_params[];
+extern image_layout_t g_formation_status_sprite_params[7];
 extern image_layout_t g_formation_status_portrait_params;
-extern menu_number_entry_t g_formation_selected_unit_number_entries[];
-extern menu_number_entry_t g_formation_comparison_unit_number_entries[];
+extern menu_number_entry_t g_formation_selected_unit_number_entries[14];
+extern menu_number_entry_t g_formation_comparison_unit_number_entries[14];
 
+static menu_status_panel_editor_packet_t s_formation_selected_unit_summary_packets[2];
 /* Selected- and comparison-unit panel storage. Packet and portrait palette
  * arrays are indexed by the active page. */
-extern menu_status_panel_editor_packet_t g_formation_selected_unit_summary_packets[2];
-extern menu_status_panel_packet_t g_formation_selected_unit_status_packets[2];
-extern u8 g_formation_selected_unit_stat_text_image[];
-extern u8 g_formation_selected_unit_name_text_image[];
-extern menu_unit_number_images_t g_formation_selected_unit_number_text_images;
-extern menu_status_panel_editor_packet_t g_formation_comparison_unit_summary_packets[2];
-extern menu_status_panel_packet_t g_formation_comparison_unit_status_packets[2];
-extern u8 g_formation_comparison_unit_stat_text_image[];
-extern u8 g_formation_comparison_unit_name_text_image[];
+static menu_status_panel_packet_t s_formation_selected_unit_status_packets[2];
+static menu_status_panel_editor_packet_t s_formation_comparison_unit_summary_packets[2];
+static menu_status_panel_packet_t s_formation_comparison_unit_status_packets[2];
+static u8 s_formation_selected_unit_stat_text_image[0x700];
+static u8 s_formation_selected_unit_name_text_image[0x580];
+static menu_unit_number_images_t s_formation_selected_unit_number_text_images;
+static u8 s_formation_comparison_unit_stat_text_image[0x700];
+static u8 s_formation_comparison_unit_name_text_image[0x580];
 static menu_unit_number_images_t s_formation_comparison_unit_number_text_images;
 static palette_t s_formation_selected_unit_portrait_palettes[2];
 static palette_t s_formation_comparison_unit_portrait_palettes[2];
@@ -119,11 +119,11 @@ void unit_panel_banner_thread(void) {
     thread = (unit_panel_thread_t*)g_threads[thread_id].function_parameter_1;
 
     if (thread_id == THREAD_SCREEN_SLOT_UNIT_STATUS) {
-        panel = g_formation_selected_unit_status_packets;
-        editor = g_formation_selected_unit_summary_packets;
-        number_pixels = g_formation_selected_unit_stat_text_image;
-        number_images = &g_formation_selected_unit_number_text_images;
-        name_image = g_formation_selected_unit_name_text_image;
+        panel = s_formation_selected_unit_status_packets;
+        editor = s_formation_selected_unit_summary_packets;
+        number_pixels = s_formation_selected_unit_stat_text_image;
+        number_images = &s_formation_selected_unit_number_text_images;
+        name_image = s_formation_selected_unit_name_text_image;
         number_entries = g_formation_selected_unit_number_entries;
         state = &g_unit_panel_selected_unit_stat_summary;
         identity = &g_formation_selected_unit_identity;
@@ -132,11 +132,11 @@ void unit_panel_banner_thread(void) {
         editor_base = editor;
         portrait_palettes = s_formation_selected_unit_portrait_palettes;
     } else {
-        panel = g_formation_comparison_unit_status_packets;
-        editor = g_formation_comparison_unit_summary_packets;
-        number_pixels = g_formation_comparison_unit_stat_text_image;
+        panel = s_formation_comparison_unit_status_packets;
+        editor = s_formation_comparison_unit_summary_packets;
+        number_pixels = s_formation_comparison_unit_stat_text_image;
         number_images = &s_formation_comparison_unit_number_text_images;
-        name_image = g_formation_comparison_unit_name_text_image;
+        name_image = s_formation_comparison_unit_name_text_image;
         number_entries = g_formation_comparison_unit_number_entries;
         state = &g_formation_comparison_unit_stat_summary;
         identity = &g_formation_comparison_unit_identity;

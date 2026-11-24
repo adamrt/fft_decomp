@@ -43,9 +43,9 @@ typedef char movie_mdec_state_size_must_be_56[(sizeof(movie_mdec_state_t) == 56)
 
 extern movie_stream_status_e g_movie_stream_status;
 extern movie_mdec_state_t g_movie_mdec_stream_state;
-extern u32 g_movie_cd_stream_ring_buffer[];
-extern u32 g_movie_mdec_output_buffer_0[];
-extern u32 g_movie_mdec_output_buffer_1[];
+extern u32 g_movie_cd_stream_ring_buffer[0x30 * 512]; /* 0x30 sectors: an StHEADER and 504 payload words each */
+extern u32 g_movie_mdec_output_buffer_0[2880];        /* one 24-column, 240-row slice: w * h / 2 words */
+extern u32 g_movie_mdec_output_buffer_1[2880];
 extern s32 g_movie_width;
 extern s32 g_movie_height;
 static s32 s_movie_aligned_height;

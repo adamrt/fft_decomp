@@ -37,7 +37,7 @@ units:
   - {name: proposition_dispatch, source: src/wldcore/proposition/dispatch.c, data: [{addr: 0x800d09a0, size: 12, hash: 15ec7bf0b50732b4}], bss: [{addr: 0x800d457c, size: 4, hash: df3f619804a92fdb}]}
   - {name: proposition_report, source: src/wldcore/proposition/report.c}
   - {name: proposition_results, source: src/wldcore/proposition/results.c, data: [{addr: 0x8009eb34, size: 8, hash: 8fa5f1b1c1b875fa}, {addr: 0x8009eb3c, size: 8, hash: 9785aa74f03e66b7}]}
-  - {name: resource_loading, source: src/wldcore/resource_loading.c, data: [{addr: 0x8009e0ec, size: 1408, hash: 697848efa3c9d262}]}
+  - {name: resource_loading, source: src/wldcore/resource_loading.c, data: [{addr: 0x8009e0ec, size: 1408, hash: 697848efa3c9d262}], bss: [{addr: 0x800bc2f4, size: 45056, hash: 61d9e6520ef1b93e}]}
   - {name: startup, source: src/wldcore/entry.c, bss: [{addr: 0x800d4908, size: 32, hash: 66687aadf862bd77}]}
   - {name: tutorial_menus, source: src/wldcore/tutorial_menus.c, data: [{addr: 0x8009ebfc, size: 32, hash: 493af45bc1a8a1a1}]}
   - {name: tutorial_topics, source: src/wldcore/tutorial_topics.c}
@@ -584,7 +584,7 @@ data:
   - {addr: 0x800bbc6c, name: g_travel_next_map_id}
   - {addr: 0x800bbc70, name: g_display_object_gs_image_pool}
   - {addr: 0x800bc2f0, name: g_world_map_input_new_button_presses}
-  - {addr: 0x800bc2f4, name: g_message_block_buffer}
+  - {addr: 0x800bc2f4, name: s_message_block_buffer}
   - {addr: 0x800c72f4, name: g_world_map_scratch_buffer}
   - {addr: 0x800c72f8, name: s_world_map_input_repeat}
   - {addr: 0x800c731c, name: g_input_polled_buttons}

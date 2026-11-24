@@ -10,13 +10,13 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-extern menu_gradient_panel_prims_t g_menu_panel_fade_frames[];
+static menu_gradient_panel_prims_t s_menu_panel_fade_frames[2];
 
 /* Build both buffers' panel fade primitives: a subtractive (abr 2) semi-transparent 256 x 50
  * center tile at (128, 172) with nine one-line tiles above and below it for the graded edges
  * that menu_update_panel_fade animates. The tiles start black, which subtracts nothing. */
 void menu_init_panel_fade_tiles(void) {
-    menu_gradient_panel_prims_t* frame = &g_menu_panel_fade_frames[0];
+    menu_gradient_panel_prims_t* frame = &s_menu_panel_fade_frames[0];
     s32 i;
 
     SetDrawMode(&frame->draw_mode, 0, 0, GetTPage(0, 2, 0x3c0, 0x100), &g_gfx_texture_window);
@@ -48,7 +48,7 @@ void menu_init_panel_fade_tiles(void) {
     }
 
     mem_copy_bytes_nonempty(
-        &g_menu_panel_fade_frames[1], &g_menu_panel_fade_frames[0], sizeof(menu_gradient_panel_prims_t));
+        &s_menu_panel_fade_frames[1], &s_menu_panel_fade_frames[0], sizeof(menu_gradient_panel_prims_t));
 }
 
 /* Step the panel fade by one frame and submit this buffer's tiles. Fading in raises the
@@ -61,7 +61,7 @@ void menu_update_panel_fade(void) {
     s32 intensity;
 
     if (g_menu_panel_fade_mode != MENU_PANEL_FADE_NONE) {
-        frame = &g_menu_panel_fade_frames[g_menu_packet_buffer_index];
+        frame = &s_menu_panel_fade_frames[g_menu_packet_buffer_index];
         if (g_menu_panel_fade_mode == MENU_PANEL_FADE_IN && g_menu_panel_fade_intensity < 80) {
             g_menu_panel_fade_intensity += 8;
         }
@@ -86,8 +86,8 @@ void menu_update_panel_fade(void) {
             gfx_draw_or_append_gpu_primitive(&frame->top[8 - i]);
             gfx_draw_or_append_gpu_primitive(&frame->bottom[i]);
         }
-        gfx_draw_or_append_gpu_primitive(&g_menu_panel_fade_frames[g_menu_packet_buffer_index].center);
-        gfx_draw_or_append_gpu_primitive(&g_menu_panel_fade_frames[g_menu_packet_buffer_index].draw_mode);
+        gfx_draw_or_append_gpu_primitive(&s_menu_panel_fade_frames[g_menu_packet_buffer_index].center);
+        gfx_draw_or_append_gpu_primitive(&s_menu_panel_fade_frames[g_menu_packet_buffer_index].draw_mode);
     }
 }
 

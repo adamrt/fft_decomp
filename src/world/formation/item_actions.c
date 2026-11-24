@@ -29,16 +29,16 @@ extern menu_screen_number_range_t g_formation_item_action_quantity_range;
 extern s16 g_formation_item_action_option_states[3];
 extern menu_entry_t g_formation_item_quantity_change_menu;
 extern menu_entry_t g_formation_item_unequip_all_menu;
-extern oriented_quad_t g_formation_item_category_tab_sprites[]; /* 20-byte quads, one per row */
-extern u8 g_formation_item_category_tab_x[];                    /* per-row base x */
+extern oriented_quad_t g_formation_item_category_tab_sprites[MENU_EQUIPMENT_SLOT_COUNT]; /* one per tab */
+extern u8 g_formation_item_category_tab_x[MENU_EQUIPMENT_SLOT_COUNT];                    /* per-tab base x */
 extern oriented_quad_t g_formation_item_category_tab_cursor_sprite;
 
 /* The two item-category icon strips; the active one is kept in g_formation_item_category_icon_strip. */
 extern menu_entry_t g_formation_item_category_icon_strip_a;
 extern menu_entry_t g_formation_item_category_icon_strip_b;
+static s16 s_formation_item_category_strip_text_ids[8]; /* option text ids of the active strip, -1 terminated */
 static menu_entry_t* s_formation_item_category_icon_strip;
 static u16 s_formation_item_saved_selected_unit_index;
-extern s16 g_formation_item_category_strip_text_ids[]; /* option text ids of the active strip, -1 terminated */
 
 /* Byte-aligned display streams; each extent includes the terminating opcode. */
 extern u8 g_formation_item_category_tabs_script[121];
@@ -250,9 +250,9 @@ s8 item_list_update_sort_menu(void) {
     if (g_formation_item_sort_order_initialized == 0) {
         g_formation_item_category_icon_strip_a.selected_index = 0;
         g_formation_item_category_icon_strip_b.selected_index = 0;
-        item_list_load_sort_order(g_menu_selected_slot + 1, g_formation_item_category_strip_text_ids);
+        item_list_load_sort_order(g_menu_selected_slot + 1, s_formation_item_category_strip_text_ids);
         i = 0;
-        while ((text_ids[i] = g_formation_item_category_strip_text_ids[i]) != -1) {
+        while ((text_ids[i] = s_formation_item_category_strip_text_ids[i]) != -1) {
             text_ids[i] += 4;
             i++;
         }
@@ -264,7 +264,7 @@ s8 item_list_update_sort_menu(void) {
     } else {
         s_formation_item_category_icon_strip = &g_formation_item_category_icon_strip_b;
     }
-    i = g_formation_item_category_strip_text_ids[s_formation_item_category_icon_strip->selected_index];
+    i = s_formation_item_category_strip_text_ids[s_formation_item_category_icon_strip->selected_index];
     if (i < 4) {
         i += 0x32;
     }
@@ -277,15 +277,15 @@ s8 item_list_update_sort_menu(void) {
     g_help_message_text_id = i + HELP_TEXT_ID_MENU_COMMAND_BASE;
     index = g_menu_screen_selection_results[7];
     if (index != -1) {
-        selected = g_formation_item_category_strip_text_ids[index];
+        selected = s_formation_item_category_strip_text_ids[index];
         for (i = index - 1; i >= 0; i--) {
-            g_formation_item_category_strip_text_ids[i + 1] = g_formation_item_category_strip_text_ids[i];
+            s_formation_item_category_strip_text_ids[i + 1] = s_formation_item_category_strip_text_ids[i];
         }
-        g_formation_item_category_strip_text_ids[0] = selected;
+        s_formation_item_category_strip_text_ids[0] = selected;
         menu_screen_reset_selection_results();
-        item_list_store_sort_order(g_menu_selected_slot + 1, g_formation_item_category_strip_text_ids);
+        item_list_store_sort_order(g_menu_selected_slot + 1, s_formation_item_category_strip_text_ids);
         i = 0;
-        while ((text_ids[i] = g_formation_item_category_strip_text_ids[i]) != -1) {
+        while ((text_ids[i] = s_formation_item_category_strip_text_ids[i]) != -1) {
             text_ids[i] += 4;
             i++;
         }

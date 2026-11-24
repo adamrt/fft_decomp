@@ -14,7 +14,7 @@
 #include "psx/types.h"
 
 /* Image the window frame thread composes its border pieces in before uploading them. */
-extern u8 g_menu_window_frame_image[];
+static u8 s_menu_window_frame_image[0x400];
 
 /* Texture windows of the frame pieces this thread uploads. */
 static RECT s_menu_panel_texture_windows[7] = { { 0, 0, 16, 16 }, { 0, 0, 16, 16 }, { 0, 0, 8, 16 }, { 0, 0, 16, 16 },
@@ -51,7 +51,7 @@ void menu_window_frame_thread(void) {
 
     menu = (urect16_t*)thread_current_get_parameter_1();
 
-    mem_zero_words(g_menu_window_frame_image, 0x400);
+    mem_zero_words(s_menu_window_frame_image, 0x400);
     texture.w = 0x80;
     texture.h = 0x10;
     gfx_alloc_texture_rect(&texture, &prim->texture_prim, (u32*)-1);
@@ -61,18 +61,18 @@ void menu_window_frame_thread(void) {
     /* Copy the border pieces from the menu glyph sheet into one 128x16 image and upload it. */
     text_set_blit_source_rect(8, 8, 0x20, 0x10);
     text_set_blit_destination(0, 0);
-    text_blit_glyph(g_menu_glyph_sheet->pixels, g_menu_window_frame_image, &g_text_glyph_source, &g_text_glyph_dest);
+    text_blit_glyph(g_menu_glyph_sheet->pixels, s_menu_window_frame_image, &g_text_glyph_source, &g_text_glyph_dest);
     text_set_blit_source_rect(0, 8, 8, 0x10);
     text_set_blit_destination(0x20, 0);
-    text_blit_glyph(g_menu_glyph_sheet->pixels, g_menu_window_frame_image, &g_text_glyph_source, &g_text_glyph_dest);
+    text_blit_glyph(g_menu_glyph_sheet->pixels, s_menu_window_frame_image, &g_text_glyph_source, &g_text_glyph_dest);
     text_set_blit_source_rect(0xd8, 0, 0x28, 0x10);
     text_set_blit_destination(0x28, 0);
-    text_blit_glyph(g_menu_glyph_sheet->pixels, g_menu_window_frame_image, &g_text_glyph_source, &g_text_glyph_dest);
+    text_blit_glyph(g_menu_glyph_sheet->pixels, s_menu_window_frame_image, &g_text_glyph_source, &g_text_glyph_dest);
     text_set_blit_source_rect(0xd8, 0x10, 0x28, 0x10);
     text_set_blit_destination(0x58, 0);
-    text_blit_glyph(g_menu_glyph_sheet->pixels, g_menu_window_frame_image, &g_text_glyph_source, &g_text_glyph_dest);
+    text_blit_glyph(g_menu_glyph_sheet->pixels, s_menu_window_frame_image, &g_text_glyph_source, &g_text_glyph_dest);
 
-    LoadImage(&texture, (u32*)g_menu_window_frame_image);
+    LoadImage(&texture, (u32*)s_menu_window_frame_image);
     menu_init_sprite_array(prim->sprites, 9, MENU_CLUT_NORMAL);
 
     texture_u = (texture.x & 0x3f) * 4;

@@ -22,9 +22,9 @@ static s8 s_formation_banner_state;
 
 /* banner state: 0 idle, 1 finishing, else countdown */
 
-extern help_navigation_record_t g_menu_screen_grid_default_cells[];
-extern help_navigation_record_t g_menu_screen_grid_shop_cells[];
-extern help_navigation_record_t g_menu_screen_grid_shop_scrolled_cells[];
+extern help_navigation_record_t g_menu_screen_grid_default_cells[31];
+extern help_navigation_record_t g_menu_screen_grid_shop_cells[12];
+extern help_navigation_record_t g_menu_screen_grid_shop_scrolled_cells[12];
 static help_navigation_record_t* s_menu_screen_grid_active_cells = { 0 };
 static u8 s_menu_screen_grid_selected_cell = 0;
 extern u16 g_menu_screen_grid_cursor_anim;

@@ -109,7 +109,7 @@ static menu_draw_number_command_t g_save_slot_number_command = { 0x12, 10, 0, 0,
 static menu_draw_number_command_t g_save_playtime_hours_command = { 0x12, 10, 0, 0, 2, 5, 2, 89, 0, 0 };
 static menu_draw_number_command_t g_save_playtime_minutes_command = { 0x12, 10, 0, 0, 2, 5, 2, 104, 0, 0 };
 static menu_draw_number_command_t g_save_playtime_seconds_command = { 0x12, 10, 0, 0, 2, 5, 2, 119, 0, 0 };
-extern oriented_quad_t g_save_slot_quads[];
+extern oriented_quad_t g_save_slot_quads[5];
 
 /* fade and queued sound */
 extern rgb24_t g_save_gfx_fade_overlay_color;
@@ -130,9 +130,9 @@ enum { SAVE_TEXTURED_QUADS_PER_BUFFER = 600 };
 extern POLY_FT4 g_save_gfx_textured_quads[2 * SAVE_TEXTURED_QUADS_PER_BUFFER];
 
 /* CARD text; init_graphics binds command help into the mutable section table. */
-extern u8 g_save_text_command_help[];
-extern const u8 g_save_text_job_name[];
-extern const u8 g_save_text_location_name[];
+extern u8 g_save_text_command_help[904];
+extern const u8 g_save_text_job_name[1412];
+extern const u8 g_save_text_location_name[688];
 
 static void build_file_header(s32 slot, s32 level, save_file_header_t* header);
 static void build_slot_description(s32 mode, u8* destination);

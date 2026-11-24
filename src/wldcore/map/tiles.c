@@ -30,7 +30,7 @@ typedef char world_map_projected_tile_size_must_be_24[sizeof(world_map_projected
 
 /* g_world_map_flags as saved by world_map_set_backdrop_mode (world_map_flags_e). */
 static u32 s_world_map_saved_system_flags;
-extern world_map_projected_tile_t g_world_map_projected_tiles[];
+extern world_map_projected_tile_t g_world_map_projected_tiles[221]; /* WORLD_MAP_CORNER_COUNT */
 
 static VECTOR s_world_map_projection_scale = { 0 };
 static SVECTOR s_world_map_projection_rotation = { 0 };

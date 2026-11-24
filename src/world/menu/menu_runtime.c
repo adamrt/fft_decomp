@@ -69,12 +69,12 @@ typedef struct menu_group {
     s32 task_ids[3];          /* 0x18 */
 } menu_group_t;
 typedef char menu_group_size_must_be_36[sizeof(menu_group_t) == 36 ? 1 : -1];
-extern u16 g_world_map_destination_list_text_ids[];
-extern s16 g_world_map_destination_list_row_colors[];
+extern u16 g_world_map_destination_list_text_ids[52];
+extern s16 g_world_map_destination_list_row_colors[52]; /* parallel to the text ids */
 extern menu_scroll_text_layout_t g_world_map_destination_list_layout;
 extern menu_entry_t g_menu_screen_default_entries[18];
-extern u8 g_menu_screen_submenu_page_counts[];
-extern u8* g_menu_screen_submenu_page_text_ids[];
+extern u8 g_menu_screen_submenu_page_counts[48]; /* two fewer than the page table */
+extern u8* g_menu_screen_submenu_page_text_ids[50];
 extern menu_scroll_text_layout_t g_menu_screen_submenu_page_layout;
 
 /* The text sprite and the two frame sprites, double-buffered by the thread below. */
@@ -111,7 +111,7 @@ extern clut_t g_menu_screen_common_clut_data;
 extern s32 g_world_map_menu_scroll_direction;
 extern s32 g_world_map_menu_scroll_threshold;
 extern s32 g_world_map_menu_dimmed;
-extern menu_input_timing_profile_t g_menu_screen_input_timing_profiles[];
+extern menu_input_timing_profile_t g_menu_screen_input_timing_profiles[GAME_FINGER_CURSOR_REPEAT_SPEED_SLOWEST + 1];
 extern RECT g_menu_screen_clear_rect;
 extern menu_group_t g_world_map_menu_groups[4];
 extern s16 g_world_map_screen_request;

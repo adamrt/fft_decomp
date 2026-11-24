@@ -90,7 +90,7 @@ extern palette_t g_deploy_cursor_clut;
 extern RECT g_deploy_cursor_clut_rect;
 extern palette_t g_deploy_cursor_palette_cycle[2];
 extern const palette_t g_deploy_cursor_palette_source[2];
-extern u32 g_deploy_cursor_texture_data[];
+extern u32 g_deploy_cursor_texture_data[8]; /* row 0 of the 16x3 upload; rows 1-2 are g_deploy_cursor_palette_source */
 extern RECT g_deploy_cursor_texture_rect;
 
 /* screen graphics */
@@ -127,7 +127,7 @@ typedef struct placement_buffer {
 typedef char placement_buffer_size_must_be_2604[(sizeof(placement_buffer_t) == 2604) ? 1 : -1];
 
 extern placement_buffer_t g_deploy_render_buffers[2];
-extern u32 g_deploy_arrow_clut_data[];
+extern u32 g_deploy_arrow_clut_data[8]; /* the 16x1 CLUT of g_deploy_arrow_clut_rect */
 extern RECT g_deploy_arrow_clut_rect;
 extern rgba5551_t g_deploy_tile_clut_buffer[48];
 extern const palette_t g_deploy_tile_clut_data[3];

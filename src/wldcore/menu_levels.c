@@ -55,7 +55,7 @@ extern world_map_scroll_axis_t g_world_map_scroll_y;
 menu_stack_level_e g_menu_stack_types[MENU_STACK_CAPACITY];
 extern u32* g_location_picture_frame_tim;
 extern deep_dungeon_battle_t* g_deep_dungeon_battles;
-extern help_navigation_record_t g_unit_panel_help_rows[];
+extern help_navigation_record_t g_unit_panel_help_rows[31];
 
 static void open_cursor_level(void);
 static void resume_cursor_level(menu_stack_record_t* level);

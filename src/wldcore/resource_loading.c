@@ -14,7 +14,7 @@
 #include "psx/types.h"
 
 extern s32 g_file_battle_sector;
-extern u8 g_message_block_buffer[];
+static u8 s_message_block_buffer[22 * 0x800]; /* one 22-sector message block */
 
 /* File-sector boundaries, including one terminal offset after the last payload. */
 static s32 s_picture_sector_offsets[93] = {
@@ -536,13 +536,13 @@ void world_map_load_background_picture_set(s32 set) {
  * novel_load_files: entry i is the start sector of block i relative to the disc
  * LBA below, so entry i+1 minus entry i is that block's length. */
 void message_load_block_if_changed(s32 block) {
-    g_text_section_pointers[TEXT_SECTION_MESSAGES] = g_message_block_buffer;
+    g_text_section_pointers[TEXT_SECTION_MESSAGES] = s_message_block_buffer;
     if (block != g_message_block_loaded) {
         file_wait_pending();
         g_message_block_loaded = block;
         file_request_pending_read(&g_file_cd_state,
             s_message_block_sector_offsets[block] + DISC_SECTOR_WORLD_WLDMES_BIN,
-            s_message_block_sector_offsets[block + 1] - s_message_block_sector_offsets[block], g_message_block_buffer);
+            s_message_block_sector_offsets[block + 1] - s_message_block_sector_offsets[block], s_message_block_buffer);
     }
 }
 
@@ -558,8 +558,8 @@ void novel_load_files(s32 chapter) {
         s_novel_script_sector_offsets[chapter + 1] - s_novel_script_sector_offsets[chapter], &g_novel_script);
     file_wait_pending();
     file_request_pending_read(&g_file_cd_state, s_novel_text_sector_offsets[chapter] + DISC_SECTOR_WORLD_SNPLMES_BIN,
-        s_novel_text_sector_offsets[chapter + 1] - s_novel_text_sector_offsets[chapter], g_message_block_buffer);
-    g_text_section_pointers[TEXT_SECTION_MESSAGES] = g_message_block_buffer;
+        s_novel_text_sector_offsets[chapter + 1] - s_novel_text_sector_offsets[chapter], s_message_block_buffer);
+    g_text_section_pointers[TEXT_SECTION_MESSAGES] = s_message_block_buffer;
     g_message_block_loaded = -1;
 }
 

@@ -17,7 +17,7 @@
 #include "psx/types.h"
 
 /* Overlay-local vertex brightness rows (12-bit fixed): brightness_row selects the row, the ring (0-5) the column. */
-extern u32 g_effect_anchored_polar_mesh_brightness_table[][6];
+extern u32 g_effect_anchored_polar_mesh_brightness_table[7][6];
 
 /* Scratchpad (0x1f800000) layout of the Zodiac Stone glow variant. Its fields shift from
  * effect_polar_mesh_scratch_t, so it is a separate layout, not a view. */

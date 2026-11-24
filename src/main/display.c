@@ -13,7 +13,7 @@
 
 /* Low immediate byte of FntLoad's CLUT-Y addiu instruction. */
 extern u8 g_psyq_gpu_font_clut_y_offset_immediate;
-extern u32 g_boot_squaresoft_logo_image_words[];
+extern u32 g_boot_squaresoft_logo_image_words[180 * 16 / 2]; /* 180x16 16-bit pixels */
 
 /* Install EFC_FNT.TIM as the debug print font: load the built-in font at VRAM (0x280, 0) with its
  * CLUT moved to row 0x7f, overwrite both with EFC_FNT.TIM (retrying until it reads) and open a

@@ -205,7 +205,7 @@ static u8* s_terrain_costs = (u8*)getScratchAddr(0x40);
 static u8* s_frontier_flags = (u8*)getScratchAddr(0x80);
 
 /* Terrain costs and pathfinder work cursors. */
-extern const u8 g_terrain_movement_cost_tables[][64];
+extern const u8 g_terrain_movement_cost_tables[6][64]; /* one row per terrain_cost_table_e */
 extern u8 g_move_terrain_cost;
 extern u8 g_move_weather_terrain_cost;
 extern s32 g_move_range_valid;
