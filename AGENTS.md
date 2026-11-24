@@ -46,6 +46,8 @@ preserving every original byte.
 - `src/<program>/` (`main`, `battle`, `world`, `wldcore`, `open`): each
   program's own code grouped by game system, shared state and complete
   workflow. Use feature folders when they help navigate a large program.
+  BATTLE's folders follow its six link images, each with its own code and
+  data (`core/`, `map/`, `event/`, `calc/`, `ai/`, `effects/`).
   Keep a feature's callbacks, private helpers, tables and working records
   together; file size and function count are not reasons to split it.
   A file's leading comment explains its role in

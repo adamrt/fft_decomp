@@ -1006,7 +1006,7 @@ s32 turn_is_over(s32 unit_id) {
 }
 
 /* End the unit's Charging, Jump, Defending and Performing statuses and drop its charged ability
- * (action state none). Same body as combat/pickups.c's static clear_action_state. */
+ * (action state none). Same body as calc/pickups.c's static clear_action_state. */
 void status_clear_action_state(battle_unit_t* unit) {
     status_set_action_state(unit, STATUS_ACTION_STATE_NONE);
 }

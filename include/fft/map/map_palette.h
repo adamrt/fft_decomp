@@ -82,7 +82,7 @@ typedef char map_palette_color_components_size_must_be_7[(sizeof(map_palette_col
 
 typedef struct map_palette_animation_state {
     u8 active;
-    u8 blend_step;    /* 0x01; index into s_palette_blend_steps_32/_8 (battle/map/palettes.c) */
+    u8 blend_step;    /* 0x01; index into s_palette_blend_steps_32/_8 (battle/core/map_palettes.c) */
     u8 delay_counter; /* 0x02; one blend step each time it reaches mode >> 2 */
     u8 mode;
     u8 repeat;            /* 0x04; map_color_repeat_e */
