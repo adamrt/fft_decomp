@@ -2,7 +2,7 @@
 #define MAP_H
 
 /* The battle map: map ids, the terrain tiles and their lookups, the terrain tables, the selected tile, tile marks,
- * the map data commands and title card, and the event library's map routines. */
+ * the map data commands, the loader, the title card and the event library's map routines. */
 
 #include "psx/libgte.h"
 #include "psx/types.h"
@@ -455,6 +455,26 @@ s32 map_get_object_state(s32 part_index);
 s32 map_set_object_state(s32 part_index, s32 state_row);
 s32 map_texture_animation_is_active(s32 animation_index);
 s32 map_start_texture_animation(s32 animation_index, s32 object_state);
+
+/* loading */
+/* Commands of map_update_load, read only while the GNS phase is idle. */
+typedef enum map_load_command {
+    MAP_LOAD_COMMAND_LOAD_GNS = 0x73, /* always read the GNS; no current caller issues this */
+    MAP_LOAD_COMMAND_START = 0x75,
+    MAP_LOAD_COMMAND_POLL = 0x76,       /* an unhandled command only advances the load */
+    MAP_LOAD_COMMAND_START_HELD = 0x99, /* as START, but hold dispatch until MAP_DATA_COMMAND_RELEASE_GNS_HOLD */
+    MAP_LOAD_COMMAND_POLL_HELD = 0x9c
+} map_load_command_e;
+
+/* Other returns are the GNS phase: 0 idle, 1 loading resources, 15 starting. */
+enum { MAP_LOAD_RESULT_HELD = 0x9b };
+
+s32 map_update_load(s32 map_id, map_load_command_e command);
+s32 map_start_load(void);
+s32 map_poll_load(void);
+s32 map_mesh_load_palette(s32 palette_mode);
+s32 map_update_init_sequence(s32 map_id, s32 step);
+s32 map_update_deployment_init_sequence(s32 map_id, s32 step, s32 deployment_running);
 
 /* map title */
 /* The title card of the battle map. The BATTLE and WORLD event interpreters

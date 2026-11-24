@@ -12,7 +12,6 @@
 #include "fft/gfx/gfx_primitive.h"
 #include "fft/gfx/sprite_sheet.h"
 #include "fft/map/map.h"
-#include "fft/map/map_load.h"
 #include "fft/map/map_unit.h"
 #include "fft/menu/menu.h"
 #include "fft/menu/menu_gfx.h"

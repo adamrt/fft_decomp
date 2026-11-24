@@ -11,7 +11,6 @@
 #include "fft/effect/effect.h"
 #include "fft/gfx/gfx.h"
 #include "fft/map/map_light.h"
-#include "fft/map/map_load.h"
 #include "fft/map/map_mesh.h"
 #include "fft/map/map_palette.h"
 #include "fft/script/script_variable.h"
@@ -4173,13 +4172,13 @@ s32 map_update_load(s32 map_id, map_load_command_e command) {
                 }
             }
         } else {
-            /* Resources: start the next pending file. Types 0x12-0x17 are
+            /* Resources: start the next pending file. The unsupported chunk and the textures are
              * passed over here and taken after the others. */
             if (file_get_load_state() == 0) {
                 while ((s_map_pending_gns_records[g_map_gns_record_cursor].resource_type == GNS_RECORD_NONE
                            && g_map_gns_record_cursor < GNS_RESOURCE_TABLE_COUNT)
-                    || (s_map_pending_gns_records[g_map_gns_record_cursor].resource_type >= 0x12
-                        && s_map_pending_gns_records[g_map_gns_record_cursor].resource_type <= 0x17)) {
+                    || (s_map_pending_gns_records[g_map_gns_record_cursor].resource_type >= GNS_RESOURCE_UNSUPPORTED_12
+                        && s_map_pending_gns_records[g_map_gns_record_cursor].resource_type <= GNS_RESOURCE_TEXTURE)) {
                     g_map_gns_record_cursor++;
                 }
 

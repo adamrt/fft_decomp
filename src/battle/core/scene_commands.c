@@ -12,7 +12,6 @@
 #include "fft/effect/effect_secondary.h"
 #include "fft/game/battle_unit.h"
 #include "fft/map/map.h"
-#include "fft/map/map_load.h"
 #include "fft/map/map_unit.h"
 #include "fft/party/status_screen.h"
 #include "fft/sys/math.h"
