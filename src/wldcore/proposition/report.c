@@ -482,7 +482,7 @@ void proposition_update_report(menu_stack_record_t* level) {
                 bounds.h = image.ph;
                 clut.x = image.cx;
                 clut.y = image.cy;
-                display_object_init_gs_image(record, bounds, clut, DISPLAY_OBJECT_8BIT_CLUT);
+                display_object_init_image(record, bounds, clut, DISPLAY_OBJECT_8BIT_CLUT);
                 g_display_object_gs_image_pool[record].priority = 9;
                 g_display_object_gs_image_pool[record].flags |= DISPLAY_OBJECT_POP_IN;
                 {
@@ -518,7 +518,7 @@ void proposition_update_report(menu_stack_record_t* level) {
                 bounds.h = image.ph;
                 clut.x = image.cx;
                 clut.y = image.cy;
-                display_object_init_gs_image(record, bounds, clut, DISPLAY_OBJECT_8BIT_CLUT);
+                display_object_init_image(record, bounds, clut, DISPLAY_OBJECT_8BIT_CLUT);
                 g_display_object_gs_image_pool[record].priority = 9;
                 g_display_object_gs_image_pool[record].flags |= DISPLAY_OBJECT_POP_IN;
                 {

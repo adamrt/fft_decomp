@@ -513,7 +513,7 @@ functions:
   - {addr: 0x801e0ba8, size: 832, name: menu_input_update_controller, hash: bbe451779e50aed3, source: src/lib/menu/pad_input.c}
   - {addr: 0x801e0ee8, size: 360, name: menu_input_update_message_state, hash: 150bea20a0faa1ea, source: src/event/jobstts/menu_input.c}
   - {addr: 0x801e1050, size: 36, name: menu_selection_clear_values, hash: f714166590860d01, unit: selection_values}
-  - {addr: 0x801e1074, size: 168, name: status_screen_update_wrapped_horizontal_selection, hash: 5953cfbb7a4e9efe, unit: selection}
+  - {addr: 0x801e1074, size: 168, name: menu_selection_step_horizontal, hash: 5953cfbb7a4e9efe, unit: selection}
   - {addr: 0x801e111c, size: 576, name: menu_gfx_enqueue_textured_quad_rect, hash: 5e19e9b09aeb355b, unit: textured_quads}
   - {addr: 0x801e135c, size: 632, name: menu_gfx_enqueue_textured_quad_list, hash: ab47c5a66b813d62, unit: textured_quads}
   - {addr: 0x801e15d4, size: 532, name: menu_gfx_enqueue_textured_quad, hash: 3fe37b9682605fd7, unit: textured_quads}
@@ -2151,9 +2151,9 @@ functions:
   - {addr: 0x801c429c, size: 280, name: update_grid_scroll, hash: eca581c8498c6c0a, unit: unit_grid}
   - {addr: 0x801c43b4, size: 700, name: draw_button, hash: f23fb25a5d33ec97, unit: unit_grid}
   - {addr: 0x801c4670, size: 224, name: unit_list_init, hash: 9b7cf4186658e38a, unit: unit_grid}
-  - {addr: 0x801c4750, size: 4208, name: unit_list_update_grid, hash: 93c70c2e5de2eb05, unit: unit_grid}
+  - {addr: 0x801c4750, size: 4208, name: unit_grid_update, hash: 93c70c2e5de2eb05, unit: unit_grid}
   - {addr: 0x801c57c0, size: 164, name: calculate_brightness_falloff, hash: 4e4cda01f5bf2e91, unit: unit_grid}
-  - {addr: 0x801c5864, size: 532, name: unit_list_draw_shaded_rows, hash: 2288b6aa90c03ece, unit: unit_grid}
+  - {addr: 0x801c5864, size: 532, name: unit_grid_draw_background, hash: 2288b6aa90c03ece, unit: unit_grid}
   - {addr: 0x801c5a78, size: 108, name: init_cursor_trail, hash: e7aff691018bf714, unit: unit_grid}
   - {addr: 0x801c5ae4, size: 916, name: update_cursor_trail, hash: 83f9c117179ef1a2, unit: unit_grid}
   - {addr: 0x801c5e78, size: 1020, name: draw_unit_sprite, hash: 5270d99f55cecd6f, unit: unit_grid}
@@ -2177,7 +2177,7 @@ functions:
   - {addr: 0x801c71d4, size: 88, name: job_find_first_for_skillset, hash: 0e69ad31124150c2, unit: job_abilities}
   - {addr: 0x801c722c, size: 76, name: get_base_job, hash: 0fb085973a10550b, unit: job_abilities}
   - {addr: 0x801c7278, size: 72, name: job_calculate_and_store_unlocks, hash: 79ecd32bffad7458, unit: job_abilities}
-  - {addr: 0x801c72c0, size: 352, name: unit_list_build_job_list, hash: 0372cf84313e0cb9, unit: job_abilities}
+  - {addr: 0x801c72c0, size: 352, name: job_list_build, hash: 0372cf84313e0cb9, unit: job_abilities}
   - {addr: 0x801c7420, size: 36, name: job_get_skillset, hash: 72f6f53360f055dc, unit: job_abilities}
   - {addr: 0x801c7444, size: 648, name: ability_list_build, hash: 373b01e6f8a27498, unit: job_abilities}
   - {addr: 0x801c76cc, size: 444, name: menu_gfx_present_frame, hash: 03562779b98bb33c, unit: gfx_contexts}

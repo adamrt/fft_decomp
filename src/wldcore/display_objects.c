@@ -51,7 +51,7 @@ void display_object_init_pools(void) {
 }
 
 /* Sort visible animated and image records through libgs. */
-void display_object_draw_gs_list(GsOT* otag, void** list, s32 count) {
+void display_object_draw_list(GsOT* otag, void** list, s32 count) {
     void* object;
     u32* flags;
     s32 i;
@@ -212,7 +212,7 @@ step_frame:
 }
 
 /* Convert one display object into a libgs sprite primitive and sort it into the
- * ordering table handed down by display_object_draw_gs_list.
+ * ordering table handed down by display_object_draw_list.
  *
  * 8BIT_CLUT selects the 8-bit texture mode (attribute 0x01000000). UNTINTED
  * uses the object's color as is, otherwise world_map_tint_fade_color

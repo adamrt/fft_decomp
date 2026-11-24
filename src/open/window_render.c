@@ -97,10 +97,10 @@ void window_init_text_record(s32 record_index, RECT bounds, s32 image_page_offse
     g_display_object_gpu_image_pool[record_index].flags |= DISPLAY_OBJECT_POP_IN;
 }
 
-/* OPEN twin of display_object_init_gs_image for the 56-byte records: it keeps
+/* OPEN's own display_object_init_image, for its 56-byte records: it keeps
  * the VRAM position instead of a texture page and also clears the 8-bit CLUT flag.
  * Nothing in OPEN.BIN calls it. */
-void display_object_init_gpu_image(
+void display_object_init_image(
     s32 record_index, point16_t vram_position, point16_t image_size, point32_t clut_position, u32 flags) {
     RECT* quad_base;
     RECT* quad;

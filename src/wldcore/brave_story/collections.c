@@ -246,7 +246,7 @@ void brave_story_update_unexplored_land_detail(menu_stack_record_t* level) {
         bounds.h = image.ph;
         clut_position.x = image.cx;
         clut_position.y = image.cy;
-        display_object_init_gs_image(render, bounds, clut_position, DISPLAY_OBJECT_8BIT_CLUT);
+        display_object_init_image(render, bounds, clut_position, DISPLAY_OBJECT_8BIT_CLUT);
         g_display_object_gs_image_pool[render].priority = 0xA;
         base = &g_display_object_gs_image_pool[render].position;
         base->x = -0x74;
@@ -513,7 +513,7 @@ void brave_story_update_treasure_detail(menu_stack_record_t* level) {
         bounds.h = image.ph;
         clut_position.x = image.cx;
         clut_position.y = image.cy;
-        display_object_init_gs_image(render, bounds, clut_position, DISPLAY_OBJECT_8BIT_CLUT);
+        display_object_init_image(render, bounds, clut_position, DISPLAY_OBJECT_8BIT_CLUT);
         g_display_object_gs_image_pool[render].priority = 0xA;
         g_display_object_gs_image_pool[render].flags &= ~(DISPLAY_OBJECT_HIDDEN | DISPLAY_OBJECT_POP_IN);
         base = &g_display_object_gs_image_pool[render].position;
@@ -708,7 +708,7 @@ static void open_reading_choice(s32 mode) {
     bounds.h = image.ph;
     clut.x = image.cx;
     clut.y = image.cy;
-    display_object_init_gs_image(index, bounds, clut, DISPLAY_OBJECT_8BIT_CLUT);
+    display_object_init_image(index, bounds, clut, DISPLAY_OBJECT_8BIT_CLUT);
     g_display_object_gs_image_pool[index].priority = 0xA;
     update_picture_dissolve(&image, 0);
 

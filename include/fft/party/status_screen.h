@@ -52,8 +52,6 @@ enum { STATUS_SCREEN_SCRIPT_END = 0x16 };
 /* Window right edge; WORLD's twin stores it to g_menu_screen_window_right_x. */
 extern s16 g_status_screen_menu_window_right_x;
 
-s32 status_screen_update_wrapped_horizontal_selection(u16 count, u8 index, s32 buttons);
-
 /* primitive pools (JOBSTTS) */
 /* Per-buffer primitive-pool pointers used by JOBSTTS.OUT's renderer. */
 typedef struct status_screen_gfx_context {

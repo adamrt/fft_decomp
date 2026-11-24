@@ -159,7 +159,7 @@ typedef enum menu_equipment_slot {
 
 /* unit grid readouts */
 /* What the unit grids draw below a unit (draw_unit_readout,
- * unit_list_update_grid). L2/R2 step g_formation_stat_display_mode and
+ * unit_grid_update). L2/R2 step g_formation_stat_display_mode and
  * g_unit_list_stat_mode through the first five, wrapping between HP and
  * BRAVE_FAITH; WORLD picks the others per unit. */
 typedef enum menu_unit_readout {

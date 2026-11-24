@@ -135,7 +135,7 @@ void window_init_text_record(s32 record_index, RECT bounds, s32 coordinate_mode,
 /* Point image render record `index` at a VRAM rectangle given in halfwords: its
  * texture page, page-relative bounds in 8-bit texels, CLUT and a neutral 0x80 tint.
  * Clears the blank and hidden flags and adds `flags`. */
-void display_object_init_gs_image(s32 index, RECT bounds, point32_t clut, s32 flags) {
+void display_object_init_image(s32 index, RECT bounds, point32_t clut, s32 flags) {
     RECT* record_bounds;
     CVECTOR* rgb;
 

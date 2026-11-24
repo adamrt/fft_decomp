@@ -325,7 +325,7 @@ void shop_soldier_rename_update_unit(void) {
     } else {
         g_help_message_text_id = 0;
     }
-    formation_grid_update(1, 1, 0, g_menu_input_secondary_repeat, g_menu_input_lock_mode, get_rename_unit_marker, 0);
+    unit_grid_update(1, 1, 0, g_menu_input_secondary_repeat, g_menu_input_lock_mode, get_rename_unit_marker, 0);
     if (g_shop_soldier_rename_error_shown != 0) {
         g_help_message_text_id = -1;
         if (g_menu_input_primary_repeat & (PSX_PAD_TRIANGLE | PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SQUARE)) {
@@ -372,7 +372,7 @@ void shop_soldier_rename_update_name(void) {
         unit_panel_toggle_banner_thread(0);
         g_shop_soldier_rename_name_entry_initialized = 1;
     }
-    formation_grid_update(1, 0, 0, 0, g_menu_input_lock_mode, get_rename_unit_marker, 0);
+    unit_grid_update(1, 0, 0, 0, g_menu_input_lock_mode, get_rename_unit_marker, 0);
     s_office_entered_name = name_entry_update_keyboard(g_formation_unit_pointers[g_unit_selected_index]->name, 0);
     if (s_office_entered_name != 0) {
         g_shop_menu_step = SHOP_STEP_SOLDIER_REOPEN;

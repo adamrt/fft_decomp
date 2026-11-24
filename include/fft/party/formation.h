@@ -174,7 +174,6 @@ void formation_run_tutorial(s32 tutorial_index);
 void formation_init_menu_state(void);
 void formation_init_display(void);
 void formation_run_world_map_return(void);
-void formation_draw_background_tiles(s32 y, s32 unused_1);
 
 /* unit grid */
 extern u8 g_formation_cursor_ot_override;
@@ -186,8 +185,6 @@ extern u8 g_formation_unit_browse_enabled;
 extern rgb24_t g_formation_dimmed_sprite_color;
 
 /* get_mode and get_shade take the unit slot index; NULL selects the default. */
-s32 formation_grid_update(s16 background_y, s16 toggle_banner, s16 allow_browse, s16 input, s16 locked,
-    s32 (*get_mode)(s32), s32 (*get_shade)(s32));
 void formation_cycle_selected_unit(s16 pad_buttons);
 void formation_grid_init_cursor(s32 formation_index);
 void formation_init_selection_cursor(s16 formation_index);

@@ -107,7 +107,7 @@ void novel_open_reader(s32 argument) {
     bounds.h = 8;
     origin.x = 0x20;
     origin.y = 0x1E8;
-    display_object_init_gs_image(index, bounds, origin, 0);
+    display_object_init_image(index, bounds, origin, 0);
     pos3 = (point32_t*)((u8*)render_pos + index * sizeof(display_object_gs_image_t));
     pos3->x = 0x34;
     pos3->y = 0x55;

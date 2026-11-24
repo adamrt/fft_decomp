@@ -745,9 +745,9 @@ functions:
   - {addr: 0x80115d6c, size: 736, name: menu_draw_pressable_button, hash: 35c131d743427e92, unit: formation_grid}
   - {addr: 0x8011604c, size: 412, name: formation_init_selection_cursor, hash: 3146962b4bfecab1, unit: formation_grid}
   - {addr: 0x801161e8, size: 124, name: formation_grid_init_cursor, hash: 5965d8e8caee29c2, unit: formation_grid}
-  - {addr: 0x80116264, size: 2924, name: formation_grid_update, hash: c1fa22b02874b8cf, unit: formation_grid}
+  - {addr: 0x80116264, size: 2924, name: unit_grid_update, hash: c1fa22b02874b8cf, unit: formation_grid}
   - {addr: 0x80116dd0, size: 164, name: calculate_brightness_falloff, hash: bfabc3c8852ab225, unit: formation_grid}
-  - {addr: 0x80116e74, size: 576, name: formation_draw_background_tiles, hash: f8ae1a32508cd42e, unit: formation_grid}
+  - {addr: 0x80116e74, size: 576, name: unit_grid_draw_background, hash: f8ae1a32508cd42e, unit: formation_grid}
   - {addr: 0x801170b4, size: 120, name: init_cursor_trail, hash: c235675eb18b05e9, unit: formation_grid}
   - {addr: 0x8011712c, size: 1008, name: update_cursor_trail, hash: 25b18e1ffb90921b, unit: formation_grid}
   - {addr: 0x8011751c, size: 540, name: draw_unit_slots, hash: cd90a473baf961d9, unit: formation_grid}

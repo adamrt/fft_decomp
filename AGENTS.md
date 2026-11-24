@@ -28,7 +28,8 @@ preserving every original byte.
   through whole alternate bodies or a thicket of conditionals. Small helpers
   may remain duplicated with their owning feature. Sources test only `FFT_` and `VARIANT_` names
   in conditionals; a header may test `FFT_` names (a record laid out per
-  program) but never `VARIANT_` names.
+  program, or a same-role function whose signature differs by program) but
+  never `VARIANT_` names.
 - Preserve retail bugs and ABI disagreements. Explain them briefly in source
   comments or `QUIRKS.md`.
 - Keep drafts, experiments, extracted files and generated output under ignored

@@ -21,6 +21,7 @@
 #include "fft/party/formation_item.h"
 #include "fft/party/item_list.h"
 #include "fft/party/shop.h"
+#include "fft/party/unit_grid.h"
 #include "fft/party/unit_panel.h"
 #include "fft/script/script_variable.h"
 #include "fft/sys/memory.h"
@@ -709,7 +710,7 @@ void shop_buy_update_unit_preview(void) {
         g_shop_buy_equip_initialized = 1;
     }
     g_shop_buy_equip_saved_browse = g_formation_unit_browse_enabled;
-    formation_grid_update(0, g_formation_unit_browse_enabled == 0, 1, input, g_menu_input_lock_mode, get_equip_marker,
+    unit_grid_update(0, g_formation_unit_browse_enabled == 0, 1, input, g_menu_input_lock_mode, get_equip_marker,
         get_equip_brightness);
     if (g_shop_buy_equip_saved_browse == 0) {
         if (g_formation_unit_browse_enabled != 0) {

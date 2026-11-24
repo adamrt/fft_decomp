@@ -741,7 +741,7 @@ written that way.
   workspace setup at battle start (`acting_unit_id` is 0), so slot 0's Jump
   divides kernel-RAM bytes.
 - `bunit_entrypoint` passes a second argument, 0, to the
-  one-parameter `unit_list_draw_shaded_rows`; its other caller passes
+  one-parameter `unit_grid_draw_background`; its other caller passes
   one.
 - `command_dispatch_request` returns `$v0` as the void
   `announcement_select` left it.

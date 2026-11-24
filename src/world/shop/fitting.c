@@ -150,7 +150,7 @@ void shop_fitting_update_menu(void) {
             g_shop_fitting_menu_thread_data[1].selected_index = 0;
             menu_selection_clear_records();
         } else {
-            formation_grid_update(
+            unit_grid_update(
                 1, 1, 0, g_menu_input_secondary_repeat, g_menu_input_lock_mode, get_fitting_unit_marker, 0);
         }
     } else {

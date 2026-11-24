@@ -501,8 +501,8 @@ void formation_grid_init_cursor(s32 formation_index) {
  * target's s1/s3/s5 do; separate variables change the call-saved register
  * assignment. The two unused locals reproduce the target's frame layout.
  */
-s32 formation_grid_update(s16 background_y, s16 toggle_banner, s16 allow_browse, s16 input, s16 locked,
-    s32 (*get_mode)(s32), s32 (*get_shade)(s32)) {
+s32 unit_grid_update(s16 background_y, s16 toggle_banner, s16 allow_browse, s16 input, s16 locked, s32 (*get_mode)(s32),
+    s32 (*get_shade)(s32)) {
     oriented_quad_t unused_desc;
     oriented_quad_t pos;
     rgb24_t unused_rgb;
@@ -721,7 +721,7 @@ s32 formation_grid_update(s16 background_y, s16 toggle_banner, s16 allow_browse,
     if (row >= -2 && row <= 2) {
         g_formation_cursor_position.y = s_formation_cursor_target.y - 1;
     }
-    formation_draw_background_tiles(g_formation_scroll_position + g_formation_scroll_velocity, background_y);
+    unit_grid_draw_background(g_formation_scroll_position + g_formation_scroll_velocity, background_y);
     return 1;
 }
 
@@ -753,7 +753,7 @@ static s32 calculate_brightness_falloff(s32 x, s32 y, s32 base, s32 floor) {
  * optimizer never treats a hard register as invariant, while a pseudo lets it
  * hoist that product and the shade-row addresses.
  */
-void formation_draw_background_tiles(s32 y, s32 unused_1) {
+void unit_grid_draw_background(s32 y, s32 unused_1) {
     textured_rect_source_t rect;
     /* Unused local bytes and RGB alignment retain the target frame. */
     u8 unused_frame[8];

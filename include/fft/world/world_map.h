@@ -40,7 +40,7 @@ typedef enum world_map_flags {
     WORLD_MAP_FLAG_REQUEST_BRAVE_STORY = 0x00000100,
     /* world_map_draw_frame does not load the scratch image into the display buffer. */
     WORLD_MAP_FLAG_NO_BACKGROUND_IMAGE = 0x00000200,
-    /* display_object_draw_gs_list draws nothing and world_map_pulse_dots returns. */
+    /* display_object_draw_list draws nothing and world_map_pulse_dots returns. */
     WORLD_MAP_FLAG_HIDE_DISPLAY_OBJECTS = 0x00000400,
     /* world_map_draw_hud_value draws nothing. */
     WORLD_MAP_FLAG_HIDE_CONTEXT_VALUE = 0x00000800,

@@ -21,7 +21,11 @@ extern s16 g_job_list_selected_id;
 s32 job_list_update(void);
 
 /* WORLD and JOBSTTS each build their own body. */
+#ifdef FFT_EVENT_BUNIT
+s32 job_list_build(s32 unit_id, s16* job_ids, s32 unused_2);
+#else
 s32 job_list_build(u8 unit_index, s16* job_ids, s32 mode);
+#endif
 
 /* row callbacks */
 /* Row callbacks of the job lists: the menu script calls them for a row's level and JP numbers. */

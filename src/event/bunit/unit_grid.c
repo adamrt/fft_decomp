@@ -379,7 +379,7 @@ void unit_list_init(s32 unused_selected_index) {
  * two numbers and gauge; 3 and 4 two labeled numbers), then ease the cursor
  * trail toward the selected cell.
  *
- * Twin of WORLD's formation_grid_update with draw_unit_readout's panel
+ * Twin of WORLD's unit_grid_update with draw_unit_readout's panel
  * body written inline. Details the target needs:
  * - `unit` is also the early "enabled" flag, `row` also the stat tile index
  *   and cursor delta, and `top` the button y, highlight flag and panel y, as
@@ -402,7 +402,7 @@ void unit_list_init(s32 unused_selected_index) {
  *   together with the two g_unit_selected_index tests; the unused
  *   RECTs reproduce the locals area.
  */
-s32 unit_list_update_grid(s16 allow_banner_toggle, s16 allow_browse, s16 show_stat_panel, s16 allow_stat_cycle,
+s32 unit_grid_update(s16 allow_banner_toggle, s16 allow_browse, s16 show_stat_panel, s16 allow_stat_cycle,
     s16 stat_mode, s16 buttons, s16 locked) {
     RECT unused[3];
     RECT cell;
@@ -743,7 +743,7 @@ s32 unit_list_update_grid(s16 allow_banner_toggle, s16 allow_browse, s16 show_st
     if (row >= -4 && row <= 4) {
         g_unit_list_gfx_falloff_focus_y = cursor_y - 1;
     }
-    unit_list_draw_shaded_rows(g_unit_list_page_offset + g_unit_list_scroll_step);
+    unit_grid_draw_background(g_unit_list_page_offset + g_unit_list_scroll_step);
     return 1;
 }
 
@@ -769,7 +769,7 @@ static s32 calculate_brightness_falloff(s32 x, s32 y, s32 base_value, s32 minimu
 
 /* Draw rows of gouraud-textured quads whose vertex brightness falls off with
  * distance from the animated focal point. */
-void unit_list_draw_shaded_rows(s32 y) {
+void unit_grid_draw_background(s32 y) {
     textured_rect_source_t rect;
     /* Unused local bytes and RGB alignment retain the target frame. */
     u8 unused_frame[8];

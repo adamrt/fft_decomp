@@ -117,7 +117,9 @@ typedef struct display_object_gpu_image {
 typedef char display_object_gpu_image_size_must_be_56[sizeof(display_object_gpu_image_t) == 56 ? 1 : -1];
 
 extern display_object_gpu_image_t g_display_object_gpu_image_pool[DISPLAY_OBJECT_GPU_POOL_CAPACITY];
-void display_object_draw_gpu_list(u32* otag, void** records, s32 count);
+#ifdef FFT_OPEN
+void display_object_draw_list(u32* otag, void** records, s32 count);
+#endif
 
 /* libgs image records */
 enum { DISPLAY_OBJECT_GS_POOL_CAPACITY = 32 };
@@ -139,8 +141,10 @@ typedef struct display_object_gs_image {
 typedef char display_object_gs_image_size_must_be_52[sizeof(display_object_gs_image_t) == 52 ? 1 : -1];
 
 extern display_object_gs_image_t g_display_object_gs_image_pool[DISPLAY_OBJECT_GS_POOL_CAPACITY];
-void display_object_init_gs_image(s32 index, RECT bounds, point32_t clut, s32 flags);
-void display_object_draw_gs_list(GsOT* otag, void** records, s32 count);
+#ifdef FFT_WLDCORE
+void display_object_init_image(s32 index, RECT bounds, point32_t clut, s32 flags);
+void display_object_draw_list(GsOT* otag, void** records, s32 count);
+#endif
 void display_object_draw_animated(display_object_animated_t* object, GsOT* ot);
 
 /* animation catalog (WLDCORE) */

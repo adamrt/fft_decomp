@@ -151,7 +151,7 @@ void world_map_capture_backdrop(void) {
     world_map_draw_tiles(&g_world_map_aux_ordering_tables[g_gfx_active_buffer_index]);
     world_map_draw_routes(&g_world_map_aux_ordering_tables[g_gfx_active_buffer_index]);
     world_map_project_dots();
-    display_object_draw_gs_list(&g_world_map_aux_ordering_tables[g_gfx_active_buffer_index], g_display_object_aux_queue,
+    display_object_draw_list(&g_world_map_aux_ordering_tables[g_gfx_active_buffer_index], g_display_object_aux_queue,
         g_display_object_aux_queue_count);
     world_map_restore_previous_stack();
     GsSortClear(0, 0, 0, &g_world_map_aux_ordering_tables[g_gfx_active_buffer_index]);
@@ -167,7 +167,7 @@ void world_map_capture_backdrop(void) {
     world_map_draw_hud_value(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
     calendar_draw_date(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
     location_draw_label(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
-    display_object_draw_gs_list(
+    display_object_draw_list(
         &g_world_map_ordering_tables[g_gfx_active_buffer_index], g_display_object_queue, g_display_object_queue_count);
     GsDrawOt(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
     DrawSync(0);
@@ -199,9 +199,9 @@ static void draw_map_frame(void) {
     world_map_draw_hud_value(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
     calendar_draw_date(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
     location_draw_label(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
-    display_object_draw_gs_list(&g_world_map_aux_ordering_tables[g_gfx_active_buffer_index], g_display_object_aux_queue,
+    display_object_draw_list(&g_world_map_aux_ordering_tables[g_gfx_active_buffer_index], g_display_object_aux_queue,
         g_display_object_aux_queue_count);
-    display_object_draw_gs_list(
+    display_object_draw_list(
         &g_world_map_ordering_tables[g_gfx_active_buffer_index], g_display_object_queue, g_display_object_queue_count);
     world_map_restore_previous_stack();
     DrawSync(0);
@@ -230,7 +230,7 @@ void world_map_draw_frame(void) {
     world_map_draw_hud_value(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
     calendar_draw_date(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
     location_draw_label(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
-    display_object_draw_gs_list(
+    display_object_draw_list(
         &g_world_map_ordering_tables[g_gfx_active_buffer_index], g_display_object_queue, g_display_object_queue_count);
     world_map_draw_fade_boxes();
     world_map_restore_previous_stack();

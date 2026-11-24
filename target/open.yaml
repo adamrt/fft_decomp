@@ -65,7 +65,7 @@ functions:
   - {addr: 0x80068b74, size: 60, name: gfx_begin_frame, hash: 22d70e319b6161e8, unit: init}
   - {addr: 0x80068bb0, size: 224, name: display_object_init_pools, hash: 39decc2065a64d27, unit: window_records}
   - {addr: 0x80068c90, size: 64, name: gfx_clear_current_otag, hash: 7dbb971d4cb43ee9, unit: window_records}
-  - {addr: 0x80068cd0, size: 176, name: display_object_draw_gpu_list, hash: a3a591bbfb26047c, unit: window_records}
+  - {addr: 0x80068cd0, size: 176, name: display_object_draw_list, hash: a3a591bbfb26047c, unit: window_records}
   - {addr: 0x80068d80, size: 1164, name: draw_animated, hash: d2445b3917e77445, unit: window_records}
   - {addr: 0x8006920c, size: 1212, name: draw_image, hash: 6c7b3dae23c3f006, unit: window_records}
   - {addr: 0x800696c8, size: 232, name: display_object_append_animated, hash: a3135d544f819f6f, unit: window_records}
@@ -105,7 +105,7 @@ functions:
   - {addr: 0x8006c96c, size: 88, name: window_display_text_entry, hash: 5dccdaeb10297930, unit: window_render}
   - {addr: 0x8006c9c4, size: 104, name: window_measure_text_image, hash: 1dee4681dccf0eb6, unit: window_render}
   - {addr: 0x8006ca2c, size: 212, name: window_init_text_record, hash: 5f2251260b376d41, unit: window_render}
-  - {addr: 0x8006cb00, size: 248, name: display_object_init_gpu_image, hash: e55c249f3c899201, unit: window_render}
+  - {addr: 0x8006cb00, size: 248, name: display_object_init_image, hash: e55c249f3c899201, unit: window_render}
   - {addr: 0x8006cbf8, size: 444, name: start_list_thread, hash: a1bb85931a6abb8e, unit: music_test}
   - {addr: 0x8006cdb4, size: 316, name: music_test_open_menu, hash: 45eaf45a7a3b75ee, unit: music_test}
   - {addr: 0x8006cef0, size: 876, name: music_test_update_menu, hash: c7076123a75c7032, unit: music_test}

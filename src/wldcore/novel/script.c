@@ -635,7 +635,7 @@ static void novel_opcode_0a_load_picture(void) {
     clut_position.y = image.cy;
     LoadTPage(image.pixel, 0, 0, bounds.x, bounds.y, bounds.w * 4, bounds.h);
     LoadClut(image.clut, clut_position.x, clut_position.y);
-    display_object_init_gs_image(g_novel_reading.picture_render_index, bounds, clut_position, DISPLAY_OBJECT_8BIT_CLUT);
+    display_object_init_image(g_novel_reading.picture_render_index, bounds, clut_position, DISPLAY_OBJECT_8BIT_CLUT);
     g_display_object_gs_image_pool[g_novel_reading.picture_render_index].pop_in_step = 0;
     g_novel_reading.state_flags |= NOVEL_STATE_FETCH;
 }

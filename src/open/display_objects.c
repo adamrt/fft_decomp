@@ -68,7 +68,7 @@ void gfx_clear_current_otag(void) {
 }
 
 /* Draw visible animated and image records into the GPU ordering table. */
-void display_object_draw_gpu_list(u32* otag, void** list, s32 count) {
+void display_object_draw_list(u32* otag, void** list, s32 count) {
     void* object;
     u32* flags;
     s32 i;

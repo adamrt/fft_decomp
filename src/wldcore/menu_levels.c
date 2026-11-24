@@ -1725,7 +1725,7 @@ void location_open_menu(s32 menu) {
         bounds.h = image.ph;
         origin.x = image.cx;
         origin.y = image.cy;
-        display_object_init_gs_image(index, bounds, origin, DISPLAY_OBJECT_8BIT_CLUT);
+        display_object_init_image(index, bounds, origin, DISPLAY_OBJECT_8BIT_CLUT);
         base = &g_display_object_gs_image_pool[index].position;
         g_display_object_gs_image_pool[index].priority = 0xB;
         base->x = -0x40;

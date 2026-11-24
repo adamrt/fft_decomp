@@ -71,7 +71,7 @@ void job_calculate_and_store_unlocks(party_unit_t* party, u8 unlocked_jobs[UNIT_
  * monsters and units using monster skillsets get only the base job. The
  * third argument is not read.
  */
-s32 unit_list_build_job_list(s32 unit_id, s16* job_ids, s32 unused_2) {
+s32 job_list_build(s32 unit_id, s16* job_ids, s32 unused_2) {
     s32 saved_unit_id = unit_id;
     u32 unit_index = (u8)saved_unit_id;
     unit_list_record_t** unit_table = g_unit_list_pointers;

@@ -7,7 +7,7 @@
 static u16 s_status_screen_menu_selection_values[8] = { 0 };
 
 /* Step selection value index left or right on the D-pad, wrapping within count, and return it. */
-s32 status_screen_update_wrapped_horizontal_selection(u16 count, u8 index, s32 buttons) {
+s32 menu_selection_step_horizontal(u16 count, u8 index, s32 buttons) {
     if (buttons & PSX_PAD_LEFT) {
         s_status_screen_menu_selection_values[index] = (s_status_screen_menu_selection_values[index] == 0)
             ? count - 1

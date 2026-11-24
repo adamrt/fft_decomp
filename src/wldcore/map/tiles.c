@@ -84,9 +84,9 @@ void world_map_set_backdrop_mode(s32 capture) {
     world_map_draw_hud_value(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
     calendar_draw_date(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
     location_draw_label(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
-    display_object_draw_gs_list(&g_world_map_aux_ordering_tables[g_gfx_active_buffer_index], g_display_object_aux_queue,
+    display_object_draw_list(&g_world_map_aux_ordering_tables[g_gfx_active_buffer_index], g_display_object_aux_queue,
         g_display_object_aux_queue_count);
-    display_object_draw_gs_list(
+    display_object_draw_list(
         &g_world_map_ordering_tables[g_gfx_active_buffer_index], g_display_object_queue, g_display_object_queue_count);
     world_map_restore_previous_stack();
     GsSortClear(0, 0, 0, &g_world_map_aux_ordering_tables[g_gfx_active_buffer_index]);
@@ -113,7 +113,7 @@ void world_map_set_backdrop_mode(s32 capture) {
             | WORLD_MAP_FLAG_HIDE_CONTEXT_VALUE | WORLD_MAP_FLAG_HIDE_CALENDAR_DATE
             | WORLD_MAP_FLAG_HIDE_LOCATION_LABEL;
         g_display_object_animated_pool[menu_window_index].flags |= DISPLAY_OBJECT_HIDDEN;
-        display_object_draw_gs_list(&g_world_map_ordering_tables[g_gfx_active_buffer_index], g_display_object_queue,
+        display_object_draw_list(&g_world_map_ordering_tables[g_gfx_active_buffer_index], g_display_object_queue,
             g_display_object_queue_count);
     }
     GsDrawOt(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);

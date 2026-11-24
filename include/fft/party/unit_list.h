@@ -123,9 +123,6 @@ void unit_list_build_index_map(void);
 /* unit grid */
 extern u8 g_unit_list_grid_selected_cell;
 
-s32 unit_list_update_grid(s16 allow_banner_toggle, s16 allow_browse, s16 show_stat_panel, s16 allow_stat_cycle,
-    s16 stat_mode, s16 buttons, s16 locked);
-
 /* reorder list */
 extern s16 g_unit_list_reorder_result;
 extern u8 g_unit_list_reorderable_count;
@@ -137,7 +134,6 @@ void unit_list_load_sort_order(s32 unused, s16* entries);
 void unit_list_store_sort_order(s32 unused, const s16* entries);
 
 /* job page */
-s32 unit_list_build_job_list(s32 unit_id, s16* job_ids, s32 unused_2);
 
 /* status banner */
 extern u8 g_unit_list_status_banner_enabled;
@@ -158,8 +154,6 @@ extern u16 g_unit_list_gfx_draw_move_capacity;
  * order only when both are volatile, and the target puts the second in the first's delay slot. */
 extern volatile u16 g_unit_list_gfx_line_g2_capacity;
 extern volatile u16 g_unit_list_gfx_line_g3_capacity;
-
-void unit_list_draw_shaded_rows(s32 y);
 
 /* input */
 extern u32 g_unit_list_input_secondary_repeat;

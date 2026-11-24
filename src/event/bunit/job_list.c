@@ -91,7 +91,7 @@ s32 job_list_update(void) {
 
     if (g_job_list_initialized == 0) {
         menu_set_event_speed(2);
-        unit_list_build_job_list(g_unit_selected_index & 0xff, g_job_list_job_ids, 0);
+        job_list_build(g_unit_selected_index & 0xff, g_job_list_job_ids, 0);
         g_menu_row_callbacks[0].value = calculate_level;
         g_menu_row_callbacks[2].value = calculate_job_list_jp;
         g_menu_row_callbacks[5].value = calculate_next_level_jp;

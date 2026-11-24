@@ -51,7 +51,12 @@ s32 menu_selection_init_value(u8 index, s16 value);
 /* The horizontal and vertical steppers move selection value selection_index (g_menu_selection_values) by the
  * D-pad, wrapping within entry_count, and return it; the _sound_step forms also queue a sound effect when
  * it moves. The grid stepper moves a grid index instead. */
+/* JOBSTTS's own body steps its private selection values and returns an s32. */
+#ifdef FFT_EVENT_JOBSTTS
+s32 menu_selection_step_horizontal(u16 count, u8 index, s32 buttons);
+#else
 s16 menu_selection_step_horizontal(u16 entry_count, u8 selection_index, s32 input_mask);
+#endif
 s32 menu_selection_step_horizontal_with_sound(u16 entry_count, u8 selection_index, s32 input_mask, u8 sound_id);
 s32 menu_selection_step_vertical_with_sound(s32 entry_count, s32 selection_index, s32 input_mask, s8 sound_id);
 s32 menu_step_grid_selection(s32 columns, s32 rows, s32 last_index, s32 old_index, s32 input);

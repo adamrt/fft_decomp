@@ -226,10 +226,10 @@ s32 bunit_entrypoint(s32 unused_unit, void* unused_otag) {
         if (g_unit_list_current_menu == UNIT_LIST_MENU_JOB) {
             job_page_update();
             /* The target also passes a1 = 0 to this one-argument callee. */
-            ((void (*)(s32, s32))unit_list_draw_shaded_rows)(g_unit_list_page_offset + g_unit_list_scroll_step, 0);
+            ((void (*)(s32, s32))unit_grid_draw_background)(g_unit_list_page_offset + g_unit_list_scroll_step, 0);
         } else {
             running = update_unit_grid_menu();
-            unit_list_update_grid(1, 1, 1, 1, 0,
+            unit_grid_update(1, 1, 1, 1, 0,
                 g_unit_list_help_screen_id == MENU_GRID_HELP_NONE ? g_unit_list_input_secondary_repeat : 0,
                 unit_list_is_busy());
         }

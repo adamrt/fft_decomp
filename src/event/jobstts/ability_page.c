@@ -91,7 +91,7 @@ s32 ability_list_update(void) {
         s_ability_list_job_name_ids[0] = g_job_list_selected_id;
         text_render_id_rows_to_vram(
             g_text_section_pointers[TEXT_SECTION_JOB_NAMES], s_ability_list_job_name_ids, &rect, 0);
-        g_ability_list_ability_category = status_screen_update_wrapped_horizontal_selection(4, 5, 0);
+        g_ability_list_ability_category = menu_selection_step_horizontal(4, 5, 0);
         ability_list_build(
             0, g_job_list_selected_id & 0x3ff, g_ability_list_ability_category, g_ability_list_ability_entries, 0);
         menu_scrollable_list_init_core(
@@ -123,7 +123,7 @@ s32 ability_list_update(void) {
     }
 
     /* On a tab change, save the old tab's cursor and rebuild the list for the new one. */
-    category = status_screen_update_wrapped_horizontal_selection(4, 5, g_menu_input_secondary_repeat);
+    category = menu_selection_step_horizontal(4, 5, g_menu_input_secondary_repeat);
     if (category != g_ability_list_ability_category) {
         menu_selection_set_record(g_ability_list_ability_category, g_menu_list_selected_index, g_menu_scroll_base_index,
             g_ability_list_ability_entries);

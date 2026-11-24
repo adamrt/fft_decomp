@@ -165,14 +165,14 @@ void formation_run_screen(s32 tutorial, s32 unused) {
             if (g_formation_current_menu == FORMATION_MENU_UNIT_GRID
                 || g_formation_current_menu == FORMATION_MENU_DISMISS_UNIT
                 || g_formation_current_menu == FORMATION_MENU_ORDER_UNIT) {
-                formation_grid_update(1, g_formation_current_menu == FORMATION_MENU_UNIT_GRID,
+                unit_grid_update(1, g_formation_current_menu == FORMATION_MENU_UNIT_GRID,
                     g_formation_current_menu == FORMATION_MENU_UNIT_GRID,
                     g_formation_triangle_menu_open + g_menu_screen_grid_id != 0
                         ? 0
                         : g_menu_screen_input_secondary_repeat_latched,
                     menu_screen_check_busy(), 0, 0);
             } else {
-                formation_draw_background_tiles(g_formation_scroll_position + g_formation_scroll_velocity, 0);
+                unit_grid_draw_background(g_formation_scroll_position + g_formation_scroll_velocity, 0);
             }
 
             /* L1/R1 cycle units; i is the buttons' disabled flag here. */
