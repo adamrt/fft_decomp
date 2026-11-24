@@ -287,10 +287,10 @@ u8 at_list_count_turns_to_resolve(s32 battle_unit_id, s32 ct, const at_entry_t* 
     ct <<= 8;
     for (count = 0; count < AT_LIST_CAPACITY; count++, entries++) {
         s32 entry_unit = entries->unit_code;
-        s32 is_action = entry_unit & AT_ACTION_ENTRY;
+        s32 is_action = entry_unit & AT_ENTRY_ACTION;
         s32 entry_ct;
-        entry_unit &= AT_UNIT_ID_MASK;
-        if (entry_unit == AT_END_OF_LIST) {
+        entry_unit &= AT_ENTRY_UNIT_ID_MASK;
+        if (entry_unit == AT_ENTRY_END_OF_LIST) {
             return 0xFF;
         }
         entry_ct = entries->sort_key;

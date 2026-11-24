@@ -32,11 +32,11 @@ typedef struct crystal_pickup_result {
 typedef char crystal_pickup_result_size_must_be_148[sizeof(crystal_pickup_result_t) == 148 ? 1 : -1];
 
 /* The choices crystal_pickup_apply_choice applies, as flags. */
-enum {
-    CRYSTAL_LEARN_ABILITIES = 0x1,
-    CRYSTAL_RESTORE_HP_MP = 0x2,
-    CRYSTAL_TAKE_TREASURE = 0x4 /* add the treasure's item instead */
-};
+typedef enum crystal_pickup_choice_flag {
+    CRYSTAL_PICKUP_CHOICE_LEARN_ABILITIES = 0x1,
+    CRYSTAL_PICKUP_CHOICE_RESTORE_HP_MP = 0x2,
+    CRYSTAL_PICKUP_CHOICE_TAKE_TREASURE = 0x4 /* add the treasure's item instead */
+} crystal_pickup_choice_flag_e;
 
 extern crystal_pickup_result_t* g_crystal_pickup_context;
 

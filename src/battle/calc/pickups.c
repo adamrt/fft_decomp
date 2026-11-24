@@ -285,17 +285,17 @@ s32 crystal_pickup_apply_choice(battle_unit_t* unit, s32 flags) {
     action_reset_result(&unit->action);
     unit->action.miss_type = ACTION_MISS_TYPE_CANCELED;
     unit->action.hit = 0;
-    if (flags & CRYSTAL_TAKE_TREASURE) {
+    if (flags & CRYSTAL_PICKUP_CHOICE_TAKE_TREASURE) {
         return item_give(unit, g_crystal_pickup_result.treasure_item);
     }
-    if (flags & CRYSTAL_RESTORE_HP_MP) {
+    if (flags & CRYSTAL_PICKUP_CHOICE_RESTORE_HP_MP) {
         unit->action.hit = 1;
         unit->action.attack_type = ACTION_TYPE_HP_HEALING | ACTION_TYPE_MP_HEALING;
         unit->action.miss_type = ACTION_MISS_TYPE_HIT;
         unit->action.hp_healing = unit->max_hp - unit->hp;
         unit->action.mp_healing = unit->max_mp - unit->mp;
     }
-    if (flags & CRYSTAL_LEARN_ABILITIES) {
+    if (flags & CRYSTAL_PICKUP_CHOICE_LEARN_ABILITIES) {
         for (i = 0; i < UNIT_LEARNED_ABILITY_JOB_COUNT; i++) {
             for (j = 0; j < UNIT_LEARNED_ABILITY_BYTES_PER_JOB; j++) {
                 unit->career.learned_abilities[i][j] |= g_crystal_pickup_result.learned[i][j];

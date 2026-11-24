@@ -267,7 +267,7 @@ static void build_ability_preview(void) {
     /* An item preview marks the first entry as the item action; the loop below names it
      * from the item text. */
     if (staged_item != 0) {
-        work->entries[1].unit_code |= AT_ACTION_ENTRY;
+        work->entries[1].unit_code |= AT_ENTRY_ACTION;
         work->entries[1].action_id_low = g_command_selected_command.data.action.item_id;
     }
 
@@ -300,13 +300,13 @@ static void build_ability_preview(void) {
         at_entry_t* slot = &work->entries[index + 1];
         s32 name_index;
 
-        if ((slot->unit_code & AT_UNIT_ID_MASK) == AT_END_OF_LIST) {
+        if ((slot->unit_code & AT_ENTRY_UNIT_ID_MASK) == AT_ENTRY_END_OF_LIST) {
             break;
         }
         work->entry_numbers[index] = index + 1;
-        battle_unit = battle_unit_get(slot->unit_code & AT_UNIT_ID_MASK);
+        battle_unit = battle_unit_get(slot->unit_code & AT_ENTRY_UNIT_ID_MASK);
         /* Action rows wrap the unit name in the 0xd9be/0xd9bf glyph pair. */
-        if (slot->unit_code & AT_ACTION_ENTRY) {
+        if (slot->unit_code & AT_ENTRY_ACTION) {
             *text++ = 0xd9;
             *text++ = 0xbe;
         }
@@ -318,7 +318,7 @@ static void build_ability_preview(void) {
             }
             text++;
         }
-        if (slot->unit_code & AT_ACTION_ENTRY) {
+        if (slot->unit_code & AT_ENTRY_ACTION) {
             *text++ = 0xd9;
             *text++ = 0xbf;
         }
@@ -326,12 +326,12 @@ static void build_ability_preview(void) {
 
         /* Text id 0xf800 + index is entry `index` of the AT list section, the name just
          * written: unit rows show it in the first text column, action rows in the second. */
-        if (slot->unit_code & AT_ACTION_ENTRY) {
+        if (slot->unit_code & AT_ENTRY_ACTION) {
             work->secondary_text_ids[count] = index - 0x800;
         } else {
             work->primary_text_ids[count] = index - 0x800;
         }
-        if (!(slot->unit_code & AT_ACTION_ENTRY)) {
+        if (!(slot->unit_code & AT_ENTRY_ACTION)) {
             work->secondary_text_ids[count] = TEXT_ID_ABILITY_NAME_BASE;
         } else {
             s32 action_text_id;
@@ -339,14 +339,14 @@ static void build_ability_preview(void) {
 
             /* The action's name: the jump text, the staged item's name or the ability's. */
             bracketed = 1;
-            if (slot->unit_code & AT_JUMP) {
+            if (slot->unit_code & AT_ENTRY_JUMP) {
                 action_text_id = 0xb012;
             } else {
                 action_id = slot->action_id_low;
                 if (index == 0 && staged_item != 0) {
                     action_text_id = action_id + TEXT_ID_ITEM_NAME_BASE;
                 } else {
-                    if (slot->unit_code & AT_ABILITY_ID_HIGH_BIT) {
+                    if (slot->unit_code & AT_ENTRY_ABILITY_ID_HIGH_BIT) {
                         action_id += 0x100;
                     }
                     action_text_id = action_id + TEXT_ID_ABILITY_NAME_BASE;

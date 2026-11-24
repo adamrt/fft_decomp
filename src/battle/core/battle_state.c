@@ -949,7 +949,7 @@ static s32 start_next_post_move_event(void) {
             } else {
                 command_dispatch_request(
                     MENU_REQUEST_CRYSTAL_OR_TREASURE, battle_unit->battle_unit_id, battle_unit->battle_unit_id, 0, 0);
-                crystal_pickup_apply_choice(source->battle_unit, CRYSTAL_RESTORE_HP_MP);
+                crystal_pickup_apply_choice(source->battle_unit, CRYSTAL_PICKUP_CHOICE_RESTORE_HP_MP);
                 action_apply_target_result(source->battle_unit->battle_unit_id);
                 result_prepare_display(source);
                 map_unit_update_display(source->map_unit_id);
@@ -964,7 +964,7 @@ static s32 start_next_post_move_event(void) {
             }
             if ((source->battle_unit->initial_team_flags & UNIT_TEAM_MASK)
                 || !(source->battle_unit->initial_team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED)) {
-                crystal_pickup_apply_choice(source->battle_unit, CRYSTAL_TAKE_TREASURE);
+                crystal_pickup_apply_choice(source->battle_unit, CRYSTAL_PICKUP_CHOICE_TAKE_TREASURE);
             }
         }
         map_unit_start_red_fade_out(target->map_unit_id);
@@ -3313,16 +3313,16 @@ void battle_state_post_move_events_update(void) {
     source = map_unit_get_source();
     casting = map_unit_get_casting();
     switch (command->kind) {
-    case CRYSTAL_RESTORE_HP_MP:
-        crystal_pickup_apply_choice(source->battle_unit, CRYSTAL_RESTORE_HP_MP);
+    case CRYSTAL_PICKUP_CHOICE_RESTORE_HP_MP:
+        crystal_pickup_apply_choice(source->battle_unit, CRYSTAL_PICKUP_CHOICE_RESTORE_HP_MP);
         g_battle_window_closed = 1;
         action_apply_target_result(source->battle_unit->battle_unit_id);
         result_prepare_display(source);
         map_unit_update_display(source->map_unit_id);
         break;
     case 0:
-    case CRYSTAL_LEARN_ABILITIES:
-    case CRYSTAL_TAKE_TREASURE:
+    case CRYSTAL_PICKUP_CHOICE_LEARN_ABILITIES:
+    case CRYSTAL_PICKUP_CHOICE_TAKE_TREASURE:
         crystal_pickup_apply_choice(source->battle_unit, command->kind);
         g_battle_window_closed = 1;
         break;

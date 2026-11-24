@@ -21,15 +21,15 @@
 /* Seven menu entries form the crystal/treasure result panel. The AT-list
  * and confirmation groups each contain a message entry followed by a choice. */
 typedef enum crystal_pickup_entry {
-    MENU_CRYSTAL_PICKUP_LIST = 0,
-    MENU_CRYSTAL_PICKUP_AT_LIST = 1,
-    MENU_CRYSTAL_PICKUP_CONFIRM = 3,
-    MENU_CRYSTAL_PICKUP_MESSAGE = 5,
-    MENU_CRYSTAL_PICKUP_CHOICE = 6,
-    MENU_CRYSTAL_PICKUP_ENTRY_COUNT = 7
+    CRYSTAL_PICKUP_ENTRY_LIST = 0,
+    CRYSTAL_PICKUP_ENTRY_AT_LIST = 1,
+    CRYSTAL_PICKUP_ENTRY_CONFIRM = 3,
+    CRYSTAL_PICKUP_ENTRY_MESSAGE = 5,
+    CRYSTAL_PICKUP_ENTRY_CHOICE = 6,
+    CRYSTAL_PICKUP_ENTRY_COUNT = 7
 } crystal_pickup_entry_e;
 
-extern menu_entry_t g_crystal_pickup_menu[MENU_CRYSTAL_PICKUP_ENTRY_COUNT];
+extern menu_entry_t g_crystal_pickup_menu[CRYSTAL_PICKUP_ENTRY_COUNT];
 extern menu_text_layout_t g_crystal_pickup_list_layout;
 extern s16 g_crystal_pickup_row_colors[512];
 extern u32* g_crystal_pickup_controller_input;
@@ -74,8 +74,8 @@ void crystal_pickup_run_menus(void) {
      * Reordering them changes address CSE. */
     g_menu_thread_menu_data = g_crystal_pickup_menu;
     menu = g_crystal_pickup_menu;
-    g_crystal_pickup_menu[MENU_CRYSTAL_PICKUP_LIST].select_text_table = 5;
-    g_crystal_pickup_menu[MENU_CRYSTAL_PICKUP_LIST].context = &g_crystal_pickup_list_layout;
+    g_crystal_pickup_menu[CRYSTAL_PICKUP_ENTRY_LIST].select_text_table = 5;
+    g_crystal_pickup_menu[CRYSTAL_PICKUP_ENTRY_LIST].context = &g_crystal_pickup_list_layout;
 
     for (index = 0x1ff; index >= 0; index--) {
         g_crystal_pickup_row_colors[index] = 0;
@@ -125,10 +125,10 @@ void crystal_pickup_run_menus(void) {
     /* Nothing to pick up: show message 0x183c and end. */
     if (context->result == CRYSTAL_PICKUP_NOTHING) {
         message_id = 0x183c;
-        g_menu_thread_menu_data[MENU_CRYSTAL_PICKUP_MESSAGE].text_id = message_id;
+        g_menu_thread_menu_data[CRYSTAL_PICKUP_ENTRY_MESSAGE].text_id = message_id;
         thread_start(g_thread_current_id - 1, menu_icon_linked_entry_thread);
         thread_set_parameters(
-            g_thread_current_id - 1, (s32)&g_menu_thread_menu_data[MENU_CRYSTAL_PICKUP_MESSAGE], 0, 0);
+            g_thread_current_id - 1, (s32)&g_menu_thread_menu_data[CRYSTAL_PICKUP_ENTRY_MESSAGE], 0, 0);
         thread_wait_inactive(g_thread_current_id - 1);
         thread_wait_frames(2);
         g_crystal_pickup_action = 0;
@@ -152,10 +152,10 @@ void crystal_pickup_run_menus(void) {
             g_text_substitution_values[0] = context->treasure_item;
             g_crystal_pickup_item = context->treasure_item;
         }
-        g_menu_thread_menu_data[MENU_CRYSTAL_PICKUP_MESSAGE].text_id = message_id;
+        g_menu_thread_menu_data[CRYSTAL_PICKUP_ENTRY_MESSAGE].text_id = message_id;
         thread_start(g_thread_current_id - 1, menu_icon_linked_entry_thread);
         thread_set_parameters(
-            g_thread_current_id - 1, (s32)&g_menu_thread_menu_data[MENU_CRYSTAL_PICKUP_MESSAGE], 0, 0);
+            g_thread_current_id - 1, (s32)&g_menu_thread_menu_data[CRYSTAL_PICKUP_ENTRY_MESSAGE], 0, 0);
         thread_wait_inactive(g_thread_current_id - 1);
         thread_wait_frames(2);
         g_crystal_pickup_action = 4;
@@ -182,7 +182,7 @@ void crystal_pickup_run_menus(void) {
             g_crystal_pickup_choice_result = 0xff;
             thread_start(g_thread_current_id - 1, menu_icon_selection_thread);
             thread_set_parameters(
-                g_thread_current_id - 1, (s32)&g_menu_thread_menu_data[MENU_CRYSTAL_PICKUP_CHOICE], 0, 0);
+                g_thread_current_id - 1, (s32)&g_menu_thread_menu_data[CRYSTAL_PICKUP_ENTRY_CHOICE], 0, 0);
             thread_wait_inactive(g_thread_current_id - 1);
         }
 
@@ -194,7 +194,7 @@ void crystal_pickup_run_menus(void) {
             thread_set_parameters(g_thread_current_id - 2, (s32)g_menu_thread_menu_data, 0, 0);
             thread_start(THREAD_BORROWED_SLOT_AT_LIST_MENU, menu_icon_linked_entry_thread);
             thread_set_parameters(
-                THREAD_BORROWED_SLOT_AT_LIST_MENU, (s32)&g_menu_thread_menu_data[MENU_CRYSTAL_PICKUP_AT_LIST], 0, 0);
+                THREAD_BORROWED_SLOT_AT_LIST_MENU, (s32)&g_menu_thread_menu_data[CRYSTAL_PICKUP_ENTRY_AT_LIST], 0, 0);
             for (;;) {
                 thread_yield();
                 if (thread_is_running_asm(g_thread_current_id - 3)) {
@@ -231,7 +231,7 @@ void crystal_pickup_run_menus(void) {
             g_crystal_pickup_menu_result = 0xff;
             thread_start(g_thread_current_id - 1, menu_icon_linked_entry_thread);
             thread_set_parameters(
-                g_thread_current_id - 1, (s32)&g_menu_thread_menu_data[MENU_CRYSTAL_PICKUP_CONFIRM], 0, 0);
+                g_thread_current_id - 1, (s32)&g_menu_thread_menu_data[CRYSTAL_PICKUP_ENTRY_CONFIRM], 0, 0);
             thread_wait_inactive(g_thread_current_id - 1);
             if (g_crystal_pickup_menu_result == 0) {
                 g_crystal_pickup_action = 2;
@@ -289,13 +289,13 @@ static void init_at_list(menu_entry_t* menu) {
         battle_unit_t* unit;
         s32 name_index;
 
-        if ((s_at_list_descriptors[index].unit_code & AT_UNIT_ID_MASK) == AT_END_OF_LIST) {
+        if ((s_at_list_descriptors[index].unit_code & AT_ENTRY_UNIT_ID_MASK) == AT_ENTRY_END_OF_LIST) {
             break;
         }
 
         g_at_list_indices[index] = index + 1;
-        unit = battle_unit_get(s_at_list_descriptors[index].unit_code & AT_UNIT_ID_MASK);
-        if (s_at_list_descriptors[index].unit_code & AT_ACTION_ENTRY) {
+        unit = battle_unit_get(s_at_list_descriptors[index].unit_code & AT_ENTRY_UNIT_ID_MASK);
+        if (s_at_list_descriptors[index].unit_code & AT_ENTRY_ACTION) {
             *text++ = 0xd9;
             *text++ = 0xbe;
         }
@@ -307,28 +307,28 @@ static void init_at_list(menu_entry_t* menu) {
             }
             text++;
         }
-        if (s_at_list_descriptors[index].unit_code & AT_ACTION_ENTRY) {
+        if (s_at_list_descriptors[index].unit_code & AT_ENTRY_ACTION) {
             *text++ = 0xd9;
             *text++ = 0xbf;
         }
         *text++ = 0xfe;
 
-        if (s_at_list_descriptors[index].unit_code & AT_ACTION_ENTRY) {
+        if (s_at_list_descriptors[index].unit_code & AT_ENTRY_ACTION) {
             g_at_list_secondary_text_ids[entry_count] = index - 0x800;
         } else {
             g_at_list_primary_text_ids[entry_count] = index - 0x800;
         }
 
-        if (!(s_at_list_descriptors[index].unit_code & AT_ACTION_ENTRY)) {
+        if (!(s_at_list_descriptors[index].unit_code & AT_ENTRY_ACTION)) {
             g_at_list_secondary_text_ids[entry_count] = TEXT_ID_ABILITY_NAME_BASE;
         } else {
             has_special_entry = 1;
-            if (s_at_list_descriptors[index].unit_code & AT_JUMP) {
+            if (s_at_list_descriptors[index].unit_code & AT_ENTRY_JUMP) {
                 g_at_list_primary_text_ids[entry_count] = 0xb012;
             } else {
                 s32 ability_id = s_at_list_descriptors[index].action_id_low;
 
-                if (s_at_list_descriptors[index].unit_code & AT_ABILITY_ID_HIGH_BIT) {
+                if (s_at_list_descriptors[index].unit_code & AT_ENTRY_ABILITY_ID_HIGH_BIT) {
                     ability_id += 0x100;
                 }
                 g_at_list_primary_text_ids[entry_count] = ability_id + TEXT_ID_ABILITY_NAME_BASE;

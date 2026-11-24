@@ -599,7 +599,7 @@ s32 at_list_find_unit(const battle_unit_t* unit) {
     at_list_build(at_list, AT_LIST_MODE_TURNS_ONLY);
     for (i = 0; i < AT_LIST_CAPACITY; i++) {
         entry = &at_list[i];
-        if ((entry->unit_code & AT_UNIT_ID_MASK) == battle_unit_id) {
+        if ((entry->unit_code & AT_ENTRY_UNIT_ID_MASK) == battle_unit_id) {
             return i;
         }
     }
@@ -609,7 +609,7 @@ s32 at_list_find_unit(const battle_unit_t* unit) {
 /* Rebuild the AT list and return the unit id of the chosen entry.
  *
  * Returns AT_LIST_ENTRY_EMPTY for an empty entry; a charged-action
- * entry (AT_ACTION_ENTRY) returns its unit id plus
+ * entry (AT_ENTRY_ACTION) returns its unit id plus
  * AT_LIST_ENTRY_CHARGED_ACTION. */
 s32 at_list_get_entry_unit_id(s32 at_index) {
     at_entry_t at_list[AT_LIST_CAPACITY];
@@ -618,11 +618,11 @@ s32 at_list_get_entry_unit_id(s32 at_index) {
 
     at_list_build(at_list, AT_LIST_MODE_ALL);
     entry = at_list[at_index].unit_code;
-    unit_id = entry & AT_UNIT_ID_MASK;
-    if (unit_id == AT_END_OF_LIST) {
+    unit_id = entry & AT_ENTRY_UNIT_ID_MASK;
+    if (unit_id == AT_ENTRY_END_OF_LIST) {
         return AT_LIST_ENTRY_EMPTY;
     }
-    if (entry & AT_ACTION_ENTRY) {
+    if (entry & AT_ENTRY_ACTION) {
         unit_id += AT_LIST_ENTRY_CHARGED_ACTION;
     }
     return unit_id;
@@ -863,11 +863,11 @@ s32 at_list_build(at_entry_t* list, at_list_mode_e mode) {
 
 /* Insert an entry into the 40-entry AT list ahead of the first one with a
  * larger key; the last entry drops off. Mode 0 is a unit's turn (the battle unit ID).
- * Mode 1 is a charged ability landing: battle unit ID + AT_ACTION_ENTRY with
- * the ability id's low byte in action_id_low, or battle unit ID + AT_ACTION_ENTRY
- * + AT_JUMP for Jump. For an ability id of 0x100 or more the code is battle
+ * Mode 1 is a charged ability landing: battle unit ID + AT_ENTRY_ACTION with
+ * the ability id's low byte in action_id_low, or battle unit ID + AT_ENTRY_ACTION
+ * + AT_ENTRY_JUMP for Jump. For an ability id of 0x100 or more the code is battle
  * ID - 0x40, which as a byte is battle unit ID + 0xc0: the action entry plus
- * AT_ABILITY_ID_HIGH_BIT. Returns 1 when the entry was placed. */
+ * AT_ENTRY_ABILITY_ID_HIGH_BIT. Returns 1 when the entry was placed. */
 static s32 insert_entry(s32 battle_unit_id, s32 mode, s32 sort_key, at_entry_t* list) {
     battle_unit_t* unit;
     s32 i;
@@ -881,7 +881,7 @@ static s32 insert_entry(s32 battle_unit_id, s32 mode, s32 sort_key, at_entry_t* 
     unit = &g_battle_units[battle_unit_id];
     for (i = 0; i < AT_LIST_CAPACITY; i++) {
         cmp = key < list[i].sort_key;
-        ability_code = battle_unit_id + AT_ACTION_ENTRY;
+        ability_code = battle_unit_id + AT_ENTRY_ACTION;
         if (cmp) {
             for (j = AT_LIST_CAPACITY - 1; j > i; j--) {
                 list[j] = list[j - 1];
@@ -891,12 +891,12 @@ static s32 insert_entry(s32 battle_unit_id, s32 mode, s32 sort_key, at_entry_t* 
             if (mode != 0) {
                 unit_code = ability_code;
                 if (unit->action_command.skillset_id == SKILLSET_ID_JUMP) {
-                    unit_code = battle_unit_id + (AT_ACTION_ENTRY | AT_JUMP);
+                    unit_code = battle_unit_id + (AT_ENTRY_ACTION | AT_ENTRY_JUMP);
                 } else {
                     ability_id = unit->action_command.ability_id;
                     list[i].action_id_low = ability_id;
                     if (ability_id >= 0x100) {
-                        unit_code = battle_unit_id - AT_ACTION_ENTRY;
+                        unit_code = battle_unit_id - AT_ENTRY_ACTION;
                     }
                 }
             }
