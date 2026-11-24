@@ -32,8 +32,7 @@ typedef char world_map_projected_tile_size_must_be_24[sizeof(world_map_projected
 static u32 s_world_map_saved_system_flags;
 extern world_map_projected_tile_t g_world_map_projected_tiles[221]; /* WORLD_MAP_CORNER_COUNT */
 
-static VECTOR s_world_map_projection_scale = { 0 };
-static SVECTOR s_world_map_projection_rotation = { 0 };
+world_map_projection_view_t g_world_map_projection_view = { 0 };
 
 /* The map is a grid of 12x16 tiles, projected through its 13x17 corners. */
 #define WORLD_MAP_TILE_ROWS    12
@@ -126,9 +125,8 @@ void world_map_set_backdrop_mode(s32 capture) {
  * reset, the two append calls here return records 0 and 1.
  *
  * Layout:
- *  - Origin, scale and rotation form g_world_map_projection_view. Their
- *    scale and rotation retain their initialized-data definitions;
- *    the projection routine anchors its shared record view at rotation.
+ *  - Origin, scale and rotation form g_world_map_projection_view, defined
+ *    here; the projection routine reaches all three from one base register.
  *  - The 24-byte tile source table is reached through the pointer cell
  *    g_world_map_tile_descriptors. The target indexes it by 32-bit value
  *    (base + k*4, k += 6), not by record, so it is an s32* with a 32-bit element index.
@@ -147,8 +145,8 @@ void world_map_set_backdrop_mode(s32 capture) {
  *    handle and `.anim_counter` off the record base, while
  *    `.sequence`/`.priority`/`.frame_index` stay array-form.
  *  - A separate index local per append call deletes two `move v1,v0` copies.
- *  - Each window-record group has its own pointer pair (wpos/rec and
- *    wpos2/rec2). One shared pair is long-lived and materializes both
+ *  - Each window-record group has its own pointer pair (map_position/map_window and
+ *    menu_position/menu_window). One shared pair is long-lived and materializes both
  *    addresses into a2/a3 ahead of the first call; split pairs are short-lived
  *    temps, giving the target's per-group `addu v0,v1,s0` / `addu v0,v1,s1`
  *    while s0 (the `.x` column) and s1 (the record base, CSE'd as
@@ -158,10 +156,10 @@ void world_map_set_backdrop_mode(s32 capture) {
  */
 void world_map_init_tile_atlas(void) {
     s32* descriptor;
-    point32_t* wpos;
-    point32_t* wpos2;
-    display_object_animated_t* rec;
-    display_object_animated_t* rec2;
+    point32_t* map_position;
+    point32_t* menu_position;
+    display_object_animated_t* map_window;
+    display_object_animated_t* menu_window;
     s32* pos;
     s32 map_window_index;
     s32 menu_window_index;
@@ -178,15 +176,15 @@ void world_map_init_tile_atlas(void) {
     s32 tpage_x;
     s32 tpage_y;
 
-    s_world_map_projection_scale.vx = ONE;
-    s_world_map_projection_scale.vy = ONE;
-    s_world_map_projection_scale.vz = ONE;
+    g_world_map_projection_view.scale.vx = ONE;
+    g_world_map_projection_view.scale.vy = ONE;
+    g_world_map_projection_view.scale.vz = ONE;
     g_world_map_projection_view.origin.vx = 0;
     g_world_map_projection_view.origin.vy = 0;
     g_world_map_projection_view.origin.vz = 0;
-    s_world_map_projection_rotation.vx = 0;
-    s_world_map_projection_rotation.vy = 0;
-    s_world_map_projection_rotation.vz = 0;
+    g_world_map_projection_view.rotation.vx = 0;
+    g_world_map_projection_view.rotation.vy = 0;
+    g_world_map_projection_view.rotation.vz = 0;
 
     descriptor = g_world_map_tile_descriptors;
     if (!(g_world_map_flags & WORLD_MAP_FLAG_RESTART)) {
@@ -224,22 +222,22 @@ void world_map_init_tile_atlas(void) {
     g_world_map_window_index = map_window_index;
     g_display_object_animated_pool[map_window_index].sequence = DISPLAY_OBJECT_ANIM_MAP_FRAME;
     g_display_object_animated_pool[map_window_index].priority = 13;
-    wpos = &g_display_object_animated_pool[map_window_index].position;
-    rec = &g_display_object_animated_pool[map_window_index];
-    wpos->x = 0;
-    wpos->y = 8;
-    rec->anim_counter = 0;
+    map_position = &g_display_object_animated_pool[map_window_index].position;
+    map_window = &g_display_object_animated_pool[map_window_index];
+    map_position->x = 0;
+    map_position->y = 8;
+    map_window->anim_counter = 0;
     g_display_object_animated_pool[map_window_index].frame_index = 0;
 
     menu_window_index = display_object_append_animated(g_display_object_queue, &g_display_object_queue_count);
     g_world_map_cursor_window = menu_window_index;
     g_display_object_animated_pool[menu_window_index].sequence = DISPLAY_OBJECT_ANIM_ROOT_MENU_FRAME;
     g_display_object_animated_pool[menu_window_index].priority = 13;
-    wpos2 = &g_display_object_animated_pool[menu_window_index].position;
-    rec2 = &g_display_object_animated_pool[menu_window_index];
-    wpos2->x = -4;
-    wpos2->y = 8;
-    rec2->anim_counter = 0;
+    menu_position = &g_display_object_animated_pool[menu_window_index].position;
+    menu_window = &g_display_object_animated_pool[menu_window_index];
+    menu_position->x = -4;
+    menu_position->y = 8;
+    menu_window->anim_counter = 0;
     g_display_object_animated_pool[menu_window_index].frame_index = 0;
 
     world_map_project_tiles();
@@ -256,21 +254,17 @@ void world_map_project_tiles(void) {
     s32 flag;
     s32 i;
     world_map_projected_tile_t* entry;
-    world_map_projection_view_t* view;
-    SVECTOR* rotation;
     s32 flags;
     s32 updated;
     s32 coordinate;
 
-    /* Retail keeps the camera base at rotation; the record base changes its argument instructions. */
-    rotation = &s_world_map_projection_rotation;
-    view = (world_map_projection_view_t*)((u8*)rotation - offsetof(world_map_projection_view_t, rotation));
-    RotMatrix(rotation, &matrix);
-    TransMatrix(&matrix, &view->origin);
-    ScaleMatrix(&matrix, &view->scale);
+    RotMatrix(&g_world_map_projection_view.rotation, &matrix);
+    TransMatrix(&matrix, &g_world_map_projection_view.origin);
+    ScaleMatrix(&matrix, &g_world_map_projection_view.scale);
     SetRotMatrix(&matrix);
     SetTransMatrix(&matrix);
 
+    /* i is zeroed before entry is loaded, as the target schedules them. */
     i = 0;
     entry = g_world_map_projected_tiles;
     for (; i < WORLD_MAP_CORNER_COUNT; i++) {
@@ -392,7 +386,7 @@ void world_map_apply_horizontal_scroll(s32* amount, s32* position) {
     if (*amount > 0) {
         old_position = *position;
         value = old_position + *amount;
-        if (value >= (WORLD_MAP_SCROLL_MAX_X + 1)) {
+        if (value > WORLD_MAP_SCROLL_MAX_X) {
             value = WORLD_MAP_SCROLL_MAX_X;
         }
         *amount -= value - old_position;
@@ -424,7 +418,7 @@ void world_map_apply_vertical_scroll(point32_t* amount, VECTOR* position) {
     if (amount->y > 0) {
         old_position = position->vy;
         value = old_position + amount->y;
-        if (value >= (WORLD_MAP_SCROLL_MAX_Y + 1)) {
+        if (value > WORLD_MAP_SCROLL_MAX_Y) {
             value = WORLD_MAP_SCROLL_MAX_Y;
         }
         amount->y -= value - old_position;

@@ -18,7 +18,7 @@ units:
   - {name: calendar, source: src/wldcore/calendar.c}
   - {name: image_buffers, source: src/wldcore/map/image_buffers.c}
   - {name: calendar_day_index, source: src/lib/calendar.c}
-  - {name: map_tiles, source: src/wldcore/map/tiles.c, data: [{addr: 0x8009f2d0, size: 16, hash: 374708fff7719dd5}, {addr: 0x8009f2e0, size: 8, hash: af5570f5a1810b7a}], bss: [{addr: 0x800d3c88, size: 4, hash: df3f619804a92fdb}]}
+  - {name: map_tiles, source: src/wldcore/map/tiles.c, data: [{addr: 0x8009f2c0, size: 40, hash: 2c34ce1df23b838c}], bss: [{addr: 0x800d3c88, size: 4, hash: df3f619804a92fdb}]}
   - {name: window_records, source: src/wldcore/display_objects.c, data: [{addr: 0x80092b2c, size: 8, hash: fc559ae5b7c6c78d}]}
   - {name: hud, source: src/wldcore/map/hud.c}
   - {name: menu_levels, source: src/wldcore/menu_levels.c, data: [{addr: 0x8009e690, size: 228, hash: 27c8987b677b000d}, {addr: 0x8009e774, size: 228, hash: 17ce379e6bacf734}, {addr: 0x8009e858, size: 228, hash: 7a22627279b735fa}], bss: [{addr: 0x800d4584, size: 32, hash: 66687aadf862bd77}]}
@@ -556,8 +556,6 @@ data:
   - {addr: 0x8009f2b8, name: g_world_map_dot_pulse_direction}
   - {addr: 0x8009f2bc, name: g_world_map_dot_pulse_phase}
   - {addr: 0x8009f2c0, name: g_world_map_projection_view}
-  - {addr: 0x8009f2d0, name: s_world_map_projection_scale}
-  - {addr: 0x8009f2e0, name: s_world_map_projection_rotation}
   - {addr: 0x8009f2e8, name: g_input_current_buttons}
   - {addr: 0x8009f2ec, name: g_proposition_selected_row}
   - {addr: 0x8009f31c, name: g_world_map_primitive_buffers}
