@@ -97,52 +97,52 @@ void script_set_event_speed(s32 speed);
 void script_execute_event(void);
 
 /* opcode handlers */
-void script_opcode_16_pause(void);
-void script_opcode_1a_map_darkness_thread(void);
-void script_opcode_28_walk_to(const event_walk_to_parameters_t* parameters);
-void script_opcode_29_wait_walk(s32 unit_id);
-void script_opcode_2a_block_start_thread(void);
-void script_opcode_32_color_unit(const event_color_unit_parameters_t* parameters);
-void script_opcode_37_flip_message_portrait(const u8* parameters);
-void script_opcode_3e_color_screen_thread(void);
-void script_opcode_41_earthquake_start_thread(void);
-void script_opcode_45_add_unit(void);
-void script_opcode_50_portrait_col(s32 portrait_id);
-void script_opcode_64_65_wait_rotate(s32 unit_id);
-void script_opcode_68_mirror_sprite(const event_mirror_sprite_parameters_t* parameters);
-void script_opcode_69_face_tile(const event_face_tile_parameters_t* parameters);
-void script_opcode_6f_wait_sprite_move(s32 unit_id);
-void script_opcode_70_jump(const event_jump_parameters_t* parameters);
-void script_opcode_74_unknown(const u8* unused_parameters);
-void script_opcode_7a_dismiss_unit(s32 sprite_set);
-void script_opcode_7e_wait_value(const event_wait_value_parameters_t* parameters);
-void script_opcode_80_march(const event_march_parameters_t* parameters);
-void script_opcode_81_set_unit_movement_effect_suppression(const event_movement_effect_parameters_t* parameters);
-void script_opcode_82_load_attack_graphics(void);
-void script_opcode_83_change_stats(const event_change_stats_parameters_t* parameters);
-void script_opcode_85_unlock_date(u32* bitset, s32 date_index, s32 month, s32 day);
-void script_opcode_8b_effect_end_thread(void);
-void script_opcode_8c_unit_anim_rotate(const event_unit_anim_rotate_parameters_t* parameters);
-void script_opcode_94_teleport_out(s32 unit_id, s32 remove);
-void script_opcode_97_reset_palette(const event_unit_parameters_t* parameters);
-void script_opcode_98_teleport_in(s32 unit_id, s32 unused);
-void script_opcode_99_blue_remove_unit(s32 unit_id);
+void script_opcode_pause(void);
+void script_opcode_map_darkness_thread(void);
+void script_opcode_walk_to(const event_walk_to_parameters_t* parameters);
+void script_opcode_wait_walk(s32 unit_id);
+void script_opcode_block_start_thread(void);
+void script_opcode_color_unit(const event_color_unit_parameters_t* parameters);
+void script_opcode_flip_message_portrait(const u8* parameters);
+void script_opcode_color_screen_thread(void);
+void script_opcode_earthquake_start_thread(void);
+void script_opcode_add_unit(void);
+void script_opcode_portrait_col(s32 portrait_id);
+void script_opcode_wait_rotate(s32 unit_id);
+void script_opcode_mirror_sprite(const event_mirror_sprite_parameters_t* parameters);
+void script_opcode_face_tile(const event_face_tile_parameters_t* parameters);
+void script_opcode_wait_sprite_move(s32 unit_id);
+void script_opcode_jump(const event_jump_parameters_t* parameters);
+void script_opcode_unknown_74(const u8* unused_parameters);
+void script_opcode_dismiss_unit(s32 sprite_set);
+void script_opcode_wait_value(const event_wait_value_parameters_t* parameters);
+void script_opcode_march(const event_march_parameters_t* parameters);
+void script_opcode_set_unit_movement_effect_suppression(const event_movement_effect_parameters_t* parameters);
+void script_opcode_load_attack_graphics(void);
+void script_opcode_change_stats(const event_change_stats_parameters_t* parameters);
+void script_opcode_unlock_date(u32* bitset, s32 date_index, s32 month, s32 day);
+void script_opcode_effect_end_thread(void);
+void script_opcode_unit_anim_rotate(const event_unit_anim_rotate_parameters_t* parameters);
+void script_opcode_teleport_out(s32 unit_id, s32 remove);
+void script_opcode_reset_palette(const event_unit_parameters_t* parameters);
+void script_opcode_teleport_in(s32 unit_id, s32 unused);
+void script_opcode_blue_remove_unit(s32 unit_id);
 
 /* AddGhostUnit: when map_unit_id is free, queue the graphics of a sprite with no unit stats at the
  * given tile and facing and return 1; return 0 when the id is taken. */
-s32 script_opcode_47_add_ghost_unit(
+s32 script_opcode_add_ghost_unit(
     s32 map_x, s32 map_y, s32 map_level, s16 facing, s16 spritesheet_id, s32 map_unit_id, s32 flags);
 
 /* The AddUnit thread body: runs the script instructions through AddUnitEnd, loading each added unit's
  * graphics; BATTLE and WORLD share the body. */
-void script_opcode_49_add_unit_start_thread(void);
+void script_opcode_add_unit_start_thread(void);
 
 /* instruction scanning */
 s32 script_find_instruction_offset(s32 offset, s32 opcode);
 
 /* Returns the offset after the matching target marker; a missing target stops
  * the current thread. alternate_opcode accepts -1. */
-s32 script_find_jump_target(s32 limit_offset, event_opcode_e target_opcode, s32 alternate_opcode, s32 target_id);
+s32 script_find_jump_target(s32 limit_offset, script_opcode_e target_opcode, s32 alternate_opcode, s32 target_id);
 
 /* Reads an unaligned little-endian signed 16-bit operand. */
 s16 script_read_s16(const void* source);
@@ -168,23 +168,23 @@ s32 script_resolve_map_unit_id(s32 unit_id);
  * thread itself store the moving unit's map unit id; WaitSpriteMove matches it. */
 enum { SPRITE_MOVE_THREAD_WORD_MAP_UNIT_ID = 0 };
 
-void script_opcode_5f_warp_unit(const event_warp_unit_parameters_t* instruction);
+void script_opcode_warp_unit(const event_warp_unit_parameters_t* instruction);
 void script_warp_unit_display_to_paired_unit(s32 map_unit_id);
-void script_opcode_3b_sprite_move_thread(void);
-void script_opcode_6e_sprite_move_beta_thread(void);
-void script_opcode_11_unit_anim(const event_unit_anim_parameters_t* parameters);
-void script_opcode_2c_53_face_each_other(const event_face_unit_parameters_t* parameters, s32 second_only);
-void script_opcode_2d_rotate_unit(const event_rotate_unit_parameters_t* parameters);
-void script_opcode_6c_6d_set_unit_palette_updates(s32 event_unit_id, s32 enable);
+void script_opcode_sprite_move_thread(void);
+void script_opcode_sprite_move_beta_thread(void);
+void script_opcode_unit_anim(const event_unit_anim_parameters_t* parameters);
+void script_opcode_face_units(const event_face_unit_parameters_t* parameters, s32 second_only);
+void script_opcode_rotate_unit(const event_rotate_unit_parameters_t* parameters);
+void script_opcode_set_unit_palette_updates(s32 event_unit_id, s32 enable);
 void script_wait_unit_ready(s32 map_unit_id);
 s32 script_map_unit_is_moving(s32 map_unit_id);
 
 /* camera */
-void script_opcode_1f_focus(event_focus_parameters_t* parameters);
+void script_opcode_focus(event_focus_parameters_t* parameters);
 void script_apply_relative_camera(event_camera_values_t* parameters, const s32* camera_values);
 
 /* A typed operand plus a local Camera cursor reorders the original argument saves. */
-void script_opcode_38_focus_speed(u8* parameters, s32* position, s32* rotation);
+void script_opcode_focus_speed(u8* parameters, s32* position, s32* rotation);
 
 /* screen and map */
 extern s16 g_event_map_jump_in_request;
@@ -200,7 +200,7 @@ extern u16 g_event_map_append_state;
 /* The gradient colors of the Background instruction. */
 extern map_background_gradient_colors_t g_event_background_colors;
 
-/* Script-driven map light transform that script_opcode_1b_map_light_thread interpolates. */
+/* Script-driven map light transform that script_opcode_map_light_thread interpolates. */
 extern SVECTOR g_script_light_angles;
 extern VECTOR g_script_light_scale;
 extern MATRIX g_script_light_base_direction_matrix;
@@ -210,7 +210,7 @@ void script_signal_map_destruction(void);
 void script_dark_screen_thread(void);
 
 /* map object requests */
-/* EVENT_OPCODE_USE_3D_OBJECT and EVENT_OPCODE_USE_FIELD_OBJECT set a request with their two
+/* SCRIPT_OPCODE_USE_3D_OBJECT and SCRIPT_OPCODE_USE_FIELD_OBJECT set a request with their two
  * operands; process_pending_requests passes them to map_set_object_state
  * and map_start_texture_animation, and the matching wait instructions poll until
  * the object is done. Provisional: the operands' value domains. The consumer reads the u16
@@ -234,8 +234,8 @@ extern s16 g_event_effect_target_mode;
 extern point16_t g_event_effect_target_position;
 
 void script_play_effect_and_wait(void);
-void script_opcode_7d_show_graphic_thread(void);
-void script_opcode_78_display_conditions_thread(void);
+void script_opcode_show_graphic_thread(void);
+void script_opcode_display_conditions_thread(void);
 
 /* EVTCHR and VRAM requests */
 extern s32 g_script_pending_loaded_evtchr_slot;
@@ -251,7 +251,7 @@ extern s32 g_event_pending_unit_vram_copy;
  * before the deployment screen starts. */
 typedef enum script_attack_entry_mode {
     SCRIPT_ATTACK_ENTRY_NORMAL = 1,      /* set when an event thread starts */
-    SCRIPT_ATTACK_ENTRY_PRELOADED = 2,   /* script_opcode_82_load_attack_graphics ran */
+    SCRIPT_ATTACK_ENTRY_PRELOADED = 2,   /* script_opcode_load_attack_graphics ran */
     SCRIPT_ATTACK_ENTRY_PRELOAD_USED = 3 /* deploy_start skipped its loads */
 } script_attack_entry_mode_e;
 
@@ -281,17 +281,17 @@ void script_update_event_input(u32 buttons);
 void script_load_event_input_state(const struct menu_input_state* saved);
 
 /* debug */
-extern s16 g_script_opcode_dc_value; /* EVENT_OPCODE_UNKNOWN_DC stores 13; nothing reads it */
+extern s16 g_script_opcode_dc_value; /* SCRIPT_OPCODE_UNKNOWN_DC stores 13; nothing reads it */
 
-void script_opcode_72_debug_pause(void);
+void script_opcode_debug_pause(void);
 
 /* stubs */
 /* MAIN's overlay_call_battle_return_zero wrapper calls BATTLE's copy. */
 s32 script_return_zero_1(void);
 
-void script_opcode_19_camera_thread(void);
+void script_opcode_camera_thread(void);
 
 /* Interpolates the script light transform (g_script_light_* in script.h) each frame. */
-void script_opcode_1b_map_light_thread(void);
+void script_opcode_map_light_thread(void);
 
 #endif

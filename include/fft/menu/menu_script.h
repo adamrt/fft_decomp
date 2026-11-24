@@ -19,36 +19,36 @@ struct menu_icon_source;
  * EQUIP's dialect ends before 0x19, JOBSTTS's before 0x16. Each module ends a stream with its own opcode, the first
  * one past its table
  * (MENU_SCREEN_SCRIPT_END, UNIT_LIST_SCRIPT_END, EQUIPMENT_SCRIPT_END, STATUS_SCREEN_SCRIPT_END). */
-typedef enum menu_script_opcode {
-    MENU_SCRIPT_OP_WINDOW_FRAME = 0x00,
-    MENU_SCRIPT_OP_IF_GROUP = 0x01,      /* run the next group when a row callback returns nonzero */
-    MENU_SCRIPT_OP_IF_ELSE_GROUP = 0x02, /* run one of the next two groups */
-    MENU_SCRIPT_OP_TILE = 0x03,
-    MENU_SCRIPT_OP_UNCOLORED_QUAD = 0x04, /* a textured quad drawn unshaded */
-    MENU_SCRIPT_OP_COLORED_QUAD = 0x05,   /* the same handler, shaded with the current draw color */
-    MENU_SCRIPT_OP_CALLBACK_QUAD = 0x06,  /* a textured quad whose source cell a row callback picks */
-    MENU_SCRIPT_OP_LINE = 0x07,
-    MENU_SCRIPT_OP_FIXED_CLUT = 0x09,
-    MENU_SCRIPT_OP_CLUT = 0x0a,
-    MENU_SCRIPT_OP_DRAW_COLOR = 0x0b,
-    MENU_SCRIPT_OP_TEXTURE_PAGE = 0x0c,
-    MENU_SCRIPT_OP_NUMBER = 0x0d,
-    MENU_SCRIPT_OP_SEMI_TRANS = 0x0e,
-    MENU_SCRIPT_OP_DRAW_PRIORITY = 0x0f,
-    MENU_SCRIPT_OP_SCROLLABLE_LIST = 0x10, /* the list geometry menu_scrollable_list_refresh reads */
-    MENU_SCRIPT_OP_TILED_RECTANGLE = 0x11,
-    MENU_SCRIPT_OP_OPENING_WINDOW_FRAME = 0x12,
-    MENU_SCRIPT_OP_CLEAR_DRAW_AREA = 0x13,
-    MENU_SCRIPT_OP_DRAW_AREA = 0x14,
-    MENU_SCRIPT_OP_REPEAT_DRAW_AREA = 0x15,
-    MENU_SCRIPT_OP_ADVANCE_WINDOW_SCALE = 0x16,
-    MENU_SCRIPT_OP_RIGHT_ALIGNED_NUMBER = 0x17,
-    MENU_SCRIPT_OP_BLEND_DRAW_MODE = 0x18,
+typedef enum menu_opcode {
+    MENU_OPCODE_WINDOW_FRAME = 0x00,
+    MENU_OPCODE_IF_GROUP = 0x01,      /* run the next group when a row callback returns nonzero */
+    MENU_OPCODE_IF_ELSE_GROUP = 0x02, /* run one of the next two groups */
+    MENU_OPCODE_TILE = 0x03,
+    MENU_OPCODE_QUAD = 0x04,          /* a textured quad drawn unshaded */
+    MENU_OPCODE_TINTED_QUAD = 0x05,   /* the same handler, tinted by the menu sprite color */
+    MENU_OPCODE_CALLBACK_QUAD = 0x06, /* a textured quad whose source cell a row callback picks */
+    MENU_OPCODE_LINE = 0x07,
+    MENU_OPCODE_FIXED_CLUT = 0x09,
+    MENU_OPCODE_CLUT = 0x0a,
+    MENU_OPCODE_DRAW_COLOR = 0x0b,
+    MENU_OPCODE_TEXTURE_PAGE = 0x0c,
+    MENU_OPCODE_NUMBER = 0x0d,
+    MENU_OPCODE_SEMI_TRANS = 0x0e,
+    MENU_OPCODE_DRAW_PRIORITY = 0x0f,
+    MENU_OPCODE_SCROLLABLE_LIST = 0x10, /* the list geometry menu_scrollable_list_refresh reads */
+    MENU_OPCODE_TILED_RECTANGLE = 0x11,
+    MENU_OPCODE_OPENING_WINDOW_FRAME = 0x12,
+    MENU_OPCODE_CLEAR_DRAW_AREA = 0x13,
+    MENU_OPCODE_DRAW_AREA = 0x14,
+    MENU_OPCODE_REPEAT_DRAW_AREA = 0x15,
+    MENU_OPCODE_ADVANCE_WINDOW_SCALE = 0x16,
+    MENU_OPCODE_RIGHT_ALIGNED_NUMBER = 0x17,
+    MENU_OPCODE_BLEND_DRAW_MODE = 0x18,
     /* Variants of NUMBER that the WORLD and BUNIT number handlers tell apart from its plain form. */
-    MENU_SCRIPT_OP_NUMBER_TINTED_NO_LEADING_ZEROS = 0x19, /* sprite color; leading zeros not drawn */
-    MENU_SCRIPT_OP_NUMBER_DIM_LEADING_ZEROS = 0x1a,       /* leading zeros in the disabled clut */
-    MENU_SCRIPT_OP_NUMBER_TINTED = 0x1b                   /* sprite color */
-} menu_script_opcode_e;
+    MENU_OPCODE_NUMBER_TINTED_NO_LEADING_ZEROS = 0x19, /* sprite color; leading zeros not drawn */
+    MENU_OPCODE_NUMBER_DIM_LEADING_ZEROS = 0x1a,       /* leading zeros in the disabled clut */
+    MENU_OPCODE_NUMBER_TINTED = 0x1b                   /* sprite color */
+} menu_opcode_e;
 
 /* instructions */
 /* Seven-byte window command in the menu script streams. The length field
@@ -65,7 +65,7 @@ typedef struct menu_window_command {
 typedef char menu_window_command_size_must_be_7[sizeof(menu_window_command_t) == 7 ? 1 : -1];
 
 /* Flags a menu-script number getter (a row callback) returns above its value, read by every program's NUMBER handler
- * (menu_opcode_0d_draw_formatted_number). */
+ * (menu_opcode_draw_formatted_number). */
 typedef enum menu_number_value_flags {
     MENU_NUMBER_VALUE_DASHES = 0x20000000,  /* a row of dashes instead of the digits */
     MENU_NUMBER_VALUE_DISABLED = 0x40000000 /* drawn with the disabled number clut */
@@ -90,7 +90,7 @@ typedef struct menu_draw_number_command {
 typedef char menu_draw_number_command_size_must_be_10[sizeof(menu_draw_number_command_t) == 10 ? 1 : -1];
 
 /* Variable-length list command (0x10) in the menu display stream: the layout menu_scrollable_list_refresh reads and
- * the placement each program's menu_opcode_10_update_scrollable_list draws with. */
+ * the placement each program's menu_opcode_update_scrollable_list draws with. */
 typedef struct menu_list_record {
     u8 opcode;          /* 0x00: 0x10 = list layout */
     u8 length;          /* 0x01: byte length of this record */
@@ -254,7 +254,7 @@ typedef union menu_callback {
 } menu_callback_t;
 typedef char menu_callback_size_must_be_4[sizeof(menu_callback_t) == 4 ? 1 : -1];
 
-/* A g_menu_row_callbacks value getter, as the overlays' menu_opcode_0d_draw_formatted_number bodies call it with a
+/* A g_menu_row_callbacks value getter, as the overlays' menu_opcode_draw_formatted_number bodies call it with a
  * row or literal operand. */
 typedef s32 (*menu_row_callback_t)(s32 row);
 
@@ -288,41 +288,41 @@ extern s16 g_menu_window_right_x;
 /* The JOBSTTS and CARD window-frame handlers' copy of g_menu_window_interior_command. */
 extern menu_window_command_t g_cmd_window_interior_command;
 
-menu_instruction_t* menu_opcode_00_draw_window_frame(menu_instruction_t* instruction);
-menu_instruction_t* menu_opcode_01_if_group(menu_instruction_t* command);
-menu_instruction_t* menu_opcode_02_if_else_group(menu_instruction_t* command);
-menu_instruction_t* menu_opcode_03_draw_tile(menu_instruction_t* instruction);
-menu_instruction_t* menu_opcode_04_05_draw_textured_quad(menu_instruction_t* instruction);
-menu_instruction_t* menu_opcode_06_draw_callback_quad(menu_instruction_t* instruction);
-menu_instruction_t* menu_opcode_07_draw_line(menu_instruction_t* instruction);
-menu_instruction_t* menu_opcode_09_set_fixed_clut(menu_instruction_t* command);
-menu_instruction_t* menu_opcode_0a_set_clut(menu_instruction_t* command);
-menu_instruction_t* menu_opcode_0b_set_draw_color(menu_instruction_t* command);
-menu_instruction_t* menu_opcode_0c_set_texture_page(menu_instruction_t* command);
+menu_instruction_t* menu_opcode_draw_window_frame(menu_instruction_t* instruction);
+menu_instruction_t* menu_opcode_if_group(menu_instruction_t* command);
+menu_instruction_t* menu_opcode_if_else_group(menu_instruction_t* command);
+menu_instruction_t* menu_opcode_draw_tile(menu_instruction_t* instruction);
+menu_instruction_t* menu_opcode_draw_quad(menu_instruction_t* instruction);
+menu_instruction_t* menu_opcode_draw_callback_quad(menu_instruction_t* instruction);
+menu_instruction_t* menu_opcode_draw_line(menu_instruction_t* instruction);
+menu_instruction_t* menu_opcode_set_fixed_clut(menu_instruction_t* command);
+menu_instruction_t* menu_opcode_set_clut(menu_instruction_t* command);
+menu_instruction_t* menu_opcode_set_draw_color(menu_instruction_t* command);
+menu_instruction_t* menu_opcode_set_texture_page(menu_instruction_t* command);
 #ifdef FFT_EVENT_CARD
 /* CARD's reduced copy reads the command as its NUMBER record. */
-menu_draw_number_command_t* menu_opcode_0d_draw_formatted_number(menu_draw_number_command_t* command);
+menu_draw_number_command_t* menu_opcode_draw_formatted_number(menu_draw_number_command_t* command);
 #else
-menu_instruction_t* menu_opcode_0d_draw_formatted_number(menu_instruction_t* instruction);
+menu_instruction_t* menu_opcode_draw_formatted_number(menu_instruction_t* instruction);
 #endif
-menu_instruction_t* menu_opcode_0e_set_semi_trans(menu_instruction_t* instruction);
-menu_instruction_t* menu_opcode_0f_set_draw_priority(menu_instruction_t* instruction);
-menu_instruction_t* menu_opcode_0f_set_draw_priority_if_unlocked(menu_instruction_t* instruction);
-menu_instruction_t* menu_opcode_10_update_scrollable_list(menu_instruction_t* instruction);
-menu_instruction_t* menu_opcode_11_draw_background_tiles(menu_instruction_t* instruction);
-menu_instruction_t* menu_opcode_12_draw_opening_window_frame(menu_instruction_t* instruction);
+menu_instruction_t* menu_opcode_set_semi_trans(menu_instruction_t* instruction);
+menu_instruction_t* menu_opcode_set_draw_priority(menu_instruction_t* instruction);
+menu_instruction_t* menu_opcode_set_draw_priority_if_unlocked(menu_instruction_t* instruction);
+menu_instruction_t* menu_opcode_update_scrollable_list(menu_instruction_t* instruction);
+menu_instruction_t* menu_opcode_draw_background_tiles(menu_instruction_t* instruction);
+menu_instruction_t* menu_opcode_draw_opening_window_frame(menu_instruction_t* instruction);
 
 /* JOBSTTS builds its own body. */
-menu_instruction_t* menu_opcode_13_clear_temporary_draw_area(menu_instruction_t* instruction);
-menu_instruction_t* menu_opcode_14_set_draw_area(menu_instruction_t* instruction);
-menu_instruction_t* menu_opcode_15_restore_draw_area(menu_instruction_t* instruction);
-menu_instruction_t* menu_opcode_16_advance_window_scale_step(menu_instruction_t* instruction);
-menu_instruction_t* menu_opcode_17_draw_right_aligned_number(menu_instruction_t* instruction);
-menu_instruction_t* menu_opcode_18_add_blend_draw_mode(menu_instruction_t* instruction);
+menu_instruction_t* menu_opcode_clear_temporary_draw_area(menu_instruction_t* instruction);
+menu_instruction_t* menu_opcode_set_draw_area(menu_instruction_t* instruction);
+menu_instruction_t* menu_opcode_restore_draw_area(menu_instruction_t* instruction);
+menu_instruction_t* menu_opcode_advance_window_scale_step(menu_instruction_t* instruction);
+menu_instruction_t* menu_opcode_draw_right_aligned_number(menu_instruction_t* instruction);
+menu_instruction_t* menu_opcode_add_blend_draw_mode(menu_instruction_t* instruction);
 
 /* scrollable lists */
 /* A scrollable list shows the rows of a -1 terminated entry list by name from a text table, under the geometry of a
- * list record (menu_list_record_t). Each program draws the rows with its own menu_opcode_10_update_scrollable_list. */
+ * list record (menu_list_record_t). Each program draws the rows with its own menu_opcode_update_scrollable_list. */
 
 /* Page scroll direction of the overlay unit, item and job lists. */
 typedef enum menu_vertical_scroll_direction {
@@ -348,7 +348,7 @@ extern u8 g_menu_list_text_columns;
 extern u16 g_menu_list_vram_width;
 extern s8 g_menu_list_scroll_direction; /* read with lb */
 extern u16 g_menu_list_scroll_progress;
-extern s8 g_menu_list_redraw_pending; /* read with lb (each program's menu_opcode_10_update_scrollable_list) */
+extern s8 g_menu_list_redraw_pending; /* read with lb (each program's menu_opcode_update_scrollable_list) */
 
 /* The row being drawn, its row mode and its scroll offset, which the row instructions read. */
 extern s32 g_menu_list_row_index;

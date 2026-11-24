@@ -70,10 +70,10 @@ void camera_fusion_thread(void) {
     key_count = 0;
     for (;;) {
         opcode = *cursor;
-        if (opcode == EVENT_OPCODE_CAMERA) {
+        if (opcode == SCRIPT_OPCODE_CAMERA) {
             key_count++;
         }
-        if (opcode == EVENT_OPCODE_CAMERA_FUSION_END) {
+        if (opcode == SCRIPT_OPCODE_CAMERA_FUSION_END) {
             break;
         }
         cursor += g_script_event_instruction_sizes[opcode] + 1;
@@ -100,13 +100,13 @@ void camera_fusion_thread(void) {
             }
         } else {
             for (;;) {
-                if (*cursor == EVENT_OPCODE_FOCUS) {
-                    script_opcode_1f_focus((event_focus_parameters_t*)(cursor + 1));
-                } else if (*cursor == EVENT_OPCODE_RELATIVE_CAMERA) {
+                if (*cursor == SCRIPT_OPCODE_FOCUS) {
+                    script_opcode_focus((event_focus_parameters_t*)(cursor + 1));
+                } else if (*cursor == SCRIPT_OPCODE_RELATIVE_CAMERA) {
                     script_apply_relative_camera((event_camera_values_t*)(cursor + 1), values);
-                } else if (*cursor == EVENT_OPCODE_FOCUS_SPEED) {
-                    script_opcode_38_focus_speed(cursor + 1, values, values + EVENT_CAMERA_COMPONENT_TILT);
-                } else if (*cursor == EVENT_OPCODE_CAMERA) {
+                } else if (*cursor == SCRIPT_OPCODE_FOCUS_SPEED) {
+                    script_opcode_focus_speed(cursor + 1, values, values + EVENT_CAMERA_COMPONENT_TILT);
+                } else if (*cursor == SCRIPT_OPCODE_CAMERA) {
                     for (i = 0; i < EVENT_CAMERA_COMPONENT_COUNT; i++) {
                         /* Indexed field access replaces retail's two additions with a shift. */
                         value

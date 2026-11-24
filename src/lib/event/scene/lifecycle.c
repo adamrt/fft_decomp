@@ -72,7 +72,7 @@ void menu_subsystems_reset(void) {
 }
 
 /* Put the map light transform of the event scripts back to the map's own light: no rotation, unit
- * scale, and the current light direction and color matrices as the base script_opcode_1b_map_light_thread
+ * scale, and the current light direction and color matrices as the base script_opcode_map_light_thread
  * interpolates from. WORLD has no map light, so its copy is empty. */
 void map_light_reset_script_light(void) {
 #ifdef FFT_BATTLE

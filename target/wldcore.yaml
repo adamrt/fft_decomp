@@ -325,65 +325,65 @@ functions:
   - {addr: 0x8008b120, size: 124, name: play_sound_quad, hash: 2853875af4bd3a7f, unit: novel}
   - {addr: 0x8008b19c, size: 52, name: play_background_sound, hash: eab8c318dcb97af7, unit: novel}
   - {addr: 0x8008b1d0, size: 388, name: update_choice_timer, hash: 2806e72d89a0f5b7, unit: novel}
-  - {addr: 0x8008b354, size: 28, name: novel_opcode_00_end_script, hash: ca0140139864f127, unit: novel}
-  - {addr: 0x8008b370, size: 28, name: novel_opcode_01_end_section, hash: ddd34af47a51ab35, unit: novel}
-  - {addr: 0x8008b38c, size: 28, name: novel_opcode_02_nop, hash: 2e9e6c67608367f6, unit: novel}
-  - {addr: 0x8008b3a8, size: 160, name: novel_opcode_03_start_text_thread_and_push_history, hash: c6a0b18e43f7c4e5, unit: novel}
-  - {addr: 0x8008b448, size: 80, name: novel_opcode_04_wait_for_text_thread, hash: fb295fc8597bac76, unit: novel}
-  - {addr: 0x8008b498, size: 112, name: novel_opcode_05_load_background_set, hash: 6aea7d6a157eb0ab, unit: novel}
-  - {addr: 0x8008b508, size: 44, name: novel_opcode_06_branch_to_section, hash: 3bdd938f03fc230c, unit: novel}
-  - {addr: 0x8008b534, size: 32, name: novel_opcode_07_branch_if_dialog_option_equal, hash: bdd9afdd40f157e7, unit: novel}
+  - {addr: 0x8008b354, size: 28, name: novel_opcode_end_script, hash: ca0140139864f127, unit: novel}
+  - {addr: 0x8008b370, size: 28, name: novel_opcode_end_section, hash: ddd34af47a51ab35, unit: novel}
+  - {addr: 0x8008b38c, size: 28, name: novel_opcode_nop, hash: 2e9e6c67608367f6, unit: novel}
+  - {addr: 0x8008b3a8, size: 160, name: novel_opcode_start_text_thread_and_push_history, hash: c6a0b18e43f7c4e5, unit: novel}
+  - {addr: 0x8008b448, size: 80, name: novel_opcode_wait_for_text_thread, hash: fb295fc8597bac76, unit: novel}
+  - {addr: 0x8008b498, size: 112, name: novel_opcode_load_background_set, hash: 6aea7d6a157eb0ab, unit: novel}
+  - {addr: 0x8008b508, size: 44, name: novel_opcode_branch_to_section, hash: 3bdd938f03fc230c, unit: novel}
+  - {addr: 0x8008b534, size: 32, name: novel_opcode_branch_if_dialog_option_equal, hash: bdd9afdd40f157e7, unit: novel}
   - {addr: 0x8008b554, size: 160, name: branch_on_choice, hash: 337af6acb9885c83, unit: novel}
-  - {addr: 0x8008b5f4, size: 32, name: novel_opcode_08_branch_if_dialog_option_not_equal, hash: 4778737a6b2c139a, unit: novel}
-  - {addr: 0x8008b614, size: 120, name: novel_opcode_09_wait_frames, hash: f7452d0c8c937492, unit: novel}
-  - {addr: 0x8008b68c, size: 480, name: novel_opcode_0a_load_picture, hash: 8f67f7f04e550104, unit: novel}
-  - {addr: 0x8008b86c, size: 112, name: novel_opcode_0b_hide_picture, hash: 04446b785db81892, unit: novel}
-  - {addr: 0x8008b8dc, size: 424, name: novel_opcode_0c_set_prompts_visible, hash: 530738ec1f9d7d14, unit: novel}
-  - {addr: 0x8008ba84, size: 104, name: novel_opcode_0d_start_text_thread, hash: b7de359c87c9901d, unit: novel}
-  - {addr: 0x8008baec, size: 124, name: novel_opcode_0e_branch_to_random_section, hash: d80f61d1700bf0b2, unit: novel}
-  - {addr: 0x8008bb68, size: 32, name: novel_opcode_0f_branch_if_section_read, hash: d7724dc3d9cca1ee, unit: novel}
+  - {addr: 0x8008b5f4, size: 32, name: novel_opcode_branch_if_dialog_option_not_equal, hash: 4778737a6b2c139a, unit: novel}
+  - {addr: 0x8008b614, size: 120, name: novel_opcode_wait_frames, hash: f7452d0c8c937492, unit: novel}
+  - {addr: 0x8008b68c, size: 480, name: novel_opcode_load_picture, hash: 8f67f7f04e550104, unit: novel}
+  - {addr: 0x8008b86c, size: 112, name: novel_opcode_hide_picture, hash: 04446b785db81892, unit: novel}
+  - {addr: 0x8008b8dc, size: 424, name: novel_opcode_set_prompts_visible, hash: 530738ec1f9d7d14, unit: novel}
+  - {addr: 0x8008ba84, size: 104, name: novel_opcode_start_text_thread, hash: b7de359c87c9901d, unit: novel}
+  - {addr: 0x8008baec, size: 124, name: novel_opcode_branch_to_random_section, hash: d80f61d1700bf0b2, unit: novel}
+  - {addr: 0x8008bb68, size: 32, name: novel_opcode_branch_if_section_read, hash: d7724dc3d9cca1ee, unit: novel}
   - {addr: 0x8008bb88, size: 144, name: branch_on_section_read, hash: 1a382c9ecf10cf96, unit: novel}
-  - {addr: 0x8008bc18, size: 32, name: novel_opcode_10_branch_if_section_unread, hash: 117b87c884107bfe, unit: novel}
-  - {addr: 0x8008bc38, size: 32, name: novel_opcode_11_branch_if_saved_flag_set, hash: 76a0153ab059fbda, unit: novel}
+  - {addr: 0x8008bc18, size: 32, name: novel_opcode_branch_if_section_unread, hash: 117b87c884107bfe, unit: novel}
+  - {addr: 0x8008bc38, size: 32, name: novel_opcode_branch_if_saved_flag_set, hash: 76a0153ab059fbda, unit: novel}
   - {addr: 0x8008bc58, size: 136, name: branch_on_saved_flag, hash: fc90cc4a95a63c13, unit: novel}
-  - {addr: 0x8008bce0, size: 32, name: novel_opcode_12_branch_if_saved_flag_clear, hash: a49094bbc0b1cd61, unit: novel}
-  - {addr: 0x8008bd00, size: 32, name: novel_opcode_13_branch_if_local_flag_set, hash: bb540802f30b0452, unit: novel}
+  - {addr: 0x8008bce0, size: 32, name: novel_opcode_branch_if_saved_flag_clear, hash: a49094bbc0b1cd61, unit: novel}
+  - {addr: 0x8008bd00, size: 32, name: novel_opcode_branch_if_local_flag_set, hash: bb540802f30b0452, unit: novel}
   - {addr: 0x8008bd20, size: 136, name: branch_on_local_flag, hash: a9507678f888d3f3, unit: novel}
-  - {addr: 0x8008bda8, size: 32, name: novel_opcode_14_branch_if_local_flag_clear, hash: 21224fc6466bdf42, unit: novel}
-  - {addr: 0x8008bdc8, size: 72, name: novel_opcode_15_set_saved_flag, hash: 75e4311d658eb2d6, unit: novel}
-  - {addr: 0x8008be10, size: 72, name: novel_opcode_16_clear_saved_flag, hash: 798b94e98436c042, unit: novel}
-  - {addr: 0x8008be58, size: 72, name: novel_opcode_17_set_local_flag, hash: 4c361ee7799ba5df, unit: novel}
-  - {addr: 0x8008bea0, size: 72, name: novel_opcode_18_clear_local_flag, hash: a2e0128657578171, unit: novel}
-  - {addr: 0x8008bee8, size: 52, name: novel_opcode_19_set_counter, hash: eaea61c280df0c4a, unit: novel}
-  - {addr: 0x8008bf1c, size: 64, name: novel_opcode_1a_add_counter_delta, hash: 5a83c06ac2b2c98e, unit: novel}
-  - {addr: 0x8008bf5c, size: 64, name: novel_opcode_1b_subtract_counter_delta, hash: 47accf9b5276e028, unit: novel}
-  - {addr: 0x8008bf9c, size: 144, name: novel_opcode_1c_show_value_display, hash: 0e8c7d16fb25a71d, unit: novel}
-  - {addr: 0x8008c02c, size: 48, name: novel_opcode_1d_hide_value_display, hash: 33df93c6e87c5be3, unit: novel}
-  - {addr: 0x8008c05c, size: 116, name: novel_opcode_1e_apply_counter_delta, hash: f60cd93b941df914, unit: novel}
-  - {addr: 0x8008c0d0, size: 64, name: novel_opcode_1f_play_sound, hash: 324ef0f32cc12574, unit: novel}
-  - {addr: 0x8008c110, size: 64, name: novel_opcode_20_load_music, hash: 147e3922b16a7121, unit: novel}
+  - {addr: 0x8008bda8, size: 32, name: novel_opcode_branch_if_local_flag_clear, hash: 21224fc6466bdf42, unit: novel}
+  - {addr: 0x8008bdc8, size: 72, name: novel_opcode_set_saved_flag, hash: 75e4311d658eb2d6, unit: novel}
+  - {addr: 0x8008be10, size: 72, name: novel_opcode_clear_saved_flag, hash: 798b94e98436c042, unit: novel}
+  - {addr: 0x8008be58, size: 72, name: novel_opcode_set_local_flag, hash: 4c361ee7799ba5df, unit: novel}
+  - {addr: 0x8008bea0, size: 72, name: novel_opcode_clear_local_flag, hash: a2e0128657578171, unit: novel}
+  - {addr: 0x8008bee8, size: 52, name: novel_opcode_set_counter, hash: eaea61c280df0c4a, unit: novel}
+  - {addr: 0x8008bf1c, size: 64, name: novel_opcode_add_counter_delta, hash: 5a83c06ac2b2c98e, unit: novel}
+  - {addr: 0x8008bf5c, size: 64, name: novel_opcode_subtract_counter_delta, hash: 47accf9b5276e028, unit: novel}
+  - {addr: 0x8008bf9c, size: 144, name: novel_opcode_show_value_display, hash: 0e8c7d16fb25a71d, unit: novel}
+  - {addr: 0x8008c02c, size: 48, name: novel_opcode_hide_value_display, hash: 33df93c6e87c5be3, unit: novel}
+  - {addr: 0x8008c05c, size: 116, name: novel_opcode_apply_counter_delta, hash: f60cd93b941df914, unit: novel}
+  - {addr: 0x8008c0d0, size: 64, name: novel_opcode_play_sound, hash: 324ef0f32cc12574, unit: novel}
+  - {addr: 0x8008c110, size: 64, name: novel_opcode_load_music, hash: 147e3922b16a7121, unit: novel}
   - {addr: 0x8008c150, size: 196, name: change_reading_music, hash: cd3f39c2cb15f5ef, unit: novel}
-  - {addr: 0x8008c214, size: 44, name: novel_opcode_21_set_sound_mode, hash: a28316d3c46a377f, unit: novel}
-  - {addr: 0x8008c240, size: 140, name: novel_opcode_22_branch_if_counter_equal, hash: cbf6358c095f87a5, unit: novel}
-  - {addr: 0x8008c2cc, size: 140, name: novel_opcode_23_branch_if_counter_not_equal, hash: 8e8e8be364171edb, unit: novel}
-  - {addr: 0x8008c358, size: 144, name: novel_opcode_24_branch_if_counter_less, hash: 8505bb222cacf729, unit: novel}
-  - {addr: 0x8008c3e8, size: 144, name: novel_opcode_25_branch_if_counter_greater, hash: 074c2c00f4b7a411, unit: novel}
-  - {addr: 0x8008c478, size: 112, name: novel_opcode_26_fade_out_music, hash: cec7c0c1dc129d5f, unit: novel}
-  - {addr: 0x8008c4e8, size: 140, name: novel_opcode_27_fade_in_music, hash: 10603990f24ad021, unit: novel}
-  - {addr: 0x8008c574, size: 92, name: novel_opcode_28_fade_screen_out, hash: 425ff88428391dbc, unit: novel}
-  - {addr: 0x8008c5d0, size: 104, name: novel_opcode_29_fade_screen_in, hash: 485fa8c311d12120, unit: novel}
-  - {addr: 0x8008c638, size: 296, name: novel_opcode_2a_set_white_screen_overlay, hash: 17b4c8d72f648c79, unit: novel}
-  - {addr: 0x8008c760, size: 76, name: novel_opcode_2b_wait_for_circle_press, hash: dca9f61e27799116, unit: novel}
-  - {addr: 0x8008c7ac, size: 92, name: novel_opcode_2c_play_sound_effect_quad, hash: 4ea403ff52255127, unit: novel}
-  - {addr: 0x8008c808, size: 60, name: novel_opcode_2d_stop_sound_effects, hash: e8da89e16ef4faf7, unit: novel}
-  - {addr: 0x8008c844, size: 84, name: novel_opcode_2e_start_countdown_timer, hash: 1301853f97b18d7f, unit: novel}
-  - {addr: 0x8008c898, size: 96, name: novel_opcode_2f_play_background_sound, hash: 5a43066da8004887, unit: novel}
-  - {addr: 0x8008c8f8, size: 112, name: novel_opcode_30_set_master_volume, hash: f09c779a64e008de, unit: novel}
-  - {addr: 0x8008c968, size: 176, name: novel_opcode_31_unload_music, hash: 9448637d40e4e6f5, unit: novel}
-  - {addr: 0x8008ca18, size: 80, name: novel_opcode_32_set_menu_brightness, hash: 366d11aaf33000b4, unit: novel}
-  - {addr: 0x8008ca68, size: 128, name: novel_opcode_33_add_counter_delta_if_choice, hash: b71a1a8e28da8919, unit: novel}
-  - {addr: 0x8008cae8, size: 72, name: novel_opcode_34_wait_for_fade, hash: 99b838a0e8a4a63b, unit: novel}
-  - {addr: 0x8008cb30, size: 92, name: novel_opcode_35_push_operand_history, hash: 8c308396e688df64, unit: novel}
+  - {addr: 0x8008c214, size: 44, name: novel_opcode_set_sound_mode, hash: a28316d3c46a377f, unit: novel}
+  - {addr: 0x8008c240, size: 140, name: novel_opcode_branch_if_counter_equal, hash: cbf6358c095f87a5, unit: novel}
+  - {addr: 0x8008c2cc, size: 140, name: novel_opcode_branch_if_counter_not_equal, hash: 8e8e8be364171edb, unit: novel}
+  - {addr: 0x8008c358, size: 144, name: novel_opcode_branch_if_counter_less, hash: 8505bb222cacf729, unit: novel}
+  - {addr: 0x8008c3e8, size: 144, name: novel_opcode_branch_if_counter_greater, hash: 074c2c00f4b7a411, unit: novel}
+  - {addr: 0x8008c478, size: 112, name: novel_opcode_fade_out_music, hash: cec7c0c1dc129d5f, unit: novel}
+  - {addr: 0x8008c4e8, size: 140, name: novel_opcode_fade_in_music, hash: 10603990f24ad021, unit: novel}
+  - {addr: 0x8008c574, size: 92, name: novel_opcode_fade_screen_out, hash: 425ff88428391dbc, unit: novel}
+  - {addr: 0x8008c5d0, size: 104, name: novel_opcode_fade_screen_in, hash: 485fa8c311d12120, unit: novel}
+  - {addr: 0x8008c638, size: 296, name: novel_opcode_set_white_screen_overlay, hash: 17b4c8d72f648c79, unit: novel}
+  - {addr: 0x8008c760, size: 76, name: novel_opcode_wait_for_circle_press, hash: dca9f61e27799116, unit: novel}
+  - {addr: 0x8008c7ac, size: 92, name: novel_opcode_play_sound_effect_quad, hash: 4ea403ff52255127, unit: novel}
+  - {addr: 0x8008c808, size: 60, name: novel_opcode_stop_sound_effects, hash: e8da89e16ef4faf7, unit: novel}
+  - {addr: 0x8008c844, size: 84, name: novel_opcode_start_countdown_timer, hash: 1301853f97b18d7f, unit: novel}
+  - {addr: 0x8008c898, size: 96, name: novel_opcode_play_background_sound, hash: 5a43066da8004887, unit: novel}
+  - {addr: 0x8008c8f8, size: 112, name: novel_opcode_set_master_volume, hash: f09c779a64e008de, unit: novel}
+  - {addr: 0x8008c968, size: 176, name: novel_opcode_unload_music, hash: 9448637d40e4e6f5, unit: novel}
+  - {addr: 0x8008ca18, size: 80, name: novel_opcode_set_menu_brightness, hash: 366d11aaf33000b4, unit: novel}
+  - {addr: 0x8008ca68, size: 128, name: novel_opcode_add_counter_delta_if_choice, hash: b71a1a8e28da8919, unit: novel}
+  - {addr: 0x8008cae8, size: 72, name: novel_opcode_wait_for_fade, hash: 99b838a0e8a4a63b, unit: novel}
+  - {addr: 0x8008cb30, size: 92, name: novel_opcode_push_operand_history, hash: 8c308396e688df64, unit: novel}
   - {addr: 0x8008cb8c, size: 612, name: world_map_init_dots, hash: 2a8587cca2243032, unit: map_routes}
   - {addr: 0x8008cdf0, size: 292, name: world_map_project_dots, hash: dfad85550257e0ac, unit: map_routes}
   - {addr: 0x8008cf14, size: 332, name: world_map_pulse_dots, hash: f98bdd99186282ca, unit: map_routes}
@@ -433,41 +433,41 @@ functions:
   - {addr: 0x80091174, size: 88, name: music_queue_start_track, hash: 3c92ed5553c06ccd, unit: music_queue}
   - {addr: 0x800911cc, size: 108, name: music_queue_wait_until_empty, hash: 8b6a1a20afb1383a, unit: music_queue}
   - {addr: 0x80091238, size: 328, name: location_script_run, hash: 3595ca7b3a29bb9a, unit: location_script}
-  - {addr: 0x80091380, size: 8, name: location_script_opcode_00_nop, hash: 6d64edf91449c1b1, unit: location_script}
-  - {addr: 0x80091388, size: 28, name: location_script_opcode_14_skip_1_operand, hash: 768b510ec89c7449, unit: location_script}
-  - {addr: 0x800913a4, size: 28, name: location_script_opcode_05_skip_2_operands, hash: d79d32bc6590d2a0, unit: location_script}
-  - {addr: 0x800913c0, size: 28, name: location_script_opcode_17_skip_3_operands, hash: 0aa2cc8b3e6218ff, unit: location_script}
-  - {addr: 0x800913dc, size: 28, name: location_script_opcode_18_skip_4_operands, hash: b44058107bcffe3d, unit: location_script}
-  - {addr: 0x800913f8, size: 88, name: location_script_opcode_01_check_var_equal, hash: c1ab99411b48c93e, unit: location_script}
+  - {addr: 0x80091380, size: 8, name: location_opcode_nop, hash: 6d64edf91449c1b1, unit: location_script}
+  - {addr: 0x80091388, size: 28, name: location_opcode_skip_1_operand, hash: 768b510ec89c7449, unit: location_script}
+  - {addr: 0x800913a4, size: 28, name: location_opcode_skip_2_operands, hash: d79d32bc6590d2a0, unit: location_script}
+  - {addr: 0x800913c0, size: 28, name: location_opcode_skip_3_operands, hash: 0aa2cc8b3e6218ff, unit: location_script}
+  - {addr: 0x800913dc, size: 28, name: location_opcode_skip_4_operands, hash: b44058107bcffe3d, unit: location_script}
+  - {addr: 0x800913f8, size: 88, name: location_opcode_check_var_equal, hash: c1ab99411b48c93e, unit: location_script}
   - {addr: 0x80091450, size: 108, name: read_operand_pair, hash: 978db3ae06647cd2, unit: location_script}
-  - {addr: 0x800914bc, size: 92, name: location_script_opcode_02_check_var_at_least, hash: 0a07d0db212801e0, unit: location_script}
-  - {addr: 0x80091518, size: 92, name: location_script_opcode_03_check_var_at_most, hash: 1d33640e4361bc9b, unit: location_script}
-  - {addr: 0x80091574, size: 188, name: location_script_opcode_04_check_roster_has_character, hash: ef88873683c9c523, unit: location_script}
-  - {addr: 0x80091630, size: 28, name: location_script_opcode_0c_skip_1_operand, hash: 768b510ec89c7449, unit: location_script}
-  - {addr: 0x8009164c, size: 28, name: location_script_opcode_0d_skip_1_operand, hash: 768b510ec89c7449, unit: location_script}
-  - {addr: 0x80091668, size: 116, name: location_script_opcode_0e_check_war_funds_at_least, hash: 979855247339c056, unit: location_script}
-  - {addr: 0x800916dc, size: 116, name: location_script_opcode_0f_check_war_funds_at_most, hash: 253ae0e61fe55917, unit: location_script}
-  - {addr: 0x80091750, size: 124, name: location_script_opcode_10_check_date_on_or_after, hash: e40e7b07422349e1, unit: location_script}
+  - {addr: 0x800914bc, size: 92, name: location_opcode_check_var_at_least, hash: 0a07d0db212801e0, unit: location_script}
+  - {addr: 0x80091518, size: 92, name: location_opcode_check_var_at_most, hash: 1d33640e4361bc9b, unit: location_script}
+  - {addr: 0x80091574, size: 188, name: location_opcode_check_roster_has_character, hash: ef88873683c9c523, unit: location_script}
+  - {addr: 0x80091630, size: 28, name: location_opcode_skip_1_operand_0c, hash: 768b510ec89c7449, unit: location_script}
+  - {addr: 0x8009164c, size: 28, name: location_opcode_skip_1_operand_0d, hash: 768b510ec89c7449, unit: location_script}
+  - {addr: 0x80091668, size: 116, name: location_opcode_check_war_funds_at_least, hash: 979855247339c056, unit: location_script}
+  - {addr: 0x800916dc, size: 116, name: location_opcode_check_war_funds_at_most, hash: 253ae0e61fe55917, unit: location_script}
+  - {addr: 0x80091750, size: 124, name: location_opcode_check_date_on_or_after, hash: e40e7b07422349e1, unit: location_script}
   - {addr: 0x800917cc, size: 168, name: read_operand_dates, hash: 3c7734d04ea829e7, unit: location_script}
-  - {addr: 0x80091874, size: 124, name: location_script_opcode_11_check_date_on_or_before, hash: 2e78e71ab1fe56af, unit: location_script}
-  - {addr: 0x800918f0, size: 116, name: location_script_opcode_12_check_casualties_at_least, hash: 43af3896782afcde, unit: location_script}
-  - {addr: 0x80091964, size: 116, name: location_script_opcode_13_check_casualties_at_most, hash: 8887097babf4143a, unit: location_script}
-  - {addr: 0x800919d8, size: 112, name: location_script_opcode_19_request_load_event, hash: aef5f1c4bd26cd57, unit: location_script}
-  - {addr: 0x80091a48, size: 156, name: location_script_opcode_1a_request_choice, hash: b7384b1765a5d616, unit: location_script}
-  - {addr: 0x80091ae4, size: 52, name: location_script_opcode_1c_set_var, hash: d6292e0e6206ed76, unit: location_script}
-  - {addr: 0x80091b18, size: 76, name: location_script_opcode_1d_request_text, hash: f1a91ad57c9cf27b, unit: location_script}
-  - {addr: 0x80091b64, size: 148, name: location_script_opcode_1e_request_deep_dungeon_entry, hash: 51bc2035ae2bcf89, unit: location_script}
-  - {addr: 0x80091bf8, size: 112, name: location_script_opcode_1f_request_set_var, hash: 78a0b8c195f92687, unit: location_script}
-  - {addr: 0x80091c68, size: 112, name: location_script_opcode_20_request_draw_path, hash: b59c744c0b443576, unit: location_script}
-  - {addr: 0x80091cd8, size: 112, name: location_script_opcode_21_request_erase_path, hash: e10263e10dd19c4f, unit: location_script}
-  - {addr: 0x80091d48, size: 64, name: location_script_opcode_22_request_draw_location, hash: 7f979a6125387956, unit: location_script}
-  - {addr: 0x80091d88, size: 64, name: location_script_opcode_23_request_erase_location, hash: 003d85a846e70105, unit: location_script}
-  - {addr: 0x80091dc8, size: 188, name: location_script_opcode_24_focus_location, hash: 03b8c19a769d4b5c, unit: location_script}
-  - {addr: 0x80091e84, size: 124, name: location_script_opcode_25_check_ramza_brave_at_least, hash: 3a15a176c8fcb641, unit: location_script}
+  - {addr: 0x80091874, size: 124, name: location_opcode_check_date_on_or_before, hash: 2e78e71ab1fe56af, unit: location_script}
+  - {addr: 0x800918f0, size: 116, name: location_opcode_check_casualties_at_least, hash: 43af3896782afcde, unit: location_script}
+  - {addr: 0x80091964, size: 116, name: location_opcode_check_casualties_at_most, hash: 8887097babf4143a, unit: location_script}
+  - {addr: 0x800919d8, size: 112, name: location_opcode_request_load_event, hash: aef5f1c4bd26cd57, unit: location_script}
+  - {addr: 0x80091a48, size: 156, name: location_opcode_request_choice, hash: b7384b1765a5d616, unit: location_script}
+  - {addr: 0x80091ae4, size: 52, name: location_opcode_set_var, hash: d6292e0e6206ed76, unit: location_script}
+  - {addr: 0x80091b18, size: 76, name: location_opcode_request_text, hash: f1a91ad57c9cf27b, unit: location_script}
+  - {addr: 0x80091b64, size: 148, name: location_opcode_request_deep_dungeon_entry, hash: 51bc2035ae2bcf89, unit: location_script}
+  - {addr: 0x80091bf8, size: 112, name: location_opcode_request_set_var, hash: 78a0b8c195f92687, unit: location_script}
+  - {addr: 0x80091c68, size: 112, name: location_opcode_request_draw_path, hash: b59c744c0b443576, unit: location_script}
+  - {addr: 0x80091cd8, size: 112, name: location_opcode_request_erase_path, hash: e10263e10dd19c4f, unit: location_script}
+  - {addr: 0x80091d48, size: 64, name: location_opcode_request_draw_location, hash: 7f979a6125387956, unit: location_script}
+  - {addr: 0x80091d88, size: 64, name: location_opcode_request_erase_location, hash: 003d85a846e70105, unit: location_script}
+  - {addr: 0x80091dc8, size: 188, name: location_opcode_focus_location, hash: 03b8c19a769d4b5c, unit: location_script}
+  - {addr: 0x80091e84, size: 124, name: location_opcode_check_ramza_brave_at_least, hash: 3a15a176c8fcb641, unit: location_script}
   - {addr: 0x80091f00, size: 116, name: find_ramza_slot, hash: abf9c33b8d49cfd2, unit: location_script}
-  - {addr: 0x80091f74, size: 124, name: location_script_opcode_26_check_ramza_brave_at_most, hash: 8ad6ea6f5047346d, unit: location_script}
-  - {addr: 0x80091ff0, size: 124, name: location_script_opcode_27_check_ramza_faith_at_least, hash: 4b093efef959c7f5, unit: location_script}
-  - {addr: 0x8009206c, size: 124, name: location_script_opcode_28_check_ramza_faith_at_most, hash: ad3113bd42ed67db, unit: location_script}
+  - {addr: 0x80091f74, size: 124, name: location_opcode_check_ramza_brave_at_most, hash: 8ad6ea6f5047346d, unit: location_script}
+  - {addr: 0x80091ff0, size: 124, name: location_opcode_check_ramza_faith_at_least, hash: 4b093efef959c7f5, unit: location_script}
+  - {addr: 0x8009206c, size: 124, name: location_opcode_check_ramza_faith_at_most, hash: ad3113bd42ed67db, unit: location_script}
   - {addr: 0x800920e8, size: 96, name: bits_set_value, hash: 56450a38fe0bff9f, unit: bit_arrays}
   - {addr: 0x80092148, size: 56, name: bits_test, hash: 822830daaa9c0843, unit: bit_arrays}
   - {addr: 0x80092180, size: 136, name: novel_calculate_read_percent, hash: 0ecc0e3f3f1d9117, unit: novel_progress}

@@ -91,21 +91,22 @@ static void load_companion_file(s32 request_index) {
 
 /* Empty in BATTLE and WORLD; in BATTLE it sits between
  * load_companion_file and
- * script_opcode_78_display_conditions_thread. Nothing on the disc calls it
+ * script_opcode_display_conditions_thread. Nothing on the disc calls it
  * or points at it; the name is a neutral placeholder until a reference turns
  * up. */
 void script_noop_1(void) {
 }
 
-/* Thread body of DisplayConditions: draw numeric values again and run REQUIRE's
+/* SCRIPT_OPCODE_DISPLAY_CONDITIONS (0x78)
+ * Thread body of DisplayConditions: draw numeric values again and run REQUIRE's
  * condition dispatcher, which takes the display id and its operand from the
  * thread parameters. */
-void script_opcode_78_display_conditions_thread(void) {
+void script_opcode_display_conditions_thread(void) {
     g_unit_panel_hide_numeric_values = 0;
     require_conditions_entrypoint();
 }
 
-/* The thread EVENT_OPCODE_DARK_SCREEN starts: it takes the task id, and in
+/* The thread SCRIPT_OPCODE_DARK_SCREEN starts: it takes the task id, and in
  * BATTLE loads REQUIRE.OUT and runs its bonus image burst (WORLD has no
  * REQUIRE.OUT to run). */
 void script_dark_screen_thread(void) {

@@ -16,79 +16,82 @@ struct map_unit;
  * run_block_seq (weapon and effect sheets) read them.
  * A sequence is a run of two-byte frame instructions (an SHP frame, then the
  * frames to wait; a wait of 0 holds the frame for good) and of commands:
- * ANIMATION_SEQ_OP_PREFIX, an opcode and its operand bytes. A jump offset is a
+ * ANIMATION_SEQ_OPCODE_PREFIX, an opcode and its operand bytes. A jump offset is a
  * signed byte counted from the command's own prefix byte, so -2 repeats the
  * frame instruction before it. UNKNOWN_XX commands only skip their operands. */
-enum { ANIMATION_SEQ_OP_PREFIX = 0xff };
+enum { ANIMATION_SEQ_OPCODE_PREFIX = 0xff };
 
 typedef enum animation_seq_opcode {
     /* 0xbe-0xd2 and 0xd4 are unit commands: a weapon or effect sequence that uses one is an error. */
-    ANIMATION_SEQ_OP_STOP_POSITION_COPIES = 0xbe,
-    ANIMATION_SEQ_OP_START_POSITION_COPIES = 0xbf, /* the trail of sprite_afterimage_draw */
-    ANIMATION_SEQ_OP_WAIT_FOR_DISTORTION = 0xc0,   /* offset: jump while a distortion animation runs */
-    ANIMATION_SEQ_OP_START_DISTORTION = 0xc1,      /* distortion animation id - 2, timer */
-    ANIMATION_SEQ_OP_NOP = 0xc2,
-    ANIMATION_SEQ_OP_HIDE_ITEM = 0xc3,
-    ANIMATION_SEQ_OP_SET_ITEM_POSITION = 0xc4, /* x, y: signed offsets of the item sprite from the unit */
-    ANIMATION_SEQ_OP_SHOW_ITEM = 0xc5,         /* draw the unit's item display (sprite_item_display_draw) */
-    ANIMATION_SEQ_OP_WAIT_FOR_INPUT = 0xc6,    /* offset: jump while g_battle_window_closed is 0 */
-    ANIMATION_SEQ_OP_UNKNOWN_C7 = 0xc7,        /* two operands */
-    ANIMATION_SEQ_OP_UNKNOWN_C8 = 0xc8,        /* two operands */
-    ANIMATION_SEQ_OP_UNKNOWN_C9 = 0xc9,        /* two operands */
-    ANIMATION_SEQ_OP_UNKNOWN_CA = 0xca,        /* one operand */
-    ANIMATION_SEQ_OP_MOVE_UP_2 = 0xcb,         /* 0xcb-0xd2 shift the sprite by one or two units of seq_offset */
-    ANIMATION_SEQ_OP_MOVE_UP_1 = 0xcc,
-    ANIMATION_SEQ_OP_MOVE_BACKWARD_2 = 0xcd,
-    ANIMATION_SEQ_OP_MOVE_BACKWARD_1 = 0xce,
-    ANIMATION_SEQ_OP_MOVE_DOWN_2 = 0xcf,
-    ANIMATION_SEQ_OP_MOVE_DOWN_1 = 0xd0,
-    ANIMATION_SEQ_OP_MOVE_FORWARD_2 = 0xd1,
-    ANIMATION_SEQ_OP_MOVE_FORWARD_1 = 0xd2,
-    ANIMATION_SEQ_OP_WAIT_FOR_EFFECT_LOAD = 0xd3, /* offset: jump while g_battle_animation_wait_state is 1 */
-    ANIMATION_SEQ_OP_PLAY_WEAPON_SOUND = 0xd4,    /* 0 swing, 1 hit: action_play_weapon_sfx */
-    ANIMATION_SEQ_OP_RESTART = 0xd5,              /* back to the sequence's first byte, counting the restart */
-    ANIMATION_SEQ_OP_WAIT_FOR_EFFECT = 0xd6,      /* offset: jump while g_battle_animation_wait_state is not 0 */
-    ANIMATION_SEQ_OP_UNKNOWN_D7 = 0xd7,           /* one operand; the sequences of death and revival start with it */
-    ANIMATION_SEQ_OP_SET_FRAME_BIAS = 0xd8,       /* signed; added to every later frame id */
-    ANIMATION_SEQ_OP_LAUNCH_PROJECTILE = 0xd9, /* two unread operands: the thrown item, stone or arrow of the action */
-    ANIMATION_SEQ_OP_UNDEFINED_DA = 0xda,      /* no handler: SYSTEM_ERROR_SEQ_OPCODE like any other value */
-    ANIMATION_SEQ_OP_SET_WAIT_BIAS = 0xdb,     /* signed; added to every later wait */
-    ANIMATION_SEQ_OP_RETURN = 0xdc,            /* resume the sequence ANIMATION_SEQ_OP_CALL_SEQUENCE left */
-    ANIMATION_SEQ_OP_CALL_SEQUENCE = 0xdd,     /* sequence id: run it from its start; one level deep */
-    ANIMATION_SEQ_OP_STRIKE_TARGETS = 0xde,    /* the blow of a weapon-like ability lands: its targets react */
-    ANIMATION_SEQ_OP_CLEAR_ROTATION = 0xdf,
-    ANIMATION_SEQ_OP_HIDE_SHADOW = 0xe0,
-    ANIMATION_SEQ_OP_SHOW_SHADOW = 0xe1,
-    ANIMATION_SEQ_OP_SET_LAYER_PRIORITY = 0xe2, /* row of g_animation_layer_priorities */
-    ANIMATION_SEQ_OP_UNKNOWN_E3 = 0xe3,         /* one operand */
-    ANIMATION_SEQ_OP_UNKNOWN_E4 = 0xe4,         /* one operand */
-    ANIMATION_SEQ_OP_SET_ROTATION = 0xe5,       /* low byte, high byte: the display's rotation, ONE to the turn */
-    ANIMATION_SEQ_OP_UNKNOWN_E6 = 0xe6,         /* two operands */
-    ANIMATION_SEQ_OP_UNKNOWN_E7 = 0xe7,         /* two operands */
-    ANIMATION_SEQ_OP_UNKNOWN_E8 = 0xe8,         /* two operands */
-    ANIMATION_SEQ_OP_UNKNOWN_E9 = 0xe9,         /* one operand */
-    ANIMATION_SEQ_OP_UNKNOWN_EA = 0xea,         /* two operands */
-    ANIMATION_SEQ_OP_FLIP_VERTICAL = 0xeb,
-    ANIMATION_SEQ_OP_FLIP_HORIZONTAL = 0xec,
-    ANIMATION_SEQ_OP_UNKNOWN_ED = 0xed,   /* one operand */
-    ANIMATION_SEQ_OP_MOVE_UNIT_FB = 0xee, /* signed: forward (+) or backward; 0xee-0xf0 and 0xfa move units only */
-    ANIMATION_SEQ_OP_MOVE_UNIT_DU = 0xef, /* signed: down (+) or up */
-    ANIMATION_SEQ_OP_MOVE_UNIT_RL = 0xf0, /* signed: right (+) or left */
-    ANIMATION_SEQ_OP_UNKNOWN_F1 = 0xf1,   /* two operands */
-    ANIMATION_SEQ_OP_START_BLOCK_SEQUENCE = 0xf2, /* sprite block 1-3, sequence id: show the weapon or effect sprite */
-    ANIMATION_SEQ_OP_UNKNOWN_F3 = 0xf3,           /* one operand */
-    ANIMATION_SEQ_OP_UNKNOWN_F4 = 0xf4,           /* one operand */
-    ANIMATION_SEQ_OP_UNKNOWN_F5 = 0xf5,           /* one operand */
-    ANIMATION_SEQ_OP_PLAY_SOUND = 0xf6,           /* sound_sfx_e */
-    ANIMATION_SEQ_OP_UNKNOWN_F7 = 0xf7,           /* three operands */
-    ANIMATION_SEQ_OP_UNKNOWN_F8 = 0xf8,           /* two operands */
-    ANIMATION_SEQ_OP_MOVE_SCREEN_OFFSET = 0xf9,   /* signed x, y: added to the unit's screen_offset */
-    ANIMATION_SEQ_OP_MOVE_UNIT = 0xfa,            /* right, down, forward: the operands of 0xf0, 0xef and 0xee */
-    ANIMATION_SEQ_OP_UNKNOWN_FB = 0xfb,           /* two operands */
-    ANIMATION_SEQ_OP_REPEAT = 0xfc,               /* offset, count: jump count times, then go on */
-    ANIMATION_SEQ_OP_JUMP = 0xfd,                 /* offset */
-    ANIMATION_SEQ_OP_END_ANIMATION = 0xfe,        /* stop; a weapon or effect sprite is hidden too */
-    ANIMATION_SEQ_OP_PAUSE_ANIMATION = 0xff /* stop; either one puts a unit in its g_animation_targeted_frame_* pose */
+    ANIMATION_SEQ_OPCODE_STOP_POSITION_COPIES = 0xbe,
+    ANIMATION_SEQ_OPCODE_START_POSITION_COPIES = 0xbf, /* the trail of sprite_afterimage_draw */
+    ANIMATION_SEQ_OPCODE_WAIT_FOR_DISTORTION = 0xc0,   /* offset: jump while a distortion animation runs */
+    ANIMATION_SEQ_OPCODE_START_DISTORTION = 0xc1,      /* distortion animation id - 2, timer */
+    ANIMATION_SEQ_OPCODE_NOP = 0xc2,
+    ANIMATION_SEQ_OPCODE_HIDE_ITEM = 0xc3,
+    ANIMATION_SEQ_OPCODE_SET_ITEM_POSITION = 0xc4, /* x, y: signed offsets of the item sprite from the unit */
+    ANIMATION_SEQ_OPCODE_SHOW_ITEM = 0xc5,         /* draw the unit's item display (sprite_item_display_draw) */
+    ANIMATION_SEQ_OPCODE_WAIT_FOR_INPUT = 0xc6,    /* offset: jump while g_battle_window_closed is 0 */
+    ANIMATION_SEQ_OPCODE_UNKNOWN_C7 = 0xc7,        /* two operands */
+    ANIMATION_SEQ_OPCODE_UNKNOWN_C8 = 0xc8,        /* two operands */
+    ANIMATION_SEQ_OPCODE_UNKNOWN_C9 = 0xc9,        /* two operands */
+    ANIMATION_SEQ_OPCODE_UNKNOWN_CA = 0xca,        /* one operand */
+    ANIMATION_SEQ_OPCODE_MOVE_UP_2 = 0xcb,         /* 0xcb-0xd2 shift the sprite by one or two units of seq_offset */
+    ANIMATION_SEQ_OPCODE_MOVE_UP_1 = 0xcc,
+    ANIMATION_SEQ_OPCODE_MOVE_BACKWARD_2 = 0xcd,
+    ANIMATION_SEQ_OPCODE_MOVE_BACKWARD_1 = 0xce,
+    ANIMATION_SEQ_OPCODE_MOVE_DOWN_2 = 0xcf,
+    ANIMATION_SEQ_OPCODE_MOVE_DOWN_1 = 0xd0,
+    ANIMATION_SEQ_OPCODE_MOVE_FORWARD_2 = 0xd1,
+    ANIMATION_SEQ_OPCODE_MOVE_FORWARD_1 = 0xd2,
+    ANIMATION_SEQ_OPCODE_WAIT_FOR_EFFECT_LOAD = 0xd3, /* offset: jump while g_battle_animation_wait_state is 1 */
+    ANIMATION_SEQ_OPCODE_PLAY_WEAPON_SOUND = 0xd4,    /* 0 swing, 1 hit: action_play_weapon_sfx */
+    ANIMATION_SEQ_OPCODE_RESTART = 0xd5,              /* back to the sequence's first byte, counting the restart */
+    ANIMATION_SEQ_OPCODE_WAIT_FOR_EFFECT = 0xd6,      /* offset: jump while g_battle_animation_wait_state is not 0 */
+    ANIMATION_SEQ_OPCODE_UNKNOWN_D7 = 0xd7,     /* one operand; the sequences of death and revival start with it */
+    ANIMATION_SEQ_OPCODE_SET_FRAME_BIAS = 0xd8, /* signed; added to every later frame id */
+    ANIMATION_SEQ_OPCODE_LAUNCH_PROJECTILE
+    = 0xd9,                                     /* two unread operands: the thrown item, stone or arrow of the action */
+    ANIMATION_SEQ_OPCODE_UNDEFINED_DA = 0xda,   /* no handler: SYSTEM_ERROR_SEQ_OPCODE like any other value */
+    ANIMATION_SEQ_OPCODE_SET_WAIT_BIAS = 0xdb,  /* signed; added to every later wait */
+    ANIMATION_SEQ_OPCODE_RETURN = 0xdc,         /* resume the sequence ANIMATION_SEQ_OPCODE_CALL_SEQUENCE left */
+    ANIMATION_SEQ_OPCODE_CALL_SEQUENCE = 0xdd,  /* sequence id: run it from its start; one level deep */
+    ANIMATION_SEQ_OPCODE_STRIKE_TARGETS = 0xde, /* the blow of a weapon-like ability lands: its targets react */
+    ANIMATION_SEQ_OPCODE_CLEAR_ROTATION = 0xdf,
+    ANIMATION_SEQ_OPCODE_HIDE_SHADOW = 0xe0,
+    ANIMATION_SEQ_OPCODE_SHOW_SHADOW = 0xe1,
+    ANIMATION_SEQ_OPCODE_SET_LAYER_PRIORITY = 0xe2, /* row of g_animation_layer_priorities */
+    ANIMATION_SEQ_OPCODE_UNKNOWN_E3 = 0xe3,         /* one operand */
+    ANIMATION_SEQ_OPCODE_UNKNOWN_E4 = 0xe4,         /* one operand */
+    ANIMATION_SEQ_OPCODE_SET_ROTATION = 0xe5,       /* low byte, high byte: the display's rotation, ONE to the turn */
+    ANIMATION_SEQ_OPCODE_UNKNOWN_E6 = 0xe6,         /* two operands */
+    ANIMATION_SEQ_OPCODE_UNKNOWN_E7 = 0xe7,         /* two operands */
+    ANIMATION_SEQ_OPCODE_UNKNOWN_E8 = 0xe8,         /* two operands */
+    ANIMATION_SEQ_OPCODE_UNKNOWN_E9 = 0xe9,         /* one operand */
+    ANIMATION_SEQ_OPCODE_UNKNOWN_EA = 0xea,         /* two operands */
+    ANIMATION_SEQ_OPCODE_FLIP_VERTICAL = 0xeb,
+    ANIMATION_SEQ_OPCODE_FLIP_HORIZONTAL = 0xec,
+    ANIMATION_SEQ_OPCODE_UNKNOWN_ED = 0xed,   /* one operand */
+    ANIMATION_SEQ_OPCODE_MOVE_UNIT_FB = 0xee, /* signed: forward (+) or backward; 0xee-0xf0 and 0xfa move units only */
+    ANIMATION_SEQ_OPCODE_MOVE_UNIT_DU = 0xef, /* signed: down (+) or up */
+    ANIMATION_SEQ_OPCODE_MOVE_UNIT_RL = 0xf0, /* signed: right (+) or left */
+    ANIMATION_SEQ_OPCODE_UNKNOWN_F1 = 0xf1,   /* two operands */
+    ANIMATION_SEQ_OPCODE_START_BLOCK_SEQUENCE
+    = 0xf2,                                 /* sprite block 1-3, sequence id: show the weapon or effect sprite */
+    ANIMATION_SEQ_OPCODE_UNKNOWN_F3 = 0xf3, /* one operand */
+    ANIMATION_SEQ_OPCODE_UNKNOWN_F4 = 0xf4, /* one operand */
+    ANIMATION_SEQ_OPCODE_UNKNOWN_F5 = 0xf5, /* one operand */
+    ANIMATION_SEQ_OPCODE_PLAY_SOUND = 0xf6, /* sound_sfx_e */
+    ANIMATION_SEQ_OPCODE_UNKNOWN_F7 = 0xf7, /* three operands */
+    ANIMATION_SEQ_OPCODE_UNKNOWN_F8 = 0xf8, /* two operands */
+    ANIMATION_SEQ_OPCODE_MOVE_SCREEN_OFFSET = 0xf9, /* signed x, y: added to the unit's screen_offset */
+    ANIMATION_SEQ_OPCODE_MOVE_UNIT = 0xfa,          /* right, down, forward: the operands of 0xf0, 0xef and 0xee */
+    ANIMATION_SEQ_OPCODE_UNKNOWN_FB = 0xfb,         /* two operands */
+    ANIMATION_SEQ_OPCODE_REPEAT = 0xfc,             /* offset, count: jump count times, then go on */
+    ANIMATION_SEQ_OPCODE_JUMP = 0xfd,               /* offset */
+    ANIMATION_SEQ_OPCODE_END_ANIMATION = 0xfe,      /* stop; a weapon or effect sprite is hidden too */
+    ANIMATION_SEQ_OPCODE_PAUSE_ANIMATION
+    = 0xff /* stop; either one puts a unit in its g_animation_targeted_frame_* pose */
 } animation_seq_opcode_e;
 
 /* Animation ids from 500 up are not doubled into a front and a back
@@ -107,12 +110,12 @@ typedef struct animation_state {
     s16 script_pos;        /* 0x06; offset of the next byte to read in the sequence */
     u16 frame;             /* 0x08; SHP frame on display */
     u16 wait;              /* 0x0a; frames until the sequence is read again; 0 when it has stopped */
-    u16 restart_count;     /* 0x0c; ANIMATION_SEQ_OP_RESTART commands run since the sequence started */
-    u16 saved_sequence_id; /* 0x0e; where ANIMATION_SEQ_OP_RETURN resumes */
+    u16 restart_count;     /* 0x0c; ANIMATION_SEQ_OPCODE_RESTART commands run since the sequence started */
+    u16 saved_sequence_id; /* 0x0e; where ANIMATION_SEQ_OPCODE_RETURN resumes */
     s16 saved_script_pos;  /* 0x10 */
-    u16 wait_bias;         /* 0x12; ANIMATION_SEQ_OP_SET_WAIT_BIAS: added to each wait read */
-    u16 frame_bias;        /* 0x14; ANIMATION_SEQ_OP_SET_FRAME_BIAS: added to each frame id read */
-    u16 repeat_count;      /* 0x16; jumps the ANIMATION_SEQ_OP_REPEAT in progress has left; 0 when none is */
+    u16 wait_bias;         /* 0x12; ANIMATION_SEQ_OPCODE_SET_WAIT_BIAS: added to each wait read */
+    u16 frame_bias;        /* 0x14; ANIMATION_SEQ_OPCODE_SET_FRAME_BIAS: added to each frame id read */
+    u16 repeat_count;      /* 0x16; jumps the ANIMATION_SEQ_OPCODE_REPEAT in progress has left; 0 when none is */
     u16 flags;             /* 0x18; the flip bits of sprite_display_flags_e that the sequence toggled */
     u8 _padding_1a[2];     /* 0x1a; aligns shp */
     struct sprite_unit_shp_frame_tables* shp; /* 0x1c */
@@ -258,7 +261,7 @@ void animation_set_shield_block_attacker(struct map_unit* attacker, struct map_u
 /* distortions */
 /* map_unit_t.distortion_animation_id: the motion that
  * animation_dispatch_distortion steps once an animation frame
- * until its handler clears the id. ANIMATION_SEQ_OP_START_DISTORTION gives the
+ * until its handler clears the id. ANIMATION_SEQ_OPCODE_START_DISTORTION gives the
  * id less 2 and, for most, the frames it takes (distortion_timer). */
 typedef enum animation_distortion {
     ANIMATION_DISTORTION_NONE = 0,

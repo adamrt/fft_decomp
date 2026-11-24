@@ -16,11 +16,12 @@ extern s16 g_gfx_window_zoom_percent[4];
 
 /* Only EQUIP links the flat-tile and line instructions. */
 #ifdef FFT_EVENT_EQUIP
-/* Stream command: draw a flat tile of size (cmd->tile.width, cmd->tile.height) at
+/* MENU_OPCODE_TILE (0x03)
+ * Stream command: draw a flat tile of size (cmd->tile.width, cmd->tile.height) at
  * (cmd->tile.x, cmd->tile.y) in cmd->tile.color. While a list row is
  * rendered, y is offset by the row's position and the scroll offset. Returns
  * the next command. */
-menu_instruction_t* menu_opcode_03_draw_tile(menu_instruction_t* cmd) {
+menu_instruction_t* menu_opcode_draw_tile(menu_instruction_t* cmd) {
     RECT rect;
     s32 y;
 
@@ -43,16 +44,19 @@ menu_instruction_t* menu_opcode_03_draw_tile(menu_instruction_t* cmd) {
 
 /* JOBSTTS links this setter here; BUNIT and EQUIP keep it with texture commands. */
 #ifdef FFT_EVENT_JOBSTTS
-/* Menu script command: turn semi-transparency on or off for later primitives and continue with the
+/* MENU_OPCODE_SEMI_TRANS (0x0e)
+ * Turn semi-transparency on or off for later primitives and continue with the
  * next command. */
-menu_instruction_t* menu_opcode_0e_set_semi_trans(menu_instruction_t* data) {
+menu_instruction_t* menu_opcode_set_semi_trans(menu_instruction_t* data) {
     g_menu_gfx_semitransparency = data->draw_state.value;
     return menu_next_instruction(data);
 }
 #endif
 
-/* Draw a textured quad at its literal position or current list row. */
-menu_instruction_t* menu_opcode_04_05_draw_textured_quad(menu_instruction_t* cmd) {
+/* MENU_OPCODE_QUAD (0x04)
+ * MENU_OPCODE_TINTED_QUAD (0x05)
+ * Draw a textured quad at its literal position or current list row. */
+menu_instruction_t* menu_opcode_draw_quad(menu_instruction_t* cmd) {
     RECT rect;
     s32 y;
     rgb24_t* color;
@@ -72,7 +76,7 @@ menu_instruction_t* menu_opcode_04_05_draw_textured_quad(menu_instruction_t* cmd
     rect.h = cmd->sprite.sprite.h;
 
     color = &g_menu_text_color;
-    if (cmd->header.opcode == MENU_SCRIPT_OP_UNCOLORED_QUAD) {
+    if (cmd->header.opcode == MENU_OPCODE_QUAD) {
         color = 0;
     }
 
@@ -82,9 +86,10 @@ menu_instruction_t* menu_opcode_04_05_draw_textured_quad(menu_instruction_t* cmd
 }
 
 #ifdef FFT_EVENT_EQUIP
-/* Stream command: draw a LINE_F2 from (x0, y0) to
+/* MENU_OPCODE_LINE (0x07)
+ * Stream command: draw a LINE_F2 from (x0, y0) to
    (x1, y1) with the RGB that follows the endpoints in the command. */
-menu_instruction_t* menu_opcode_07_draw_line(menu_instruction_t* stream) {
+menu_instruction_t* menu_opcode_draw_line(menu_instruction_t* stream) {
     point16_t endpoints[2];
 
     endpoints[0].x = stream->line.x0;
@@ -98,9 +103,10 @@ menu_instruction_t* menu_opcode_07_draw_line(menu_instruction_t* stream) {
 
 /* JOBSTTS has no callback-quad instruction and keeps its window commands in a separate unit. */
 #if defined(FFT_EVENT_BUNIT) || defined(FFT_EVENT_EQUIP)
-/* Draw the selected callback's icon for the literal or current list row,
+/* MENU_OPCODE_CALLBACK_QUAD (0x06)
+ * Draw the selected callback's icon for the literal or current list row,
  * using its texture, dimensions and palette. */
-menu_instruction_t* menu_opcode_06_draw_callback_quad(menu_instruction_t* cmd) {
+menu_instruction_t* menu_opcode_draw_callback_quad(menu_instruction_t* cmd) {
     menu_icon_source_t* entry;
     s32 row;
     menu_icon_source_t* (*callback)(s32);
@@ -125,15 +131,16 @@ menu_instruction_t* menu_opcode_06_draw_callback_quad(menu_instruction_t* cmd) {
         g_menu_script_quad_command.sprite.v = entry->v;
         g_menu_gfx_clut_id = entry->clut;
         g_menu_gfx_texture_page = entry->tpage;
-        menu_opcode_04_05_draw_textured_quad((menu_instruction_t*)&g_menu_script_quad_command);
+        menu_opcode_draw_quad((menu_instruction_t*)&g_menu_script_quad_command);
     }
     return menu_next_instruction(cmd);
 }
 
-/* Draw a menu window's border and tile its interior through the overlay's handler.
+/* MENU_OPCODE_WINDOW_FRAME (0x00)
+ * Draw a menu window's border and tile its interior through the overlay's handler.
  * Source 1 selects alternate border UVs. The final command reassignment
  * preserves the original pointer allocation. */
-menu_instruction_t* menu_opcode_00_draw_window_frame(menu_instruction_t* command) {
+menu_instruction_t* menu_opcode_draw_window_frame(menu_instruction_t* command) {
     RECT rect;
     s32 left;
     s32 top;
@@ -236,7 +243,7 @@ menu_instruction_t* menu_opcode_00_draw_window_frame(menu_instruction_t* command
     g_menu_window_interior_command.y = command->window.y;
     g_menu_window_interior_command.width = command->window.width;
     g_menu_window_interior_command.height = command->window.height;
-    menu_opcode_11_draw_background_tiles((menu_instruction_t*)&g_menu_window_interior_command);
+    menu_opcode_draw_background_tiles((menu_instruction_t*)&g_menu_window_interior_command);
 
     top = top + 9 + partial_height + full_rows * 16;
     rect.x = left;
@@ -269,12 +276,13 @@ menu_instruction_t* menu_opcode_00_draw_window_frame(menu_instruction_t* command
     return command;
 }
 
-/* Stream command for a window frame that zooms open: during the first four
+/* MENU_OPCODE_OPENING_WINDOW_FRAME (0x12)
+ * Stream command for a window frame that zooms open: during the first four
  * transition frames it first queues a draw area cropped about the window's
  * center to the zoom table's percentage of its size (and, for the first
  * three, withholds the stream's input), then draws the frame through
- * menu_opcode_00_draw_window_frame. */
-menu_instruction_t* menu_opcode_12_draw_opening_window_frame(menu_instruction_t* command) {
+ * menu_opcode_draw_window_frame. */
+menu_instruction_t* menu_opcode_draw_opening_window_frame(menu_instruction_t* command) {
     RECT area;
     s32 frame = g_gfx_transition_frame;
     s32 scale;
@@ -293,6 +301,6 @@ menu_instruction_t* menu_opcode_12_draw_opening_window_frame(menu_instruction_t*
     } else {
         g_gfx_otag_index_locked = 0;
     }
-    return menu_opcode_00_draw_window_frame(command);
+    return menu_opcode_draw_window_frame(command);
 }
 #endif

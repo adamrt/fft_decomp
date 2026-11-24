@@ -101,6 +101,57 @@ typedef char effect_palette_section_size_must_be_1028[sizeof(effect_palette_sect
  * 16-bit values. Script offsets are bytes from the start of the script. */
 enum { EFFECT_SCRIPT_OPCODE_MASK = 0x1ff };
 
+/* Opcode of an effect script instruction: the index of its handler in g_effect_script_instructions. */
+typedef enum effect_opcode {
+    EFFECT_OPCODE_JUMP_AND_YIELD = 0x00,
+    EFFECT_OPCODE_JUMP = 0x01,
+    EFFECT_OPCODE_SPAWN_CHILD = 0x02,
+    EFFECT_OPCODE_FREE_CHILD = 0x03,
+    EFFECT_OPCODE_END = 0x04,
+    EFFECT_OPCODE_STORE_HIGH_NIBBLE = 0x05,
+    EFFECT_OPCODE_REGISTER_NATIVE_CALLBACK = 0x06,
+    EFFECT_OPCODE_CALL_NATIVE_CALLBACK = 0x07,
+    EFFECT_OPCODE_SET_CAMERA_POSITION = 0x08,
+    EFFECT_OPCODE_SAVE_CAMERA_POSITION = 0x09,
+    EFFECT_OPCODE_RESTORE_CAMERA_POSITION = 0x0a,
+    EFFECT_OPCODE_SET_CAMERA_ROTATION = 0x0b,
+    EFFECT_OPCODE_SAVE_CAMERA_ROTATION = 0x0c,
+    EFFECT_OPCODE_RESTORE_CAMERA_ROTATION = 0x0d,
+    EFFECT_OPCODE_SET_CAMERA_ZOOM = 0x0e,
+    EFFECT_OPCODE_SAVE_CAMERA_ZOOM = 0x0f,
+    EFFECT_OPCODE_SET_SELECTED_COUNTER = 0x10,
+    EFFECT_OPCODE_JUMP_IF_COUNTER_EQUAL = 0x11,
+    EFFECT_OPCODE_JUMP_IF_COUNTER_AT_LEAST = 0x12,
+    EFFECT_OPCODE_JUMP_IF_COUNTER_GREATER = 0x13,
+    EFFECT_OPCODE_JUMP_IF_COUNTER_AT_MOST = 0x14,
+    EFFECT_OPCODE_JUMP_IF_COUNTER_LESS = 0x15,
+    EFFECT_OPCODE_JUMP_IF_PARTICLE_COUNT_EQUAL = 0x16,
+    EFFECT_OPCODE_JUMP_IF_PARTICLE_COUNT_GREATER = 0x17,
+    EFFECT_OPCODE_JUMP_IF_PARTICLE_COUNT_LESS = 0x18,
+    EFFECT_OPCODE_JUMP_IF_CHILD_COUNT_EQUAL = 0x19,
+    EFFECT_OPCODE_JUMP_IF_CHILD_ACTIVE = 0x1a,
+    EFFECT_OPCODE_JUMP_IF_CHILD_INACTIVE = 0x1b,
+    EFFECT_OPCODE_JUMP_IF_COUNTER_NOT_EQUAL = 0x1c,
+    EFFECT_OPCODE_JUMP_AFTER_CHILD_TIMELINE_DURATION = 0x1d,
+    EFFECT_OPCODE_JUMP_AFTER_TOTAL_DURATION = 0x1e,
+    EFFECT_OPCODE_JUMP_IF_TARGET_COUNT_EQUAL = 0x1f,
+    EFFECT_OPCODE_INCREMENT_SELECTED_COUNTER = 0x20,
+    EFFECT_OPCODE_DECREMENT_SELECTED_COUNTER = 0x21,
+    EFFECT_OPCODE_ADD_IMMEDIATE_TO_SELECTED_COUNTER = 0x22,
+    EFFECT_OPCODE_SUBTRACT_IMMEDIATE_FROM_SELECTED_COUNTER = 0x23,
+    EFFECT_OPCODE_RESTORE_CAMERA_ZOOM = 0x24,
+    EFFECT_OPCODE_UPDATE_ALL_PARTICLES = 0x25,
+    EFFECT_OPCODE_SPAWN_EMITTER_PARTICLES = 0x26,
+    EFFECT_OPCODE_INIT_PARTICLE_PHYSICS = 0x27,
+    EFFECT_OPCODE_STEP_CHILD_TIMELINE = 0x28,
+    EFFECT_OPCODE_STEP_PARENT_TIMELINE = 0x29,
+    EFFECT_OPCODE_RESET_CHILD_TIMELINE = 0x2a,
+    EFFECT_OPCODE_RESET_PARENT_TIMELINE = 0x2b,
+    EFFECT_OPCODE_NOP_2C = 0x2c,
+    EFFECT_OPCODE_NOP_2D = 0x2d,
+    EFFECT_OPCODE_INVALID = 0x2e /* and every opcode through 0x77: the invalid-opcode handler */
+} effect_opcode_e;
+
 /* Each opcode interprets the selector byte differently. Unnamed bits are ignored
  * by that view. Copy the byte before reading bit fields to retain byte loads. */
 typedef union effect_script_parameters {
@@ -211,13 +262,13 @@ extern u8* g_effect_frame_data;
 /* sprite sequences */
 /* Opcodes in the low seven bits of a sprite-sequence control byte. */
 typedef enum effect_sequence_opcode {
-    EFFECT_SEQUENCE_OP_LOOP = 1,       /* back to the first byte */
-    EFFECT_SEQUENCE_OP_SET_OFFSET = 2, /* two s16 sprite offsets follow */
-    EFFECT_SEQUENCE_OP_ADD_OFFSET = 3  /* two s8 sprite offset deltas follow */
+    EFFECT_SEQUENCE_OPCODE_LOOP = 1,       /* back to the first byte */
+    EFFECT_SEQUENCE_OPCODE_SET_OFFSET = 2, /* two s16 sprite offsets follow */
+    EFFECT_SEQUENCE_OPCODE_ADD_OFFSET = 3  /* two s8 sprite offset deltas follow */
 } effect_sequence_opcode_e;
 
 /* The high bit distinguishes control bytes from ordinary frame indices. */
-enum { EFFECT_SEQUENCE_OP_MASK = 0x7f, EFFECT_SEQUENCE_OP_FLAG = 0x80 };
+enum { EFFECT_SEQUENCE_OPCODE_MASK = 0x7f, EFFECT_SEQUENCE_OPCODE_FLAG = 0x80 };
 
 /* effect_list_node_t.depth_mode: the third byte of a sequence frame, which adjusts the sprite's
  * ordering-table depth. */

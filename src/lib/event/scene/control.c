@@ -32,9 +32,9 @@ void script_process_status_commands(void) {
     battle_unit_t* unit;
 
     while (
-        (instruction_offset = script_find_instruction_offset(instruction_offset, EVENT_OPCODE_INFLICT_STATUS)) != 0) {
+        (instruction_offset = script_find_instruction_offset(instruction_offset, SCRIPT_OPCODE_INFLICT_STATUS)) != 0) {
         instruction = (const u8*)g_script_event_block;
-        if (instruction[instruction_offset] == EVENT_OPCODE_INFLICT_STATUS) {
+        if (instruction[instruction_offset] == SCRIPT_OPCODE_INFLICT_STATUS) {
             map_unit_id = script_resolve_map_unit_id(script_read_s16(instruction + instruction_offset + 1));
             if (map_unit_id != EVENT_MAP_UNIT_ID_NONE) {
                 battle_unit_id = map_unit_get_battle_unit_id(map_unit_id);
@@ -55,7 +55,7 @@ void script_process_status_commands(void) {
                 }
             }
         }
-        instruction_offset += g_script_event_instruction_sizes[EVENT_OPCODE_INFLICT_STATUS] + 1;
+        instruction_offset += g_script_event_instruction_sizes[SCRIPT_OPCODE_INFLICT_STATUS] + 1;
     }
 }
 

@@ -46,13 +46,14 @@ static s32 get_variable_shift(s32 value);
 
 static s32* get_variable_word(s32 variable_id);
 
-/* Event instruction 0x37 (unused by the scenario scripts): toggles bit 0 of
+/* SCRIPT_OPCODE_FLIP_MESSAGE_PORTRAIT (0x37)
+ * Toggles bit 0 of
  * portrait_flipped of the menu window buffer whose message_id matches the
  * operand.
  *
  * record_index is never assigned: the target indexes with whatever $s0 holds
  * on entry and tests that one record six times. */
-void script_opcode_37_flip_message_portrait(const u8* parameters) {
+void script_opcode_flip_message_portrait(const u8* parameters) {
     s32 i;
     s32 record_index;
     s16 record_id = script_read_s16(parameters);
@@ -68,8 +69,9 @@ void script_opcode_37_flip_message_portrait(const u8* parameters) {
     }
 }
 
-/* EVENT_OPCODE_UNKNOWN_74: receives the operand pointer and does nothing. */
-void script_opcode_74_unknown(const u8* unused_parameters) {
+/* SCRIPT_OPCODE_UNKNOWN_74 (0x74)
+ * SCRIPT_OPCODE_UNKNOWN_74: receives the operand pointer and does nothing. */
+void script_opcode_unknown_74(const u8* unused_parameters) {
 }
 
 /* Returns the slot a thread should start in: a requested id below 16 as it is,
@@ -130,18 +132,18 @@ void thread_current_set_task(s32 task_id) {
  * event start to limit_offset and keeps the last matching BackTarget not followed by a barrier
  * (0xd9) or a same-id ForwardTarget; otherwise it scans forward from limit_offset to EventEnd for
  * target_opcode or alternate_opcode. With no target the thread exits. */
-s32 script_find_jump_target(s32 limit_offset, event_opcode_e target_opcode, s32 alternate_opcode, s32 target_id) {
+s32 script_find_jump_target(s32 limit_offset, script_opcode_e target_opcode, s32 alternate_opcode, s32 target_id) {
     u8* base;
     s32 offset;
     s32 found = -1;
     s32 opcode;
 
-    if (target_opcode == EVENT_OPCODE_BACK_TARGET) {
+    if (target_opcode == SCRIPT_OPCODE_BACK_TARGET) {
         for (offset = 0; offset < limit_offset; offset += 1 + g_script_event_instruction_sizes[opcode]) {
             base = (u8*)g_script_event_block;
             opcode = base[offset];
-            if (opcode == EVENT_OPCODE_BACK_TARGET_BARRIER
-                || (opcode == EVENT_OPCODE_FORWARD_TARGET && (base + offset)[1] == target_id)) {
+            if (opcode == SCRIPT_OPCODE_BACK_TARGET_BARRIER
+                || (opcode == SCRIPT_OPCODE_FORWARD_TARGET && (base + offset)[1] == target_id)) {
                 found = -1;
             } else if (opcode == target_opcode && (base + offset)[1] == target_id) {
                 found = offset;
@@ -151,7 +153,7 @@ s32 script_find_jump_target(s32 limit_offset, event_opcode_e target_opcode, s32 
             return found + 2;
         }
     } else {
-        while ((opcode = ((u8*)g_script_event_block)[limit_offset]) != EVENT_OPCODE_END) {
+        while ((opcode = ((u8*)g_script_event_block)[limit_offset]) != SCRIPT_OPCODE_END) {
             if (opcode == target_opcode && ((u8*)g_script_event_block + limit_offset)[1] == target_id) {
                 return limit_offset + 2;
             }
@@ -175,7 +177,7 @@ s32 script_find_instruction_offset(s32 offset, s32 opcode) {
 
     for (;;) {
         op = base[offset];
-        if (op == EVENT_OPCODE_END) {
+        if (op == SCRIPT_OPCODE_END) {
             return 0;
         }
         if (op == opcode) {
@@ -185,37 +187,43 @@ s32 script_find_instruction_offset(s32 offset, s32 opcode) {
     }
 }
 
-/* Comparison opcodes 0xa0..0xa5: replace the comparison-result variable (32-bit script
+/* SCRIPT_OPCODE_COMPARE_LESS_EQUAL (0xa0)
+ * SCRIPT_OPCODE_COMPARE_GREATER_EQUAL (0xa1)
+ * SCRIPT_OPCODE_COMPARE_EQUAL (0xa2)
+ * SCRIPT_OPCODE_COMPARE_NOT_EQUAL (0xa3)
+ * SCRIPT_OPCODE_COMPARE_LESS (0xa4)
+ * SCRIPT_OPCODE_COMPARE_GREATER (0xa5)
+ * Comparison opcodes 0xa0..0xa5: replace the comparison-result variable (32-bit script
  * variable 0) with the truth value of comparing it against the operand variable (variable
  * 1), using <=, >=, ==, !=, < and > in opcode order. Any other opcode changes
  * nothing. */
-void script_opcode_a0_a5_compare(event_opcode_e opcode) {
-    if (opcode == EVENT_OPCODE_COMPARE_LESS_EQUAL) {
+void script_opcode_compare(script_opcode_e opcode) {
+    if (opcode == SCRIPT_OPCODE_COMPARE_LESS_EQUAL) {
         g_script_variables[EVENT_SCRIPT_VAR_COMPARISON_RESULT] = g_script_variables[EVENT_SCRIPT_VAR_COMPARISON_RESULT]
             <= g_script_variables[EVENT_SCRIPT_VAR_COMPARISON_OPERAND];
         return;
     }
-    if (opcode == EVENT_OPCODE_COMPARE_GREATER_EQUAL) {
+    if (opcode == SCRIPT_OPCODE_COMPARE_GREATER_EQUAL) {
         g_script_variables[EVENT_SCRIPT_VAR_COMPARISON_RESULT] = g_script_variables[EVENT_SCRIPT_VAR_COMPARISON_RESULT]
             >= g_script_variables[EVENT_SCRIPT_VAR_COMPARISON_OPERAND];
         return;
     }
-    if (opcode == EVENT_OPCODE_COMPARE_EQUAL) {
+    if (opcode == SCRIPT_OPCODE_COMPARE_EQUAL) {
         g_script_variables[EVENT_SCRIPT_VAR_COMPARISON_RESULT] = g_script_variables[EVENT_SCRIPT_VAR_COMPARISON_RESULT]
             == g_script_variables[EVENT_SCRIPT_VAR_COMPARISON_OPERAND];
         return;
     }
-    if (opcode == EVENT_OPCODE_COMPARE_NOT_EQUAL) {
+    if (opcode == SCRIPT_OPCODE_COMPARE_NOT_EQUAL) {
         g_script_variables[EVENT_SCRIPT_VAR_COMPARISON_RESULT] = g_script_variables[EVENT_SCRIPT_VAR_COMPARISON_RESULT]
             != g_script_variables[EVENT_SCRIPT_VAR_COMPARISON_OPERAND];
         return;
     }
-    if (opcode == EVENT_OPCODE_COMPARE_LESS) {
+    if (opcode == SCRIPT_OPCODE_COMPARE_LESS) {
         g_script_variables[EVENT_SCRIPT_VAR_COMPARISON_RESULT] = g_script_variables[EVENT_SCRIPT_VAR_COMPARISON_RESULT]
             < g_script_variables[EVENT_SCRIPT_VAR_COMPARISON_OPERAND];
         return;
     }
-    if (opcode == EVENT_OPCODE_COMPARE_GREATER) {
+    if (opcode == SCRIPT_OPCODE_COMPARE_GREATER) {
         g_script_variables[EVENT_SCRIPT_VAR_COMPARISON_RESULT] = g_script_variables[EVENT_SCRIPT_VAR_COMPARISON_RESULT]
             > g_script_variables[EVENT_SCRIPT_VAR_COMPARISON_OPERAND];
         return;
@@ -245,7 +253,7 @@ void script_run_variable_command(s32 opcode, s32 destination_id, s32 source, s32
     u32 replay_mode;
     s32 value;
 
-    if (opcode != EVENT_OPCODE_ZERO_VARIABLE) {
+    if (opcode != SCRIPT_OPCODE_ZERO_VARIABLE) {
         if (!(opcode & 1)) {
             operand = source;
         } else if (source == EVENT_SCRIPT_VAR_RANDOM_VALUE) {
@@ -278,24 +286,24 @@ void script_run_variable_command(s32 opcode, s32 destination_id, s32 source, s32
     } else {
         value = *destination_word;
     }
-    if (opcode == EVENT_OPCODE_ZERO_VARIABLE) {
+    if (opcode == SCRIPT_OPCODE_ZERO_VARIABLE) {
         value = 0;
-    } else if (opcode < EVENT_OPCODE_SUBTRACT_IMMEDIATE) {
+    } else if (opcode < SCRIPT_OPCODE_SUBTRACT_IMMEDIATE) {
         value += operand;
-    } else if (opcode < EVENT_OPCODE_MULTIPLY_IMMEDIATE) {
+    } else if (opcode < SCRIPT_OPCODE_MULTIPLY_IMMEDIATE) {
         value -= operand;
-    } else if (opcode < EVENT_OPCODE_DIVIDE_IMMEDIATE) {
+    } else if (opcode < SCRIPT_OPCODE_DIVIDE_IMMEDIATE) {
         value *= operand;
-    } else if (opcode < EVENT_OPCODE_MODULO_IMMEDIATE) {
+    } else if (opcode < SCRIPT_OPCODE_MODULO_IMMEDIATE) {
         if (operand == 0) {
             thread_current_exit();
         }
         value = value / operand;
-    } else if (opcode < EVENT_OPCODE_AND_IMMEDIATE) {
+    } else if (opcode < SCRIPT_OPCODE_AND_IMMEDIATE) {
         value = value % operand;
-    } else if (opcode < EVENT_OPCODE_OR_IMMEDIATE) {
+    } else if (opcode < SCRIPT_OPCODE_OR_IMMEDIATE) {
         value &= operand;
-    } else if (opcode < EVENT_OPCODE_ZERO_VARIABLE) {
+    } else if (opcode < SCRIPT_OPCODE_ZERO_VARIABLE) {
         value |= operand;
     }
     /* Two vetoes, skipped while the guard is set so the getters below (which run this
@@ -384,8 +392,9 @@ static s32 get_variable_shift(s32 value) {
     return result;
 }
 
-/* Wait until the variable reaches the signed 16-bit test value. */
-void script_opcode_7e_wait_value(const event_wait_value_parameters_t* parameters) {
+/* SCRIPT_OPCODE_WAIT_VALUE (0x7e)
+ * Wait until the variable reaches the signed 16-bit test value. */
+void script_opcode_wait_value(const event_wait_value_parameters_t* parameters) {
     s32 variable_id = script_read_s16(parameters->variable_id_le);
     s32 test_value = script_read_s16(parameters->test_value_le);
 

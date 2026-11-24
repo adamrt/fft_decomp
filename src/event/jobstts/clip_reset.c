@@ -5,11 +5,12 @@
 #include "fft/menu/menu_script.h"
 #include "psx/types.h"
 
-/* Stream command closing a zoomed window: when the zoom transition queued a
+/* MENU_OPCODE_CLEAR_DRAW_AREA (0x13)
+ * Stream command closing a zoomed window: when the zoom transition queued a
  * cropped draw area, queue the full draw area again one ordering-table entry
  * above the window's contents, move on to the next entry and clear the
  * lock. */
-menu_instruction_t* menu_opcode_13_clear_temporary_draw_area(menu_instruction_t* data) {
+menu_instruction_t* menu_opcode_clear_temporary_draw_area(menu_instruction_t* data) {
     s16 otag_index;
     if (g_gfx_otag_index_locked != 0) {
         otag_index = g_menu_gfx_otag_index + 1;

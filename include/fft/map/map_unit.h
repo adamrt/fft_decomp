@@ -50,7 +50,7 @@ struct map_unit {
      * Read-modify-written as a 16-bit value over
      * 0x012..0x013 (sprite_update_transparency). */
     u16 sprite_display_flags; /* 0x012 */
-    /* 0x014; ANIMATION_SEQ_OP_SET_LAYER_PRIORITY: the row of g_animation_layer_priorities. */
+    /* 0x014; ANIMATION_SEQ_OPCODE_SET_LAYER_PRIORITY: the row of g_animation_layer_priorities. */
     u16 layer_priority;
     u8 _padding_016[2]; /* aligns real */
     VECTOR real;        /* 0x018; world coordinates in 20.12 */
@@ -68,7 +68,7 @@ struct map_unit {
      * of world_coords (vx = x, vy = height, vz = map depth). */
     SVECTOR seq_offset; /* 0x050; the shift of the running sequence's move commands; cleared when one starts */
     /* Added to the projected sprite position, in pixels, by
-     * ANIMATION_SEQ_OP_MOVE_SCREEN_OFFSET; cleared when a sequence starts and,
+     * ANIMATION_SEQ_OPCODE_MOVE_SCREEN_OFFSET; cleared when a sequence starts and,
      * with the other two offsets, by map_unit_place_in_new_location. vz
      * is only ever cleared. */
     SVECTOR screen_offset; /* 0x058 */
@@ -171,9 +171,9 @@ struct map_unit {
     u8 _padding_29b;                         /* aligns shadow_quad */
     SVECTOR shadow_quad[4];                  /* 0x29c; shadow corners written by sprite_build_shadow_quad */
     action_result_display_t numeric_display; /* 0x2bc..0x2cf */
-    u8 item_display_active;                  /* 0x2d0; ANIMATION_SEQ_OP_SHOW_ITEM: draw item_display */
+    u8 item_display_active;                  /* 0x2d0; ANIMATION_SEQ_OPCODE_SHOW_ITEM: draw item_display */
     u8 _unused_2d1;                          /* 0x2d1 */
-    s8 item_display_x_offset;                /* 0x2d2; ANIMATION_SEQ_OP_SET_ITEM_POSITION, in pixels */
+    s8 item_display_x_offset;                /* 0x2d2; ANIMATION_SEQ_OPCODE_SET_ITEM_POSITION, in pixels */
     s8 item_display_y_offset;                /* 0x2d3 */
     u8 _unused_2d4[4];
     sprite_display_t* item_display; /* 0x2d8; item/Equip display pointer */

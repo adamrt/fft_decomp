@@ -600,11 +600,11 @@ s32 unit_grid_update(s16 allow_banner_toggle, s16 allow_browse, s16 show_stat_pa
                     g_unit_list_grid_max_stat_number.x = cell.x + 40;
                     g_unit_list_grid_max_stat_number.y = cell_y + 45;
                     g_unit_list_grid_max_stat_number.value = unit_index;
-                    menu_opcode_0d_draw_formatted_number((menu_instruction_t*)&g_unit_list_grid_max_stat_number);
+                    menu_opcode_draw_formatted_number((menu_instruction_t*)&g_unit_list_grid_max_stat_number);
                     g_unit_list_grid_stat_number.x = cell.x + 20;
                     g_unit_list_grid_stat_number.y = number_y;
                     g_unit_list_grid_stat_number.value = unit_index;
-                    menu_opcode_0d_draw_formatted_number((menu_instruction_t*)&g_unit_list_grid_stat_number);
+                    menu_opcode_draw_formatted_number((menu_instruction_t*)&g_unit_list_grid_stat_number);
                     rect.x = cell.x + 35;
                     rect.y = top + 5;
                     rect.w = 6;
@@ -663,11 +663,11 @@ s32 unit_grid_update(s16 allow_banner_toggle, s16 allow_browse, s16 show_stat_pa
                     g_unit_list_grid_level_number.x = cell.x + 13;
                     g_unit_list_grid_level_number.y = upper_y3;
                     g_unit_list_grid_level_number.value = unit_index;
-                    menu_opcode_0d_draw_formatted_number((menu_instruction_t*)&g_unit_list_grid_level_number);
+                    menu_opcode_draw_formatted_number((menu_instruction_t*)&g_unit_list_grid_level_number);
                     g_unit_list_grid_experience_number.x = cell.x + 45;
                     g_unit_list_grid_experience_number.y = number_y3;
                     g_unit_list_grid_experience_number.value = unit_index;
-                    menu_opcode_0d_draw_formatted_number((menu_instruction_t*)&g_unit_list_grid_experience_number);
+                    menu_opcode_draw_formatted_number((menu_instruction_t*)&g_unit_list_grid_experience_number);
                 } else if (g_unit_list_stat_mode == MENU_UNIT_READOUT_BRAVE_FAITH) {
                     top = cell_y + 45;
                     rect.x = cell.x - 1;
@@ -703,18 +703,18 @@ s32 unit_grid_update(s16 allow_banner_toggle, s16 allow_browse, s16 show_stat_pa
                     g_unit_list_grid_brave_number_wide.value = g_unit_list_grid_brave_number.value = unit_index;
                     if (g_unit_list_pointers[unit_index]->brave >= 100) {
                         g_unit_list_grid_brave_number_wide.x = cell.x + 10;
-                        menu_opcode_0d_draw_formatted_number((menu_instruction_t*)&g_unit_list_grid_brave_number_wide);
+                        menu_opcode_draw_formatted_number((menu_instruction_t*)&g_unit_list_grid_brave_number_wide);
                     } else
-                        menu_opcode_0d_draw_formatted_number((menu_instruction_t*)&g_unit_list_grid_brave_number);
+                        menu_opcode_draw_formatted_number((menu_instruction_t*)&g_unit_list_grid_brave_number);
                     lower_y4 = top;
                     g_unit_list_grid_faith_number.x = cell.x + 45;
                     g_unit_list_grid_faith_number_wide.y = g_unit_list_grid_faith_number.y = lower_y4;
                     g_unit_list_grid_faith_number_wide.value = g_unit_list_grid_faith_number.value = unit_index;
                     if (g_unit_list_pointers[unit_index]->faith >= 100) {
                         g_unit_list_grid_faith_number_wide.x = cell.x + 40;
-                        menu_opcode_0d_draw_formatted_number((menu_instruction_t*)&g_unit_list_grid_faith_number_wide);
+                        menu_opcode_draw_formatted_number((menu_instruction_t*)&g_unit_list_grid_faith_number_wide);
                     } else
-                        menu_opcode_0d_draw_formatted_number((menu_instruction_t*)&g_unit_list_grid_faith_number);
+                        menu_opcode_draw_formatted_number((menu_instruction_t*)&g_unit_list_grid_faith_number);
                 }
             }
             draw_unit_sprite(g_unit_list_reorderable_indices[unit], cell.x, cell.y);

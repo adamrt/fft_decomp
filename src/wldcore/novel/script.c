@@ -24,60 +24,118 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-static void novel_opcode_00_end_script(void);
-static void novel_opcode_01_end_section(void);
-static void novel_opcode_02_nop(void);
-static void novel_opcode_03_start_text_thread_and_push_history(void);
-static void novel_opcode_04_wait_for_text_thread(void);
-static void novel_opcode_05_load_background_set(void);
-static void novel_opcode_06_branch_to_section(void);
-static void novel_opcode_07_branch_if_dialog_option_equal(void);
-static void novel_opcode_08_branch_if_dialog_option_not_equal(void);
-static void novel_opcode_09_wait_frames(void);
-static void novel_opcode_0a_load_picture(void);
-static void novel_opcode_0b_hide_picture(void);
-static void novel_opcode_0c_set_prompts_visible(void);
-static void novel_opcode_0d_start_text_thread(void);
-static void novel_opcode_0e_branch_to_random_section(void);
-static void novel_opcode_0f_branch_if_section_read(void);
-static void novel_opcode_10_branch_if_section_unread(void);
-static void novel_opcode_11_branch_if_saved_flag_set(void);
-static void novel_opcode_12_branch_if_saved_flag_clear(void);
-static void novel_opcode_13_branch_if_local_flag_set(void);
-static void novel_opcode_14_branch_if_local_flag_clear(void);
-static void novel_opcode_15_set_saved_flag(void);
-static void novel_opcode_16_clear_saved_flag(void);
-static void novel_opcode_17_set_local_flag(void);
-static void novel_opcode_18_clear_local_flag(void);
-static void novel_opcode_19_set_counter(void);
-static void novel_opcode_1a_add_counter_delta(void);
-static void novel_opcode_1b_subtract_counter_delta(void);
-static void novel_opcode_1c_show_value_display(void);
-static void novel_opcode_1d_hide_value_display(void);
-static void novel_opcode_1e_apply_counter_delta(void);
-static void novel_opcode_1f_play_sound(void);
-static void novel_opcode_20_load_music(void);
-static void novel_opcode_21_set_sound_mode(void);
-static void novel_opcode_22_branch_if_counter_equal(void);
-static void novel_opcode_23_branch_if_counter_not_equal(void);
-static void novel_opcode_24_branch_if_counter_less(void);
-static void novel_opcode_25_branch_if_counter_greater(void);
-static void novel_opcode_26_fade_out_music(void);
-static void novel_opcode_27_fade_in_music(void);
-static void novel_opcode_28_fade_screen_out(void);
-static void novel_opcode_29_fade_screen_in(void);
-static void novel_opcode_2a_set_white_screen_overlay(void);
-static void novel_opcode_2b_wait_for_circle_press(void);
-static void novel_opcode_2c_play_sound_effect_quad(void);
-static void novel_opcode_2d_stop_sound_effects(void);
-static void novel_opcode_2e_start_countdown_timer(void);
-static void novel_opcode_2f_play_background_sound(void);
-static void novel_opcode_30_set_master_volume(void);
-static void novel_opcode_31_unload_music(void);
-static void novel_opcode_32_set_menu_brightness(void);
-static void novel_opcode_33_add_counter_delta_if_choice(void);
-static void novel_opcode_34_wait_for_fade(void);
-static void novel_opcode_35_push_operand_history(void);
+/* Opcode byte of a sound-novel instruction: the index of its handler in s_novel_opcode_handlers. */
+typedef enum novel_opcode {
+    NOVEL_OPCODE_END_SCRIPT = 0x00,
+    NOVEL_OPCODE_END_SECTION = 0x01,
+    NOVEL_OPCODE_NOP = 0x02,
+    NOVEL_OPCODE_START_TEXT_THREAD_AND_PUSH_HISTORY = 0x03,
+    NOVEL_OPCODE_WAIT_FOR_TEXT_THREAD = 0x04,
+    NOVEL_OPCODE_LOAD_BACKGROUND_SET = 0x05,
+    NOVEL_OPCODE_BRANCH_TO_SECTION = 0x06,
+    NOVEL_OPCODE_BRANCH_IF_DIALOG_OPTION_EQUAL = 0x07,
+    NOVEL_OPCODE_BRANCH_IF_DIALOG_OPTION_NOT_EQUAL = 0x08,
+    NOVEL_OPCODE_WAIT_FRAMES = 0x09,
+    NOVEL_OPCODE_LOAD_PICTURE = 0x0a,
+    NOVEL_OPCODE_HIDE_PICTURE = 0x0b,
+    NOVEL_OPCODE_SET_PROMPTS_VISIBLE = 0x0c,
+    NOVEL_OPCODE_START_TEXT_THREAD = 0x0d,
+    NOVEL_OPCODE_BRANCH_TO_RANDOM_SECTION = 0x0e,
+    NOVEL_OPCODE_BRANCH_IF_SECTION_READ = 0x0f,
+    NOVEL_OPCODE_BRANCH_IF_SECTION_UNREAD = 0x10,
+    NOVEL_OPCODE_BRANCH_IF_SAVED_FLAG_SET = 0x11,
+    NOVEL_OPCODE_BRANCH_IF_SAVED_FLAG_CLEAR = 0x12,
+    NOVEL_OPCODE_BRANCH_IF_LOCAL_FLAG_SET = 0x13,
+    NOVEL_OPCODE_BRANCH_IF_LOCAL_FLAG_CLEAR = 0x14,
+    NOVEL_OPCODE_SET_SAVED_FLAG = 0x15,
+    NOVEL_OPCODE_CLEAR_SAVED_FLAG = 0x16,
+    NOVEL_OPCODE_SET_LOCAL_FLAG = 0x17,
+    NOVEL_OPCODE_CLEAR_LOCAL_FLAG = 0x18,
+    NOVEL_OPCODE_SET_COUNTER = 0x19,
+    NOVEL_OPCODE_ADD_COUNTER_DELTA = 0x1a,
+    NOVEL_OPCODE_SUBTRACT_COUNTER_DELTA = 0x1b,
+    NOVEL_OPCODE_SHOW_VALUE_DISPLAY = 0x1c,
+    NOVEL_OPCODE_HIDE_VALUE_DISPLAY = 0x1d,
+    NOVEL_OPCODE_APPLY_COUNTER_DELTA = 0x1e,
+    NOVEL_OPCODE_PLAY_SOUND = 0x1f,
+    NOVEL_OPCODE_LOAD_MUSIC = 0x20,
+    NOVEL_OPCODE_SET_SOUND_MODE = 0x21,
+    NOVEL_OPCODE_BRANCH_IF_COUNTER_EQUAL = 0x22,
+    NOVEL_OPCODE_BRANCH_IF_COUNTER_NOT_EQUAL = 0x23,
+    NOVEL_OPCODE_BRANCH_IF_COUNTER_LESS = 0x24,
+    NOVEL_OPCODE_BRANCH_IF_COUNTER_GREATER = 0x25,
+    NOVEL_OPCODE_FADE_OUT_MUSIC = 0x26,
+    NOVEL_OPCODE_FADE_IN_MUSIC = 0x27,
+    NOVEL_OPCODE_FADE_SCREEN_OUT = 0x28,
+    NOVEL_OPCODE_FADE_SCREEN_IN = 0x29,
+    NOVEL_OPCODE_SET_WHITE_SCREEN_OVERLAY = 0x2a,
+    NOVEL_OPCODE_WAIT_FOR_CIRCLE_PRESS = 0x2b,
+    NOVEL_OPCODE_PLAY_SOUND_EFFECT_QUAD = 0x2c,
+    NOVEL_OPCODE_STOP_SOUND_EFFECTS = 0x2d,
+    NOVEL_OPCODE_START_COUNTDOWN_TIMER = 0x2e,
+    NOVEL_OPCODE_PLAY_BACKGROUND_SOUND = 0x2f,
+    NOVEL_OPCODE_SET_MASTER_VOLUME = 0x30,
+    NOVEL_OPCODE_UNLOAD_MUSIC = 0x31,
+    NOVEL_OPCODE_SET_MENU_BRIGHTNESS = 0x32,
+    NOVEL_OPCODE_ADD_COUNTER_DELTA_IF_CHOICE = 0x33,
+    NOVEL_OPCODE_WAIT_FOR_FADE = 0x34,
+    NOVEL_OPCODE_PUSH_OPERAND_HISTORY = 0x35
+} novel_opcode_e;
+
+static void novel_opcode_end_script(void);
+static void novel_opcode_end_section(void);
+static void novel_opcode_nop(void);
+static void novel_opcode_start_text_thread_and_push_history(void);
+static void novel_opcode_wait_for_text_thread(void);
+static void novel_opcode_load_background_set(void);
+static void novel_opcode_branch_to_section(void);
+static void novel_opcode_branch_if_dialog_option_equal(void);
+static void novel_opcode_branch_if_dialog_option_not_equal(void);
+static void novel_opcode_wait_frames(void);
+static void novel_opcode_load_picture(void);
+static void novel_opcode_hide_picture(void);
+static void novel_opcode_set_prompts_visible(void);
+static void novel_opcode_start_text_thread(void);
+static void novel_opcode_branch_to_random_section(void);
+static void novel_opcode_branch_if_section_read(void);
+static void novel_opcode_branch_if_section_unread(void);
+static void novel_opcode_branch_if_saved_flag_set(void);
+static void novel_opcode_branch_if_saved_flag_clear(void);
+static void novel_opcode_branch_if_local_flag_set(void);
+static void novel_opcode_branch_if_local_flag_clear(void);
+static void novel_opcode_set_saved_flag(void);
+static void novel_opcode_clear_saved_flag(void);
+static void novel_opcode_set_local_flag(void);
+static void novel_opcode_clear_local_flag(void);
+static void novel_opcode_set_counter(void);
+static void novel_opcode_add_counter_delta(void);
+static void novel_opcode_subtract_counter_delta(void);
+static void novel_opcode_show_value_display(void);
+static void novel_opcode_hide_value_display(void);
+static void novel_opcode_apply_counter_delta(void);
+static void novel_opcode_play_sound(void);
+static void novel_opcode_load_music(void);
+static void novel_opcode_set_sound_mode(void);
+static void novel_opcode_branch_if_counter_equal(void);
+static void novel_opcode_branch_if_counter_not_equal(void);
+static void novel_opcode_branch_if_counter_less(void);
+static void novel_opcode_branch_if_counter_greater(void);
+static void novel_opcode_fade_out_music(void);
+static void novel_opcode_fade_in_music(void);
+static void novel_opcode_fade_screen_out(void);
+static void novel_opcode_fade_screen_in(void);
+static void novel_opcode_set_white_screen_overlay(void);
+static void novel_opcode_wait_for_circle_press(void);
+static void novel_opcode_play_sound_effect_quad(void);
+static void novel_opcode_stop_sound_effects(void);
+static void novel_opcode_start_countdown_timer(void);
+static void novel_opcode_play_background_sound(void);
+static void novel_opcode_set_master_volume(void);
+static void novel_opcode_unload_music(void);
+static void novel_opcode_set_menu_brightness(void);
+static void novel_opcode_add_counter_delta_if_choice(void);
+static void novel_opcode_wait_for_fade(void);
+static void novel_opcode_push_operand_history(void);
 
 /* Existing biased view retained only for opcodes 2c, 2f and 30. It aliases
  * g_novel_reading at instruction (+0x08); direct full-record accesses
@@ -166,7 +224,7 @@ void novel_restore_reading(s32 render_record) {
         g_novel_reading.picture_id = -1;
         g_novel_reading.instruction
             = (g_novel_reading.picture_x << 24) | (g_novel_reading.picture_y << 16) | (picture_id << 8);
-        novel_opcode_0a_load_picture();
+        novel_opcode_load_picture();
     }
 
     transition = g_novel_reading.background_set;
@@ -174,7 +232,7 @@ void novel_restore_reading(s32 render_record) {
         g_novel_reading.instruction = transition << 8;
         g_novel_reading.background_set = -1;
         g_picture_background_loaded_set = -1;
-        novel_opcode_05_load_background_set();
+        novel_opcode_load_background_set();
     }
 
     if (g_novel_reading.music_selection & 0xFF) {
@@ -185,7 +243,7 @@ void novel_restore_reading(s32 render_record) {
         g_novel_reading.music_selection = 0;
     }
 
-    /* Bit 0x4000 marks an environment sound (novel_opcode_2f_play_background_sound);
+    /* Bit 0x4000 marks an environment sound (novel_opcode_play_background_sound);
      * otherwise the id names a sound quad. */
     sound = g_novel_reading.sound_id;
     if (sound != 0) {
@@ -206,7 +264,7 @@ void novel_restore_reading(s32 render_record) {
 
     if (*state_flags & NOVEL_STATE_VALUE_DISPLAY) {
         g_novel_reading.instruction = g_novel_reading.value_display_mode << 8;
-        novel_opcode_1c_show_value_display();
+        novel_opcode_show_value_display();
     }
 
     tint = g_novel_reading.brightness;
@@ -333,7 +391,7 @@ u32 novel_find_section_instruction(s32 section, s32 opcode) {
         if (opcode == (value & 0xFF)) {
             return value;
         }
-        if ((value & 0xFF) == 1) {
+        if ((value & 0xFF) == NOVEL_OPCODE_END_SECTION) {
             return 0;
         }
         word++;
@@ -479,27 +537,31 @@ static s32 update_choice_timer(void) {
     return 0;
 }
 
-/* Sound-novel opcode 0x00: end the script; novel_run_script then returns 0. */
-static void novel_opcode_00_end_script(void) {
+/* NOVEL_OPCODE_END_SCRIPT (0x00)
+ * End the script; novel_run_script then returns 0. */
+static void novel_opcode_end_script(void) {
     g_novel_reading.state_flags |= NOVEL_STATE_END;
 }
 
-/* Sound-novel opcode: end the section; the script branches to the recorded
+/* NOVEL_OPCODE_END_SECTION (0x01)
+ * End the section; the script branches to the recorded
  * section after yielding this frame. */
-static void novel_opcode_01_end_section(void) {
+static void novel_opcode_end_section(void) {
     g_novel_reading.state_flags |= NOVEL_STATE_BRANCH | NOVEL_STATE_YIELD;
 }
 
-/* Sound-novel opcode 0x02: do nothing and fetch the next instruction. */
-static void novel_opcode_02_nop(void) {
+/* NOVEL_OPCODE_NOP (0x02)
+ * Do nothing and fetch the next instruction. */
+static void novel_opcode_nop(void) {
     g_novel_reading.state_flags |= NOVEL_STATE_FETCH;
 }
 
-/* Sound-novel opcode 0x03: show message byte 1 of the novel's text
+/* NOVEL_OPCODE_START_TEXT_THREAD_AND_PUSH_HISTORY (0x03)
+ * Show message byte 1 of the novel's text
  * (TEXT_ID_WORLD_MESSAGE_BASE | byte 1) in the message box, as
- * novel_opcode_0d_start_text_thread does, then push it onto the four-entry
+ * novel_opcode_start_text_thread does, then push it onto the four-entry
  * history g_novel_reading.text_history[0..3]. */
-static void novel_opcode_03_start_text_thread_and_push_history(void) {
+static void novel_opcode_start_text_thread_and_push_history(void) {
     u16 history_1;
     u16 history_2;
     u16 history_3;
@@ -520,8 +582,9 @@ static void novel_opcode_03_start_text_thread_and_push_history(void) {
     g_novel_reading.state_flags = flags | NOVEL_STATE_FETCH;
 }
 
-/* Sound-novel opcode: yield while the message thread is running. */
-static void novel_opcode_04_wait_for_text_thread(void) {
+/* NOVEL_OPCODE_WAIT_FOR_TEXT_THREAD (0x04)
+ * Yield while the message thread is running. */
+static void novel_opcode_wait_for_text_thread(void) {
     if (thread_is_running(WORLD_MAP_THREAD_SLOT_MESSAGE) == 0) {
         g_novel_reading.state_flags |= NOVEL_STATE_FETCH;
     } else {
@@ -529,9 +592,10 @@ static void novel_opcode_04_wait_for_text_thread(void) {
     }
 }
 
-/* Sound-novel opcode: load background set operand 0 unless it is the one
+/* NOVEL_OPCODE_LOAD_BACKGROUND_SET (0x05)
+ * Load background set operand 0 unless it is the one
  * already recorded, waiting for the file. */
-static void novel_opcode_05_load_background_set(void) {
+static void novel_opcode_load_background_set(void) {
     s32 value = (u8)(g_novel_reading.instruction >> 8);
 
     if (g_novel_reading.background_set != value) {
@@ -543,15 +607,17 @@ static void novel_opcode_05_load_background_set(void) {
     g_novel_reading.state_flags |= NOVEL_STATE_FETCH;
 }
 
-/* Sound-novel opcode 0x06: branch to the section in instruction byte 1. */
-static void novel_opcode_06_branch_to_section(void) {
+/* NOVEL_OPCODE_BRANCH_TO_SECTION (0x06)
+ * Branch to the section in instruction byte 1. */
+static void novel_opcode_branch_to_section(void) {
     g_novel_reading.section = (u8)(g_novel_reading.instruction >> 8);
     g_novel_reading.state_flags |= NOVEL_STATE_BRANCH;
 }
 
-/* Sound-novel opcode 0x07: branch to the section in byte 1 when the chosen dialog option equals
+/* NOVEL_OPCODE_BRANCH_IF_DIALOG_OPTION_EQUAL (0x07)
+ * Branch to the section in byte 1 when the chosen dialog option equals
  * byte 2. */
-static void novel_opcode_07_branch_if_dialog_option_equal(void) {
+static void novel_opcode_branch_if_dialog_option_equal(void) {
     branch_on_choice(1);
 }
 
@@ -569,15 +635,17 @@ static void branch_on_choice(s32 branch_if_equal) {
     }
 }
 
-/* Sound-novel opcode 0x08: branch to the section in byte 1 when the chosen dialog option differs
+/* NOVEL_OPCODE_BRANCH_IF_DIALOG_OPTION_NOT_EQUAL (0x08)
+ * Branch to the section in byte 1 when the chosen dialog option differs
  * from byte 2. */
-static void novel_opcode_08_branch_if_dialog_option_not_equal(void) {
+static void novel_opcode_branch_if_dialog_option_not_equal(void) {
     branch_on_choice(0);
 }
 
-/* Sound-novel opcode 0x09: yield every frame until the frame counter passes byte 1, then fetch the
+/* NOVEL_OPCODE_WAIT_FRAMES (0x09)
+ * Yield every frame until the frame counter passes byte 1, then fetch the
  * next instruction (byte 1 + 2 frames in all). */
-static void novel_opcode_09_wait_frames(void) {
+static void novel_opcode_wait_frames(void) {
     u16 flags = g_novel_reading.state_flags;
     u16 updated = flags | NOVEL_STATE_YIELD;
     s32 counter;
@@ -597,11 +665,12 @@ static void novel_opcode_09_wait_frames(void) {
     }
 }
 
-/* Sound-novel opcode: loads picture byte 1 through
+/* NOVEL_OPCODE_LOAD_PICTURE (0x0a)
+ * Loads picture byte 1 through
  * world_map_load_picture_set, places its render record at
  * (byte 3 - 0x80, byte 2 - 0x78), uploads the TIM's pixels and CLUT, and
  * binds the render record to the VRAM image. */
-static void novel_opcode_0a_load_picture(void) {
+static void novel_opcode_load_picture(void) {
     GsIMAGE image;
     RECT bounds;
     point32_t clut_position;
@@ -636,16 +705,18 @@ static void novel_opcode_0a_load_picture(void) {
     g_novel_reading.state_flags |= NOVEL_STATE_FETCH;
 }
 
-/* Hides the sound-novel picture's render record and forgets the picture. */
-static void novel_opcode_0b_hide_picture(void) {
+/* NOVEL_OPCODE_HIDE_PICTURE (0x0b)
+ * Hides the sound-novel picture's render record and forgets the picture. */
+static void novel_opcode_hide_picture(void) {
     g_display_object_gs_image_pool[g_novel_reading.picture_render_index].flags |= DISPLAY_OBJECT_HIDDEN;
     g_novel_reading.picture_id = -1;
     g_novel_reading.state_flags |= NOVEL_STATE_FETCH | NOVEL_STATE_YIELD;
 }
 
-/* Sound-novel opcode: a nonzero byte 1 shows the novel level's two button
+/* NOVEL_OPCODE_SET_PROMPTS_VISIBLE (0x0c)
+ * A nonzero byte 1 shows the novel level's two button
  * windows and records PARENT_WINDOWS_VISIBLE, zero hides them and clears it. */
-static void novel_opcode_0c_set_prompts_visible(void) {
+static void novel_opcode_set_prompts_visible(void) {
     if ((u8)(g_novel_reading.instruction >> 8) != 0) {
         g_novel_reading.state_flags |= NOVEL_STATE_PARENT_WINDOWS_VISIBLE;
         g_display_object_animated_pool[g_menu_stack_records[g_menu_stack_depth - 1].novel.quit_prompt_window].flags
@@ -662,9 +733,10 @@ static void novel_opcode_0c_set_prompts_visible(void) {
     g_novel_reading.state_flags |= NOVEL_STATE_FETCH;
 }
 
-/* Sound-novel opcode 0x0D: show message byte 1 of the novel's text in the message thread and
+/* NOVEL_OPCODE_START_TEXT_THREAD (0x0d)
+ * Show message byte 1 of the novel's text in the message thread and
  * record it, without the history push of opcode 0x03. */
-static void novel_opcode_0d_start_text_thread(void) {
+static void novel_opcode_start_text_thread(void) {
     s32 operand = (u8)(g_novel_reading.instruction >> 8);
 
     thread_start(WORLD_MAP_THREAD_SLOT_MESSAGE, message_dialog_thread);
@@ -673,9 +745,10 @@ static void novel_opcode_0d_start_text_thread(void) {
     g_novel_reading.state_flags |= NOVEL_STATE_FETCH;
 }
 
-/* Sound-novel opcode: branch to one of the three sections named by the
+/* NOVEL_OPCODE_BRANCH_TO_RANDOM_SECTION (0x0e)
+ * Branch to one of the three sections named by the
  * operand bytes, chosen by rand() with equal weight. */
-static void novel_opcode_0e_branch_to_random_section(void) {
+static void novel_opcode_branch_to_random_section(void) {
     s32 pick = (rand() * 3) >> 15;
     s32 value;
 
@@ -692,10 +765,11 @@ static void novel_opcode_0e_branch_to_random_section(void) {
     g_novel_reading.state_flags |= NOVEL_STATE_BRANCH;
 }
 
-/* Sound-novel opcode 0x0F: branch to the section in byte 3 when section byte 2 of novel byte 1 has
+/* NOVEL_OPCODE_BRANCH_IF_SECTION_READ (0x0f)
+ * Branch to the section in byte 3 when section byte 2 of novel byte 1 has
  * been reached, i.e. bit (byte 1 << 8 | byte 2) of g_novel_read_section_bits that
  * novel_run_script sets on each branch. */
-static void novel_opcode_0f_branch_if_section_read(void) {
+static void novel_opcode_branch_if_section_read(void) {
     branch_on_section_read(1);
 }
 
@@ -715,15 +789,17 @@ static void branch_on_section_read(s32 expected) {
     g_novel_reading.state_flags = flags;
 }
 
-/* Sound-novel opcode 0x10: branch to the section in byte 3 when section byte 2 of novel byte 1 has
+/* NOVEL_OPCODE_BRANCH_IF_SECTION_UNREAD (0x10)
+ * Branch to the section in byte 3 when section byte 2 of novel byte 1 has
  * not been reached. */
-static void novel_opcode_10_branch_if_section_unread(void) {
+static void novel_opcode_branch_if_section_unread(void) {
     branch_on_section_read(0);
 }
 
-/* Sound-novel opcode 0x11: branch to the section in byte 2 when saved flag byte 1
+/* NOVEL_OPCODE_BRANCH_IF_SAVED_FLAG_SET (0x11)
+ * Branch to the section in byte 2 when saved flag byte 1
  * (g_novel_saved_flags) is set. */
-static void novel_opcode_11_branch_if_saved_flag_set(void) {
+static void novel_opcode_branch_if_saved_flag_set(void) {
     branch_on_saved_flag(1);
 }
 
@@ -743,14 +819,16 @@ static void branch_on_saved_flag(s32 expected) {
     g_novel_reading.state_flags = flags;
 }
 
-/* Sound-novel opcode 0x12: branch to the section in byte 2 when saved flag byte 1 is clear. */
-static void novel_opcode_12_branch_if_saved_flag_clear(void) {
+/* NOVEL_OPCODE_BRANCH_IF_SAVED_FLAG_CLEAR (0x12)
+ * Branch to the section in byte 2 when saved flag byte 1 is clear. */
+static void novel_opcode_branch_if_saved_flag_clear(void) {
     branch_on_saved_flag(0);
 }
 
-/* Sound-novel opcode 0x13: branch to the section in byte 2 when local flag byte 1 is set; the
+/* NOVEL_OPCODE_BRANCH_IF_LOCAL_FLAG_SET (0x13)
+ * Branch to the section in byte 2 when local flag byte 1 is set; the
  * local flags are cleared whenever a reading starts or resumes. */
-static void novel_opcode_13_branch_if_local_flag_set(void) {
+static void novel_opcode_branch_if_local_flag_set(void) {
     branch_on_local_flag(1);
 }
 
@@ -769,58 +847,67 @@ static void branch_on_local_flag(s32 expected) {
     g_novel_reading.state_flags = flags;
 }
 
-/* Sound-novel opcode 0x14: branch to the section in byte 2 when local flag byte 1 is clear. */
-static void novel_opcode_14_branch_if_local_flag_clear(void) {
+/* NOVEL_OPCODE_BRANCH_IF_LOCAL_FLAG_CLEAR (0x14)
+ * Branch to the section in byte 2 when local flag byte 1 is clear. */
+static void novel_opcode_branch_if_local_flag_clear(void) {
     branch_on_local_flag(0);
 }
 
-/* Sound-novel opcode 0x15: set saved flag byte 1 (g_novel_saved_flags). */
-static void novel_opcode_15_set_saved_flag(void) {
+/* NOVEL_OPCODE_SET_SAVED_FLAG (0x15)
+ * Set saved flag byte 1 (g_novel_saved_flags). */
+static void novel_opcode_set_saved_flag(void) {
     bits_set_value(g_novel_saved_flags, (u8)(g_novel_reading.instruction >> 8), 1);
     g_novel_reading.state_flags |= NOVEL_STATE_FETCH;
 }
 
-/* Sound-novel opcode 0x16: clear saved flag byte 1. */
-static void novel_opcode_16_clear_saved_flag(void) {
+/* NOVEL_OPCODE_CLEAR_SAVED_FLAG (0x16)
+ * Clear saved flag byte 1. */
+static void novel_opcode_clear_saved_flag(void) {
     bits_set_value(g_novel_saved_flags, (u8)(g_novel_reading.instruction >> 8), 0);
     g_novel_reading.state_flags |= NOVEL_STATE_FETCH;
 }
 
-/* Sound-novel opcode 0x17: set local flag byte 1 (kept only for the current reading). */
-static void novel_opcode_17_set_local_flag(void) {
+/* NOVEL_OPCODE_SET_LOCAL_FLAG (0x17)
+ * Set local flag byte 1 (kept only for the current reading). */
+static void novel_opcode_set_local_flag(void) {
     bits_set_value(g_novel_local_flags, (u8)(g_novel_reading.instruction >> 8), 1);
     g_novel_reading.state_flags |= NOVEL_STATE_FETCH;
 }
 
-/* Sound-novel opcode 0x18: clear local flag byte 1. */
-static void novel_opcode_18_clear_local_flag(void) {
+/* NOVEL_OPCODE_CLEAR_LOCAL_FLAG (0x18)
+ * Clear local flag byte 1. */
+static void novel_opcode_clear_local_flag(void) {
     bits_set_value(g_novel_local_flags, (u8)(g_novel_reading.instruction >> 8), 0);
     g_novel_reading.state_flags |= NOVEL_STATE_FETCH;
 }
 
-/* Sound-novel opcode 0x19: set the record's counter to the 16-bit operand in bytes 1-2. */
-static void novel_opcode_19_set_counter(void) {
+/* NOVEL_OPCODE_SET_COUNTER (0x19)
+ * Set the record's counter to the 16-bit operand in bytes 1-2. */
+static void novel_opcode_set_counter(void) {
     g_novel_reading.counter = (g_novel_reading.instruction << 8) >> 16;
     g_novel_reading.state_flags |= NOVEL_STATE_FETCH;
 }
 
-/* Sound-novel opcode: add the 16-bit operand (instruction bits 8..23) to the
+/* NOVEL_OPCODE_ADD_COUNTER_DELTA (0x1a)
+ * Add the 16-bit operand (instruction bits 8..23) to the
  * record's counter delta. */
-static void novel_opcode_1a_add_counter_delta(void) {
+static void novel_opcode_add_counter_delta(void) {
     g_novel_reading.counter_delta += (g_novel_reading.instruction << 8) >> 16;
     g_novel_reading.state_flags |= NOVEL_STATE_FETCH;
 }
 
-/* Sound-novel opcode: subtract the 16-bit operand (instruction bits 8..23)
+/* NOVEL_OPCODE_SUBTRACT_COUNTER_DELTA (0x1b)
+ * Subtract the 16-bit operand (instruction bits 8..23)
  * from the record's counter delta. */
-static void novel_opcode_1b_subtract_counter_delta(void) {
+static void novel_opcode_subtract_counter_delta(void) {
     g_novel_reading.counter_delta -= (g_novel_reading.instruction << 8) >> 16;
     g_novel_reading.state_flags |= NOVEL_STATE_FETCH;
 }
 
-/* Sound-novel opcode: show the context value display in the mode of operand
+/* NOVEL_OPCODE_SHOW_VALUE_DISPLAY (0x1c)
+ * Show the context value display in the mode of operand
  * 0 at (-0x20, 0x54). Any mode but the play time shows the record's counter. */
-static void novel_opcode_1c_show_value_display(void) {
+static void novel_opcode_show_value_display(void) {
     s32 mode;
 
     g_world_map_flags &= ~WORLD_MAP_FLAG_HIDE_CONTEXT_VALUE;
@@ -836,16 +923,18 @@ static void novel_opcode_1c_show_value_display(void) {
     g_novel_reading.state_flags |= NOVEL_STATE_FETCH | NOVEL_STATE_VALUE_DISPLAY;
 }
 
-/* Opcode 29: take the numeric value display down again (novel_opcode_1c_show_value_display
+/* NOVEL_OPCODE_HIDE_VALUE_DISPLAY (0x1d)
+ * Take the numeric value display down again (novel_opcode_show_value_display
  * puts it up) and fetch the next instruction. */
-static void novel_opcode_1d_hide_value_display(void) {
+static void novel_opcode_hide_value_display(void) {
     g_world_map_flags |= WORLD_MAP_FLAG_HIDE_CONTEXT_VALUE;
     g_novel_reading.state_flags = (g_novel_reading.state_flags & ~NOVEL_STATE_VALUE_DISPLAY) | NOVEL_STATE_FETCH;
 }
 
-/* Sound-novel opcode 0x1E: add the counter delta to the counter, clamp it to 0..0xFFFF, clear the
+/* NOVEL_OPCODE_APPLY_COUNTER_DELTA (0x1e)
+ * Add the counter delta to the counter, clamp it to 0..0xFFFF, clear the
  * delta and show the counter in the value display. */
-static void novel_opcode_1e_apply_counter_delta(void) {
+static void novel_opcode_apply_counter_delta(void) {
     s32 delta;
     s32* value = &g_novel_reading.counter;
 
@@ -862,14 +951,16 @@ static void novel_opcode_1e_apply_counter_delta(void) {
     g_novel_reading.state_flags |= NOVEL_STATE_FETCH;
 }
 
-/* Sound-novel opcode 0x1F: play sound effect byte 1 on a free channel. */
-static void novel_opcode_1f_play_sound(void) {
+/* NOVEL_OPCODE_PLAY_SOUND (0x1f)
+ * Play sound effect byte 1 on a free channel. */
+static void novel_opcode_play_sound(void) {
     sound_play_sfx_on_free_channel((u8)(g_novel_reading.instruction >> 8));
     g_novel_reading.state_flags |= NOVEL_STATE_FETCH;
 }
 
-/* Sound-novel opcode 0x20: switch the novel's music to track byte 1. */
-static void novel_opcode_20_load_music(void) {
+/* NOVEL_OPCODE_LOAD_MUSIC (0x20)
+ * Switch the novel's music to track byte 1. */
+static void novel_opcode_load_music(void) {
     change_reading_music((u8)(g_novel_reading.instruction >> 8));
     g_novel_reading.state_flags |= NOVEL_STATE_FETCH;
 }
@@ -900,17 +991,19 @@ static void change_reading_music(s32 music_id) {
     g_music_queue.current_slot = slot;
 }
 
-/* Sound-novel opcode 0x21: set the record's sound mode to byte 1; in mode 1 the pending-music
+/* NOVEL_OPCODE_SET_SOUND_MODE (0x21)
+ * Set the record's sound mode to byte 1; in mode 1 the pending-music
  * script variable also changes the track, mode 0 plays only effects and weather sounds. */
-static void novel_opcode_21_set_sound_mode(void) {
+static void novel_opcode_set_sound_mode(void) {
     g_novel_reading.sound_mode = (u8)(g_novel_reading.instruction >> 8);
     g_novel_reading.state_flags |= NOVEL_STATE_FETCH;
 }
 
-/* Sound-novel opcode: branch to section byte 3 when the counter plus its
+/* NOVEL_OPCODE_BRANCH_IF_COUNTER_EQUAL (0x22)
+ * Branch to section byte 3 when the counter plus its
  * pending delta, clamped to 0..0xffff, equals the 16-bit operand in bytes 1-2.
  * The double negation keeps the native counter/delta add operand order. */
-static void novel_opcode_22_branch_if_counter_equal(void) {
+static void novel_opcode_branch_if_counter_equal(void) {
     s32 value = g_novel_reading.counter - (-g_novel_reading.counter_delta);
     s32 operand;
     u32 word;
@@ -931,8 +1024,9 @@ static void novel_opcode_22_branch_if_counter_equal(void) {
     }
 }
 
-/* As novel_opcode_22_branch_if_counter_equal, branching when the values differ. */
-static void novel_opcode_23_branch_if_counter_not_equal(void) {
+/* NOVEL_OPCODE_BRANCH_IF_COUNTER_NOT_EQUAL (0x23)
+ * As novel_opcode_branch_if_counter_equal, branching when the values differ. */
+static void novel_opcode_branch_if_counter_not_equal(void) {
     s32 value = g_novel_reading.counter - (-g_novel_reading.counter_delta);
     s32 operand;
     u32 word;
@@ -953,9 +1047,10 @@ static void novel_opcode_23_branch_if_counter_not_equal(void) {
     }
 }
 
-/* As novel_opcode_22_branch_if_counter_equal, branching when the counter is below the
+/* NOVEL_OPCODE_BRANCH_IF_COUNTER_LESS (0x24)
+ * As novel_opcode_branch_if_counter_equal, branching when the counter is below the
  * operand. */
-static void novel_opcode_24_branch_if_counter_less(void) {
+static void novel_opcode_branch_if_counter_less(void) {
     s32 value = g_novel_reading.counter - (-g_novel_reading.counter_delta);
     s32 operand;
     u32 word;
@@ -976,9 +1071,10 @@ static void novel_opcode_24_branch_if_counter_less(void) {
     }
 }
 
-/* As novel_opcode_22_branch_if_counter_equal, branching when the counter is above the
+/* NOVEL_OPCODE_BRANCH_IF_COUNTER_GREATER (0x25)
+ * As novel_opcode_branch_if_counter_equal, branching when the counter is above the
  * operand. */
-static void novel_opcode_25_branch_if_counter_greater(void) {
+static void novel_opcode_branch_if_counter_greater(void) {
     s32 value = g_novel_reading.counter - (-g_novel_reading.counter_delta);
     s32 operand;
     u32 word;
@@ -999,9 +1095,10 @@ static void novel_opcode_25_branch_if_counter_greater(void) {
     }
 }
 
-/* Sound-novel opcode: fade the music to silence over operand 0 * 3 steps and
+/* NOVEL_OPCODE_FADE_OUT_MUSIC (0x26)
+ * Fade the music to silence over operand 0 * 3 steps and
  * clear the playing flag and the selected music id (the slot is kept). */
-static void novel_opcode_26_fade_out_music(void) {
+static void novel_opcode_fade_out_music(void) {
     s32 operand;
 
     g_music_queue.music.flags &= ~MUSIC_QUEUE_PLAYING;
@@ -1011,9 +1108,10 @@ static void novel_opcode_26_fade_out_music(void) {
     g_novel_reading.music_selection &= 0xFF00;
 }
 
-/* Sound-novel opcode: when a track is selected, switch playback to its slot
+/* NOVEL_OPCODE_FADE_IN_MUSIC (0x27)
+ * When a track is selected, switch playback to its slot
  * at volume 0 and fade to the queue's volume over operand 0 * 3 steps. */
-static void novel_opcode_27_fade_in_music(void) {
+static void novel_opcode_fade_in_music(void) {
     s16 track = g_novel_reading.music_selection;
     s32 operand;
 
@@ -1026,18 +1124,20 @@ static void novel_opcode_27_fade_in_music(void) {
     g_novel_reading.state_flags |= NOVEL_STATE_FETCH;
 }
 
-/* Sound-novel opcode: fade the screen out over operand 0 frames. The
+/* NOVEL_OPCODE_FADE_SCREEN_OUT (0x28)
+ * Fade the screen out over operand 0 frames. The
  * fade-out bit is cleared first so that world_map_start_fade always
  * starts the fade; the box-visible bit set here is replaced by it. */
-static void novel_opcode_28_fade_screen_out(void) {
+static void novel_opcode_fade_screen_out(void) {
     g_world_map_fade.flags[0] = (g_world_map_fade.flags[0] & ~WORLD_MAP_FADE_OUT) | WORLD_MAP_FADE_BOX_VISIBLE;
     world_map_start_fade(WORLD_MAP_FADE_OUT, (u8)(g_novel_reading.instruction >> 8));
     g_novel_reading.state_flags |= NOVEL_STATE_FETCH;
 }
 
-/* Sound-novel opcode: fade the screen in over operand 0 frames and drop the
+/* NOVEL_OPCODE_FADE_SCREEN_IN (0x29)
+ * Fade the screen in over operand 0 frames and drop the
  * white-overlay state. */
-static void novel_opcode_29_fade_screen_in(void) {
+static void novel_opcode_fade_screen_in(void) {
     u32* state = &g_world_map_fade.flags[0];
     u16* flags = &g_novel_reading.state_flags;
 
@@ -1047,7 +1147,8 @@ static void novel_opcode_29_fade_screen_in(void) {
     *flags |= NOVEL_STATE_FETCH;
 }
 
-/* Sound-novel opcode 42 of g_novel_opcode_handlers. Drains the GPU and
+/* NOVEL_OPCODE_SET_WHITE_SCREEN_OVERLAY (0x2a)
+ * Drains the GPU and
  * waits a frame, then with byte 1 zero puts up the full-screen white overlay
  * (fade box white and visible, any fade stopped, WHITE_OVERLAY recorded, the
  * menus blacked out), or otherwise takes it down again (box black and hidden,
@@ -1057,7 +1158,7 @@ static void novel_opcode_29_fade_screen_in(void) {
  * arm; jump.c cross-jumps the common tail from the g_novel_reading.state_flags store
  * onward, leaving only the three argument constants in the arms.
  */
-static void novel_opcode_2a_set_white_screen_overlay(void) {
+static void novel_opcode_set_white_screen_overlay(void) {
     u16* flags;
 
     DrawSync(0);
@@ -1087,11 +1188,12 @@ static void novel_opcode_2a_set_white_screen_overlay(void) {
     *flags = *flags | (NOVEL_STATE_FETCH | NOVEL_STATE_YIELD);
 }
 
-/* Sound-novel opcode: yield each frame until Circle is pressed.
+/* NOVEL_OPCODE_WAIT_FOR_CIRCLE_PRESS (0x2b)
+ * Yield each frame until Circle is pressed.
  *
  * Each block takes its own pointer local so the flag address is materialized
  * twice, as in the target. */
-static void novel_opcode_2b_wait_for_circle_press(void) {
+static void novel_opcode_wait_for_circle_press(void) {
     if (g_world_map_input_new_button_presses & PSX_PAD_CIRCLE) {
         u16* state_flags;
 
@@ -1106,9 +1208,10 @@ static void novel_opcode_2b_wait_for_circle_press(void) {
     }
 }
 
-/* Sound-novel opcode: stop all sound effects and play sound quad byte 1. A
+/* NOVEL_OPCODE_PLAY_SOUND_EFFECT_QUAD (0x2c)
+ * Stop all sound effects and play sound quad byte 1. A
  * nonzero byte 2 also records the sound so a restored reading replays it. */
-static void novel_opcode_2c_play_sound_effect_quad(void) {
+static void novel_opcode_play_sound_effect_quad(void) {
     char unused[8];
     s32 sound_id;
 
@@ -1120,17 +1223,19 @@ static void novel_opcode_2c_play_sound_effect_quad(void) {
     g_novel_reading.state_flags |= NOVEL_STATE_FETCH;
 }
 
-/* Sound-novel opcode: stop all sound effects and clear the recorded sound. */
-static void novel_opcode_2d_stop_sound_effects(void) {
+/* NOVEL_OPCODE_STOP_SOUND_EFFECTS (0x2d)
+ * Stop all sound effects and clear the recorded sound. */
+static void novel_opcode_stop_sound_effects(void) {
     sound_stop_all_sfx();
     g_novel_reading.sound_id = 0;
     g_novel_reading.state_flags |= NOVEL_STATE_FETCH;
 }
 
-/* Sound-novel opcode: start a countdown of the 16-bit operand in seconds
+/* NOVEL_OPCODE_START_COUNTDOWN_TIMER (0x2e)
+ * Start a countdown of the 16-bit operand in seconds
  * (60 frames each); when it runs out the script branches to the section in
  * the top operand byte. */
-static void novel_opcode_2e_start_countdown_timer(void) {
+static void novel_opcode_start_countdown_timer(void) {
     u32 instruction;
 
     instruction = g_novel_reading.instruction;
@@ -1140,10 +1245,11 @@ static void novel_opcode_2e_start_countdown_timer(void) {
     g_novel_reading.state_flags |= NOVEL_STATE_FETCH;
 }
 
-/* Sound-novel opcode: stop all sound effects and play environment sound
+/* NOVEL_OPCODE_PLAY_BACKGROUND_SOUND (0x2f)
+ * Stop all sound effects and play environment sound
  * operand 0 as the background sound. A nonzero operand 1 also records the
  * sound, flagged 0x4000, so a restored reading replays it. */
-static void novel_opcode_2f_play_background_sound(void) {
+static void novel_opcode_play_background_sound(void) {
     char unused[8];
     s32 sound_id;
 
@@ -1155,9 +1261,10 @@ static void novel_opcode_2f_play_background_sound(void) {
     g_novel_reading.state_flags |= NOVEL_STATE_FETCH;
 }
 
-/* Sound-novel opcode: set the master volume to operand 0 * 0x40 (0xff maps
+/* NOVEL_OPCODE_SET_MASTER_VOLUME (0x30)
+ * Set the master volume to operand 0 * 0x40 (0xff maps
  * to the maximum 0x3fff) over operand 1 * 3 steps, at least one. */
-static void novel_opcode_30_set_master_volume(void) {
+static void novel_opcode_set_master_volume(void) {
     s32 unused[2];
     s32 balance = (u8)(g_novel_reading.instruction >> 16) * 3;
     s32 volume = (g_novel_state.instruction & 0xFF00) >> 2;
@@ -1172,10 +1279,11 @@ static void novel_opcode_30_set_master_volume(void) {
     g_novel_reading.state_flags |= NOVEL_STATE_FETCH;
 }
 
-/* Script opcode: when the sound novel has music, stop it, unload the music slot
+/* NOVEL_OPCODE_UNLOAD_MUSIC (0x31)
+ * When the sound novel has music, stop it, unload the music slot
  * change_reading_music loaded it into and clear the selection; then mark the
  * opcode complete. */
-static void novel_opcode_31_unload_music(void) {
+static void novel_opcode_unload_music(void) {
     if (g_novel_reading.music_selection != 0) {
         g_music_queue.music.flags &= ~MUSIC_QUEUE_PLAYING;
         music_stop();
@@ -1189,8 +1297,9 @@ static void novel_opcode_31_unload_music(void) {
     g_novel_reading.state_flags |= NOVEL_STATE_FETCH;
 }
 
-/* Sound-novel opcode 0x32: set WORLD's menu brightness to red, green and blue bytes 1-3. */
-static void novel_opcode_32_set_menu_brightness(void) {
+/* NOVEL_OPCODE_SET_MENU_BRIGHTNESS (0x32)
+ * Set WORLD's menu brightness to red, green and blue bytes 1-3. */
+static void novel_opcode_set_menu_brightness(void) {
     menu_screen_set_brightness((u8)(g_novel_reading.instruction >> 8), (u8)(g_novel_reading.instruction >> 16),
         (g_novel_reading.instruction >> 24));
     g_novel_reading.state_flags |= NOVEL_STATE_FETCH;
@@ -1199,10 +1308,11 @@ static void novel_opcode_32_set_menu_brightness(void) {
 /* Scalar counter access preserves the separate load/store symbol bases. */
 extern u16 g_novel_counter_delta;
 
-/* Sound-novel opcode 0x33: when EVENT_SCRIPT_VAR_SELECTED_DIALOG_OPTION equals
+/* NOVEL_OPCODE_ADD_COUNTER_DELTA_IF_CHOICE (0x33)
+ * When EVENT_SCRIPT_VAR_SELECTED_DIALOG_OPTION equals
  * byte 3, add bytes 1-2 minus 0x8000 (an operand biased by 0x8000) to
  * g_novel_counter_delta. */
-static void novel_opcode_33_add_counter_delta_if_choice(void) {
+static void novel_opcode_add_counter_delta_if_choice(void) {
     u32* instruction;
     u8 expected;
 
@@ -1215,8 +1325,9 @@ static void novel_opcode_33_add_counter_delta_if_choice(void) {
     g_novel_reading.state_flags |= NOVEL_STATE_FETCH;
 }
 
-/* Sound-novel opcode: yield while a screen fade is running. */
-static void novel_opcode_34_wait_for_fade(void) {
+/* NOVEL_OPCODE_WAIT_FOR_FADE (0x34)
+ * Yield while a screen fade is running. */
+static void novel_opcode_wait_for_fade(void) {
     if (!(g_world_map_flags & WORLD_MAP_FLAG_FADING)) {
         g_novel_reading.state_flags |= NOVEL_STATE_FETCH;
     } else {
@@ -1224,10 +1335,11 @@ static void novel_opcode_34_wait_for_fade(void) {
     }
 }
 
-/* Sound-novel opcode: shift the four-entry history
+/* NOVEL_OPCODE_PUSH_OPERAND_HISTORY (0x35)
+ * Shift the four-entry history
  * g_novel_reading.text_history down one slot and push byte 1 at
- * the end (same shape as novel_opcode_03_start_text_thread_and_push_history). */
-static void novel_opcode_35_push_operand_history(void) {
+ * the end (same shape as novel_opcode_start_text_thread_and_push_history). */
+static void novel_opcode_push_operand_history(void) {
     u8 new_entry = (g_novel_reading.instruction & 0xff00) >> 8;
 
     g_novel_reading.text_history[0] = g_novel_reading.text_history[1];
@@ -1239,58 +1351,58 @@ static void novel_opcode_35_push_operand_history(void) {
 
 /* Dispatch by the instruction's low-byte opcode. */
 static void (*s_novel_opcode_handlers[54])(void) = {
-    novel_opcode_00_end_script,
-    novel_opcode_01_end_section,
-    novel_opcode_02_nop,
-    novel_opcode_03_start_text_thread_and_push_history,
-    novel_opcode_04_wait_for_text_thread,
-    novel_opcode_05_load_background_set,
-    novel_opcode_06_branch_to_section,
-    novel_opcode_07_branch_if_dialog_option_equal,
-    novel_opcode_08_branch_if_dialog_option_not_equal,
-    novel_opcode_09_wait_frames,
-    novel_opcode_0a_load_picture,
-    novel_opcode_0b_hide_picture,
-    novel_opcode_0c_set_prompts_visible,
-    novel_opcode_0d_start_text_thread,
-    novel_opcode_0e_branch_to_random_section,
-    novel_opcode_0f_branch_if_section_read,
-    novel_opcode_10_branch_if_section_unread,
-    novel_opcode_11_branch_if_saved_flag_set,
-    novel_opcode_12_branch_if_saved_flag_clear,
-    novel_opcode_13_branch_if_local_flag_set,
-    novel_opcode_14_branch_if_local_flag_clear,
-    novel_opcode_15_set_saved_flag,
-    novel_opcode_16_clear_saved_flag,
-    novel_opcode_17_set_local_flag,
-    novel_opcode_18_clear_local_flag,
-    novel_opcode_19_set_counter,
-    novel_opcode_1a_add_counter_delta,
-    novel_opcode_1b_subtract_counter_delta,
-    novel_opcode_1c_show_value_display,
-    novel_opcode_1d_hide_value_display,
-    novel_opcode_1e_apply_counter_delta,
-    novel_opcode_1f_play_sound,
-    novel_opcode_20_load_music,
-    novel_opcode_21_set_sound_mode,
-    novel_opcode_22_branch_if_counter_equal,
-    novel_opcode_23_branch_if_counter_not_equal,
-    novel_opcode_24_branch_if_counter_less,
-    novel_opcode_25_branch_if_counter_greater,
-    novel_opcode_26_fade_out_music,
-    novel_opcode_27_fade_in_music,
-    novel_opcode_28_fade_screen_out,
-    novel_opcode_29_fade_screen_in,
-    novel_opcode_2a_set_white_screen_overlay,
-    novel_opcode_2b_wait_for_circle_press,
-    novel_opcode_2c_play_sound_effect_quad,
-    novel_opcode_2d_stop_sound_effects,
-    novel_opcode_2e_start_countdown_timer,
-    novel_opcode_2f_play_background_sound,
-    novel_opcode_30_set_master_volume,
-    novel_opcode_31_unload_music,
-    novel_opcode_32_set_menu_brightness,
-    novel_opcode_33_add_counter_delta_if_choice,
-    novel_opcode_34_wait_for_fade,
-    novel_opcode_35_push_operand_history,
+    novel_opcode_end_script,
+    novel_opcode_end_section,
+    novel_opcode_nop,
+    novel_opcode_start_text_thread_and_push_history,
+    novel_opcode_wait_for_text_thread,
+    novel_opcode_load_background_set,
+    novel_opcode_branch_to_section,
+    novel_opcode_branch_if_dialog_option_equal,
+    novel_opcode_branch_if_dialog_option_not_equal,
+    novel_opcode_wait_frames,
+    novel_opcode_load_picture,
+    novel_opcode_hide_picture,
+    novel_opcode_set_prompts_visible,
+    novel_opcode_start_text_thread,
+    novel_opcode_branch_to_random_section,
+    novel_opcode_branch_if_section_read,
+    novel_opcode_branch_if_section_unread,
+    novel_opcode_branch_if_saved_flag_set,
+    novel_opcode_branch_if_saved_flag_clear,
+    novel_opcode_branch_if_local_flag_set,
+    novel_opcode_branch_if_local_flag_clear,
+    novel_opcode_set_saved_flag,
+    novel_opcode_clear_saved_flag,
+    novel_opcode_set_local_flag,
+    novel_opcode_clear_local_flag,
+    novel_opcode_set_counter,
+    novel_opcode_add_counter_delta,
+    novel_opcode_subtract_counter_delta,
+    novel_opcode_show_value_display,
+    novel_opcode_hide_value_display,
+    novel_opcode_apply_counter_delta,
+    novel_opcode_play_sound,
+    novel_opcode_load_music,
+    novel_opcode_set_sound_mode,
+    novel_opcode_branch_if_counter_equal,
+    novel_opcode_branch_if_counter_not_equal,
+    novel_opcode_branch_if_counter_less,
+    novel_opcode_branch_if_counter_greater,
+    novel_opcode_fade_out_music,
+    novel_opcode_fade_in_music,
+    novel_opcode_fade_screen_out,
+    novel_opcode_fade_screen_in,
+    novel_opcode_set_white_screen_overlay,
+    novel_opcode_wait_for_circle_press,
+    novel_opcode_play_sound_effect_quad,
+    novel_opcode_stop_sound_effects,
+    novel_opcode_start_countdown_timer,
+    novel_opcode_play_background_sound,
+    novel_opcode_set_master_volume,
+    novel_opcode_unload_music,
+    novel_opcode_set_menu_brightness,
+    novel_opcode_add_counter_delta_if_choice,
+    novel_opcode_wait_for_fade,
+    novel_opcode_push_operand_history,
 };

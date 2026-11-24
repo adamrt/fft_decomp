@@ -9,11 +9,12 @@
 
 /* JOBSTTS and WORLD have distinct clipping-reset commands. */
 #if defined(FFT_EVENT_BUNIT) || defined(FFT_EVENT_EQUIP)
-/* Stream command closing a zoomed window: when the zoom transition queued a
+/* MENU_OPCODE_CLEAR_DRAW_AREA (0x13)
+ * Stream command closing a zoomed window: when the zoom transition queued a
  * cropped draw area, queue the full draw area again at the next
  * ordering-table entry and clear the lock. Unlike JOBSTTS's own copy, the
  * one BUNIT and EQUIP link does not advance the ordering-table index. */
-menu_instruction_t* menu_opcode_13_clear_temporary_draw_area(menu_instruction_t* data) {
+menu_instruction_t* menu_opcode_clear_temporary_draw_area(menu_instruction_t* data) {
     if (g_gfx_otag_index_locked != 0) {
         g_gfx_draw_area.y = 0;
         menu_gfx_enqueue_draw_area(&g_gfx_draw_area, g_menu_gfx_otag_index + 1);
@@ -25,8 +26,9 @@ menu_instruction_t* menu_opcode_13_clear_temporary_draw_area(menu_instruction_t*
 
 /* WORLD keeps its draw-area commands in its own unit. */
 #ifndef FFT_WORLD
-/* Queue the instruction draw area unless the zoom transition already queued one. */
-menu_instruction_t* menu_opcode_14_set_draw_area(menu_instruction_t* data) {
+/* MENU_OPCODE_DRAW_AREA (0x14)
+ * Queue the instruction draw area unless the zoom transition already queued one. */
+menu_instruction_t* menu_opcode_set_draw_area(menu_instruction_t* data) {
     RECT area;
 
     if (g_gfx_otag_index_locked == 0) {
@@ -39,8 +41,9 @@ menu_instruction_t* menu_opcode_14_set_draw_area(menu_instruction_t* data) {
     return menu_next_instruction(data);
 }
 
-/* Queue the full draw area at the next ordering-table slot when unlocked. */
-menu_instruction_t* menu_opcode_15_restore_draw_area(menu_instruction_t* instruction) {
+/* MENU_OPCODE_REPEAT_DRAW_AREA (0x15)
+ * Queue the full draw area at the next ordering-table slot when unlocked. */
+menu_instruction_t* menu_opcode_restore_draw_area(menu_instruction_t* instruction) {
     if (g_gfx_otag_index_locked == 0) {
         g_gfx_draw_area.y = 0;
         menu_gfx_enqueue_draw_area(&g_gfx_draw_area, g_menu_gfx_otag_index + 1);
@@ -61,9 +64,10 @@ s32 menu_window_get_scale_step(void) {
 
 /* JOBSTTS advances the transition in its script runner. */
 #ifndef FFT_EVENT_JOBSTTS
-/* Command 0x16: advance the window zoom transition frame (up to 4, the open window), then skip
+/* MENU_OPCODE_ADVANCE_WINDOW_SCALE (0x16)
+ * Advance the window zoom transition frame (up to 4, the open window), then skip
  * the one-byte command. */
-menu_instruction_t* menu_opcode_16_advance_window_scale_step(menu_instruction_t* data) {
+menu_instruction_t* menu_opcode_advance_window_scale_step(menu_instruction_t* data) {
     if (g_gfx_transition_frame < 4) {
         g_gfx_transition_frame++;
     }

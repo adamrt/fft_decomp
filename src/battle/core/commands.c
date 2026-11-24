@@ -657,10 +657,11 @@ void sprite_map_unit_set_weapon_graphic(u32 item_id, u32 map_unit_id) {
     }
 }
 
-/* AddGhostUnit: when `map_unit_id` is free, restart the unit graphics load queue with one
+/* SCRIPT_OPCODE_ADD_GHOST_UNIT (0x47)
+ * AddGhostUnit: when `map_unit_id` is free, restart the unit graphics load queue with one
  * descriptor for a sprite with no unit stats at the given tile and facing, and return
  * 1; return 0 when the id is taken. */
-s32 script_opcode_47_add_ghost_unit(
+s32 script_opcode_add_ghost_unit(
     s32 map_x, s32 map_y, s32 map_level, s16 facing, s16 spritesheet_id, s32 map_unit_id, s32 flags) {
     s32 ret;
 

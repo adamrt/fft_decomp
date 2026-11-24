@@ -61,9 +61,10 @@ void message_measure_window_width(s32 offset, s32 flags, s32* out_width) {
                                 + DISPLAY_MESSAGE_INSTRUCTION_AT((u8*)g_script_event_block, offset)->text_id_le[0])
                 - 1));
         max_width = width;
-        offset += 1 + g_script_event_instruction_sizes[EVENT_OPCODE_DISPLAY_MESSAGE];
-        while ((offset = script_find_instruction_offset(offset, EVENT_OPCODE_CHANGE_DIALOG)) != 0) {
-            if (CHANGE_DIALOG_INSTRUCTION_AT((u8*)g_script_event_block, offset)->opcode == EVENT_OPCODE_CHANGE_DIALOG) {
+        offset += 1 + g_script_event_instruction_sizes[SCRIPT_OPCODE_DISPLAY_MESSAGE];
+        while ((offset = script_find_instruction_offset(offset, SCRIPT_OPCODE_CHANGE_DIALOG)) != 0) {
+            if (CHANGE_DIALOG_INSTRUCTION_AT((u8*)g_script_event_block, offset)->opcode
+                == SCRIPT_OPCODE_CHANGE_DIALOG) {
                 if (CHANGE_DIALOG_INSTRUCTION_AT((u8*)g_script_event_block, offset)->text_id_le[0] == 0xFF
                     && CHANGE_DIALOG_INSTRUCTION_AT((u8*)g_script_event_block, offset)->text_id_le[1] == 0xFF
                     && (CHANGE_DIALOG_INSTRUCTION_AT((u8*)g_script_event_block, offset)->window_selector & flags)
@@ -82,7 +83,7 @@ void message_measure_window_width(s32 offset, s32 flags, s32* out_width) {
                     }
                 }
             }
-            offset += 1 + g_script_event_instruction_sizes[EVENT_OPCODE_CHANGE_DIALOG];
+            offset += 1 + g_script_event_instruction_sizes[SCRIPT_OPCODE_CHANGE_DIALOG];
         }
         *out_width = max_width;
     }

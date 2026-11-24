@@ -38,34 +38,34 @@ extern u16 g_menu_screen_scroll_repeat_timer;
 
 /* Dispatch slots before this program's end opcode; zero entries stay unhandled. */
 menu_opcode_handler_t g_menu_opcode_handlers[MENU_SCREEN_SCRIPT_END] = {
-    menu_opcode_00_draw_window_frame,         /* 0x00 */
-    menu_opcode_01_if_group,                  /* 0x01 */
-    menu_opcode_02_if_else_group,             /* 0x02 */
-    menu_opcode_03_draw_tile,                 /* 0x03 */
-    menu_opcode_04_05_draw_textured_quad,     /* 0x04 */
-    menu_opcode_04_05_draw_textured_quad,     /* 0x05 */
-    menu_opcode_06_draw_callback_quad,        /* 0x06 */
-    menu_opcode_07_draw_line,                 /* 0x07 */
-    0,                                        /* 0x08 */
-    menu_opcode_09_set_fixed_clut,            /* 0x09 */
-    menu_opcode_0a_set_clut,                  /* 0x0a */
-    menu_opcode_0b_set_draw_color,            /* 0x0b */
-    menu_opcode_0c_set_texture_page,          /* 0x0c */
-    menu_opcode_0d_draw_formatted_number,     /* 0x0d */
-    menu_opcode_0e_set_semi_trans,            /* 0x0e */
-    menu_opcode_0f_set_draw_priority,         /* 0x0f */
-    menu_opcode_10_update_scrollable_list,    /* 0x10 */
-    menu_opcode_11_draw_background_tiles,     /* 0x11 */
-    menu_opcode_12_draw_opening_window_frame, /* 0x12 */
-    menu_opcode_13_clear_temporary_draw_area, /* 0x13 */
-    menu_opcode_14_set_draw_area,             /* 0x14 */
-    menu_opcode_15_restore_draw_area,         /* 0x15 */
-    menu_opcode_16_advance_window_scale_step, /* 0x16 */
-    menu_opcode_17_draw_right_aligned_number, /* 0x17 */
-    menu_opcode_18_add_blend_draw_mode,       /* 0x18 */
-    menu_opcode_0d_draw_formatted_number,     /* 0x19 */
-    menu_opcode_0d_draw_formatted_number,     /* 0x1a */
-    menu_opcode_0d_draw_formatted_number,     /* 0x1b */
+    menu_opcode_draw_window_frame,         /* 0x00 */
+    menu_opcode_if_group,                  /* 0x01 */
+    menu_opcode_if_else_group,             /* 0x02 */
+    menu_opcode_draw_tile,                 /* 0x03 */
+    menu_opcode_draw_quad,                 /* 0x04 */
+    menu_opcode_draw_quad,                 /* 0x05 */
+    menu_opcode_draw_callback_quad,        /* 0x06 */
+    menu_opcode_draw_line,                 /* 0x07 */
+    0,                                     /* 0x08 */
+    menu_opcode_set_fixed_clut,            /* 0x09 */
+    menu_opcode_set_clut,                  /* 0x0a */
+    menu_opcode_set_draw_color,            /* 0x0b */
+    menu_opcode_set_texture_page,          /* 0x0c */
+    menu_opcode_draw_formatted_number,     /* 0x0d */
+    menu_opcode_set_semi_trans,            /* 0x0e */
+    menu_opcode_set_draw_priority,         /* 0x0f */
+    menu_opcode_update_scrollable_list,    /* 0x10 */
+    menu_opcode_draw_background_tiles,     /* 0x11 */
+    menu_opcode_draw_opening_window_frame, /* 0x12 */
+    menu_opcode_clear_temporary_draw_area, /* 0x13 */
+    menu_opcode_set_draw_area,             /* 0x14 */
+    menu_opcode_restore_draw_area,         /* 0x15 */
+    menu_opcode_advance_window_scale_step, /* 0x16 */
+    menu_opcode_draw_right_aligned_number, /* 0x17 */
+    menu_opcode_add_blend_draw_mode,       /* 0x18 */
+    menu_opcode_draw_formatted_number,     /* 0x19 */
+    menu_opcode_draw_formatted_number,     /* 0x1a */
+    menu_opcode_draw_formatted_number,     /* 0x1b */
 };
 
 s8 g_gfx_transition_frame = 0;
@@ -78,10 +78,11 @@ static oriented_quad_t s_screen_number_blank_sprite = { { 0, 216 }, 7, 8, { 208,
 static s8 s_screen_cursor_bob_thresholds[12] = { 16, 0, 18, 1, 22, 2, 28, 3, 36, 2, 46, 1 };
 static s8 s_screen_cursor_bob_active_thresholds[12] = { 2, 0, 8, -2, 10, 1, 12, 3, 14, 5, 16, 4 };
 
-/* Menu script command: run the next count commands when the row predicate holds, otherwise skip
+/* MENU_OPCODE_IF_GROUP (0x01)
+ * Run the next count commands when the row predicate holds, otherwise skip
  * them. The predicate gets the command's literal value, or the current list row while the list
  * uses its scroll position. */
-menu_instruction_t* menu_opcode_01_if_group(menu_instruction_t* script) {
+menu_instruction_t* menu_opcode_if_group(menu_instruction_t* script) {
     menu_instruction_t* instruction = script;
     s32 (*predicate)(s32) = g_menu_row_callbacks[instruction->conditional.predicate].value;
     s32 count = instruction->conditional.count;
@@ -112,9 +113,10 @@ menu_instruction_t* menu_opcode_01_if_group(menu_instruction_t* script) {
     return instruction;
 }
 
-/* Execute the selected branch and skip the other by encoded instruction
+/* MENU_OPCODE_IF_ELSE_GROUP (0x02)
+ * Execute the selected branch and skip the other by encoded instruction
  * lengths, using a literal predicate argument or the current scrolling row. */
-menu_instruction_t* menu_opcode_02_if_else_group(menu_instruction_t* instruction) {
+menu_instruction_t* menu_opcode_if_else_group(menu_instruction_t* instruction) {
     s32 (*predicate)(s32) = g_menu_row_callbacks[instruction->if_else.predicate].value;
     s32 count_true = instruction->if_else.count_true;
     s32 count_false = instruction->if_else.count_false;
@@ -155,10 +157,11 @@ menu_instruction_t* menu_opcode_02_if_else_group(menu_instruction_t* instruction
     return instruction;
 }
 
-/* Menu script command: draw a filled tile (x, y, width, height and color) at
+/* MENU_OPCODE_TILE (0x03)
+ * Draw a filled tile (x, y, width, height and color) at
  * the current draw priority and semi-transparency, and return the next
  * command. Inside a list body, y follows the row being drawn. */
-menu_instruction_t* menu_opcode_03_draw_tile(menu_instruction_t* instruction) {
+menu_instruction_t* menu_opcode_draw_tile(menu_instruction_t* instruction) {
     RECT rect;
     s32 y;
     s16 step;
@@ -180,11 +183,13 @@ menu_instruction_t* menu_opcode_03_draw_tile(menu_instruction_t* instruction) {
     return menu_next_instruction(instruction);
 }
 
-/* Draws the sprite described by a 9-byte command header (x, y, w, h, u, v)
+/* MENU_OPCODE_QUAD (0x04)
+ * MENU_OPCODE_TINTED_QUAD (0x05)
+ * Draws the sprite described by a 9-byte command header (x, y, w, h, u, v)
  * with the current texture page and CLUT, tinted by the menu sprite color
- * unless it is the uncolored variant, and returns the next command. Inside a
+ * unless it is MENU_OPCODE_QUAD, and returns the next command. Inside a
  * list body, y follows the row being drawn. */
-menu_instruction_t* menu_opcode_04_05_draw_textured_quad(menu_instruction_t* instruction) {
+menu_instruction_t* menu_opcode_draw_quad(menu_instruction_t* instruction) {
     RECT rect;
     s32 y;
     s16 step;
@@ -203,7 +208,7 @@ menu_instruction_t* menu_opcode_04_05_draw_textured_quad(menu_instruction_t* ins
     rect.y = y;
     rect.w = instruction->sprite.sprite.w;
     rect.h = instruction->sprite.sprite.h;
-    if (instruction->sprite.opcode == MENU_SCRIPT_OP_UNCOLORED_QUAD) {
+    if (instruction->sprite.opcode == MENU_OPCODE_QUAD) {
         color = 0;
     } else {
         color = &g_menu_screen_sprite_color;
@@ -213,8 +218,9 @@ menu_instruction_t* menu_opcode_04_05_draw_textured_quad(menu_instruction_t* ins
     return menu_next_instruction(instruction);
 }
 
-/* Draw the command's two endpoints with its RGB color, then advance. */
-menu_instruction_t* menu_opcode_07_draw_line(menu_instruction_t* instruction) {
+/* MENU_OPCODE_LINE (0x07)
+ * Draw the command's two endpoints with its RGB color, then advance. */
+menu_instruction_t* menu_opcode_draw_line(menu_instruction_t* instruction) {
     point16_t endpoints[2];
 
     endpoints[0].x = instruction->line.x0;
@@ -225,9 +231,10 @@ menu_instruction_t* menu_opcode_07_draw_line(menu_instruction_t* instruction) {
     return menu_next_instruction(instruction);
 }
 
-/* Ask the selected callback for the literal row's icon, or the current
+/* MENU_OPCODE_CALLBACK_QUAD (0x06)
+ * Ask the selected callback for the literal row's icon, or the current
  * scrolling row's icon, then draw it at the command's position. */
-menu_instruction_t* menu_opcode_06_draw_callback_quad(menu_instruction_t* instruction) {
+menu_instruction_t* menu_opcode_draw_callback_quad(menu_instruction_t* instruction) {
     menu_icon_source_t* (*handler)(s32);
     menu_icon_source_t* entry;
     s32 index;
@@ -252,14 +259,15 @@ menu_instruction_t* menu_opcode_06_draw_callback_quad(menu_instruction_t* instru
         s_screen_script_sprite_command.sprite.v = entry->v;
         s_screen_clut = entry->clut;
         g_menu_screen_texture_page = entry->tpage;
-        menu_opcode_04_05_draw_textured_quad((menu_instruction_t*)&s_screen_script_sprite_command);
+        menu_opcode_draw_quad((menu_instruction_t*)&s_screen_script_sprite_command);
     }
     return menu_next_instruction(instruction);
 }
 
 /*
+ * MENU_OPCODE_WINDOW_FRAME (0x00)
  * Draw a menu window's 5x9/5x7 border pieces around its rectangle and tile
- * the interior through menu_opcode_11_draw_background_tiles.
+ * the interior through menu_opcode_draw_background_tiles.
  *
  * Source 2 takes the signed rectangle from the shared window record; other
  * sources use the command's byte operands. Source 1 selects the alternate
@@ -267,7 +275,7 @@ menu_instruction_t* menu_opcode_06_draw_callback_quad(menu_instruction_t* instru
  * pointer's reference count above the draw priority's, so global allocation
  * places them in s6 and s7 like the target.
  */
-menu_instruction_t* menu_opcode_00_draw_window_frame(menu_instruction_t* instruction) {
+menu_instruction_t* menu_opcode_draw_window_frame(menu_instruction_t* instruction) {
     RECT rect;
     s32 left;
     s32 top;
@@ -387,7 +395,7 @@ menu_instruction_t* menu_opcode_00_draw_window_frame(menu_instruction_t* instruc
         s_screen_window_interior_command.width = instruction->window.width;
         s_screen_window_interior_command.height = instruction->window.height;
     }
-    menu_opcode_11_draw_background_tiles((menu_instruction_t*)&s_screen_window_interior_command);
+    menu_opcode_draw_background_tiles((menu_instruction_t*)&s_screen_window_interior_command);
 
     /* Bottom edge, laid out like the top. */
     top = top + 9 + partial_height + full_rows * 16;
@@ -422,12 +430,13 @@ menu_instruction_t* menu_opcode_00_draw_window_frame(menu_instruction_t* instruc
 }
 
 /*
+ * MENU_OPCODE_OPENING_WINDOW_FRAME (0x12)
  * Apply the centered opening-animation clip before processing a window command.
  *
  * Steps 0-3 scale width and height by the signed percentage table. Later
  * steps disable the temporary clip; the downstream command still runs.
  */
-menu_instruction_t* menu_opcode_12_draw_opening_window_frame(menu_instruction_t* instruction) {
+menu_instruction_t* menu_opcode_draw_opening_window_frame(menu_instruction_t* instruction) {
     RECT clip;
     s32 scale;
 
@@ -445,15 +454,16 @@ menu_instruction_t* menu_opcode_12_draw_opening_window_frame(menu_instruction_t*
     } else {
         g_gfx_otag_index_locked = 0;
     }
-    return menu_opcode_00_draw_window_frame(instruction);
+    return menu_opcode_draw_window_frame(instruction);
 }
 
 /*
+ * MENU_OPCODE_TILED_RECTANGLE (0x11)
  * Tile a menu rectangle with 16-pixel sprites and clipped edge pieces.
  *
  * Source 2 uses the signed shared rectangle; other sources use byte operands.
  */
-menu_instruction_t* menu_opcode_11_draw_background_tiles(menu_instruction_t* instruction) {
+menu_instruction_t* menu_opcode_draw_background_tiles(menu_instruction_t* instruction) {
     RECT rect;
     s32 base_x;
     s32 full_rows;
@@ -521,13 +531,14 @@ menu_instruction_t* menu_opcode_11_draw_background_tiles(menu_instruction_t* ins
     return menu_next_instruction(instruction);
 }
 
-/* Menu script opcode: compute a CLUT id from the packed operands and record it.
+/* MENU_OPCODE_FIXED_CLUT (0x09)
+ * Compute a CLUT id from the packed operands and record it.
  * Returns the next script instruction pointer.
  *
  * Built at -O1: the unscheduled prologue and load order are the -O1 signature
  * of the menu-script handlers (see the menu_opcode_* handlers in this file). The
  * reassigned s32 y defeats plus->ior folding (gives addu). */
-menu_instruction_t* menu_opcode_09_set_fixed_clut(menu_instruction_t* instruction) {
+menu_instruction_t* menu_opcode_set_fixed_clut(menu_instruction_t* instruction) {
     s32 x = instruction->fixed_clut.x_div_16;
     s32 y;
 
@@ -538,11 +549,12 @@ menu_instruction_t* menu_opcode_09_set_fixed_clut(menu_instruction_t* instructio
     return menu_next_instruction(instruction);
 }
 
-/* Menu-script opcode handler: pick the CLUT x/y operands from bytes 2..4 or,
+/* MENU_OPCODE_CLUT (0x0a)
+ * Pick the CLUT x/y operands from bytes 2..4 or,
  * when g_menu_screen_use_alternate_palette selects the alternate palette, bytes 5..7, and record the
  * resulting CLUT id. Advances by the instruction length (byte 1), like
- * menu_opcode_0c_set_texture_page. */
-menu_instruction_t* menu_opcode_0a_set_clut(menu_instruction_t* instruction) {
+ * menu_opcode_set_texture_page. */
+menu_instruction_t* menu_opcode_set_clut(menu_instruction_t* instruction) {
     if (g_menu_screen_use_alternate_palette) {
         s_screen_clut = GetClut(instruction->clut.alternate_x_div_16 << 4,
             instruction->clut.alternate_y_low + (instruction->clut.alternate_y_high << 8));
@@ -553,33 +565,37 @@ menu_instruction_t* menu_opcode_0a_set_clut(menu_instruction_t* instruction) {
     return menu_next_instruction(instruction);
 }
 
-/* Menu-script opcode handler: set the texture page from the operand bytes and
- * advance by the instruction length (byte 1), like menu_opcode_0e_set_semi_trans. */
-menu_instruction_t* menu_opcode_0c_set_texture_page(menu_instruction_t* instruction) {
+/* MENU_OPCODE_TEXTURE_PAGE (0x0c)
+ * Set the texture page from the operand bytes and
+ * advance by the instruction length (byte 1), like menu_opcode_set_semi_trans. */
+menu_instruction_t* menu_opcode_set_texture_page(menu_instruction_t* instruction) {
     g_menu_screen_texture_page = GetTPage(instruction->texture_page.depth, instruction->texture_page.y_blend >> 4,
         instruction->texture_page.x_div_16 << 4, instruction->texture_page.y_blend << 8);
     return menu_next_instruction(instruction);
 }
 
-/* Menu-script opcode handler: byte 3 of the instruction selects the
+/* MENU_OPCODE_SEMI_TRANS (0x0e)
+ * Byte 3 of the instruction selects the
  * semi-transparency flag used by the window/text primitives. Returns the
  * address of the next instruction (byte 1 is the instruction length). */
-menu_instruction_t* menu_opcode_0e_set_semi_trans(menu_instruction_t* instruction) {
+menu_instruction_t* menu_opcode_set_semi_trans(menu_instruction_t* instruction) {
     g_menu_gfx_semitransparency = instruction->draw_state.value;
     return menu_next_instruction(instruction);
 }
 
-/* Menu script command: queue a draw-mode packet that selects the command's blend rate at the
+/* MENU_OPCODE_BLEND_DRAW_MODE (0x18)
+ * Queue a draw-mode packet that selects the command's blend rate at the
  * current ordering-table slot, then continue with the next command. */
-menu_instruction_t* menu_opcode_18_add_blend_draw_mode(menu_instruction_t* instruction) {
+menu_instruction_t* menu_opcode_add_blend_draw_mode(menu_instruction_t* instruction) {
     menu_gfx_enqueue_draw_mode(0, 0, GetTPage(0, instruction->blend.blend_rate, 0x100, 0), 0, g_menu_gfx_otag_index);
     return menu_next_instruction(instruction);
 }
 
-/* Set the current sprite color from a menu-script operand triplet.
+/* MENU_OPCODE_DRAW_COLOR (0x0b)
+ * Set the current sprite color from a menu-script operand triplet.
  *
  * The palette selector chooses bytes 5..7 instead of the normal bytes 2..4. */
-menu_instruction_t* menu_opcode_0b_set_draw_color(menu_instruction_t* instruction) {
+menu_instruction_t* menu_opcode_set_draw_color(menu_instruction_t* instruction) {
     if (g_menu_screen_use_alternate_palette) {
         g_menu_screen_sprite_color.r = instruction->sprite_color.alternate.r;
         g_menu_screen_sprite_color.g = instruction->sprite_color.alternate.g;
@@ -592,21 +608,25 @@ menu_instruction_t* menu_opcode_0b_set_draw_color(menu_instruction_t* instructio
     return menu_next_instruction(instruction);
 }
 
-/* Menu-script opcode handler: byte 3 of the instruction sets the menu draw
+/* MENU_OPCODE_DRAW_PRIORITY (0x0f)
+ * Byte 3 of the instruction sets the menu draw
  * priority. Returns the address of the next instruction. */
-menu_instruction_t* menu_opcode_0f_set_draw_priority(menu_instruction_t* instruction) {
+menu_instruction_t* menu_opcode_set_draw_priority(menu_instruction_t* instruction) {
     g_menu_gfx_otag_index = instruction->draw_state.value;
     return menu_next_instruction(instruction);
 }
 
 /*
+ * MENU_OPCODE_NUMBER (0x0d)
+ * MENU_OPCODE_NUMBER_TINTED_NO_LEADING_ZEROS (0x19)
+ * MENU_OPCODE_NUMBER_DIM_LEADING_ZEROS (0x1a)
+ * MENU_OPCODE_NUMBER_TINTED (0x1b)
  * Render a formatted callback value with the menu's compact number glyphs.
  *
  * The command selects its value source, width, spacing, palette, and one of
  * three glyph layouts. High value bits request a disabled palette or dashes.
- * The handler table also runs it for opcodes 0x19 through 0x1b.
  */
-menu_instruction_t* menu_opcode_0d_draw_formatted_number(menu_instruction_t* command) {
+menu_instruction_t* menu_opcode_draw_formatted_number(menu_instruction_t* command) {
     s8 text[16];
     RECT rect;
     RECT glyph;
@@ -647,8 +667,8 @@ menu_instruction_t* menu_opcode_0d_draw_formatted_number(menu_instruction_t* com
         value = -value;
         negative = 1;
     }
-    if (command->number.opcode == MENU_SCRIPT_OP_NUMBER_TINTED
-        || command->number.opcode == MENU_SCRIPT_OP_NUMBER_TINTED_NO_LEADING_ZEROS) {
+    if (command->number.opcode == MENU_OPCODE_NUMBER_TINTED
+        || command->number.opcode == MENU_OPCODE_NUMBER_TINTED_NO_LEADING_ZEROS) {
         color = &g_menu_screen_sprite_color;
     } else {
         color = 0;
@@ -700,23 +720,23 @@ menu_instruction_t* menu_opcode_0d_draw_formatted_number(menu_instruction_t* com
                 minus_rect.y = y + 2;
                 minus_rect.w = 6;
                 minus_rect.h = 11;
-                if (command->number.opcode == MENU_SCRIPT_OP_NUMBER_DIM_LEADING_ZEROS) {
+                if (command->number.opcode == MENU_OPCODE_NUMBER_DIM_LEADING_ZEROS) {
                     minus_rect.x = 174;
                 }
                 menu_gfx_enqueue_textured_quad(&minus_rect, 0xBA, 0x10, color, g_menu_gfx_semitransparency,
                     g_menu_screen_window_tpage, clut, g_menu_gfx_otag_index);
                 negative = 0;
             } else {
-                if (command->number.opcode == MENU_SCRIPT_OP_NUMBER_DIM_LEADING_ZEROS) {
+                if (command->number.opcode == MENU_OPCODE_NUMBER_DIM_LEADING_ZEROS) {
                     clut = g_menu_palette_clut;
                 }
                 if (blanks) {
                     digit = 0;
                     blanks--;
-                    if (command->number.opcode == MENU_SCRIPT_OP_NUMBER_TINTED_NO_LEADING_ZEROS) {
+                    if (command->number.opcode == MENU_OPCODE_NUMBER_TINTED_NO_LEADING_ZEROS) {
                         continue;
                     }
-                    if (command->number.opcode == MENU_SCRIPT_OP_NUMBER_DIM_LEADING_ZEROS
+                    if (command->number.opcode == MENU_OPCODE_NUMBER_DIM_LEADING_ZEROS
                         && i < command->number.width - 1) {
                         clut = g_menu_screen_disabled_number_clut;
                     }
@@ -735,6 +755,7 @@ menu_instruction_t* menu_opcode_0d_draw_formatted_number(menu_instruction_t* com
 }
 
 /*
+ * MENU_OPCODE_RIGHT_ALIGNED_NUMBER (0x17)
  * Render a plain right-aligned number with the menu's compact glyphs.
  *
  * The printed value and the digit count are one variable, which keeps the
@@ -743,7 +764,7 @@ menu_instruction_t* menu_opcode_0d_draw_formatted_number(menu_instruction_t* com
  * destination register as the minuend; written as a single subtraction the
  * sign-extended blanks claims $s2 and the operands swap.
  */
-menu_instruction_t* menu_opcode_17_draw_right_aligned_number(menu_instruction_t* instruction) {
+menu_instruction_t* menu_opcode_draw_right_aligned_number(menu_instruction_t* instruction) {
     s8 text[16];
     RECT rect;
     s32 value;
@@ -965,10 +986,10 @@ void menu_draw_bouncing_cursor(point16_t* pos, u16* state, s32 mode) {
 static menu_instruction_t* skip_script_group(menu_instruction_t* instruction) {
     s32 count;
 
-    if (instruction->header.opcode == MENU_SCRIPT_OP_IF_GROUP) {
+    if (instruction->header.opcode == MENU_OPCODE_IF_GROUP) {
         count = instruction->conditional.count;
         count += 1;
-    } else if (instruction->header.opcode == MENU_SCRIPT_OP_IF_ELSE_GROUP) {
+    } else if (instruction->header.opcode == MENU_OPCODE_IF_ELSE_GROUP) {
         count = instruction->if_else.count_true;
         count += instruction->if_else.count_false;
         count += 1;
@@ -993,7 +1014,7 @@ void menu_scrollable_list_refresh(const menu_instruction_t* script) {
     const menu_instruction_t* instruction = script;
     s32 i;
 
-    while (instruction->header.opcode != MENU_SCRIPT_OP_SCROLLABLE_LIST) {
+    while (instruction->header.opcode != MENU_OPCODE_SCROLLABLE_LIST) {
         if (instruction->header.opcode == MENU_SCREEN_SCRIPT_END) {
             return;
         }
@@ -1060,6 +1081,7 @@ void menu_scrollable_list_open_at_scroll_base(
 }
 
 /*
+ * MENU_OPCODE_SCROLLABLE_LIST (0x10)
  * Menu-script handler for a scrollable list: the WORLD original of the
  * overlays' scrollable-list body commands.
  *
@@ -1079,7 +1101,7 @@ void menu_scrollable_list_open_at_scroll_base(
  * An empty list skips the list command and its following row group. Returns
  * the record that follows the list.
  */
-menu_instruction_t* menu_opcode_10_update_scrollable_list(menu_instruction_t* command) {
+menu_instruction_t* menu_opcode_update_scrollable_list(menu_instruction_t* command) {
     RECT rect;
     s32 unused[4];
     point16_t marker;

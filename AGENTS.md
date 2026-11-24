@@ -162,10 +162,10 @@ preserving every original byte.
   (`item_list_update_sort_menu`) rather than adding `_frame`.
 - Thread bodies end in `_thread`. A public state-machine handler names its
   state before its role (`battle_state_free_cursor_update`).
-- A bytecode machine's handler is `<machine>_opcode_<nn>_<instruction>` with
-  the opcode in two hex digits (`script_opcode_28_walk_to`); a handler shared
-  by several opcodes names them all, or the first and last of a run
-  (`script_opcode_64_65_wait_rotate`, `script_opcode_a0_a5_compare`).
+- A bytecode machine's handler is `<machine>_opcode_<instruction>`
+  (`script_opcode_walk_to`), and the machine's `<machine>_opcode_e` enum
+  names each opcode as `<MACHINE>_OPCODE_<INSTRUCTION>`; the handler's
+  comment lists the opcodes it handles as `MENU_OPCODE_QUAD (0x04)`.
   "Opcode" is only for an instruction stream a dispatcher decodes; request
   codes and single records are commands.
 - Program entrypoints are `<program>_entrypoint` or

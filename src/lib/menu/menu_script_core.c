@@ -51,9 +51,10 @@ void menu_script_run_with_palette_mode(void* script, s32 input, s32 mode) {
 
 /* WORLD keeps its group commands in its larger opcode unit. */
 #ifndef FFT_WORLD
-/* Menu script command: run the next count commands when the row predicate holds, otherwise skip
+/* MENU_OPCODE_IF_GROUP (0x01)
+ * Run the next count commands when the row predicate holds, otherwise skip
  * them. The predicate gets the command's literal row, or the current list row in list mode. */
-menu_instruction_t* menu_opcode_01_if_group(menu_instruction_t* cmd) {
+menu_instruction_t* menu_opcode_if_group(menu_instruction_t* cmd) {
     s32 (*callback)(s32);
     s32 count;
     s32 row;
@@ -81,9 +82,10 @@ menu_instruction_t* menu_opcode_01_if_group(menu_instruction_t* cmd) {
     return cmd;
 }
 
-/* Run the selected branch and skip the other, using the literal or current
+/* MENU_OPCODE_IF_ELSE_GROUP (0x02)
+ * Run the selected branch and skip the other, using the literal or current
  * list row as the predicate's argument. */
-menu_instruction_t* menu_opcode_02_if_else_group(menu_instruction_t* cmd) {
+menu_instruction_t* menu_opcode_if_else_group(menu_instruction_t* cmd) {
     s32 then_count;
     s32 else_count;
     s32 (*callback)(s32);

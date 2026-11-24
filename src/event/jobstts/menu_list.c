@@ -15,8 +15,9 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-/* Draw the getter's decimal value, or dashes, using the current row and palette. */
-menu_instruction_t* menu_opcode_0d_draw_formatted_number(menu_instruction_t* data) {
+/* MENU_OPCODE_NUMBER (0x0d)
+ * Draw the getter's decimal value, or dashes, using the current row and palette. */
+menu_instruction_t* menu_opcode_draw_formatted_number(menu_instruction_t* data) {
     s8 text[16];
     menu_digit_glyph_t glyph;
     u16 unused[8]; /* Preserves the original frame size. */
@@ -190,9 +191,9 @@ void menu_draw_sliding_cursor(const point16_t* anchor, u16* state, s32 mode) {
 static menu_instruction_t* skip_script_group(menu_instruction_t* command) {
     s32 count;
 
-    if (command->header.opcode == MENU_SCRIPT_OP_IF_GROUP) {
+    if (command->header.opcode == MENU_OPCODE_IF_GROUP) {
         count = command->conditional.count + 1;
-    } else if (command->header.opcode == MENU_SCRIPT_OP_IF_ELSE_GROUP) {
+    } else if (command->header.opcode == MENU_OPCODE_IF_ELSE_GROUP) {
         count = command->if_else.count_true + command->if_else.count_false + 1;
     } else {
         count = 1;
@@ -206,7 +207,7 @@ static menu_instruction_t* skip_script_group(menu_instruction_t* command) {
 
 /* Draw the visible rows of a scrollable list.
  *
- * The stream's MENU_SCRIPT_OP_SCROLLABLE_LIST command supplies the list geometry; a stream that
+ * The stream's MENU_OPCODE_SCROLLABLE_LIST command supplies the list geometry; a stream that
  * reaches its end opcode first has no list. The selection and scroll position are clamped to
  * the list and, with a text table set, the visible rows' text is redrawn into VRAM at
  * (0x100, 0x30).
@@ -220,7 +221,7 @@ void menu_scrollable_list_refresh(const menu_instruction_t* script) {
     s16 selected;
     const menu_list_record_t* list;
 
-    while (script->header.opcode != MENU_SCRIPT_OP_SCROLLABLE_LIST) {
+    while (script->header.opcode != MENU_OPCODE_SCROLLABLE_LIST) {
         if (script->header.opcode == STATUS_SCREEN_SCRIPT_END) {
             return;
         }
@@ -284,7 +285,8 @@ void menu_scrollable_list_open(s16* entries, s32 selected_index, u8* text_table,
     menu_scrollable_list_refresh(script);
 }
 
-/* Scrollable-list body command.
+/* MENU_OPCODE_SCROLLABLE_LIST (0x10)
+ * Scrollable-list body command.
  *
  * Handles line and page scrolling (animating the VRAM text strip and
  * rendering the newly exposed row), draws the list image, the arrows, the
@@ -295,7 +297,7 @@ void menu_scrollable_list_open(s16* entries, s32 selected_index, u8* text_table,
  * Uses the event-speed multiplier and an animated cursor. The unused arrays
  * retain the original stack frame: rect is at 0x20 and marker at 0x38.
  */
-menu_instruction_t* menu_opcode_10_update_scrollable_list(menu_instruction_t* command) {
+menu_instruction_t* menu_opcode_update_scrollable_list(menu_instruction_t* command) {
     RECT rect;
     u8 unused_28[16];
     point16_t marker;

@@ -9,12 +9,13 @@
 
 /* BUNIT and JOBSTTS use fixed background tiles; EQUIP selects a rectangle source below. */
 #if defined(FFT_EVENT_BUNIT) || defined(FFT_EVENT_JOBSTTS)
-/* Fill a background rectangle with 16-pixel textured tiles.
+/* MENU_OPCODE_TILED_RECTANGLE (0x11)
+ * Fill a background rectangle with 16-pixel textured tiles.
  *
  * Command bytes 5 and 6 encode the full-tile counts in their high nibbles and
  * the remaining width and height in their low nibbles.
  */
-menu_instruction_t* menu_opcode_11_draw_background_tiles(menu_instruction_t* desc) {
+menu_instruction_t* menu_opcode_draw_background_tiles(menu_instruction_t* desc) {
     RECT rect;
     s32 full_columns;
     s32 origin_x;
@@ -77,8 +78,9 @@ menu_instruction_t* menu_opcode_11_draw_background_tiles(menu_instruction_t* des
 #endif
 
 #ifdef FFT_EVENT_EQUIP
-/* Tile the command rectangle, or the shared rectangle when source is 2. */
-menu_instruction_t* menu_opcode_11_draw_background_tiles(menu_instruction_t* command) {
+/* MENU_OPCODE_TILED_RECTANGLE (0x11)
+ * Tile the command rectangle, or the shared rectangle when source is 2. */
+menu_instruction_t* menu_opcode_draw_background_tiles(menu_instruction_t* command) {
     RECT rect;
     s32 base_x;
     s32 base_y;
@@ -152,17 +154,19 @@ menu_instruction_t* menu_opcode_11_draw_background_tiles(menu_instruction_t* com
 }
 #endif
 
-/* Menu script command: set the sprite CLUT from the command's VRAM coordinates and return the next
+/* MENU_OPCODE_FIXED_CLUT (0x09)
+ * Set the sprite CLUT from the command's VRAM coordinates and return the next
  * command. */
-menu_instruction_t* menu_opcode_09_set_fixed_clut(menu_instruction_t* data) {
+menu_instruction_t* menu_opcode_set_fixed_clut(menu_instruction_t* data) {
     g_menu_gfx_clut_id
         = GetClut(data->fixed_clut.x_div_16 << 4, data->fixed_clut.y_low | (data->fixed_clut.y_high << 8));
     return menu_next_instruction(data);
 }
 
-/* Set the sprite CLUT from the command's normal or compact-layout coordinates
+/* MENU_OPCODE_CLUT (0x0a)
+ * Set the sprite CLUT from the command's normal or compact-layout coordinates
  * and return the next command. */
-menu_instruction_t* menu_opcode_0a_set_clut(menu_instruction_t* command) {
+menu_instruction_t* menu_opcode_set_clut(menu_instruction_t* command) {
     if (g_menu_use_alternate_palette != 0) {
         g_menu_gfx_clut_id = GetClut(command->clut.alternate_x_div_16 << 4,
             command->clut.alternate_y_low | (command->clut.alternate_y_high << 8));
@@ -175,29 +179,33 @@ menu_instruction_t* menu_opcode_0a_set_clut(menu_instruction_t* command) {
     return command;
 }
 
-/* Select the texture page and blend rate. */
-menu_instruction_t* menu_opcode_0c_set_texture_page(menu_instruction_t* data) {
+/* MENU_OPCODE_TEXTURE_PAGE (0x0c)
+ * Select the texture page and blend rate. */
+menu_instruction_t* menu_opcode_set_texture_page(menu_instruction_t* data) {
     g_menu_gfx_texture_page = GetTPage(data->texture_page.depth, data->texture_page.y_blend >> 4,
         data->texture_page.x_div_16 << 4, data->texture_page.y_blend << 8);
     return menu_next_instruction(data);
 }
 /* JOBSTTS links translucency with primitive drawing and has a guarded priority setter below. */
 #if defined(FFT_EVENT_BUNIT) || defined(FFT_EVENT_EQUIP)
-/* Menu script command: turn semi-transparency on or off for later primitives and continue with the
+/* MENU_OPCODE_SEMI_TRANS (0x0e)
+ * Turn semi-transparency on or off for later primitives and continue with the
  * next command. */
-menu_instruction_t* menu_opcode_0e_set_semi_trans(menu_instruction_t* data) {
+menu_instruction_t* menu_opcode_set_semi_trans(menu_instruction_t* data) {
     g_menu_gfx_semitransparency = data->draw_state.value;
     return menu_next_instruction(data);
 }
 
-/* Queue a draw mode with the requested blend rate at the current OT entry. */
-menu_instruction_t* menu_opcode_18_add_blend_draw_mode(menu_instruction_t* data) {
+/* MENU_OPCODE_BLEND_DRAW_MODE (0x18)
+ * Queue a draw mode with the requested blend rate at the current OT entry. */
+menu_instruction_t* menu_opcode_add_blend_draw_mode(menu_instruction_t* data) {
     menu_gfx_enqueue_draw_mode(0, 0, GetTPage(0, data->blend.blend_rate, 0x100, 0), 0, g_menu_gfx_otag_index);
     return menu_next_instruction(data);
 }
 
-/* Select the normal or alternate sprite color. */
-menu_instruction_t* menu_opcode_0b_set_draw_color(menu_instruction_t* data) {
+/* MENU_OPCODE_DRAW_COLOR (0x0b)
+ * Select the normal or alternate sprite color. */
+menu_instruction_t* menu_opcode_set_draw_color(menu_instruction_t* data) {
     if (g_menu_use_alternate_palette != 0) {
         g_menu_text_color.r = data->sprite_color.alternate.r;
         g_menu_text_color.g = data->sprite_color.alternate.g;
@@ -210,18 +218,20 @@ menu_instruction_t* menu_opcode_0b_set_draw_color(menu_instruction_t* data) {
     return menu_next_instruction(data);
 }
 
-/* Menu script command: select the ordering-table slot for later primitives and continue with the
+/* MENU_OPCODE_DRAW_PRIORITY (0x0f)
+ * Select the ordering-table slot for later primitives and continue with the
  * next command. */
-menu_instruction_t* menu_opcode_0f_set_draw_priority(menu_instruction_t* data) {
+menu_instruction_t* menu_opcode_set_draw_priority(menu_instruction_t* data) {
     g_menu_gfx_otag_index = data->draw_state.value;
     return menu_next_instruction(data);
 }
 #endif
 
 #ifdef FFT_EVENT_JOBSTTS
-/* Menu script command: select the ordering-table slot for later primitives unless the slot is
+/* MENU_OPCODE_DRAW_PRIORITY (0x0f)
+ * Select the ordering-table slot for later primitives unless the slot is
  * locked, and continue with the next command. */
-menu_instruction_t* menu_opcode_0f_set_draw_priority_if_unlocked(menu_instruction_t* data) {
+menu_instruction_t* menu_opcode_set_draw_priority_if_unlocked(menu_instruction_t* data) {
     if (g_gfx_otag_index_locked == 0) {
         g_menu_gfx_otag_index = data->draw_state.value;
     }

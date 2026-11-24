@@ -19,9 +19,11 @@ static u16 s_save_gfx_draw_clut;
 
 static s16 s_save_menu_window_right_x = 0;
 
-/* Draw the command's textured quad at its literal position, in the current sprite color or, for
- * MENU_SCRIPT_OP_UNCOLORED_QUAD, unshaded. CARD's copy has no list rows. Returns the next command. */
-menu_instruction_t* menu_opcode_04_05_draw_textured_quad(menu_instruction_t* command) {
+/* MENU_OPCODE_QUAD (0x04)
+ * MENU_OPCODE_TINTED_QUAD (0x05)
+ * Draw the command's textured quad at its literal position, in the current sprite color or, for
+ * MENU_OPCODE_QUAD, unshaded. CARD's copy has no list rows. Returns the next command. */
+menu_instruction_t* menu_opcode_draw_quad(menu_instruction_t* command) {
     RECT rect;
     const rgb24_t* color;
     s32 x = command->sprite.sprite.x;
@@ -32,7 +34,7 @@ menu_instruction_t* menu_opcode_04_05_draw_textured_quad(menu_instruction_t* com
     rect.w = command->sprite.sprite.w;
     rect.h = command->sprite.sprite.h;
     color = &g_menu_text_color;
-    if (command->header.opcode == MENU_SCRIPT_OP_UNCOLORED_QUAD) {
+    if (command->header.opcode == MENU_OPCODE_QUAD) {
         color = 0;
     }
     menu_gfx_enqueue_textured_quad(&rect, command->sprite.sprite.u, command->sprite.sprite.v, color,
@@ -41,14 +43,15 @@ menu_instruction_t* menu_opcode_04_05_draw_textured_quad(menu_instruction_t* com
 }
 
 /*
+ * MENU_OPCODE_WINDOW_FRAME (0x00)
  * Draw a menu window's 5x9/5x7 border pieces around its rectangle and tile
- * the interior through menu_opcode_11_draw_background_tiles.
+ * the interior through menu_opcode_draw_background_tiles.
  *
  * Source 2 takes the signed rectangle from the shared window record, other sources use the command's
  * byte operands, and source 1 selects the alternate border texture
  * coordinates. Returns the command that follows.
  */
-menu_instruction_t* menu_opcode_00_draw_window_frame(menu_instruction_t* instruction) {
+menu_instruction_t* menu_opcode_draw_window_frame(menu_instruction_t* instruction) {
     RECT rect;
     s32 left;
     s32 top;
@@ -169,7 +172,7 @@ menu_instruction_t* menu_opcode_00_draw_window_frame(menu_instruction_t* instruc
         g_cmd_window_interior_command.width = instruction->window.width;
         g_cmd_window_interior_command.height = instruction->window.height;
     }
-    menu_opcode_11_draw_background_tiles((menu_instruction_t*)&g_cmd_window_interior_command);
+    menu_opcode_draw_background_tiles((menu_instruction_t*)&g_cmd_window_interior_command);
 
     /* Bottom edge, laid out like the top. */
     top = top + 9 + partial_height + full_rows * 16;
@@ -203,8 +206,9 @@ menu_instruction_t* menu_opcode_00_draw_window_frame(menu_instruction_t* instruc
     return instruction;
 }
 
-/* Tile the command rectangle, or the shared rectangle when source is 2. */
-menu_instruction_t* menu_opcode_11_draw_background_tiles(menu_instruction_t* command) {
+/* MENU_OPCODE_TILED_RECTANGLE (0x11)
+ * Tile the command rectangle, or the shared rectangle when source is 2. */
+menu_instruction_t* menu_opcode_draw_background_tiles(menu_instruction_t* command) {
     RECT rect;
     s32 base_x;
     s32 base_y;
@@ -276,24 +280,27 @@ menu_instruction_t* menu_opcode_11_draw_background_tiles(menu_instruction_t* com
     return command;
 }
 
-/* Set CARD's texture page from the command. Unlike the shared handler it ignores the blend bits and uses
+/* MENU_OPCODE_TEXTURE_PAGE (0x0c)
+ * Set CARD's texture page from the command. Unlike the shared handler it ignores the blend bits and uses
  * blend rate 0. Returns the next command. */
-menu_instruction_t* menu_opcode_0c_set_texture_page(menu_instruction_t* data) {
+menu_instruction_t* menu_opcode_set_texture_page(menu_instruction_t* data) {
     g_save_gfx_texture_page
         = GetTPage(data->texture_page.depth, 0, data->texture_page.x_div_16 << 4, data->texture_page.y_blend << 8);
     return menu_next_instruction(data);
 }
 
-/* Select the ordering-table slot later primitives go to and return the next command. */
-menu_instruction_t* menu_opcode_0f_set_draw_priority(menu_instruction_t* data) {
+/* MENU_OPCODE_DRAW_PRIORITY (0x0f)
+ * Select the ordering-table slot later primitives go to and return the next command. */
+menu_instruction_t* menu_opcode_set_draw_priority(menu_instruction_t* data) {
     g_menu_gfx_otag_index = data->draw_state.value;
     return menu_next_instruction(data);
 }
 
-/* Draw the command's literal value as `width` zero-padded digit glyphs from (x, y),
+/* MENU_OPCODE_NUMBER (0x0d)
+ * Draw the command's literal value as `width` zero-padded digit glyphs from (x, y),
  * `spacing` pixels apart, tinted with the menu text color. A style of 2 or more draws
  * nothing. Returns the next command. */
-menu_draw_number_command_t* menu_opcode_0d_draw_formatted_number(menu_draw_number_command_t* command) {
+menu_draw_number_command_t* menu_opcode_draw_formatted_number(menu_draw_number_command_t* command) {
     s8 text[16];
     menu_digit_glyph_t glyph;
     RECT unused_minus_rect; /* Preserves the original frame size. */

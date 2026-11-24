@@ -24,10 +24,10 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   it returns 1065039 rather than signed division's 1064587. Its range flag
   only checks negative-result high words; `math_cross_product_q12` checks
   `high >> 12` for 0 or -1. Neither test covers every signed 32-bit overflow.
-- `script_opcode_38_focus_speed` accumulates into an uninitialized `$s6`: the event
+- `script_opcode_focus_speed` accumulates into an uninitialized `$s6`: the event
   dispatcher leaves `operand_3` there, while camera fusion leaves its key count.
   Those caller values affect the camera duration.
-- `script_opcode_37_flip_message_portrait` (BATTLE and
+- `script_opcode_flip_message_portrait` (BATTLE and
   WORLD): the record index is never
   assigned; all six passes use whatever `$s0` held. Keep the local
   uninitialized.
@@ -217,7 +217,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   - WaitUnitReady waits on `map_unit_is_ready`, so it never waits.
   - Effect stores its x and y operands to two globals nothing reads.
   - DebugPause prints "PAUSE", yields one frame and sets a 16-bit value nothing reads
-    (`script_opcode_72_debug_pause`); instruction 0xdc stores 13 to
+    (`script_opcode_debug_pause`); instruction 0xdc stores 13 to
     another. Neither changes the script's course.
   - In WORLD, WalkTo is an empty arm outside a block, Arrow resolves both
     units and never sets the trajectory, and ChangeMap calls an empty
@@ -606,7 +606,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   when `move_type` is `MOVE_CLASS_FLY`, where that function refuses it unless
   `can_pass_lava` is set. The walker always uses `MOVE_CLASS_NORMAL`, so lava
   is never refused as a WalkTo destination.
-- Both copies of `script_opcode_2a_block_start_thread`: the block's WalkToAnim
+- Both copies of `script_opcode_block_start_thread`: the block's WalkToAnim
   clears `g_unit_was_moving_latch[map_unit_id]` outside its absent-unit test,
   so an absent unit (2000) zeroes the halfword 4000 bytes on, the `w` of
   `g_menu_window_buffers[5].sprites[3]` in BATTLE and WORLD. The interpreters'
@@ -633,7 +633,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   with L1/R1 puts the grid cursor on a later unit's cell (or past the last),
   and ending the browse there selects that cell's unit.
 - The right-aligned number commands in WORLD, BUNIT and EQUIP
-  (`menu_opcode_17_draw_right_aligned_number`) count their blank cells
+  (`menu_opcode_draw_right_aligned_number`) count their blank cells
   down to -1 in an `s16` with no lower bound: a value with more digits than
   the field starts below -1 and queues a blank quad about 65,535 times.
   Whether any retail field is too narrow is unknown.
@@ -649,7 +649,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   Delita's Chapter 2/3 identity (`sprite_set` 5) selects portrait 120 and
   reads remap byte 57 in the following window data. Their normal-game
   reachability in Formation is unverified.
-- `novel_opcode_31_unload_music` clears `tracks[slot]`,
+- `novel_opcode_unload_music` clears `tracks[slot]`,
   but `change_reading_music` and the audio queue keep slot n's
   track in `tracks[n - 1]`. The novel always uses slot 2, so the store hits
   `current_slot` (zeroed next) and `tracks[1]` keeps the unloaded id: a later
@@ -661,8 +661,8 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   141 WLDCORE cels have CLUT x 0, so nothing shows.
 - `find_ramza_slot` returns 16 (`PARTY_MEMBER_SLOT_COUNT`) when
   no formation slot holds Ramza, and the four MCBrave/MCFaith opcodes
-  (`location_script_opcode_25_check_ramza_brave_at_least` through
-  `location_script_opcode_28_check_ramza_faith_at_most`) use it unchecked, so
+  (`location_opcode_check_ramza_brave_at_least` through
+  `location_opcode_check_ramza_faith_at_most`) use it unchecked, so
   they test roster slot 16, the first guest slot.
 - `music_start_load_into_free_slot` allocates the SMD block before
   it requests the read; when `file_request_read_bytes` refuses (loader
@@ -922,8 +922,8 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
 - `psyq_gte_apply_rotation_ir`: writes saturated IR1–IR3 32-bit output values and returns its unchanged third argument.
 - `sprintf`: unsupported conversions terminate output, `%#p` prefixes `0p`, hexadecimal alternate form prefixes zero, and `%#.0o` with zero emits no digit.
 - JOBSTTS.OUT offset `0x0` and BUNIT.OUT offset `0x200` hold the literal `"%d"`
-  used by `menu_opcode_0d_draw_formatted_number` and
-  `menu_opcode_17_draw_right_aligned_number`.
+  used by `menu_opcode_draw_formatted_number` and
+  `menu_opcode_draw_right_aligned_number`.
 - The 32-bit game-options value (`game_options_t`) packs its last five fields
   out of array order.
 - CallFunction (both copies of `script_execute_event`)
@@ -931,7 +931,7 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
   `0x06` also runs the `0x0f` warp, and `0x0e` can fall into later arms.
 - WORLD's copies of some event-library routines call BATTLE-only functions
   at their BATTLE addresses, which hold unrelated code or data while WORLD and
-  WLDCORE are loaded: `script_opcode_1a_map_darkness_thread` calls `map_light_start_ambient_blend`
+  WLDCORE are loaded: `script_opcode_map_darkness_thread` calls `map_light_start_ambient_blend`
   (`0x800934d0`, WLDCORE data), `apply_staged_status` runs
   `status_queue_display_flag_change` on the main stack (`0x80068e80`, 0x10 bytes into
   `world_map_update_scroll_axis`) and `battle_unit_status_staging_save`
@@ -985,11 +985,11 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
 - `EFFECT/E223.BIN` through `E225.BIN` contain effect data but have zero resident load sizes; requesting those file IDs loads Cure instead. The ability-effect mapping does not reference them.
 - `load_portraits`: the WLDFACE rectangles (`g_menu_screen_wldface_vram_rects`) use x = 1664–1856; the GPU masks VRAM transfer coordinates, so the pages land at x = 640–832.
 - `suzuki_sound_init`: `suzuki_sound_init_sfx_music` reaches `suzuki_smd_insert_music`, which disables and re-enables `g_suzuki_sound_root_counter_2_event` before the initializer opens that event: handle 0 at boot, the handle `suzuki_sound_quit` closed on a soft reset.
-- `effect_script_opcode_2e_invalid`: opcodes 2e–77 report an error without setting a handler result; `run_script_instance` then tests the undefined return value.
+- `effect_opcode_invalid`: opcodes 2e–77 report an error without setting a handler result; `run_script_instance` then tests the undefined return value.
 - EFFECT scripts never run seven state handlers: E000's script calls only `effect_noop` (opcode 07) and E314's names no file function, so native function ids 1 and 90 are bound by nothing; E134/E242 `effect_ring_stack_mesh_update`, E454/E455 `effect_set_map_3d_objects_state_2` and E456 `effect_freeze_map` sit in callback slots (script opcode 06) that no keyframe selector fires. E457.BIN, which has no code, binds native function 88 (0x801c2578, E259's `effect_dome_mesh_update`; data in its own image) to slot 0, and none of its keyframes names a slot.
 - `map_draw`: when map command 0x96 (E458) ends, `weather_dispatch_command(0x8b)` restores a non-snow rain or storm mid-draw; the mode-0x55 block then re-links `ft3` drops the 0x96 block already linked at OT+2, an ordering-table cycle that holds `DrawSync` until its 240-VBlank timeout.
 - `save_run_screen`: its 0xCCD8-byte stack frame, containing packet pools and directory entries, reaches below 0x801ff000 into the top cells of MAIN's game heap (0x801df000-0x801ff000); it is safe only while those cells are free.
-- `tutorial_opcode_17_end`: two paths fall off the end of the s32 handler and return a stale nonzero `$v0` (the fade's result, or the 1 just stored), so the formation loop keeps running.
+- `tutorial_opcode_end`: two paths fall off the end of the s32 handler and return a stale nonzero `$v0` (the fade's result, or the 1 just stored), so the formation loop keeps running.
 - `unit_panel_draw_backdrops` in WORLD and BUNIT (the ATTACK, DEBUGCHR and REQUIRE
   copies, and EQUIP's `unit_panel_draw_backdrops`, have no caller): while a unit-status banner thread (8 or 7) is being
   stopped its first parameter is 0, and the panel check reads that display
@@ -1075,8 +1075,8 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
   (Germonik Scriptures, novel 5), so `brave_story_update_treasure_detail`
   opens no reader for the four book treasures 17-20.
 - World-map script opcodes 0x10 and 0x11 pass on a date on or after and on or
-  before their operand (`location_script_opcode_10_check_date_on_or_after`,
-  `location_script_opcode_11_check_date_on_or_before`); scenario condition types 16 and 17 are the reverse
+  before their operand (`location_opcode_check_date_on_or_after`,
+  `location_opcode_check_date_on_or_before`); scenario condition types 16 and 17 are the reverse
   (`EVENT_SCENARIO_CONDITION_DATE_ON_OR_BEFORE`, `_ON_OR_AFTER`), although the
   war-funds and casualty tests beside them share their numbers.
 - The Music Test names and comments (OPEN.LZW text sections 24 and 25, text
@@ -1187,8 +1187,8 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
   phase 5 has no case and would return `result` unset.
 - `ai_target_is_untargetable`: the AI never targets a Transparent enemy
   unless it is a rider whose mount is Transparent too.
-- World-map script opcodes 0x22-0x24 (`location_script_opcode_22_request_draw_location`,
-  `location_script_opcode_23_request_erase_location`, `location_script_opcode_24_focus_location`)
+- World-map script opcodes 0x22-0x24 (`location_opcode_request_draw_location`,
+  `location_opcode_request_erase_location`, `location_opcode_focus_location`)
   read their operand without advancing `ip`; each ends the block, so no opcode
   is read from the operand.
 - `move_find_get_result` repeats the same `battle_unit_find_at_tile`

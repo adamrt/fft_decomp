@@ -20,37 +20,41 @@ extern textured_quad_source_t g_unit_list_bouncing_cursor_quad;
 
 /* Dispatch slots before this program's end opcode; zero entries stay unhandled. */
 menu_opcode_handler_t g_menu_opcode_handlers[UNIT_LIST_SCRIPT_END] = {
-    menu_opcode_00_draw_window_frame,         /* 0x00 */
-    menu_opcode_01_if_group,                  /* 0x01 */
-    menu_opcode_02_if_else_group,             /* 0x02 */
-    0,                                        /* 0x03 */
-    menu_opcode_04_05_draw_textured_quad,     /* 0x04 */
-    menu_opcode_04_05_draw_textured_quad,     /* 0x05 */
-    menu_opcode_06_draw_callback_quad,        /* 0x06 */
-    0,                                        /* 0x07 */
-    0,                                        /* 0x08 */
-    menu_opcode_09_set_fixed_clut,            /* 0x09 */
-    menu_opcode_0a_set_clut,                  /* 0x0a */
-    menu_opcode_0b_set_draw_color,            /* 0x0b */
-    menu_opcode_0c_set_texture_page,          /* 0x0c */
-    menu_opcode_0d_draw_formatted_number,     /* 0x0d */
-    menu_opcode_0e_set_semi_trans,            /* 0x0e */
-    menu_opcode_0f_set_draw_priority,         /* 0x0f */
-    menu_opcode_10_update_scrollable_list,    /* 0x10 */
-    menu_opcode_11_draw_background_tiles,     /* 0x11 */
-    menu_opcode_12_draw_opening_window_frame, /* 0x12 */
-    menu_opcode_13_clear_temporary_draw_area, /* 0x13 */
-    menu_opcode_14_set_draw_area,             /* 0x14 */
-    menu_opcode_15_restore_draw_area,         /* 0x15 */
-    menu_opcode_16_advance_window_scale_step, /* 0x16 */
-    menu_opcode_17_draw_right_aligned_number, /* 0x17 */
-    menu_opcode_18_add_blend_draw_mode,       /* 0x18 */
-    menu_opcode_0d_draw_formatted_number,     /* 0x19 */
-    menu_opcode_0d_draw_formatted_number,     /* 0x1a */
-    menu_opcode_0d_draw_formatted_number,     /* 0x1b */
+    menu_opcode_draw_window_frame,         /* 0x00 */
+    menu_opcode_if_group,                  /* 0x01 */
+    menu_opcode_if_else_group,             /* 0x02 */
+    0,                                     /* 0x03 */
+    menu_opcode_draw_quad,                 /* 0x04 */
+    menu_opcode_draw_quad,                 /* 0x05 */
+    menu_opcode_draw_callback_quad,        /* 0x06 */
+    0,                                     /* 0x07 */
+    0,                                     /* 0x08 */
+    menu_opcode_set_fixed_clut,            /* 0x09 */
+    menu_opcode_set_clut,                  /* 0x0a */
+    menu_opcode_set_draw_color,            /* 0x0b */
+    menu_opcode_set_texture_page,          /* 0x0c */
+    menu_opcode_draw_formatted_number,     /* 0x0d */
+    menu_opcode_set_semi_trans,            /* 0x0e */
+    menu_opcode_set_draw_priority,         /* 0x0f */
+    menu_opcode_update_scrollable_list,    /* 0x10 */
+    menu_opcode_draw_background_tiles,     /* 0x11 */
+    menu_opcode_draw_opening_window_frame, /* 0x12 */
+    menu_opcode_clear_temporary_draw_area, /* 0x13 */
+    menu_opcode_set_draw_area,             /* 0x14 */
+    menu_opcode_restore_draw_area,         /* 0x15 */
+    menu_opcode_advance_window_scale_step, /* 0x16 */
+    menu_opcode_draw_right_aligned_number, /* 0x17 */
+    menu_opcode_add_blend_draw_mode,       /* 0x18 */
+    menu_opcode_draw_formatted_number,     /* 0x19 */
+    menu_opcode_draw_formatted_number,     /* 0x1a */
+    menu_opcode_draw_formatted_number,     /* 0x1b */
 };
 
-/* Draw a row-callback value as a row of digit glyphs (opcodes 0x19-0x1B).
+/* MENU_OPCODE_NUMBER (0x0d)
+ * MENU_OPCODE_NUMBER_TINTED_NO_LEADING_ZEROS (0x19)
+ * MENU_OPCODE_NUMBER_DIM_LEADING_ZEROS (0x1a)
+ * MENU_OPCODE_NUMBER_TINTED (0x1b)
+ * Draw a row-callback value as a row of digit glyphs (opcodes 0x19-0x1B).
  *
  * Getter, width, spacing, palette, coordinates and value come from the command,
  * and the getter is given the command's value, or the list row in a scrollable
@@ -63,9 +67,8 @@ menu_opcode_handler_t g_menu_opcode_handlers[UNIT_LIST_SCRIPT_END] = {
  * an s8 (the promoted subreg gives the target's `move v0,s7` copy before the
  * test) and is cleared after the minus-glyph call, and the if/else spellings
  * of `color` and `value` set the live lengths that put `color` in s6 ahead of
- * `negative` in s7. The handler table also runs it for opcodes 0x19 through
- * 0x1b. */
-menu_instruction_t* menu_opcode_0d_draw_formatted_number(menu_instruction_t* command) {
+ * `negative` in s7. */
+menu_instruction_t* menu_opcode_draw_formatted_number(menu_instruction_t* command) {
     s8 text[16];
     RECT rect;
     RECT glyph;
@@ -108,7 +111,7 @@ menu_instruction_t* menu_opcode_0d_draw_formatted_number(menu_instruction_t* com
         negative = 1;
     }
     opcode = command->number.opcode;
-    if (opcode == MENU_SCRIPT_OP_NUMBER_TINTED || opcode == MENU_SCRIPT_OP_NUMBER_TINTED_NO_LEADING_ZEROS) {
+    if (opcode == MENU_OPCODE_NUMBER_TINTED || opcode == MENU_OPCODE_NUMBER_TINTED_NO_LEADING_ZEROS) {
         color = &g_menu_text_color;
     } else {
         color = 0;
@@ -168,16 +171,16 @@ menu_instruction_t* menu_opcode_0d_draw_formatted_number(menu_instruction_t* com
                     g_menu_atlas_texture_page, clut, g_menu_gfx_otag_index);
                 negative = 0;
             } else {
-                if (command->number.opcode == MENU_SCRIPT_OP_NUMBER_DIM_LEADING_ZEROS) {
+                if (command->number.opcode == MENU_OPCODE_NUMBER_DIM_LEADING_ZEROS) {
                     clut = g_menu_palette_clut;
                 }
                 if (blanks != 0) {
                     digit = 0;
                     blanks--;
-                    if (command->number.opcode == MENU_SCRIPT_OP_NUMBER_TINTED_NO_LEADING_ZEROS) {
+                    if (command->number.opcode == MENU_OPCODE_NUMBER_TINTED_NO_LEADING_ZEROS) {
                         continue;
                     }
-                    if (command->number.opcode == MENU_SCRIPT_OP_NUMBER_DIM_LEADING_ZEROS
+                    if (command->number.opcode == MENU_OPCODE_NUMBER_DIM_LEADING_ZEROS
                         && i < command->number.width - 1) {
                         clut = g_menu_disabled_number_clut;
                     }
@@ -195,11 +198,12 @@ menu_instruction_t* menu_opcode_0d_draw_formatted_number(menu_instruction_t* com
     return menu_next_instruction(command);
 }
 
-/* Draw the row callback's value right-aligned in a field of `width` 8x16 cells: blank
+/* MENU_OPCODE_RIGHT_ALIGNED_NUMBER (0x17)
+ * Draw the row callback's value right-aligned in a field of `width` 8x16 cells: blank
  * cells on the left, then the digit glyphs (u 0xa8 + 8 per digit, v 0x30 on the cursor
  * texture page). A value with more digits than `width` would start the blank-cell
  * countdown below -1 and run it through the whole 16-bit range. */
-menu_instruction_t* menu_opcode_17_draw_right_aligned_number(menu_instruction_t* cmd) {
+menu_instruction_t* menu_opcode_draw_right_aligned_number(menu_instruction_t* cmd) {
     s8 digits[16];
     RECT glyph_rect;
     s32 count;
@@ -414,9 +418,9 @@ void menu_draw_bouncing_cursor(point16_t* pos, u16* state, s32 mode) {
 static menu_instruction_t* skip_script_group(menu_instruction_t* command) {
     s32 count;
 
-    if (command->header.opcode == MENU_SCRIPT_OP_IF_GROUP) {
+    if (command->header.opcode == MENU_OPCODE_IF_GROUP) {
         count = command->conditional.count + 1;
-    } else if (command->header.opcode == MENU_SCRIPT_OP_IF_ELSE_GROUP) {
+    } else if (command->header.opcode == MENU_OPCODE_IF_ELSE_GROUP) {
         count = command->if_else.count_true + command->if_else.count_false + 1;
     } else {
         count = 1;
@@ -430,7 +434,7 @@ static menu_instruction_t* skip_script_group(menu_instruction_t* command) {
 
 /* Draw the visible rows of a scrollable list.
  *
- * The stream's MENU_SCRIPT_OP_SCROLLABLE_LIST command supplies the list geometry; a stream that
+ * The stream's MENU_OPCODE_SCROLLABLE_LIST command supplies the list geometry; a stream that
  * reaches its end opcode first has no list. The selection and scroll position are clamped to
  * the list and, with a text table set, the visible rows' text is redrawn into VRAM at
  * (0x100, 0x30).
@@ -444,7 +448,7 @@ void menu_scrollable_list_refresh(const menu_instruction_t* script) {
     s16 selected;
     const menu_list_record_t* list;
 
-    while (script->header.opcode != MENU_SCRIPT_OP_SCROLLABLE_LIST) {
+    while (script->header.opcode != MENU_OPCODE_SCROLLABLE_LIST) {
         if (script->header.opcode == UNIT_LIST_SCRIPT_END) {
             return;
         }
@@ -515,7 +519,8 @@ void menu_scrollable_list_open_at_scroll_base(
     menu_scrollable_list_refresh(script);
 }
 
-/* Scrollable-list body command.
+/* MENU_OPCODE_SCROLLABLE_LIST (0x10)
+ * Scrollable-list body command.
  *
  * Handles line and page scrolling (animating the VRAM text strip and
  * rendering the newly exposed row), draws the list image, the arrows, the
@@ -526,7 +531,7 @@ void menu_scrollable_list_open_at_scroll_base(
  * Uses the event speed and a sliding cursor. The padding arrays retain the
  * original stack frame.
  */
-menu_instruction_t* menu_opcode_10_update_scrollable_list(menu_instruction_t* command) {
+menu_instruction_t* menu_opcode_update_scrollable_list(menu_instruction_t* command) {
     RECT rect;
     u8 pad0[0x10];
     point16_t marker;

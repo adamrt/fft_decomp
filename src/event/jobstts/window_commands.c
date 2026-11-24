@@ -10,14 +10,15 @@
 
 static s16 s_status_screen_gfx_transition_height_percent[8] = { 5, 10, 20, 35, 60, 75, 90, 95 };
 
-/* Draw a window's 5x9/5x7 border pieces around its rectangle and tile the
- * interior through menu_opcode_11_draw_background_tiles.
+/* MENU_OPCODE_WINDOW_FRAME (0x00)
+ * Draw a window's 5x9/5x7 border pieces around its rectangle and tile the
+ * interior through menu_opcode_draw_background_tiles.
  *
- * JOBSTTS copy of menu_opcode_00_draw_window_frame without the rectangle
+ * JOBSTTS copy of menu_opcode_draw_window_frame without the rectangle
  * source selection. Reassigning the command pointer before the return keeps
  * its reference count high enough for global allocation to place it in s6.
  */
-menu_instruction_t* menu_opcode_00_draw_window_frame(menu_instruction_t* command) {
+menu_instruction_t* menu_opcode_draw_window_frame(menu_instruction_t* command) {
     RECT rect;
     s32 left;
     s32 top;
@@ -102,7 +103,7 @@ menu_instruction_t* menu_opcode_00_draw_window_frame(menu_instruction_t* command
     g_cmd_window_interior_command.y = command->window.y;
     g_cmd_window_interior_command.width = command->window.width;
     g_cmd_window_interior_command.height = command->window.height;
-    menu_opcode_11_draw_background_tiles((menu_instruction_t*)&g_cmd_window_interior_command);
+    menu_opcode_draw_background_tiles((menu_instruction_t*)&g_cmd_window_interior_command);
 
     /* Bottom edge, laid out like the top. */
     top = top + 9 + partial_height + full_rows * 16;
@@ -136,12 +137,13 @@ menu_instruction_t* menu_opcode_00_draw_window_frame(menu_instruction_t* command
     return command;
 }
 
-/* Draw a window frame that opens vertically: during the first 8 transition frames, clip
+/* MENU_OPCODE_OPENING_WINDOW_FRAME (0x12)
+ * Draw a window frame that opens vertically: during the first 8 transition frames, clip
  * drawing to a band centered on the window whose height follows
  * g_status_screen_gfx_transition_height_percent, and lock the ordering-table index so later
- * set-index commands leave it until menu_opcode_13_clear_temporary_draw_area restores the full
+ * set-index commands leave it until menu_opcode_clear_temporary_draw_area restores the full
  * draw area. Input is withheld for the first 3 frames. */
-menu_instruction_t* menu_opcode_12_draw_opening_window_frame(menu_instruction_t* command) {
+menu_instruction_t* menu_opcode_draw_opening_window_frame(menu_instruction_t* command) {
     menu_instruction_t* next;
     RECT rect;
 
@@ -162,7 +164,7 @@ menu_instruction_t* menu_opcode_12_draw_opening_window_frame(menu_instruction_t*
     } else {
         g_gfx_otag_index_locked = 0;
     }
-    next = menu_opcode_00_draw_window_frame(command);
+    next = menu_opcode_draw_window_frame(command);
     g_menu_gfx_otag_index++;
     return next;
 }

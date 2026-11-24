@@ -1409,7 +1409,7 @@ static void update_slot_list(s32 input) {
         gfx_set_otag_index(10);
         value = row != g_save_slot_cursor_row || busy != 0;
         menu_palette_set_mode(value);
-        menu_opcode_00_draw_window_frame((menu_instruction_t*)&g_save_slot_window_command);
+        menu_opcode_draw_window_frame((menu_instruction_t*)&g_save_slot_window_command);
 
         label_y = g_save_slot_window.rect.y - 14;
         g_save_slot_quad_1.position.y = label_y;
@@ -1431,7 +1431,7 @@ static void update_slot_list(s32 input) {
             gfx_set_otag_index(11);
             s_save_slot_number_command.y = g_save_slot_quad_0.position.y;
             s_save_slot_number_command.value = i + 1;
-            menu_opcode_0d_draw_formatted_number((menu_instruction_t*)&s_save_slot_number_command);
+            menu_opcode_draw_formatted_number((menu_instruction_t*)&s_save_slot_number_command);
         }
 
         g_save_slot_quad_2.position.y = g_save_slot_quad_0.position.y;
@@ -1446,9 +1446,9 @@ static void update_slot_list(s32 input) {
             if (s_save_playtime_hours_command.value >= 100) {
                 s_save_playtime_hours_command.value = 99;
             }
-            menu_opcode_0d_draw_formatted_number((menu_instruction_t*)&s_save_playtime_hours_command);
-            menu_opcode_0d_draw_formatted_number((menu_instruction_t*)&s_save_playtime_minutes_command);
-            menu_opcode_0d_draw_formatted_number((menu_instruction_t*)&s_save_playtime_seconds_command);
+            menu_opcode_draw_formatted_number((menu_instruction_t*)&s_save_playtime_hours_command);
+            menu_opcode_draw_formatted_number((menu_instruction_t*)&s_save_playtime_minutes_command);
+            menu_opcode_draw_formatted_number((menu_instruction_t*)&s_save_playtime_seconds_command);
         }
 
         if (g_save_slot_file_states[i] == SAVE_SLOT_AVAILABLE) {

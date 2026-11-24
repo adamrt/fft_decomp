@@ -55,11 +55,12 @@ void menu_palette_set_mode(s32 mode) {
     s_screen_active_clut_back = clut;
 }
 
-/* Menu-script opcode: when the ordering-table index is locked (a temporary
+/* MENU_OPCODE_CLEAR_DRAW_AREA (0x13)
+ * When the ordering-table index is locked (a temporary
  * draw-area clip is active), end the clip by adding
  * g_menu_screen_temporary_draw_area (y reset to 0) one entry after the current
  * ordering-table index, and unlock the index. Returns the next instruction. */
-menu_instruction_t* menu_opcode_13_clear_temporary_draw_area(menu_instruction_t* instruction) {
+menu_instruction_t* menu_opcode_clear_temporary_draw_area(menu_instruction_t* instruction) {
     if (g_gfx_otag_index_locked) {
         g_menu_screen_temporary_draw_area.y = 0;
         menu_gfx_enqueue_draw_area(&g_menu_screen_temporary_draw_area, g_menu_gfx_otag_index + 1);
@@ -68,10 +69,11 @@ menu_instruction_t* menu_opcode_13_clear_temporary_draw_area(menu_instruction_t*
     return menu_next_instruction(instruction);
 }
 
-/* Menu-script opcode: unless the ordering-table index is locked, add the
+/* MENU_OPCODE_DRAW_AREA (0x14)
+ * Unless the ordering-table index is locked, add the
  * instruction's draw area one entry before the current ordering-table index.
  * Returns the next instruction. */
-menu_instruction_t* menu_opcode_14_set_draw_area(menu_instruction_t* instruction) {
+menu_instruction_t* menu_opcode_set_draw_area(menu_instruction_t* instruction) {
     RECT rect;
 
     if (!g_gfx_otag_index_locked) {
@@ -84,10 +86,11 @@ menu_instruction_t* menu_opcode_14_set_draw_area(menu_instruction_t* instruction
     return menu_next_instruction(instruction);
 }
 
-/* Menu-script opcode: unless the ordering-table index is locked, add
+/* MENU_OPCODE_REPEAT_DRAW_AREA (0x15)
+ * Unless the ordering-table index is locked, add
  * g_menu_screen_temporary_draw_area (y reset to 0) one entry after the current
  * ordering-table index. Returns the next instruction. */
-menu_instruction_t* menu_opcode_15_restore_draw_area(menu_instruction_t* instruction) {
+menu_instruction_t* menu_opcode_restore_draw_area(menu_instruction_t* instruction) {
     if (!g_gfx_otag_index_locked) {
         g_menu_screen_temporary_draw_area.y = 0;
         menu_gfx_enqueue_draw_area(&g_menu_screen_temporary_draw_area, g_menu_gfx_otag_index + 1);

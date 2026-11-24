@@ -216,7 +216,7 @@ void world_map_draw_hud_value(GsOT* ot);
 extern s32 g_picture_loaded_set;
 extern s32 g_picture_background_loaded_set;
 
-/* Destination image buffer (read back as a TIM by novel_opcode_0a_load_picture). */
+/* Destination image buffer (read back as a TIM by novel_opcode_load_picture). */
 extern u32* g_picture_buffer;
 
 void world_map_load_background_picture_set(s32 set);

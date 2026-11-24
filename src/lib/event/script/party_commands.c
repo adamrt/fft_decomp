@@ -17,9 +17,10 @@
 
 static map_tile_coordinates_t s_script_warp_coords;
 
-/* DismissUnit: remove the first roster member after slot 0 with this sprite set from
+/* SCRIPT_OPCODE_DISMISS_UNIT (0x7a)
+ * DismissUnit: remove the first roster member after slot 0 with this sprite set from
  * the party, returning its equipment to the inventory. Nothing happens if none matches. */
-void script_opcode_7a_dismiss_unit(s32 sprite_set) {
+void script_opcode_dismiss_unit(s32 sprite_set) {
     party_unit_t* party;
     s32 party_index = 1;
     s32 empty_party_id = PARTY_ID_NONE;

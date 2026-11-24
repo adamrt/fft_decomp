@@ -61,7 +61,7 @@ s32 music_stop(void);
 /* Tunes of music_play_tune: short pieces that fade the scenario music
  * out, play once and fade it back in (music_update_tunes). Tune t is
  * MUSIC_(44 + t).SMD, kept loaded in music slot 2 + t. Tune 4 has no caller
- * in the code; EVENT_OPCODE_PLAY_TUNE passes its operand. */
+ * in the code; SCRIPT_OPCODE_PLAY_TUNE passes its operand. */
 typedef enum music_tune {
     MUSIC_TUNE_NONE = 0,
     MUSIC_TUNE_LEVEL_UP = 1,

@@ -168,7 +168,7 @@ typedef enum sound_sfx {
 
 /* Sounds of SOUND_RESOURCE_ENV that the code plays by number. ENV.SED
  * holds 27 (0, 0x15, 0x16 and 0x17 are empty); event scripts choose the
- * others through EVENT_OPCODE_BG_SOUND. */
+ * others through SCRIPT_OPCODE_BG_SOUND. */
 typedef enum sound_env_sfx {
     SOUND_ENV_SFX_RAIN = 2,      /* weather_dispatch_command: rain without snow, and the thunder command */
     SOUND_ENV_SFX_THUNDER_A = 3, /* map_draw picks one of the two for a lightning flash */

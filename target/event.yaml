@@ -528,27 +528,27 @@ functions:
   - {addr: 0x801e2148, size: 52, name: menu_scrollable_list_open_at_scroll_base, hash: 5f113e345c0f0da5, unit: scrollable_list_setup}
   - {addr: 0x801e217c, size: 188, name: menu_script_run, hash: 276770c4066d6467, unit: menu_script}
   - {addr: 0x801e2238, size: 68, name: menu_script_run_with_palette_mode, hash: 925ea4eee2a0c636, unit: menu_script}
-  - {addr: 0x801e227c, size: 280, name: menu_opcode_01_if_group, hash: 805a0f95f73a013b, unit: menu_script_core}
-  - {addr: 0x801e2394, size: 396, name: menu_opcode_02_if_else_group, hash: 173681792d4416de, unit: menu_script_core}
-  - {addr: 0x801e2520, size: 24, name: menu_opcode_0e_set_semi_trans, hash: e8f3f4f1b8bcabae, unit: draw_commands}
-  - {addr: 0x801e2538, size: 256, name: menu_opcode_04_05_draw_textured_quad, hash: 6dc0e28c0937d6cd, unit: draw_commands}
-  - {addr: 0x801e2638, size: 1456, name: menu_opcode_00_draw_window_frame, hash: 6a98e48a107603be, unit: menu_window_commands}
-  - {addr: 0x801e2be8, size: 272, name: menu_opcode_12_draw_opening_window_frame, hash: 3c407feb3809b329, unit: menu_window_commands}
-  - {addr: 0x801e2cf8, size: 664, name: menu_opcode_11_draw_background_tiles, hash: 4e00ec3720d82fa7, unit: texture_commands}
-  - {addr: 0x801e2f90, size: 84, name: menu_opcode_09_set_fixed_clut, hash: 24c0f51aabe0e17b, unit: texture_commands}
-  - {addr: 0x801e2fe4, size: 116, name: menu_opcode_0a_set_clut, hash: 41e76722475e6fa9, unit: texture_commands}
-  - {addr: 0x801e3058, size: 84, name: menu_opcode_0c_set_texture_page, hash: 6bd8f86e471c2d2f, unit: texture_commands}
-  - {addr: 0x801e30ac, size: 44, name: menu_opcode_0f_set_draw_priority_if_unlocked, hash: 2bdd2ff580aa0d01, unit: texture_commands}
-  - {addr: 0x801e30d8, size: 704, name: menu_opcode_0d_draw_formatted_number, hash: a7c4288fdb526bef, unit: menu_list}
+  - {addr: 0x801e227c, size: 280, name: menu_opcode_if_group, hash: 805a0f95f73a013b, unit: menu_script_core}
+  - {addr: 0x801e2394, size: 396, name: menu_opcode_if_else_group, hash: 173681792d4416de, unit: menu_script_core}
+  - {addr: 0x801e2520, size: 24, name: menu_opcode_set_semi_trans, hash: e8f3f4f1b8bcabae, unit: draw_commands}
+  - {addr: 0x801e2538, size: 256, name: menu_opcode_draw_quad, hash: 6dc0e28c0937d6cd, unit: draw_commands}
+  - {addr: 0x801e2638, size: 1456, name: menu_opcode_draw_window_frame, hash: 6a98e48a107603be, unit: menu_window_commands}
+  - {addr: 0x801e2be8, size: 272, name: menu_opcode_draw_opening_window_frame, hash: 3c407feb3809b329, unit: menu_window_commands}
+  - {addr: 0x801e2cf8, size: 664, name: menu_opcode_draw_background_tiles, hash: 4e00ec3720d82fa7, unit: texture_commands}
+  - {addr: 0x801e2f90, size: 84, name: menu_opcode_set_fixed_clut, hash: 24c0f51aabe0e17b, unit: texture_commands}
+  - {addr: 0x801e2fe4, size: 116, name: menu_opcode_set_clut, hash: 41e76722475e6fa9, unit: texture_commands}
+  - {addr: 0x801e3058, size: 84, name: menu_opcode_set_texture_page, hash: 6bd8f86e471c2d2f, unit: texture_commands}
+  - {addr: 0x801e30ac, size: 44, name: menu_opcode_set_draw_priority_if_unlocked, hash: 2bdd2ff580aa0d01, unit: texture_commands}
+  - {addr: 0x801e30d8, size: 704, name: menu_opcode_draw_formatted_number, hash: a7c4288fdb526bef, unit: menu_list}
   - {addr: 0x801e3398, size: 660, name: menu_draw_sliding_cursor, hash: 1820d09644d45f32, unit: menu_list}
   - {addr: 0x801e362c, size: 108, name: skip_script_group, hash: 68ca8c4bcbe84a81, unit: menu_list}
   - {addr: 0x801e3698, size: 672, name: menu_scrollable_list_refresh, hash: e44d487c3819b679, unit: menu_list}
   - {addr: 0x801e3938, size: 48, name: menu_scrollable_list_open, hash: 461e97c53dac7c63, unit: menu_list}
-  - {addr: 0x801e3968, size: 2512, name: menu_opcode_10_update_scrollable_list, hash: 8765fb678224aca4, unit: menu_list}
+  - {addr: 0x801e3968, size: 2512, name: menu_opcode_update_scrollable_list, hash: 8765fb678224aca4, unit: menu_list}
   - {addr: 0x801e4338, size: 220, name: menu_palette_set_mode, hash: 48580046bd100f9b, unit: draw_state}
-  - {addr: 0x801e4414, size: 136, name: menu_opcode_13_clear_temporary_draw_area, hash: 376bac94034d2252, source: src/event/jobstts/clip_reset.c}
-  - {addr: 0x801e449c, size: 116, name: menu_opcode_14_set_draw_area, hash: fbe7c3c7c2471b38, unit: window_state}
-  - {addr: 0x801e4510, size: 92, name: menu_opcode_15_restore_draw_area, hash: 24311d14e944847c, unit: window_state}
+  - {addr: 0x801e4414, size: 136, name: menu_opcode_clear_temporary_draw_area, hash: 376bac94034d2252, source: src/event/jobstts/clip_reset.c}
+  - {addr: 0x801e449c, size: 116, name: menu_opcode_set_draw_area, hash: fbe7c3c7c2471b38, unit: window_state}
+  - {addr: 0x801e4510, size: 92, name: menu_opcode_restore_draw_area, hash: 24311d14e944847c, unit: window_state}
   - {addr: 0x801e456c, size: 16, name: menu_window_set_scale_step, hash: 379bc481db4f0729, unit: window_state}
   - {addr: 0x801e457c, size: 16, name: menu_window_get_scale_step, hash: 865935d79ad81c7d, unit: window_state}
   - {addr: 0x801e458c, size: 320, name: menu_scroll_list_by_page, hash: 0fa518b015eb3a18, source: src/lib/menu/page_scroll.c}
@@ -726,7 +726,7 @@ imports:
 
 overrides:
   - {function: help_start_text, name: g_help_message_text_id, addr: 0x801fa818}
-  - {function: menu_opcode_11_draw_background_tiles, name: g_menu_atlas_texture_page, addr: 0x801eff70}
+  - {function: menu_opcode_draw_background_tiles, name: g_menu_atlas_texture_page, addr: 0x801eff70}
   - {function: menu_selection_clear_values, name: g_menu_selection_values, addr: 0x801fa6ac}
 ---
 module: event-attack
@@ -1417,38 +1417,38 @@ functions:
   - {addr: 0x801ca9a0, size: 52, name: menu_scrollable_list_open_at_scroll_base, hash: 503e07ba5c988426, unit: scrollable_list_setup}
   - {addr: 0x801ca9d4, size: 148, name: menu_script_run, hash: 796e6e240ffcc397, unit: menu_script_core}
   - {addr: 0x801caa68, size: 80, name: menu_script_run_with_palette_mode, hash: d3c4df2e5ae8c513, unit: menu_script_core}
-  - {addr: 0x801caab8, size: 280, name: menu_opcode_01_if_group, hash: dc63cdd97deb4ab1, unit: menu_script_core}
-  - {addr: 0x801cabd0, size: 396, name: menu_opcode_02_if_else_group, hash: 41490b9b5d7a75e9, unit: menu_script_core}
-  - {addr: 0x801cad5c, size: 184, name: menu_opcode_03_draw_tile, hash: 7daebd5cd090df58, unit: draw_commands}
-  - {addr: 0x801cae14, size: 256, name: menu_opcode_04_05_draw_textured_quad, hash: 3672300e8e6a0c8d, unit: draw_commands}
-  - {addr: 0x801caf14, size: 112, name: menu_opcode_07_draw_line, hash: 9a125788afe57a8e, unit: draw_commands}
-  - {addr: 0x801caf84, size: 264, name: menu_opcode_06_draw_callback_quad, hash: b66afccb939dd94c, unit: draw_commands}
-  - {addr: 0x801cb08c, size: 1608, name: menu_opcode_00_draw_window_frame, hash: abd265453db88592, unit: draw_commands}
-  - {addr: 0x801cb6d4, size: 300, name: menu_opcode_12_draw_opening_window_frame, hash: 7d6314f93f4b800c, unit: draw_commands}
-  - {addr: 0x801cb800, size: 816, name: menu_opcode_11_draw_background_tiles, hash: 53f3a353be4987fb, unit: texture_commands}
-  - {addr: 0x801cbb30, size: 84, name: menu_opcode_09_set_fixed_clut, hash: ec0ac942b9f202d0, unit: texture_commands}
-  - {addr: 0x801cbb84, size: 116, name: menu_opcode_0a_set_clut, hash: c1be2e1cdf9eecba, unit: texture_commands}
-  - {addr: 0x801cbbf8, size: 84, name: menu_opcode_0c_set_texture_page, hash: f1b465b0bce5b755, unit: texture_commands}
-  - {addr: 0x801cbc4c, size: 24, name: menu_opcode_0e_set_semi_trans, hash: 6340759d70435982, unit: texture_commands}
-  - {addr: 0x801cbc64, size: 100, name: menu_opcode_18_add_blend_draw_mode, hash: 2c51d30300513ef9, unit: texture_commands}
-  - {addr: 0x801cbcc8, size: 104, name: menu_opcode_0b_set_draw_color, hash: ead031d84ebc84e9, unit: texture_commands}
-  - {addr: 0x801cbd30, size: 24, name: menu_opcode_0f_set_draw_priority, hash: 0d38c979b93736fb, unit: texture_commands}
-  - {addr: 0x801cbd48, size: 1076, name: menu_opcode_0d_draw_formatted_number, hash: 66875582960ce0d8, unit: menu_list}
-  - {addr: 0x801cc17c, size: 428, name: menu_opcode_17_draw_right_aligned_number, hash: 325db0fd2794a02d, unit: menu_list}
+  - {addr: 0x801caab8, size: 280, name: menu_opcode_if_group, hash: dc63cdd97deb4ab1, unit: menu_script_core}
+  - {addr: 0x801cabd0, size: 396, name: menu_opcode_if_else_group, hash: 41490b9b5d7a75e9, unit: menu_script_core}
+  - {addr: 0x801cad5c, size: 184, name: menu_opcode_draw_tile, hash: 7daebd5cd090df58, unit: draw_commands}
+  - {addr: 0x801cae14, size: 256, name: menu_opcode_draw_quad, hash: 3672300e8e6a0c8d, unit: draw_commands}
+  - {addr: 0x801caf14, size: 112, name: menu_opcode_draw_line, hash: 9a125788afe57a8e, unit: draw_commands}
+  - {addr: 0x801caf84, size: 264, name: menu_opcode_draw_callback_quad, hash: b66afccb939dd94c, unit: draw_commands}
+  - {addr: 0x801cb08c, size: 1608, name: menu_opcode_draw_window_frame, hash: abd265453db88592, unit: draw_commands}
+  - {addr: 0x801cb6d4, size: 300, name: menu_opcode_draw_opening_window_frame, hash: 7d6314f93f4b800c, unit: draw_commands}
+  - {addr: 0x801cb800, size: 816, name: menu_opcode_draw_background_tiles, hash: 53f3a353be4987fb, unit: texture_commands}
+  - {addr: 0x801cbb30, size: 84, name: menu_opcode_set_fixed_clut, hash: ec0ac942b9f202d0, unit: texture_commands}
+  - {addr: 0x801cbb84, size: 116, name: menu_opcode_set_clut, hash: c1be2e1cdf9eecba, unit: texture_commands}
+  - {addr: 0x801cbbf8, size: 84, name: menu_opcode_set_texture_page, hash: f1b465b0bce5b755, unit: texture_commands}
+  - {addr: 0x801cbc4c, size: 24, name: menu_opcode_set_semi_trans, hash: 6340759d70435982, unit: texture_commands}
+  - {addr: 0x801cbc64, size: 100, name: menu_opcode_add_blend_draw_mode, hash: 2c51d30300513ef9, unit: texture_commands}
+  - {addr: 0x801cbcc8, size: 104, name: menu_opcode_set_draw_color, hash: ead031d84ebc84e9, unit: texture_commands}
+  - {addr: 0x801cbd30, size: 24, name: menu_opcode_set_draw_priority, hash: 0d38c979b93736fb, unit: texture_commands}
+  - {addr: 0x801cbd48, size: 1076, name: menu_opcode_draw_formatted_number, hash: 66875582960ce0d8, unit: menu_list}
+  - {addr: 0x801cc17c, size: 428, name: menu_opcode_draw_right_aligned_number, hash: 325db0fd2794a02d, unit: menu_list}
   - {addr: 0x801cc328, size: 660, name: menu_draw_sliding_cursor, hash: 3938e60d49f17206, unit: menu_list}
   - {addr: 0x801cc5bc, size: 108, name: skip_script_group, hash: e3dba406e3887731, unit: menu_list}
   - {addr: 0x801cc628, size: 672, name: menu_scrollable_list_refresh, hash: b2d0e76db3f4d7ef, unit: menu_list}
   - {addr: 0x801cc8c8, size: 48, name: menu_scrollable_list_open, hash: 822692f126a2bbf9, unit: menu_list}
-  - {addr: 0x801cc8f8, size: 2492, name: menu_opcode_10_update_scrollable_list, hash: 94ee93a645f6dd65, unit: menu_list}
+  - {addr: 0x801cc8f8, size: 2492, name: menu_opcode_update_scrollable_list, hash: 94ee93a645f6dd65, unit: menu_list}
   - {addr: 0x801cd2b4, size: 44, name: menu_gfx_set_draw_color, hash: 17666895092d599e, unit: draw_state}
   - {addr: 0x801cd2e0, size: 16, name: gfx_set_otag_index, hash: bb1416428e2ecf6d, unit: draw_state}
   - {addr: 0x801cd2f0, size: 220, name: menu_palette_set_mode, hash: 156ec1881c754753, unit: draw_state}
-  - {addr: 0x801cd3cc, size: 100, name: menu_opcode_13_clear_temporary_draw_area, hash: e77483d981229efc, unit: window_state}
-  - {addr: 0x801cd430, size: 116, name: menu_opcode_14_set_draw_area, hash: ba55df416db898b4, unit: window_state}
-  - {addr: 0x801cd4a4, size: 92, name: menu_opcode_15_restore_draw_area, hash: 6bbd6efdd3867c3b, unit: window_state}
+  - {addr: 0x801cd3cc, size: 100, name: menu_opcode_clear_temporary_draw_area, hash: e77483d981229efc, unit: window_state}
+  - {addr: 0x801cd430, size: 116, name: menu_opcode_set_draw_area, hash: ba55df416db898b4, unit: window_state}
+  - {addr: 0x801cd4a4, size: 92, name: menu_opcode_restore_draw_area, hash: 6bbd6efdd3867c3b, unit: window_state}
   - {addr: 0x801cd500, size: 16, name: menu_window_set_scale_step, hash: c29481e27ac6ffd6, unit: window_state}
   - {addr: 0x801cd510, size: 16, name: menu_window_get_scale_step, hash: 9b3bf67680c26976, unit: window_state}
-  - {addr: 0x801cd520, size: 56, name: menu_opcode_16_advance_window_scale_step, hash: 7d8e1868250a374c, unit: window_state}
+  - {addr: 0x801cd520, size: 56, name: menu_opcode_advance_window_scale_step, hash: 7d8e1868250a374c, unit: window_state}
   - {addr: 0x801cd558, size: 16, name: menu_gfx_get_draw_color, hash: 428cf158b493c273, source: src/lib/menu/graphics/draw_color.c}
   - {addr: 0x801cd568, size: 320, name: menu_scroll_list_by_page, hash: "8964502444949709", source: src/lib/menu/page_scroll.c}
   - {addr: 0x801cd6a8, size: 284, name: menu_input_read_page_scroll_direction, hash: 2b43d6db87557730, unit: page_scroll_input}
@@ -1851,12 +1851,12 @@ functions:
   - {addr: 0x801c57e0, size: 464, name: save_gfx_init_contexts, hash: 17d58bd69695ffbe, unit: gfx_contexts}
   - {addr: 0x801c59b0, size: 52, name: menu_set_event_speed, hash: 48e5f4bdd9a23db4, unit: menu_timing}
   - {addr: 0x801c59e4, size: 32, name: menu_get_event_speed, hash: 950823f3780118ae, unit: menu_timing}
-  - {addr: 0x801c5a04, size: 180, name: menu_opcode_04_05_draw_textured_quad, hash: 80bb4d6a52a62e83, unit: drawing_commands}
-  - {addr: 0x801c5ab8, size: 1832, name: menu_opcode_00_draw_window_frame, hash: 0f8c1fe24c89ed4f, unit: drawing_commands}
-  - {addr: 0x801c61e0, size: 816, name: menu_opcode_11_draw_background_tiles, hash: 6bf11123f13510a0, unit: drawing_commands}
-  - {addr: 0x801c6510, size: 84, name: menu_opcode_0c_set_texture_page, hash: c033f758528baa4e, unit: drawing_commands}
-  - {addr: 0x801c6564, size: 24, name: menu_opcode_0f_set_draw_priority, hash: 866b1fe58b80beba, unit: drawing_commands}
-  - {addr: 0x801c657c, size: 400, name: menu_opcode_0d_draw_formatted_number, hash: 86de3729d1341209, unit: drawing_commands}
+  - {addr: 0x801c5a04, size: 180, name: menu_opcode_draw_quad, hash: 80bb4d6a52a62e83, unit: drawing_commands}
+  - {addr: 0x801c5ab8, size: 1832, name: menu_opcode_draw_window_frame, hash: 0f8c1fe24c89ed4f, unit: drawing_commands}
+  - {addr: 0x801c61e0, size: 816, name: menu_opcode_draw_background_tiles, hash: 6bf11123f13510a0, unit: drawing_commands}
+  - {addr: 0x801c6510, size: 84, name: menu_opcode_set_texture_page, hash: c033f758528baa4e, unit: drawing_commands}
+  - {addr: 0x801c6564, size: 24, name: menu_opcode_set_draw_priority, hash: 866b1fe58b80beba, unit: drawing_commands}
+  - {addr: 0x801c657c, size: 400, name: menu_opcode_draw_formatted_number, hash: 86de3729d1341209, unit: drawing_commands}
   - {addr: 0x801c670c, size: 652, name: menu_draw_sliding_cursor, hash: d2bf3388d465f9d3, unit: drawing_commands}
   - {addr: 0x801c6998, size: 44, name: menu_gfx_set_draw_color, hash: 56f9f1312189e13e, unit: draw_state}
   - {addr: 0x801c69c4, size: 16, name: gfx_set_otag_index, hash: e32615753d53f066, unit: draw_state}
@@ -2189,38 +2189,38 @@ functions:
   - {addr: 0x801c8530, size: 52, name: menu_scrollable_list_init, hash: 2e929bd3e1d1a802, unit: scrollable_list_setup}
   - {addr: 0x801c8564, size: 148, name: menu_script_run, hash: 596b0013f79e045b, unit: menu_script_core}
   - {addr: 0x801c85f8, size: 80, name: menu_script_run_with_palette_mode, hash: 3eea69c59c091978, unit: menu_script_core}
-  - {addr: 0x801c8648, size: 280, name: menu_opcode_01_if_group, hash: 8839eaaea9e0dd88, unit: menu_script_core}
-  - {addr: 0x801c8760, size: 396, name: menu_opcode_02_if_else_group, hash: 874d29e34d6a2029, unit: menu_script_core}
-  - {addr: 0x801c88ec, size: 256, name: menu_opcode_04_05_draw_textured_quad, hash: c024a5e6a5fdac7d, unit: draw_commands}
-  - {addr: 0x801c89ec, size: 264, name: menu_opcode_06_draw_callback_quad, hash: aa0680488625c39f, unit: draw_commands}
-  - {addr: 0x801c8af4, size: 1608, name: menu_opcode_00_draw_window_frame, hash: 0a50bf9bdc4971f4, unit: draw_commands}
-  - {addr: 0x801c913c, size: 300, name: menu_opcode_12_draw_opening_window_frame, hash: 2a2f64cf07a7b91f, unit: draw_commands}
-  - {addr: 0x801c9268, size: 664, name: menu_opcode_11_draw_background_tiles, hash: 09b81548f04977d8, unit: texture_commands}
-  - {addr: 0x801c9500, size: 84, name: menu_opcode_09_set_fixed_clut, hash: a7a0ade9fdaa50b5, unit: texture_commands}
-  - {addr: 0x801c9554, size: 116, name: menu_opcode_0a_set_clut, hash: 9c9abdd96fb4e07c, unit: texture_commands}
-  - {addr: 0x801c95c8, size: 84, name: menu_opcode_0c_set_texture_page, hash: bd3947ac43dead9e, unit: texture_commands}
-  - {addr: 0x801c961c, size: 24, name: menu_opcode_0e_set_semi_trans, hash: f13890f2ccaa1896, unit: texture_commands}
-  - {addr: 0x801c9634, size: 100, name: menu_opcode_18_add_blend_draw_mode, hash: 74bbfcd06b49e6bd, unit: texture_commands}
-  - {addr: 0x801c9698, size: 104, name: menu_opcode_0b_set_draw_color, hash: f8e9ecc48cf193a2, unit: texture_commands}
-  - {addr: 0x801c9700, size: 24, name: menu_opcode_0f_set_draw_priority, hash: e3a66bb32067285c, unit: texture_commands}
-  - {addr: 0x801c9718, size: 1076, name: menu_opcode_0d_draw_formatted_number, hash: a52fa763ae07e832, unit: menu_list}
-  - {addr: 0x801c9b4c, size: 424, name: menu_opcode_17_draw_right_aligned_number, hash: fbd03bb0cdf31870, unit: menu_list}
+  - {addr: 0x801c8648, size: 280, name: menu_opcode_if_group, hash: 8839eaaea9e0dd88, unit: menu_script_core}
+  - {addr: 0x801c8760, size: 396, name: menu_opcode_if_else_group, hash: 874d29e34d6a2029, unit: menu_script_core}
+  - {addr: 0x801c88ec, size: 256, name: menu_opcode_draw_quad, hash: c024a5e6a5fdac7d, unit: draw_commands}
+  - {addr: 0x801c89ec, size: 264, name: menu_opcode_draw_callback_quad, hash: aa0680488625c39f, unit: draw_commands}
+  - {addr: 0x801c8af4, size: 1608, name: menu_opcode_draw_window_frame, hash: 0a50bf9bdc4971f4, unit: draw_commands}
+  - {addr: 0x801c913c, size: 300, name: menu_opcode_draw_opening_window_frame, hash: 2a2f64cf07a7b91f, unit: draw_commands}
+  - {addr: 0x801c9268, size: 664, name: menu_opcode_draw_background_tiles, hash: 09b81548f04977d8, unit: texture_commands}
+  - {addr: 0x801c9500, size: 84, name: menu_opcode_set_fixed_clut, hash: a7a0ade9fdaa50b5, unit: texture_commands}
+  - {addr: 0x801c9554, size: 116, name: menu_opcode_set_clut, hash: 9c9abdd96fb4e07c, unit: texture_commands}
+  - {addr: 0x801c95c8, size: 84, name: menu_opcode_set_texture_page, hash: bd3947ac43dead9e, unit: texture_commands}
+  - {addr: 0x801c961c, size: 24, name: menu_opcode_set_semi_trans, hash: f13890f2ccaa1896, unit: texture_commands}
+  - {addr: 0x801c9634, size: 100, name: menu_opcode_add_blend_draw_mode, hash: 74bbfcd06b49e6bd, unit: texture_commands}
+  - {addr: 0x801c9698, size: 104, name: menu_opcode_set_draw_color, hash: f8e9ecc48cf193a2, unit: texture_commands}
+  - {addr: 0x801c9700, size: 24, name: menu_opcode_set_draw_priority, hash: e3a66bb32067285c, unit: texture_commands}
+  - {addr: 0x801c9718, size: 1076, name: menu_opcode_draw_formatted_number, hash: a52fa763ae07e832, unit: menu_list}
+  - {addr: 0x801c9b4c, size: 424, name: menu_opcode_draw_right_aligned_number, hash: fbd03bb0cdf31870, unit: menu_list}
   - {addr: 0x801c9cf4, size: 652, name: menu_draw_sliding_cursor, hash: 48df7a46e058abc1, unit: menu_list}
   - {addr: 0x801c9f80, size: 864, name: menu_draw_bouncing_cursor, hash: 8fec6593004c6ff0, unit: menu_list}
   - {addr: 0x801ca2e0, size: 108, name: skip_script_group, hash: a7fc8159f10402de, unit: menu_list}
   - {addr: 0x801ca34c, size: 672, name: menu_scrollable_list_refresh, hash: c454dc9d46c8694d, unit: menu_list}
   - {addr: 0x801ca5ec, size: 48, name: menu_scrollable_list_open, hash: b8eb15fde9cb581d, unit: menu_list}
   - {addr: 0x801ca61c, size: 52, name: menu_scrollable_list_open_at_scroll_base, hash: 35dc1f5825a6e10d, unit: menu_list}
-  - {addr: 0x801ca650, size: 2500, name: menu_opcode_10_update_scrollable_list, hash: 358544f0b74bb783, unit: menu_list}
+  - {addr: 0x801ca650, size: 2500, name: menu_opcode_update_scrollable_list, hash: 358544f0b74bb783, unit: menu_list}
   - {addr: 0x801cb014, size: 52, name: menu_gfx_set_draw_color, hash: febb234714c08dd5, unit: draw_state}
   - {addr: 0x801cb048, size: 16, name: gfx_set_otag_index, hash: b8570cd4076e6ca3, unit: draw_state}
   - {addr: 0x801cb058, size: 220, name: menu_palette_set_mode, hash: 097927c9311af253, unit: draw_state}
-  - {addr: 0x801cb134, size: 100, name: menu_opcode_13_clear_temporary_draw_area, hash: 5762755fa4395bb7, unit: window_state}
-  - {addr: 0x801cb198, size: 116, name: menu_opcode_14_set_draw_area, hash: 27724050b3193070, unit: window_state}
-  - {addr: 0x801cb20c, size: 92, name: menu_opcode_15_restore_draw_area, hash: 7af571cb94447649, unit: window_state}
+  - {addr: 0x801cb134, size: 100, name: menu_opcode_clear_temporary_draw_area, hash: 5762755fa4395bb7, unit: window_state}
+  - {addr: 0x801cb198, size: 116, name: menu_opcode_set_draw_area, hash: 27724050b3193070, unit: window_state}
+  - {addr: 0x801cb20c, size: 92, name: menu_opcode_restore_draw_area, hash: 7af571cb94447649, unit: window_state}
   - {addr: 0x801cb268, size: 16, name: menu_window_set_scale_step, hash: 2975c13d1cb6d612, unit: window_state}
   - {addr: 0x801cb278, size: 16, name: menu_window_get_scale_step, hash: 198bb5d80e6a8297, unit: window_state}
-  - {addr: 0x801cb288, size: 56, name: menu_opcode_16_advance_window_scale_step, hash: 02b5eb90d2b04757, unit: window_state}
+  - {addr: 0x801cb288, size: 56, name: menu_opcode_advance_window_scale_step, hash: 02b5eb90d2b04757, unit: window_state}
   - {addr: 0x801cb2c0, size: 16, name: menu_gfx_get_draw_color, hash: cd5c665fda37b57c, source: src/lib/menu/graphics/draw_color.c}
   - {addr: 0x801cb2d0, size: 320, name: menu_scroll_list_by_page, hash: 267e3c7bf3437203, source: src/lib/menu/page_scroll.c}
   - {addr: 0x801cb410, size: 284, name: menu_input_read_page_scroll_direction, hash: c9c3ae74b59d1149, source: src/event/bunit/page_scroll_input.c}

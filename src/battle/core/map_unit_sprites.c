@@ -584,24 +584,24 @@ static void run_unit_seq(map_unit_t* unit, animation_state_t* state, s32 advance
     for (;;) {
         u8 op;
 
-        if (seq->sequences[index][pos] == ANIMATION_SEQ_OP_PREFIX) {
+        if (seq->sequences[index][pos] == ANIMATION_SEQ_OPCODE_PREFIX) {
             pos++;
             op = seq->sequences[index][pos++];
             switch (op) {
-            case ANIMATION_SEQ_OP_FLIP_HORIZONTAL:
+            case ANIMATION_SEQ_OPCODE_FLIP_HORIZONTAL:
                 state->flags ^= SPRITE_DISPLAY_HORIZONTAL_FLIP;
                 break;
-            case ANIMATION_SEQ_OP_FLIP_VERTICAL:
+            case ANIMATION_SEQ_OPCODE_FLIP_VERTICAL:
                 state->flags ^= SPRITE_DISPLAY_VERTICAL_FLIP;
                 break;
-            case ANIMATION_SEQ_OP_SHOW_SHADOW:
+            case ANIMATION_SEQ_OPCODE_SHOW_SHADOW:
                 unit->shadow_graphic_trigger = 1;
                 break;
-            case ANIMATION_SEQ_OP_HIDE_SHADOW:
+            case ANIMATION_SEQ_OPCODE_HIDE_SHADOW:
                 unit->shadow_graphic_trigger = 0;
                 break;
-            case ANIMATION_SEQ_OP_END_ANIMATION:
-            case ANIMATION_SEQ_OP_PAUSE_ANIMATION:
+            case ANIMATION_SEQ_OPCODE_END_ANIMATION:
+            case ANIMATION_SEQ_OPCODE_PAUSE_ANIMATION:
                 if (sequence_id < ANIMATION_SEQUENCE_EVTCHR_SLOT_0) {
                     /* Odd sequence ids are the views from behind. */
                     if (sequence_id % 2) {
@@ -616,14 +616,14 @@ static void run_unit_seq(map_unit_t* unit, animation_state_t* state, s32 advance
                 }
                 state->wait = 0;
                 return;
-            case ANIMATION_SEQ_OP_RESTART:
+            case ANIMATION_SEQ_OPCODE_RESTART:
                 pos = 0;
                 state->restart_count++;
                 break;
-            case ANIMATION_SEQ_OP_CLEAR_ROTATION:
+            case ANIMATION_SEQ_OPCODE_CLEAR_ROTATION:
                 state->display->rotation = 0;
                 break;
-            case ANIMATION_SEQ_OP_STRIKE_TARGETS:
+            case ANIMATION_SEQ_OPCODE_STRIKE_TARGETS:
                 if (g_battle_state == BATTLE_STATE_EVENT) {
                     break;
                 }
@@ -649,22 +649,22 @@ static void run_unit_seq(map_unit_t* unit, animation_state_t* state, s32 advance
                     }
                 }
                 break;
-            case ANIMATION_SEQ_OP_LAUNCH_PROJECTILE:
+            case ANIMATION_SEQ_OPCODE_LAUNCH_PROJECTILE:
                 effect_secondary_start_projectile(unit);
                 /* fallthrough: the command's two operand bytes are skipped like the unknowns' */
-            case ANIMATION_SEQ_OP_UNKNOWN_C7:
-            case ANIMATION_SEQ_OP_UNKNOWN_C8:
-            case ANIMATION_SEQ_OP_UNKNOWN_C9:
-            case ANIMATION_SEQ_OP_UNKNOWN_E6:
-            case ANIMATION_SEQ_OP_UNKNOWN_E7:
-            case ANIMATION_SEQ_OP_UNKNOWN_E8:
-            case ANIMATION_SEQ_OP_UNKNOWN_EA:
-            case ANIMATION_SEQ_OP_UNKNOWN_F1:
-            case ANIMATION_SEQ_OP_UNKNOWN_F8:
-            case ANIMATION_SEQ_OP_UNKNOWN_FB:
+            case ANIMATION_SEQ_OPCODE_UNKNOWN_C7:
+            case ANIMATION_SEQ_OPCODE_UNKNOWN_C8:
+            case ANIMATION_SEQ_OPCODE_UNKNOWN_C9:
+            case ANIMATION_SEQ_OPCODE_UNKNOWN_E6:
+            case ANIMATION_SEQ_OPCODE_UNKNOWN_E7:
+            case ANIMATION_SEQ_OPCODE_UNKNOWN_E8:
+            case ANIMATION_SEQ_OPCODE_UNKNOWN_EA:
+            case ANIMATION_SEQ_OPCODE_UNKNOWN_F1:
+            case ANIMATION_SEQ_OPCODE_UNKNOWN_F8:
+            case ANIMATION_SEQ_OPCODE_UNKNOWN_FB:
                 pos += 2;
                 break;
-            case ANIMATION_SEQ_OP_RETURN:
+            case ANIMATION_SEQ_OPCODE_RETURN:
                 sequence_id = state->saved_sequence_id;
                 pos = state->saved_script_pos;
                 index = sequence_id;
@@ -676,7 +676,7 @@ static void run_unit_seq(map_unit_t* unit, animation_state_t* state, s32 advance
                     }
                 }
                 break;
-            case ANIMATION_SEQ_OP_WAIT_FOR_EFFECT:
+            case ANIMATION_SEQ_OPCODE_WAIT_FOR_EFFECT:
                 if (g_battle_animation_wait_state != 0) {
                     /* Jump offsets count from the prefix byte, two bytes behind pos. */
                     offset = (s8)seq->sequences[index][pos];
@@ -685,26 +685,26 @@ static void run_unit_seq(map_unit_t* unit, animation_state_t* state, s32 advance
                     pos++;
                 }
                 break;
-            case ANIMATION_SEQ_OP_PLAY_SOUND:
+            case ANIMATION_SEQ_OPCODE_PLAY_SOUND:
                 value = seq->sequences[index][pos++];
                 map_unit_play_sfx(unit, value);
                 break;
-            case ANIMATION_SEQ_OP_MOVE_UNIT_RL:
+            case ANIMATION_SEQ_OPCODE_MOVE_UNIT_RL:
                 shift_seq_lateral(unit, seq->sequences[index][pos++]);
                 break;
-            case ANIMATION_SEQ_OP_MOVE_UNIT_DU:
+            case ANIMATION_SEQ_OPCODE_MOVE_UNIT_DU:
                 shift_seq_height(unit, seq->sequences[index][pos++]);
                 break;
-            case ANIMATION_SEQ_OP_MOVE_UNIT_FB:
+            case ANIMATION_SEQ_OPCODE_MOVE_UNIT_FB:
                 shift_seq_forward(unit, seq->sequences[index][pos++]);
                 break;
-            case ANIMATION_SEQ_OP_SET_WAIT_BIAS:
+            case ANIMATION_SEQ_OPCODE_SET_WAIT_BIAS:
                 state->wait_bias = (s8)seq->sequences[index][pos++];
                 break;
-            case ANIMATION_SEQ_OP_SET_FRAME_BIAS:
+            case ANIMATION_SEQ_OPCODE_SET_FRAME_BIAS:
                 state->frame_bias = (s8)seq->sequences[index][pos++];
                 break;
-            case ANIMATION_SEQ_OP_CALL_SEQUENCE:
+            case ANIMATION_SEQ_OPCODE_CALL_SEQUENCE:
                 state->saved_sequence_id = sequence_id;
                 sequence_id = seq->sequences[index][pos++];
                 index = sequence_id;
@@ -718,10 +718,10 @@ static void run_unit_seq(map_unit_t* unit, animation_state_t* state, s32 advance
                 state->saved_script_pos = pos;
                 pos = 0;
                 break;
-            case ANIMATION_SEQ_OP_SET_LAYER_PRIORITY:
+            case ANIMATION_SEQ_OPCODE_SET_LAYER_PRIORITY:
                 unit->layer_priority = seq->sequences[index][pos++];
                 break;
-            case ANIMATION_SEQ_OP_START_BLOCK_SEQUENCE:
+            case ANIMATION_SEQ_OPCODE_START_BLOCK_SEQUENCE:
                 block_id = seq->sequences[index][pos++];
                 block_sequence = seq->sequences[index][pos++];
                 if (block_id == 0) {
@@ -736,7 +736,7 @@ static void run_unit_seq(map_unit_t* unit, animation_state_t* state, s32 advance
                 block->repeat_count = 0;
                 block->trigger = 1;
                 break;
-            case ANIMATION_SEQ_OP_REPEAT:
+            case ANIMATION_SEQ_OPCODE_REPEAT:
                 offset = (s8)seq->sequences[index][pos++];
                 value = seq->sequences[index][pos++];
                 /* pos is four bytes past the prefix the offset counts from. */
@@ -749,54 +749,54 @@ static void run_unit_seq(map_unit_t* unit, animation_state_t* state, s32 advance
                     state->repeat_count = value;
                 }
                 break;
-            case ANIMATION_SEQ_OP_MOVE_SCREEN_OFFSET:
+            case ANIMATION_SEQ_OPCODE_MOVE_SCREEN_OFFSET:
                 unit->screen_offset.vx += (s8)seq->sequences[index][pos++];
                 unit->screen_offset.vy += (s8)seq->sequences[index][pos++];
                 break;
-            case ANIMATION_SEQ_OP_SET_ROTATION:
+            case ANIMATION_SEQ_OPCODE_SET_ROTATION:
                 value = seq->sequences[index][pos++];
                 value |= seq->sequences[index][pos++] << 8;
                 state->display->rotation = value;
                 break;
-            case ANIMATION_SEQ_OP_MOVE_UNIT:
+            case ANIMATION_SEQ_OPCODE_MOVE_UNIT:
                 shift_seq_lateral(unit, seq->sequences[index][pos++]);
                 shift_seq_height(unit, seq->sequences[index][pos++]);
                 shift_seq_forward(unit, seq->sequences[index][pos++]);
                 break;
-            case ANIMATION_SEQ_OP_UNKNOWN_F7:
+            case ANIMATION_SEQ_OPCODE_UNKNOWN_F7:
                 pos += 3;
                 break;
-            case ANIMATION_SEQ_OP_MOVE_FORWARD_1:
+            case ANIMATION_SEQ_OPCODE_MOVE_FORWARD_1:
                 shift_seq_forward(unit, 1);
                 break;
-            case ANIMATION_SEQ_OP_MOVE_FORWARD_2:
+            case ANIMATION_SEQ_OPCODE_MOVE_FORWARD_2:
                 shift_seq_forward(unit, 2);
                 break;
-            case ANIMATION_SEQ_OP_MOVE_DOWN_1:
+            case ANIMATION_SEQ_OPCODE_MOVE_DOWN_1:
                 shift_seq_height(unit, 1);
                 break;
-            case ANIMATION_SEQ_OP_MOVE_DOWN_2:
+            case ANIMATION_SEQ_OPCODE_MOVE_DOWN_2:
                 shift_seq_height(unit, 2);
                 break;
-            case ANIMATION_SEQ_OP_MOVE_BACKWARD_1:
+            case ANIMATION_SEQ_OPCODE_MOVE_BACKWARD_1:
                 shift_seq_forward(unit, -1);
                 break;
-            case ANIMATION_SEQ_OP_MOVE_BACKWARD_2:
+            case ANIMATION_SEQ_OPCODE_MOVE_BACKWARD_2:
                 shift_seq_forward(unit, -2);
                 break;
-            case ANIMATION_SEQ_OP_MOVE_UP_1:
+            case ANIMATION_SEQ_OPCODE_MOVE_UP_1:
                 shift_seq_height(unit, -1);
                 break;
-            case ANIMATION_SEQ_OP_MOVE_UP_2:
+            case ANIMATION_SEQ_OPCODE_MOVE_UP_2:
                 shift_seq_height(unit, -2);
                 break;
-            case ANIMATION_SEQ_OP_SHOW_ITEM:
+            case ANIMATION_SEQ_OPCODE_SHOW_ITEM:
                 unit->item_display_active = 1;
                 break;
-            case ANIMATION_SEQ_OP_HIDE_ITEM:
+            case ANIMATION_SEQ_OPCODE_HIDE_ITEM:
                 unit->item_display_active = 0;
                 break;
-            case ANIMATION_SEQ_OP_WAIT_FOR_INPUT:
+            case ANIMATION_SEQ_OPCODE_WAIT_FOR_INPUT:
                 if (g_battle_window_closed == 0) {
                     offset = (s8)seq->sequences[index][pos];
                     pos += offset - 2;
@@ -804,10 +804,10 @@ static void run_unit_seq(map_unit_t* unit, animation_state_t* state, s32 advance
                     pos++;
                 }
                 break;
-            case ANIMATION_SEQ_OP_PLAY_WEAPON_SOUND:
+            case ANIMATION_SEQ_OPCODE_PLAY_WEAPON_SOUND:
                 action_play_weapon_sfx(unit, seq->sequences[index][pos++]);
                 break;
-            case ANIMATION_SEQ_OP_WAIT_FOR_EFFECT_LOAD:
+            case ANIMATION_SEQ_OPCODE_WAIT_FOR_EFFECT_LOAD:
                 if (g_battle_animation_wait_state == 1) {
                     offset = (s8)seq->sequences[index][pos];
                     pos += offset - 2;
@@ -815,18 +815,18 @@ static void run_unit_seq(map_unit_t* unit, animation_state_t* state, s32 advance
                     pos++;
                 }
                 break;
-            case ANIMATION_SEQ_OP_SET_ITEM_POSITION:
+            case ANIMATION_SEQ_OPCODE_SET_ITEM_POSITION:
                 unit->item_display_x_offset = seq->sequences[index][pos++];
                 unit->item_display_y_offset = seq->sequences[index][pos++];
                 break;
-            case ANIMATION_SEQ_OP_START_DISTORTION:
+            case ANIMATION_SEQ_OPCODE_START_DISTORTION:
                 /* The operand stores the id less 2, so a script cannot start NONE or the scale pulse. */
                 unit->distortion_animation_id = seq->sequences[index][pos++] + 2;
                 timer = seq->sequences[index][pos++];
                 unit->distortion_phase = 0;
                 unit->distortion_timer = timer;
                 break;
-            case ANIMATION_SEQ_OP_WAIT_FOR_DISTORTION:
+            case ANIMATION_SEQ_OPCODE_WAIT_FOR_DISTORTION:
                 if (unit->distortion_animation_id != ANIMATION_DISTORTION_NONE) {
                     offset = (s8)seq->sequences[index][pos];
                     pos += offset - 2;
@@ -834,27 +834,27 @@ static void run_unit_seq(map_unit_t* unit, animation_state_t* state, s32 advance
                     pos++;
                 }
                 break;
-            case ANIMATION_SEQ_OP_JUMP:
+            case ANIMATION_SEQ_OPCODE_JUMP:
                 offset = (s8)seq->sequences[index][pos];
                 pos += offset - 2;
                 break;
-            case ANIMATION_SEQ_OP_START_POSITION_COPIES:
+            case ANIMATION_SEQ_OPCODE_START_POSITION_COPIES:
                 sprite_afterimage_init(unit);
                 break;
-            case ANIMATION_SEQ_OP_STOP_POSITION_COPIES:
+            case ANIMATION_SEQ_OPCODE_STOP_POSITION_COPIES:
                 unit->position_copies_active = 0;
                 break;
-            case ANIMATION_SEQ_OP_NOP:
+            case ANIMATION_SEQ_OPCODE_NOP:
                 break;
-            case ANIMATION_SEQ_OP_UNKNOWN_CA:
-            case ANIMATION_SEQ_OP_UNKNOWN_D7:
-            case ANIMATION_SEQ_OP_UNKNOWN_E3:
-            case ANIMATION_SEQ_OP_UNKNOWN_E4:
-            case ANIMATION_SEQ_OP_UNKNOWN_E9:
-            case ANIMATION_SEQ_OP_UNKNOWN_ED:
-            case ANIMATION_SEQ_OP_UNKNOWN_F3:
-            case ANIMATION_SEQ_OP_UNKNOWN_F4:
-            case ANIMATION_SEQ_OP_UNKNOWN_F5:
+            case ANIMATION_SEQ_OPCODE_UNKNOWN_CA:
+            case ANIMATION_SEQ_OPCODE_UNKNOWN_D7:
+            case ANIMATION_SEQ_OPCODE_UNKNOWN_E3:
+            case ANIMATION_SEQ_OPCODE_UNKNOWN_E4:
+            case ANIMATION_SEQ_OPCODE_UNKNOWN_E9:
+            case ANIMATION_SEQ_OPCODE_UNKNOWN_ED:
+            case ANIMATION_SEQ_OPCODE_UNKNOWN_F3:
+            case ANIMATION_SEQ_OPCODE_UNKNOWN_F4:
+            case ANIMATION_SEQ_OPCODE_UNKNOWN_F5:
                 pos++;
                 break;
             default:
@@ -894,7 +894,7 @@ static void load_casting_unit_frame(void) {
 /* Run a weapon or effect sprite block's sequence up to its next frame
  * instruction, or to its end, as run_unit_seq does for the
  * unit's own sprite. The unit-only commands are errors here, the ones that
- * move a unit only skip their operands, and ANIMATION_SEQ_OP_STRIKE_TARGETS and
+ * move a unit only skip their operands, and ANIMATION_SEQ_OPCODE_STRIKE_TARGETS and
  * the two shadow commands do nothing.
  *
  * A frame id counts from the first frame of the unit's weapon type
@@ -948,49 +948,49 @@ static void run_block_seq(map_unit_t* unit, sprite_block_t* sprite, s32 index, s
     }
     for (;;) {
         data = seq[sequence_id];
-        if (data[pos] == ANIMATION_SEQ_OP_PREFIX) {
+        if (data[pos] == ANIMATION_SEQ_OPCODE_PREFIX) {
             pos++;
             op = seq[sequence_id][pos++];
             switch (op) {
-            case ANIMATION_SEQ_OP_FLIP_HORIZONTAL:
+            case ANIMATION_SEQ_OPCODE_FLIP_HORIZONTAL:
                 sprite->flags ^= SPRITE_DISPLAY_HORIZONTAL_FLIP;
                 break;
-            case ANIMATION_SEQ_OP_FLIP_VERTICAL:
+            case ANIMATION_SEQ_OPCODE_FLIP_VERTICAL:
                 sprite->flags ^= SPRITE_DISPLAY_VERTICAL_FLIP;
                 break;
-            case ANIMATION_SEQ_OP_END_ANIMATION:
+            case ANIMATION_SEQ_OPCODE_END_ANIMATION:
                 /* Ending also switches the block off; both stop the script. */
                 sprite->trigger = 0;
-            case ANIMATION_SEQ_OP_PAUSE_ANIMATION:
+            case ANIMATION_SEQ_OPCODE_PAUSE_ANIMATION:
                 sprite->wait = 0;
                 return;
-            case ANIMATION_SEQ_OP_RESTART:
+            case ANIMATION_SEQ_OPCODE_RESTART:
                 sprite->restart_count++;
                 pos = 0;
                 break;
-            case ANIMATION_SEQ_OP_CLEAR_ROTATION:
+            case ANIMATION_SEQ_OPCODE_CLEAR_ROTATION:
                 sprite->display->rotation = 0;
                 break;
-            case ANIMATION_SEQ_OP_LAUNCH_PROJECTILE:
+            case ANIMATION_SEQ_OPCODE_LAUNCH_PROJECTILE:
                 effect_secondary_start_projectile(unit);
                 /* fallthrough: the command's two operand bytes are skipped like the unknowns' */
-            case ANIMATION_SEQ_OP_UNKNOWN_E6:
-            case ANIMATION_SEQ_OP_UNKNOWN_E7:
-            case ANIMATION_SEQ_OP_UNKNOWN_E8:
-            case ANIMATION_SEQ_OP_UNKNOWN_EA:
-            case ANIMATION_SEQ_OP_UNKNOWN_F1:
-            case ANIMATION_SEQ_OP_UNKNOWN_F8:
-            case ANIMATION_SEQ_OP_UNKNOWN_FB:
+            case ANIMATION_SEQ_OPCODE_UNKNOWN_E6:
+            case ANIMATION_SEQ_OPCODE_UNKNOWN_E7:
+            case ANIMATION_SEQ_OPCODE_UNKNOWN_E8:
+            case ANIMATION_SEQ_OPCODE_UNKNOWN_EA:
+            case ANIMATION_SEQ_OPCODE_UNKNOWN_F1:
+            case ANIMATION_SEQ_OPCODE_UNKNOWN_F8:
+            case ANIMATION_SEQ_OPCODE_UNKNOWN_FB:
                 pos += 2;
                 break;
-            case ANIMATION_SEQ_OP_RETURN:
+            case ANIMATION_SEQ_OPCODE_RETURN:
                 pos = sprite->saved_script_pos;
                 sequence_id = sprite->saved_sequence_id;
                 break;
-            case ANIMATION_SEQ_OP_SET_LAYER_PRIORITY:
+            case ANIMATION_SEQ_OPCODE_SET_LAYER_PRIORITY:
                 unit->layer_priority = seq[sequence_id][pos++];
                 break;
-            case ANIMATION_SEQ_OP_WAIT_FOR_EFFECT:
+            case ANIMATION_SEQ_OPCODE_WAIT_FOR_EFFECT:
                 if (g_battle_animation_wait_state != 0) {
                     offset = (s8)seq[sequence_id][pos];
                     pos += offset - 2;
@@ -998,27 +998,27 @@ static void run_block_seq(map_unit_t* unit, sprite_block_t* sprite, s32 index, s
                     pos++;
                 }
                 break;
-            case ANIMATION_SEQ_OP_PLAY_SOUND:
+            case ANIMATION_SEQ_OPCODE_PLAY_SOUND:
                 value = seq[sequence_id][pos++];
                 map_unit_play_sfx(unit, value);
                 break;
-            case ANIMATION_SEQ_OP_SET_WAIT_BIAS:
+            case ANIMATION_SEQ_OPCODE_SET_WAIT_BIAS:
                 sprite->wait_bias = (s8)seq[sequence_id][pos++];
                 break;
-            case ANIMATION_SEQ_OP_SET_FRAME_BIAS:
+            case ANIMATION_SEQ_OPCODE_SET_FRAME_BIAS:
                 sprite->frame_bias = (s8)seq[sequence_id][pos++];
                 break;
-            case ANIMATION_SEQ_OP_CALL_SEQUENCE:
+            case ANIMATION_SEQ_OPCODE_CALL_SEQUENCE:
                 sprite->saved_sequence_id = sequence_id;
                 sequence_id = seq[sequence_id][pos++];
                 sprite->saved_script_pos = pos;
                 pos = 0;
                 break;
-            case ANIMATION_SEQ_OP_MOVE_SCREEN_OFFSET:
+            case ANIMATION_SEQ_OPCODE_MOVE_SCREEN_OFFSET:
                 unit->screen_offset.vx += (s8)seq[sequence_id][pos++];
                 unit->screen_offset.vy += (s8)seq[sequence_id][pos++];
                 break;
-            case ANIMATION_SEQ_OP_REPEAT:
+            case ANIMATION_SEQ_OPCODE_REPEAT:
                 offset = (s8)seq[sequence_id][pos++];
                 value = seq[sequence_id][pos++];
                 if (sprite->repeat_count != 0) {
@@ -1030,7 +1030,7 @@ static void run_block_seq(map_unit_t* unit, sprite_block_t* sprite, s32 index, s
                     sprite->repeat_count = value;
                 }
                 break;
-            case ANIMATION_SEQ_OP_START_BLOCK_SEQUENCE:
+            case ANIMATION_SEQ_OPCODE_START_BLOCK_SEQUENCE:
                 block_id = seq[sequence_id][pos++];
                 block_sequence = seq[sequence_id][pos++];
                 if (block_id == 0) {
@@ -1045,16 +1045,16 @@ static void run_block_seq(map_unit_t* unit, sprite_block_t* sprite, s32 index, s
                 block->repeat_count = 0;
                 block->trigger = 1;
                 break;
-            case ANIMATION_SEQ_OP_SET_ROTATION:
+            case ANIMATION_SEQ_OPCODE_SET_ROTATION:
                 value = seq[sequence_id][pos++];
                 value |= seq[sequence_id][pos++] << 8;
                 sprite->display->rotation = value;
                 break;
-            case ANIMATION_SEQ_OP_UNKNOWN_F7:
-            case ANIMATION_SEQ_OP_MOVE_UNIT:
+            case ANIMATION_SEQ_OPCODE_UNKNOWN_F7:
+            case ANIMATION_SEQ_OPCODE_MOVE_UNIT:
                 pos += 3;
                 break;
-            case ANIMATION_SEQ_OP_WAIT_FOR_EFFECT_LOAD:
+            case ANIMATION_SEQ_OPCODE_WAIT_FOR_EFFECT_LOAD:
                 if (g_battle_animation_wait_state == 1) {
                     offset = (s8)seq[sequence_id][pos];
                     pos += offset - 2;
@@ -1062,26 +1062,26 @@ static void run_block_seq(map_unit_t* unit, sprite_block_t* sprite, s32 index, s
                     pos++;
                 }
                 break;
-            case ANIMATION_SEQ_OP_JUMP:
+            case ANIMATION_SEQ_OPCODE_JUMP:
                 offset = (s8)seq[sequence_id][pos];
                 pos += offset - 2;
                 break;
-            case ANIMATION_SEQ_OP_UNKNOWN_D7:
-            case ANIMATION_SEQ_OP_UNKNOWN_E3:
-            case ANIMATION_SEQ_OP_UNKNOWN_E4:
-            case ANIMATION_SEQ_OP_UNKNOWN_E9:
-            case ANIMATION_SEQ_OP_UNKNOWN_ED:
-            case ANIMATION_SEQ_OP_MOVE_UNIT_FB:
-            case ANIMATION_SEQ_OP_MOVE_UNIT_DU:
-            case ANIMATION_SEQ_OP_MOVE_UNIT_RL:
-            case ANIMATION_SEQ_OP_UNKNOWN_F3:
-            case ANIMATION_SEQ_OP_UNKNOWN_F4:
-            case ANIMATION_SEQ_OP_UNKNOWN_F5:
+            case ANIMATION_SEQ_OPCODE_UNKNOWN_D7:
+            case ANIMATION_SEQ_OPCODE_UNKNOWN_E3:
+            case ANIMATION_SEQ_OPCODE_UNKNOWN_E4:
+            case ANIMATION_SEQ_OPCODE_UNKNOWN_E9:
+            case ANIMATION_SEQ_OPCODE_UNKNOWN_ED:
+            case ANIMATION_SEQ_OPCODE_MOVE_UNIT_FB:
+            case ANIMATION_SEQ_OPCODE_MOVE_UNIT_DU:
+            case ANIMATION_SEQ_OPCODE_MOVE_UNIT_RL:
+            case ANIMATION_SEQ_OPCODE_UNKNOWN_F3:
+            case ANIMATION_SEQ_OPCODE_UNKNOWN_F4:
+            case ANIMATION_SEQ_OPCODE_UNKNOWN_F5:
                 pos++;
                 break;
-            case ANIMATION_SEQ_OP_STRIKE_TARGETS:
-            case ANIMATION_SEQ_OP_HIDE_SHADOW:
-            case ANIMATION_SEQ_OP_SHOW_SHADOW:
+            case ANIMATION_SEQ_OPCODE_STRIKE_TARGETS:
+            case ANIMATION_SEQ_OPCODE_HIDE_SHADOW:
+            case ANIMATION_SEQ_OPCODE_SHOW_SHADOW:
                 break;
             default:
                 system_handle_error(SYSTEM_ERROR_SEQ_OPCODE);

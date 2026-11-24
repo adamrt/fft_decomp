@@ -26,20 +26,35 @@
 static s16 s_tutorial_highlight_brightness;
 static s16 s_tutorial_buttons;
 
-/* The tutorial command stream. Commands below 0x10 are one-byte shifts; the rest are the id (1 byte) followed by
- * their parameters: 0x10 message id (2) and y (1), 0x11 message id (2), 0x13 x, y, size, width mod and height mod
- * (1 each), 0x15 time (1). */
-enum {
-    TUTORIAL_CMD_PRESS_BUTTON_LIMIT = 0x10,
-    TUTORIAL_CMD_DISPLAY_MESSAGE = 0x10,
-    TUTORIAL_CMD_CHANGE_DIALOG = 0x11,
-    TUTORIAL_CMD_WAIT_FOR_MESSAGE = 0x12,
-    TUTORIAL_CMD_HIGHLIGHT_RING = 0x13,
-    TUTORIAL_CMD_FADE_OUT_HIGHLIGHT = 0x14,
-    TUTORIAL_CMD_WAIT_TIME = 0x15,
-    TUTORIAL_CMD_WAIT_FOR_BUTTON = 0x16,
-    TUTORIAL_CMD_END = 0x17
-};
+/* Opcode byte of a tutorial command, the value tutorial_update dispatches on. Commands below 0x10 are one-byte
+ * presses of that PadRead bit; the rest are the opcode followed by their parameters: 0x10 message id (2) and y (1),
+ * 0x11 message id (2), 0x13 x, y, size, width mod and height mod (1 each), 0x15 time (1). */
+typedef enum tutorial_opcode {
+    TUTORIAL_OPCODE_PRESS_L2 = 0x00,
+    TUTORIAL_OPCODE_PRESS_R2 = 0x01,
+    TUTORIAL_OPCODE_PRESS_L1 = 0x02,
+    TUTORIAL_OPCODE_PRESS_R1 = 0x03,
+    TUTORIAL_OPCODE_PRESS_TRIANGLE = 0x04,
+    TUTORIAL_OPCODE_PRESS_CIRCLE = 0x05,
+    TUTORIAL_OPCODE_PRESS_CROSS = 0x06,
+    TUTORIAL_OPCODE_PRESS_SQUARE = 0x07,
+    TUTORIAL_OPCODE_PRESS_SELECT = 0x08,
+    TUTORIAL_OPCODE_PRESS_L3 = 0x09,
+    TUTORIAL_OPCODE_PRESS_R3 = 0x0a,
+    TUTORIAL_OPCODE_PRESS_START = 0x0b,
+    TUTORIAL_OPCODE_PRESS_UP = 0x0c,
+    TUTORIAL_OPCODE_PRESS_RIGHT = 0x0d,
+    TUTORIAL_OPCODE_PRESS_DOWN = 0x0e,
+    TUTORIAL_OPCODE_PRESS_LEFT = 0x0f,
+    TUTORIAL_OPCODE_DISPLAY_MESSAGE = 0x10,
+    TUTORIAL_OPCODE_CHANGE_DIALOG = 0x11,
+    TUTORIAL_OPCODE_WAIT_FOR_MESSAGE = 0x12,
+    TUTORIAL_OPCODE_HIGHLIGHT_RING = 0x13,
+    TUTORIAL_OPCODE_FADE_OUT_HIGHLIGHT = 0x14,
+    TUTORIAL_OPCODE_WAIT_TIME = 0x15,
+    TUTORIAL_OPCODE_WAIT_FOR_BUTTON = 0x16,
+    TUTORIAL_OPCODE_END = 0x17
+} tutorial_opcode_e;
 
 /* Serialized tutorial commands; opcode selects the operand record. */
 typedef struct tutorial_message_instruction {
@@ -85,15 +100,15 @@ static u8 s_tutorial_highlight_quad_count = 0;
 
 static void update_highlight(void);
 static void draw_highlight(s32 brightness);
-static void tutorial_opcode_00_press_button(void);
-static void tutorial_opcode_10_display_message(void);
-static void tutorial_opcode_11_change_dialog(void);
-static void tutorial_opcode_12_wait_for_message(void);
-static void tutorial_opcode_13_highlight_ring(void);
-static void tutorial_opcode_14_fade_out_highlight(void);
-static void tutorial_opcode_15_wait_time(void);
-static void tutorial_opcode_16_wait_for_button(void);
-static s32 tutorial_opcode_17_end(void);
+static void tutorial_opcode_press_button(void);
+static void tutorial_opcode_display_message(void);
+static void tutorial_opcode_change_dialog(void);
+static void tutorial_opcode_wait_for_message(void);
+static void tutorial_opcode_highlight_ring(void);
+static void tutorial_opcode_fade_out_highlight(void);
+static void tutorial_opcode_wait_time(void);
+static void tutorial_opcode_wait_for_button(void);
+static s32 tutorial_opcode_end(void);
 
 /* The pad state tutorial_update read this frame; the tutorial text
  * thread takes its button input from it. */
@@ -137,7 +152,7 @@ void tutorial_start(s32 index) {
  * Reads pad 0 as the tutorial's own button input (the soft-reset combination
  * resets the game), advances the highlight brightness while a wait is timed,
  * and dispatches the command byte at g_tutorial_command_ptr:
- * values below TUTORIAL_CMD_PRESS_BUTTON_LIMIT are pad-input commands, the
+ * values through TUTORIAL_OPCODE_PRESS_LEFT are pad-input commands, the
  * rest display a message, draw the highlight ring, wait or end.
  */
 s32 tutorial_update(void) {
@@ -156,36 +171,37 @@ s32 tutorial_update(void) {
         update_highlight();
     }
     cmd = *s_tutorial_command_ptr;
-    if (cmd < TUTORIAL_CMD_PRESS_BUTTON_LIMIT) {
-        tutorial_opcode_00_press_button();
-    } else if (cmd == TUTORIAL_CMD_DISPLAY_MESSAGE) {
-        tutorial_opcode_10_display_message();
-    } else if (cmd == TUTORIAL_CMD_HIGHLIGHT_RING) {
-        tutorial_opcode_13_highlight_ring();
-    } else if (cmd == TUTORIAL_CMD_FADE_OUT_HIGHLIGHT) {
-        tutorial_opcode_14_fade_out_highlight();
-    } else if (cmd == TUTORIAL_CMD_WAIT_TIME) {
-        tutorial_opcode_15_wait_time();
-    } else if (cmd == TUTORIAL_CMD_WAIT_FOR_BUTTON) {
-        tutorial_opcode_16_wait_for_button();
-    } else if (cmd == TUTORIAL_CMD_END) {
-        return tutorial_opcode_17_end();
-    } else if (cmd == TUTORIAL_CMD_WAIT_FOR_MESSAGE) {
-        tutorial_opcode_12_wait_for_message();
-    } else if (cmd == TUTORIAL_CMD_CHANGE_DIALOG) {
-        tutorial_opcode_11_change_dialog();
+    if (cmd <= TUTORIAL_OPCODE_PRESS_LEFT) {
+        tutorial_opcode_press_button();
+    } else if (cmd == TUTORIAL_OPCODE_DISPLAY_MESSAGE) {
+        tutorial_opcode_display_message();
+    } else if (cmd == TUTORIAL_OPCODE_HIGHLIGHT_RING) {
+        tutorial_opcode_highlight_ring();
+    } else if (cmd == TUTORIAL_OPCODE_FADE_OUT_HIGHLIGHT) {
+        tutorial_opcode_fade_out_highlight();
+    } else if (cmd == TUTORIAL_OPCODE_WAIT_TIME) {
+        tutorial_opcode_wait_time();
+    } else if (cmd == TUTORIAL_OPCODE_WAIT_FOR_BUTTON) {
+        tutorial_opcode_wait_for_button();
+    } else if (cmd == TUTORIAL_OPCODE_END) {
+        return tutorial_opcode_end();
+    } else if (cmd == TUTORIAL_OPCODE_WAIT_FOR_MESSAGE) {
+        tutorial_opcode_wait_for_message();
+    } else if (cmd == TUTORIAL_OPCODE_CHANGE_DIALOG) {
+        tutorial_opcode_change_dialog();
     }
     return 1;
 }
 
-/* Tutorial "end" command: fade the screen out, then free the tutorial's files,
+/* TUTORIAL_OPCODE_END (0x17)
+ * Tutorial "end" command: fade the screen out, then free the tutorial's files,
  * restore the game saved by tutorial_start and rebuild the
  * formation records; returns 0 then.
  *
  * The paths that keep running return nothing (a retail quirk); at -O0 $v0
  * still holds 1 there, from the fade's running result or the stored flag, so
  * tutorial_update passes 1 on. */
-static s32 tutorial_opcode_17_end(void) {
+static s32 tutorial_opcode_end(void) {
     if (s_tutorial_command_active != 0) {
         if (fade_menu_update_out() == 0) {
             g_tutorial_id = 0;
@@ -204,10 +220,25 @@ static s32 tutorial_opcode_17_end(void) {
     }
 }
 
-/* Tutorial command below TUTORIAL_CMD_PRESS_BUTTON_LIMIT: press pad bit
- * number <command> for one frame, then wait 30 frames (counted by the VSync
+/* TUTORIAL_OPCODE_PRESS_L2 (0x00)
+ * TUTORIAL_OPCODE_PRESS_R2 (0x01)
+ * TUTORIAL_OPCODE_PRESS_L1 (0x02)
+ * TUTORIAL_OPCODE_PRESS_R1 (0x03)
+ * TUTORIAL_OPCODE_PRESS_TRIANGLE (0x04)
+ * TUTORIAL_OPCODE_PRESS_CIRCLE (0x05)
+ * TUTORIAL_OPCODE_PRESS_CROSS (0x06)
+ * TUTORIAL_OPCODE_PRESS_SQUARE (0x07)
+ * TUTORIAL_OPCODE_PRESS_SELECT (0x08)
+ * TUTORIAL_OPCODE_PRESS_L3 (0x09)
+ * TUTORIAL_OPCODE_PRESS_R3 (0x0a)
+ * TUTORIAL_OPCODE_PRESS_START (0x0b)
+ * TUTORIAL_OPCODE_PRESS_UP (0x0c)
+ * TUTORIAL_OPCODE_PRESS_RIGHT (0x0d)
+ * TUTORIAL_OPCODE_PRESS_DOWN (0x0e)
+ * TUTORIAL_OPCODE_PRESS_LEFT (0x0f)
+ * Press pad bit number <command> for one frame, then wait 30 frames (counted by the VSync
  * mode) before moving to the next command. */
-static void tutorial_opcode_00_press_button(void) {
+static void tutorial_opcode_press_button(void) {
     if (s_tutorial_command_active != 0) {
         s_tutorial_command_active -= menu_get_event_speed();
         g_tutorial_pressed_button = 0;
@@ -221,7 +252,8 @@ static void tutorial_opcode_00_press_button(void) {
     }
 }
 
-/* Tutorial command: start the text thread on a new message. Operands: two
+/* TUTORIAL_OPCODE_DISPLAY_MESSAGE (0x10)
+ * Start the text thread on a new message. Operands: two
  * message-id bytes (little-endian, biased by 0xB800) and a third byte stored
  * as the text thread's y offset.
  *
@@ -230,7 +262,7 @@ static void tutorial_opcode_00_press_button(void) {
  * 2.6.3's fold re-associates `hi + (lo + 0xB800)` into `(hi + 0xB800) + lo`,
  * and the target adds the bias to the low byte first. Taking the address of
  * the operand fields preserves the -O0 byte-address steps. */
-static void tutorial_opcode_10_display_message(void) {
+static void tutorial_opcode_display_message(void) {
     thread_start(MENU_SCREEN_THREAD_SLOT_TUTORIAL_TEXT, message_dialog_thread);
     thread_set_parameters(MENU_SCREEN_THREAD_SLOT_TUTORIAL_TEXT, 0x99,
         (s32)((u8*)(s_tutorial_command_ptr[2] * 0x100) + (s_tutorial_command_ptr[1] + 0xB800)), 0);
@@ -241,16 +273,18 @@ static void tutorial_opcode_10_display_message(void) {
     s_tutorial_command_ptr += 4;
 }
 
-/* Tutorial command: let the tutorial text continue and move on once its
+/* TUTORIAL_OPCODE_WAIT_FOR_MESSAGE (0x12)
+ * Let the tutorial text continue and move on once its
  * thread has ended. */
-static void tutorial_opcode_12_wait_for_message(void) {
+static void tutorial_opcode_wait_for_message(void) {
     menu_screen_text_resume_printing(MENU_SCREEN_THREAD_SLOT_TUTORIAL_TEXT);
     if (thread_is_running(MENU_SCREEN_THREAD_SLOT_TUTORIAL_TEXT) == 0) {
         s_tutorial_command_ptr++;
     }
 }
 
-/* Tutorial command: replace the dialog text once the current text has
+/* TUTORIAL_OPCODE_CHANGE_DIALOG (0x11)
+ * Replace the dialog text once the current text has
  * finished printing. Operands: two message-id bytes (little-endian, biased
  * by 0xB800) that are handed to the text thread as its second parameter.
  *
@@ -259,7 +293,7 @@ static void tutorial_opcode_12_wait_for_message(void) {
  * 2.6.3's fold re-associates `hi + (lo + 0xB800)` into `(hi + 0xB800) + lo`,
  * and the target adds the bias to the low byte first. Taking the address of
  * the operand fields preserves the -O0 byte-address steps. */
-static void tutorial_opcode_11_change_dialog(void) {
+static void tutorial_opcode_change_dialog(void) {
     if (menu_screen_text_is_printing(MENU_SCREEN_THREAD_SLOT_TUTORIAL_TEXT) != 1) {
         thread_set_parameters(MENU_SCREEN_THREAD_SLOT_TUTORIAL_TEXT, 0x99,
             (s32)((u8*)(s_tutorial_command_ptr[2] * 0x100) + (s_tutorial_command_ptr[1] + 0xB800)), 0);
@@ -270,7 +304,8 @@ static void tutorial_opcode_11_change_dialog(void) {
     }
 }
 
-/* Tutorial command: lay out the highlight ring. The two corner arrays the
+/* TUTORIAL_OPCODE_HIGHLIGHT_RING (0x13)
+ * Lay out the highlight ring. The two corner arrays the
  * draw routine consumes are filled with 30 samples of a circle centered on
  * the command's (x, y) operand bytes, at three radii -- outer (r + 8),
  * middle (r + 4) and inner (r) -- each scaled independently in x and y by
@@ -283,7 +318,7 @@ static void tutorial_opcode_11_change_dialog(void) {
  * turn on the GTE's ONE-unit circle, so sample 0 starts at the top. Taking
  * the address of the operand fields preserves the -O0 byte-address steps.
  */
-static void tutorial_opcode_13_highlight_ring(void) {
+static void tutorial_opcode_highlight_ring(void) {
     s32 radius;
     s32 outer_x;
     s32 outer_y;
@@ -332,7 +367,7 @@ static void tutorial_opcode_13_highlight_ring(void) {
  * command runs, the ring grows by one quad per VSync up to all 30, at full
  * brightness (18); WAIT then counts the brightness down to fade it out. */
 static void update_highlight(void) {
-    if (*s_tutorial_command_ptr != TUTORIAL_CMD_FADE_OUT_HIGHLIGHT) {
+    if (*s_tutorial_command_ptr != TUTORIAL_OPCODE_FADE_OUT_HIGHLIGHT) {
         s_tutorial_highlight_brightness = 0x12;
         s_tutorial_highlight_quad_count += menu_get_event_speed();
         if (s_tutorial_highlight_quad_count >= 0x1e) {
@@ -342,9 +377,10 @@ static void update_highlight(void) {
     draw_highlight(s_tutorial_highlight_brightness);
 }
 
-/* Tutorial command: fade the highlight out, counting its brightness down by the
+/* TUTORIAL_OPCODE_FADE_OUT_HIGHLIGHT (0x14)
+ * Fade the highlight out, counting its brightness down by the
  * VSync mode, and move to the next command when it reaches zero. */
-static void tutorial_opcode_14_fade_out_highlight(void) {
+static void tutorial_opcode_fade_out_highlight(void) {
     s_tutorial_highlight_brightness -= menu_get_event_speed();
     if (s_tutorial_highlight_brightness <= 0) {
         s_tutorial_highlight_brightness = 0;
@@ -381,10 +417,11 @@ static void draw_highlight(s32 brightness) {
     }
 }
 
-/* Tutorial command: wait the number of frames in the command's operand byte
+/* TUTORIAL_OPCODE_WAIT_TIME (0x15)
+ * Wait the number of frames in the command's operand byte
  * (counted by the VSync mode), then step past the two-byte command. Taking the
  * address of the operand field preserves the -O0 byte-address steps. */
-static void tutorial_opcode_15_wait_time(void) {
+static void tutorial_opcode_wait_time(void) {
     if (s_tutorial_command_active != 0) {
         s_tutorial_wait_time_remaining -= menu_get_event_speed();
         if (s_tutorial_wait_time_remaining < 0) {
@@ -397,9 +434,10 @@ static void tutorial_opcode_15_wait_time(void) {
     }
 }
 
-/* Tutorial command: advance on any button once the tutorial text thread has
+/* TUTORIAL_OPCODE_WAIT_FOR_BUTTON (0x16)
+ * Advance on any button once the tutorial text thread has
  * ended or has stopped printing. */
-static void tutorial_opcode_16_wait_for_button(void) {
+static void tutorial_opcode_wait_for_button(void) {
     s32 running = thread_is_running(MENU_SCREEN_THREAD_SLOT_TUTORIAL_TEXT);
 
     if (running == 0) {

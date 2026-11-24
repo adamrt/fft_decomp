@@ -142,7 +142,7 @@ typedef struct sprite_display {
     u16 scale_x;   /* 0x08; ONE is neutral scale */
     u16 scale_y;   /* 0x0a; ONE is neutral scale */
     /* 0x0c; turns the sprite about its origin, ONE to the turn. Each frame
-     * sets it from its header; ANIMATION_SEQ_OP_SET_ROTATION and _CLEAR_ROTATION
+     * sets it from its header; ANIMATION_SEQ_OPCODE_SET_ROTATION and _CLEAR_ROTATION
      * then replace it. */
     u16 rotation;
     sprite_display_part_t parts[0]; /* 0x0e; variable tail */

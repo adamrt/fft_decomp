@@ -247,7 +247,7 @@ extern s32* g_script_variables;
 extern s32 g_script_variable_storage[0x100];
 
 void script_variable_set(s32 variable_id, s32 value);
-void script_opcode_a0_a5_compare(event_opcode_e opcode);
+void script_opcode_compare(script_opcode_e opcode);
 
 /* Read through the resident scene's variable commands, preserving the comparison
  * result. Reading weather/time first rebuilds it from the separate variables. */

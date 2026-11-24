@@ -305,7 +305,7 @@ enum {
 
 /* Eight-byte terrain record: map_get_tile indexes
  * (layer * 256 + y * width + x) * 8. The SetTileHeight instruction
- * (EVENT_OPCODE_SET_TILE_HEIGHT) in script_execute_event modifies bytes 0, 2
+ * (SCRIPT_OPCODE_SET_TILE_HEIGHT) in script_execute_event modifies bytes 0, 2
  * and 6: it replaces the untargetable bit and clears the blocked bit. Its
  * bitfield accesses reproduce that handler's separate surface-byte reload and
  * flag-update order. */

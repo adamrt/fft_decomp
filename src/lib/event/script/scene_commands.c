@@ -172,6 +172,7 @@ void camera_clear_zoom_flag(void) {
 #define ABS(x) (x < 0 ? -(x) : x)
 
 /*
+ * SCRIPT_OPCODE_CAMERA (0x19)
  * The event CAMERA instruction (0x19) thread.
  *
  * The script supplies seven camera-component targets and a frame count; 10000
@@ -186,7 +187,7 @@ void camera_clear_zoom_flag(void) {
  * mode 1 and late mode 2 paths while first and elapsed are block-local, which
  * gives the target's s0-s3 assignment.
  */
-void script_opcode_19_camera_thread(void) {
+void script_opcode_camera_thread(void) {
     s32 target[EVENT_CAMERA_COMPONENT_COUNT + 1];
     s32 start[EVENT_CAMERA_COMPONENT_COUNT];
     s32 i;
@@ -361,12 +362,13 @@ void script_opcode_19_camera_thread(void) {
     thread_current_exit();
 }
 
-/* Thread body of MapDarkness: start the ambient-light blend described by the
+/* SCRIPT_OPCODE_MAP_DARKNESS (0x1a)
+ * Thread body of MapDarkness: start the ambient-light blend described by the
  * operands (blend mode, red, green, blue as s8, duration index), then keep the
  * thread alive under the MapDarkness task id for
  * g_script_map_darkness_durations[duration index] frames (1 to 256). WORLD's copy
  * also calls the BATTLE blend at 0x800934d0, which is WLDCORE data there. */
-void script_opcode_1a_map_darkness_thread(void) {
+void script_opcode_map_darkness_thread(void) {
     event_unit_color_t* parameters;
 
     thread_current_set_task(THREAD_TASK_MAP_DARKNESS);
@@ -377,10 +379,11 @@ void script_opcode_1a_map_darkness_thread(void) {
     thread_current_exit();
 }
 
-/* Thread body of Earthquake: each of the two pulses adds its z delta to the camera shake
+/* SCRIPT_OPCODE_EARTHQUAKE_START (0x41)
+ * Thread body of Earthquake: each of the two pulses adds its z delta to the camera shake
  * offset every pulses[k].frames frames, on independent counters. The thread never ends on
  * its own; another instruction tears it down. */
-void script_opcode_41_earthquake_start_thread(void) {
+void script_opcode_earthquake_start_thread(void) {
     event_earthquake_parameters_t* parameters;
     s32 first_counter;
     s32 second_counter;
@@ -404,10 +407,11 @@ void script_opcode_41_earthquake_start_thread(void) {
     }
 }
 
-/* Thread body of ColorScreen: blend the screen color modulation from the start RGB to the
+/* SCRIPT_OPCODE_COLOR_SCREEN (0x3e)
+ * Thread body of ColorScreen: blend the screen color modulation from the start RGB to the
  * end RGB over the duration in frames, restarting a 2-frame modulation fade every second
  * frame, then settle on the end color. */
-void script_opcode_3e_color_screen_thread(void) {
+void script_opcode_color_screen_thread(void) {
     struct {
         s32 start_and_end[6];
         s32 current[3];
@@ -447,8 +451,8 @@ void script_opcode_3e_color_screen_thread(void) {
 }
 
 /*
- * Sprite-move worker called by script_opcode_3b_sprite_move_thread (mode 0) and
- * script_opcode_6e_sprite_move_beta_thread (mode 1) with the script cursor: a unit
+ * Sprite-move worker called by script_opcode_sprite_move_thread (mode 0) and
+ * script_opcode_sprite_move_beta_thread (mode 1) with the script cursor: a unit
  * 16-bit value, three 16-bit destination coordinates, an easing byte, a weight byte and a
  * 16-bit value that is a frame count (mode 0) or a speed (mode 1). pos[0] is the
  * start, pos[1] the destination, pos[2] the current position and pos[3] the
@@ -587,26 +591,29 @@ static void run_sprite_move(const event_sprite_move_parameters_t* arg, s32 use_s
     }
 }
 
-/* Thread body of SpriteMove: run the sprite move with the last operand taken as a
+/* SCRIPT_OPCODE_SPRITE_MOVE (0x3b)
+ * Thread body of SpriteMove: run the sprite move with the last operand taken as a
  * frame count. */
-void script_opcode_3b_sprite_move_thread(void) {
+void script_opcode_sprite_move_thread(void) {
     thread_current_set_task(THREAD_TASK_SPRITE_MOVE);
     run_sprite_move((const event_sprite_move_parameters_t*)thread_current_get_parameter_1(), 0);
     thread_current_exit();
 }
 
-/* Thread body of SpriteMoveBeta: run the sprite move with the last operand taken
+/* SCRIPT_OPCODE_SPRITE_MOVE_BETA (0x6e)
+ * Thread body of SpriteMoveBeta: run the sprite move with the last operand taken
  * as a speed. */
-void script_opcode_6e_sprite_move_beta_thread(void) {
+void script_opcode_sprite_move_beta_thread(void) {
     thread_current_set_task(THREAD_TASK_SPRITE_MOVE);
     run_sprite_move((const event_sprite_move_parameters_t*)thread_current_get_parameter_1(), 1);
     thread_current_exit();
 }
 
-/* WaitSpriteMove: yield until no thread is still running the sprite-move task
+/* SCRIPT_OPCODE_WAIT_SPRITE_MOVE (0x6f)
+ * WaitSpriteMove: yield until no thread is still running the sprite-move task
  * for the calling event's sprite. A unit id that does not resolve has nothing
  * to wait for. */
-void script_opcode_6f_wait_sprite_move(s32 unit_id) {
+void script_opcode_wait_sprite_move(s32 unit_id) {
     s32 map_unit_id = script_resolve_map_unit_id(unit_id);
     s32 i;
 
@@ -633,12 +640,13 @@ static void copy_matrix(MATRIX* destination, const MATRIX* source) {
 }
 
 /*
+ * SCRIPT_OPCODE_MAP_LIGHT (0x1b)
  * Scenario thread task 7: interpolates the map light color and its three
  * light vectors from their current values to six script-supplied targets over
  * the script's frame count, rebuilding the GTE light matrix each frame, then
  * commits the final values back to the live light state.
  */
-void script_opcode_1b_map_light_thread(void) {
+void script_opcode_map_light_thread(void) {
     /* The instruction stores rotation XYZ followed by color scale RGB. */
     enum {
         LIGHT_ROTATION_X = 0,
@@ -792,7 +800,7 @@ void script_apply_relative_camera(event_camera_values_t* parameters, const s32* 
     s32 delta;
     s32 value;
 
-    if (((event_camera_instruction_t*)(parameters + 1))->opcode == EVENT_OPCODE_FOCUS_SPEED) {
+    if (((event_camera_instruction_t*)(parameters + 1))->opcode == SCRIPT_OPCODE_FOCUS_SPEED) {
         destination = ((event_camera_instruction_t*)((event_focus_speed_instruction_t*)(parameters + 1) + 1))
                           ->parameters.values.position_le[0];
     }
@@ -814,14 +822,15 @@ void script_apply_relative_camera(event_camera_values_t* parameters, const s32* 
     }
 }
 
-/* Focus: patch the next Camera instruction in the script to frame two units.
+/* SCRIPT_OPCODE_FOCUS (0x1f)
+ * Focus: patch the next Camera instruction in the script to frame two units.
  *
  * Its position becomes the units' midpoint scaled by 4 (the sum of both positions doubled),
  * with y offset by 0x20, and further when the first unit is Altima's second form or the
  * second unit Altima's first form. Unless keep_angle is set, its yaw becomes the nearest diagonal not
  * blocked at either unit's tile. When either unit is missing, the Camera instruction is
  * disabled and system error 7 is reported. */
-void script_opcode_1f_focus(event_focus_parameters_t* parameters) {
+void script_opcode_focus(event_focus_parameters_t* parameters) {
     s32 coords[2][4];
     s32 unit_a;
     s32 unit_b;
@@ -838,7 +847,7 @@ void script_opcode_1f_focus(event_focus_parameters_t* parameters) {
     cursor += sizeof(parameters->second_unit_id_le);
     keep_angle = *cursor;
     cursor++;
-    while (*cursor != EVENT_OPCODE_CAMERA) {
+    while (*cursor != SCRIPT_OPCODE_CAMERA) {
         cursor += g_script_event_instruction_sizes[*cursor] + 1;
     }
     cursor = ((event_camera_instruction_t*)cursor)->parameters.values.position_le[0];
@@ -848,7 +857,7 @@ void script_opcode_1f_focus(event_focus_parameters_t* parameters) {
     second = script_resolve_map_unit_id(unit_b);
     if (first == EVENT_MAP_UNIT_ID_NONE || second == EVENT_MAP_UNIT_ID_NONE) {
         ((event_camera_instruction_t*)(cursor - offsetof(event_camera_instruction_t, parameters)))->opcode
-            = EVENT_OPCODE_CAMERA_DISABLED;
+            = SCRIPT_OPCODE_CAMERA_DISABLED;
         system_report_error(7, 0);
         return;
     }
@@ -875,11 +884,12 @@ void script_opcode_1f_focus(event_focus_parameters_t* parameters) {
     }
 }
 
-/* FocusSpeed event instruction: derives the camera move duration from the
+/* SCRIPT_OPCODE_FOCUS_SPEED (0x38)
+ * FocusSpeed event instruction: derives the camera move duration from the
  * distance between the current and requested position/rotation and the speed.
  *
  * The original leaves rotation_sum uninitialized (s6 is never set). */
-void script_opcode_38_focus_speed(u8* parameters, s32* position, s32* rotation) {
+void script_opcode_focus_speed(u8* parameters, s32* position, s32* rotation) {
     s32 position_delta[4]; /* four slots: the target spaces the arrays 0x10 apart */
     s32 rotation_delta[4];
     s32 speed;
@@ -1027,12 +1037,13 @@ static s32 filter_unit_id(u16* out_id, u16* in_id, s32* mode) {
     }
 }
 
-/* TeleportOut: play the teleport sound and secondary effect on the unit, raise
+/* SCRIPT_OPCODE_TELEPORT_OUT (0x94)
+ * TeleportOut: play the teleport sound and secondary effect on the unit, raise
  * its hands, modulate its palette by +0x1f per channel, wait 60 frames, modulate
  * it by -0x1f and wait 60 frames more. Then, when `remove` is set, mark its
  * battle unit as not existing. A unit id that does not resolve does nothing. The
  * interpreter always passes remove = 1. */
-void script_opcode_94_teleport_out(s32 unit_id, s32 remove) {
+void script_opcode_teleport_out(s32 unit_id, s32 remove) {
     s32 map_unit_id = script_resolve_map_unit_id(unit_id);
     s32 battle_unit_id;
 
@@ -1053,9 +1064,10 @@ void script_opcode_94_teleport_out(s32 unit_id, s32 remove) {
     }
 }
 
-/* Start the teleport-in effect for an event unit. The interpreter supplies 1
+/* SCRIPT_OPCODE_TELEPORT_IN (0x98)
+ * Start the teleport-in effect for an event unit. The interpreter supplies 1
  * as its second argument; this entry forwards only the unit ID. */
-void script_opcode_98_teleport_in(s32 unit_id, s32 unused) {
+void script_opcode_teleport_in(s32 unit_id, s32 unused) {
     s32 map_unit_id = script_resolve_map_unit_id(unit_id);
 
     if (map_unit_id != EVENT_MAP_UNIT_ID_NONE) {
@@ -1088,12 +1100,13 @@ void script_blue_remove_all_enemy_units(void) {
     }
 }
 
-/* BlueRemoveUnit (event instruction 0x99): tints every non-player unit whose
+/* SCRIPT_OPCODE_BLUE_REMOVE_UNIT (0x99)
+ * BlueRemoveUnit (event instruction 0x99): tints every non-player unit whose
  * ENTD unit id is unit_id blue (red and green modulated by -0x1f).
  *
  * The team test reads the current team byte (0x05), not the initial one at
  * 0x1ba. */
-void script_opcode_99_blue_remove_unit(s32 unit_id) {
+void script_opcode_blue_remove_unit(s32 unit_id) {
     s32 map_unit_id;
     s32 battle_index;
     battle_unit_t* unit;
@@ -1122,12 +1135,13 @@ void script_opcode_99_blue_remove_unit(s32 unit_id) {
 }
 
 /*
+ * SCRIPT_OPCODE_WARP_UNIT (0x5f)
  * WarpUnit event instruction: move an ENTD unit to a new tile and facing.
  *
  * Parameters: 0x00 ENTD unit id (16-bit value), 0x02 x, 0x03 y, 0x04 higher
  * elevation, 0x05 facing.
  */
-void script_opcode_5f_warp_unit(const event_warp_unit_parameters_t* instruction) {
+void script_opcode_warp_unit(const event_warp_unit_parameters_t* instruction) {
     /* Separate instruction and placement pointers change register allocation. */
     union {
         const event_warp_unit_parameters_t* instruction;
@@ -1172,8 +1186,9 @@ void script_opcode_5f_warp_unit(const event_warp_unit_parameters_t* instruction)
     map_unit_set_event_facing(map_unit_id, cursor.placement->facing * 4);
 }
 
-/* Set facing and animation immediately; the animation high byte also controls facing-update suppression. */
-void script_opcode_8c_unit_anim_rotate(const event_unit_anim_rotate_parameters_t* parameters) {
+/* SCRIPT_OPCODE_UNIT_ANIM_ROTATE (0x8c)
+ * Set facing and animation immediately; the animation high byte also controls facing-update suppression. */
+void script_opcode_unit_anim_rotate(const event_unit_anim_rotate_parameters_t* parameters) {
     u8 rotation;
     s16 animation;
     s16 map_unit_id = script_read_s16(parameters->unit_id_le);
@@ -1195,7 +1210,9 @@ void script_opcode_8c_unit_anim_rotate(const event_unit_anim_rotate_parameters_t
     map_unit_set_event_animation(map_unit_id, animation);
 }
 
-/* FACE_UNIT and FACE_EACH_OTHER event instructions:
+/* SCRIPT_OPCODE_FACE_EACH_OTHER (0x2c)
+ * SCRIPT_OPCODE_FACE_UNIT (0x53)
+ * FACE_UNIT and FACE_EACH_OTHER event instructions:
  * turn two units toward each other.
  *
  * Parameters: first 16-bit unit id, second 16-bit unit id, rotate mode, speed index
@@ -1204,7 +1221,7 @@ void script_opcode_8c_unit_anim_rotate(const event_unit_anim_rotate_parameters_t
  * toward the second. Successive second-unit records are staggered like FaceTile.
  * The angle is built in place (negate, then add) so combine cannot fold the two
  * constant additions into one. */
-void script_opcode_2c_53_face_each_other(const event_face_unit_parameters_t* parameters, s32 second_only) {
+void script_opcode_face_units(const event_face_unit_parameters_t* parameters, s32 second_only) {
     SVECTOR position;
     SVECTOR target;
     u16 unit_id;
@@ -1262,7 +1279,8 @@ void script_opcode_2c_53_face_each_other(const event_face_unit_parameters_t* par
     }
 }
 
-/* RotateUnit event instruction: turn the addressed unit(s) to a facing.
+/* SCRIPT_OPCODE_ROTATE_UNIT (0x2d)
+ * RotateUnit event instruction: turn the addressed unit(s) to a facing.
  *
  * Parameters: 0x00 unit id (16-bit value), 0x02 facing code, 0x03 rotate mode,
  * 0x04 rotation speed (index into g_unit_rotation_speed_frames), 0x05 delay multiplier.
@@ -1273,7 +1291,7 @@ void script_opcode_2c_53_face_each_other(const event_face_unit_parameters_t* par
  * The restore arm carries its own copy of the filter_mode test, which is what
  * retail does: it reloads filter_mode and jumps past the absolute arm's own
  * reload, so cross-jumping merges only the branch and the loop increment. */
-void script_opcode_2d_rotate_unit(const event_rotate_unit_parameters_t* parameters) {
+void script_opcode_rotate_unit(const event_rotate_unit_parameters_t* parameters) {
     u16 unit_id;
     s32 filter_mode;
     s32 i;
@@ -1681,12 +1699,13 @@ static void change_event_unit_status(s32 event_unit_id, s32 status, s32 which, s
     thread_call_on_main_stack(battle_unit_id, removal_only);
 }
 
-/* ChangeStats event instruction: add a signed delta to one stat of each
+/* SCRIPT_OPCODE_CHANGE_STATS (0x83)
+ * ChangeStats event instruction: add a signed delta to one stat of each
  * resolved unit.
  *
  * Parameters: 16-bit unit id, stat selector (event_change_stats_e), then a
  * 16-bit delta. HP clamps to max HP and the other stats to 0-100. */
-void script_opcode_83_change_stats(const event_change_stats_parameters_t* parameters) {
+void script_opcode_change_stats(const event_change_stats_parameters_t* parameters) {
     u16 unit_id;
     s32 filter_mode;
     s32 unit_index;
@@ -1735,11 +1754,12 @@ void script_opcode_83_change_stats(const event_change_stats_parameters_t* parame
 }
 
 /*
+ * SCRIPT_OPCODE_UNIT_ANIM (0x11)
  * UnitAnim event instruction.  Parameters: 0x00 unit id
  * (16-bit value), 0x02 animation id (16-bit value), 0x04 facing-update mode (0 allow,
  * 1 suppress; other values leave it unchanged). Units are selected as prepare_unit_filter describes.
  */
-void script_opcode_11_unit_anim(const event_unit_anim_parameters_t* parameters) {
+void script_opcode_unit_anim(const event_unit_anim_parameters_t* parameters) {
     u16 unit_id = script_read_s16(parameters->unit_id_le);
     s32 filter_mode;
     s32 unit_index;
@@ -1770,11 +1790,12 @@ void script_opcode_11_unit_anim(const event_unit_anim_parameters_t* parameters) 
 }
 
 /*
- * Event instruction: put the addressed unit(s) into their status idle
+ * SCRIPT_OPCODE_MARCH (0x80)
+ * Put the addressed unit(s) into their status idle
  * animation and wait.  Parameters: 0x00 unit id (16-bit value), 0x02 wait length
  * in frames. Units are selected as prepare_unit_filter describes.
  */
-void script_opcode_80_march(const event_march_parameters_t* parameters) {
+void script_opcode_march(const event_march_parameters_t* parameters) {
     u16 unit_id = script_read_s16(parameters->unit_id_le);
     s32 filter_mode;
     s32 unit_index;
@@ -1794,11 +1815,12 @@ void script_opcode_80_march(const event_march_parameters_t* parameters) {
 }
 
 /*
- * Event instruction: set or clear movement-effect suppression on the addressed unit(s).
+ * SCRIPT_OPCODE_SET_UNIT_MOVEMENT_EFFECT_SUPPRESSION (0x81)
+ * Set or clear movement-effect suppression on the addressed unit(s).
  * Parameters: 0x00 unit id (16-bit value), 0x02 nonzero to set, zero to clear.
  * Units are selected as prepare_unit_filter describes.
  */
-void script_opcode_81_set_unit_movement_effect_suppression(const event_movement_effect_parameters_t* parameters) {
+void script_opcode_set_unit_movement_effect_suppression(const event_movement_effect_parameters_t* parameters) {
     u16 unit_id = script_read_s16(parameters->unit_id_le);
     s32 filter_mode;
     s32 unit_index;
@@ -1819,14 +1841,15 @@ void script_opcode_81_set_unit_movement_effect_suppression(const event_movement_
     }
 }
 
-/* ColorUnit: start a palette modulation on a unit or a unit group.
+/* SCRIPT_OPCODE_COLOR_UNIT (0x32)
+ * ColorUnit: start a palette modulation on a unit or a unit group.
  *
  * Operands: unit id or group (16-bit value), blend mode, red, green, blue (s8 each)
  * and a time. A plain unit id colors that one unit; id 0 and the group ids from
  * EVENT_UNIT_GROUP_FIRST run all 21 unit ids through
  * filter_unit_id. Nothing happens when a plain unit id does
  * not resolve. */
-void script_opcode_32_color_unit(const event_color_unit_parameters_t* parameters) {
+void script_opcode_color_unit(const event_color_unit_parameters_t* parameters) {
     const event_unit_color_t* color;
     u16 unit_id = script_read_s16(parameters->unit_id_le);
     s32 filter_mode;
@@ -1846,13 +1869,15 @@ void script_opcode_32_color_unit(const event_color_unit_parameters_t* parameters
     }
 }
 
-/* Event instructions 0x6c (enable 0) and 0x6d (enable 1): clear or set
+/* SCRIPT_OPCODE_RESUME_UNIT_PALETTE_UPDATES (0x6c)
+ * SCRIPT_OPCODE_SUPPRESS_UNIT_PALETTE_UPDATES (0x6d)
+ * Clear or set
  * palette-update suppression on the event unit, or on every unit its group
  * mode selects.
  *
  * 0x80149698 stores a0 directly as a 16-bit value. The interpreter passes a
  * zero-extended 32-bit value; signed argument normalization is not part of this ABI. */
-void script_opcode_6c_6d_set_unit_palette_updates(s32 event_unit_id, s32 enable) {
+void script_opcode_set_unit_palette_updates(s32 event_unit_id, s32 enable) {
     u16 unit_id = event_unit_id;
     s32 filter_mode;
     s32 i;
@@ -1889,7 +1914,8 @@ s32 map_unit_is_facing_away_from_camera_by_event_unit_id(s32 event_unit_id) {
 }
 
 /*
- * Event instruction 0x69 (FaceTile): turn the addressed unit(s) to face a tile.
+ * SCRIPT_OPCODE_FACE_TILE (0x69)
+ * Turn the addressed unit(s) to face a tile.
  *
  * Parameters: 0x00 unit id (16-bit value), 0x02 tile x, 0x03 tile y, 0x04 unused,
  * 0x05 clockwise flag, 0x06 rotation speed (index into g_unit_rotation_speed_frames), 0x07
@@ -1897,7 +1923,7 @@ s32 map_unit_is_facing_away_from_camera_by_event_unit_id(s32 event_unit_id) {
  * tile center to pick one of 16 facings; the n-th matching unit gets
  * rotation time * n / 4.
  */
-void script_opcode_69_face_tile(const event_face_tile_parameters_t* parameters) {
+void script_opcode_face_tile(const event_face_tile_parameters_t* parameters) {
     SVECTOR world_position;
     SVECTOR tile;
     u16 unit_id;
@@ -1935,8 +1961,10 @@ void script_opcode_69_face_tile(const event_face_tile_parameters_t* parameters) 
     }
 }
 
-/* WaitRotateUnit/All: resolved units yield at least once; -1 waits for all 21 slots. */
-void script_opcode_64_65_wait_rotate(s32 unit_id) {
+/* SCRIPT_OPCODE_WAIT_ROTATE_UNIT (0x64)
+ * SCRIPT_OPCODE_WAIT_ROTATE_ALL (0x65)
+ * WaitRotateUnit/All: resolved units yield at least once; -1 waits for all 21 slots. */
+void script_opcode_wait_rotate(s32 unit_id) {
     s32 i;
     s32 index;
 

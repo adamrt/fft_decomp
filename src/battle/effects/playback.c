@@ -626,7 +626,7 @@ extern effect_callback_t g_effect_native_callbacks[EFFECT_NATIVE_CALLBACK_COUNT]
 extern effect_callback_t g_effect_callback_slots[];
 
 /* Written by effect-script opcode 05; no game source reads it. */
-extern u16 g_effect_script_opcode_05_value;
+extern u16 g_effect_opcode_store_high_nibble_value;
 
 static void free_script_instance(s16 record_index);
 
@@ -1059,7 +1059,7 @@ static s32 update_playback_phase(void) {
         unit_view_hide_tile_depth();
         upload_palette_and_texture(g_effect_id);
         s_effect_playback_phase = EFFECT_PLAYBACK_PHASE_START_SCRIPT;
-        g_effect_script_opcode_05_value = 0;
+        g_effect_opcode_store_high_nibble_value = 0;
         system_reset_frame_pacing();
         result = 1;
         break;
@@ -1306,31 +1306,35 @@ static s16 start_script_instance(const u8* script, s16 start_pc, s16 parent_inde
     return index;
 }
 
-/* Handler for opcodes 2e-77: calls the empty stub reporter and returns no defined value. In retail
+/* EFFECT_OPCODE_INVALID (0x2e)
+ * Also every opcode after it through 0x77: calls the empty stub reporter and returns no defined value. In retail
  * $v0 still holds this handler's address, which run_script_instance treats as 'continue'
  * without the pc moving, so an invalid opcode hangs the script loop. */
-effect_script_result_e effect_script_opcode_2e_invalid(effect_record_t* unused_record) {
+effect_script_result_e effect_opcode_invalid(effect_record_t* unused_record) {
     system_report(1, 0x22);
     /* Retail leaves the dispatch result undefined after an invalid opcode. */
 }
 
-/* Opcode 00: jump to the script offset in the second 16-bit value and end the
+/* EFFECT_OPCODE_JUMP_AND_YIELD (0x00)
+ * Jump to the script offset in the second 16-bit value and end the
  * record's run for this frame. */
-effect_script_result_e effect_script_opcode_00_jump_and_yield(effect_record_t* record) {
+effect_script_result_e effect_opcode_jump_and_yield(effect_record_t* record) {
     record->pc = get_current_script_instruction(record)->immediate.value;
     return EFFECT_SCRIPT_RESULT_YIELD;
 }
 
-/* Opcode 01: jump to the script offset in the second 16-bit value. */
-effect_script_result_e effect_script_opcode_01_jump(effect_record_t* record) {
+/* EFFECT_OPCODE_JUMP (0x01)
+ * Jump to the script offset in the second 16-bit value. */
+effect_script_result_e effect_opcode_jump(effect_record_t* record) {
     record->pc = get_current_script_instruction(record)->immediate.value;
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
-/* Opcode 02: start a child record at the script offset in the second 16-bit value, parented to the
+/* EFFECT_OPCODE_SPAWN_CHILD (0x02)
+ * Start a child record at the script offset in the second 16-bit value, parented to the
  * running record, and keep its index in the child slot named by the high nibble of the second
  * byte; slots above 3 are not kept. */
-effect_script_result_e effect_script_opcode_02_spawn_child(effect_record_t* record) {
+effect_script_result_e effect_opcode_spawn_child(effect_record_t* record) {
     effect_script_parameters_t parameters;
     s16 slot;
     s16 child;
@@ -1346,9 +1350,10 @@ effect_script_result_e effect_script_opcode_02_spawn_child(effect_record_t* reco
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
-/* Opcode 03: free the child record in the child slot named by bits 4-5 of
+/* EFFECT_OPCODE_FREE_CHILD (0x03)
+ * Free the child record in the child slot named by bits 4-5 of
  * the instruction's second byte. */
-effect_script_result_e effect_script_opcode_03_free_child(effect_record_t* record) {
+effect_script_result_e effect_opcode_free_child(effect_record_t* record) {
     const effect_script_instruction_t* instruction = get_current_script_instruction(record);
     effect_script_parameters_t parameters = instruction->header.parameters;
     s16 child = record->child_indices[parameters.free_child.slot];
@@ -1358,27 +1363,30 @@ effect_script_result_e effect_script_opcode_03_free_child(effect_record_t* recor
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
-/* Opcode 04: end the script; run_script_instance's caller then frees the
+/* EFFECT_OPCODE_END (0x04)
+ * End the script; run_script_instance's caller then frees the
  * record. */
-effect_script_result_e effect_script_opcode_04_end(effect_record_t* unused_record) {
+effect_script_result_e effect_opcode_end(effect_record_t* unused_record) {
     return EFFECT_SCRIPT_RESULT_ABORT;
 }
 
-/* Opcode 05: store the high nibble of the instruction's second byte.
+/* EFFECT_OPCODE_STORE_HIGH_NIBBLE (0x05)
+ * Store the high nibble of the instruction's second byte.
  * Retail clears this global before the script runs but never reads it. */
-effect_script_result_e effect_script_opcode_05_store_high_nibble(effect_record_t* record) {
+effect_script_result_e effect_opcode_store_high_nibble(effect_record_t* record) {
     const effect_script_instruction_t* instruction = get_current_script_instruction(record);
 
     effect_script_parameters_t parameters = instruction->header.parameters;
-    g_effect_script_opcode_05_value = parameters.opcode_05.high_nibble;
+    g_effect_opcode_store_high_nibble_value = parameters.opcode_05.high_nibble;
     record->pc += 2;
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
-/* Opcode 06: put the native callback whose catalog id is the second 16-bit value in the
+/* EFFECT_OPCODE_REGISTER_NATIVE_CALLBACK (0x06)
+ * Put the native callback whose catalog id is the second 16-bit value in the
  * callback slot named by the top six bits of the instruction's second byte.
  * A particle keyframe whose action names the slot binds it to the record. */
-effect_script_result_e effect_script_opcode_06_register_native_callback(effect_record_t* record) {
+effect_script_result_e effect_opcode_register_native_callback(effect_record_t* record) {
     const effect_script_instruction_t* command = get_current_script_instruction(record);
     effect_script_parameters_t parameters = command->header.parameters;
     u32 slot = parameters.callback.slot;
@@ -1387,10 +1395,11 @@ effect_script_result_e effect_script_opcode_06_register_native_callback(effect_r
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
-/* Opcode 07: call the native callback whose catalog id is the second 16-bit value with
+/* EFFECT_OPCODE_CALL_NATIVE_CALLBACK (0x07)
+ * Call the native callback whose catalog id is the second 16-bit value with
  * the record index and the top six bits of the instruction's second byte as
  * its callback slot, and remember it in the record. */
-effect_script_result_e effect_script_opcode_07_call_native_callback(effect_record_t* record) {
+effect_script_result_e effect_opcode_call_native_callback(effect_record_t* record) {
     const effect_script_instruction_t* command = get_current_script_instruction(record);
     effect_script_parameters_t parameters = command->header.parameters;
     u32 slot = parameters.callback.slot;
@@ -1401,9 +1410,10 @@ effect_script_result_e effect_script_opcode_07_call_native_callback(effect_recor
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
-/* Opcode 08: move the camera to the position in the three 16-bit values that
+/* EFFECT_OPCODE_SET_CAMERA_POSITION (0x08)
+ * Move the camera to the position in the three 16-bit values that
  * follow (x, y, z in world units). */
-effect_script_result_e effect_script_opcode_08_set_camera_position(effect_record_t* record) {
+effect_script_result_e effect_opcode_set_camera_position(effect_record_t* record) {
     VECTOR coords;
 
     /* Opcodes 08, 0b and 0e find the instruction again for each component: the bytes reload it. */
@@ -1414,22 +1424,25 @@ effect_script_result_e effect_script_opcode_08_set_camera_position(effect_record
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
-/* Opcode 09: save the camera position (opcode 0a restores it). */
-effect_script_result_e effect_script_opcode_09_save_camera_position(effect_record_t* record) {
+/* EFFECT_OPCODE_SAVE_CAMERA_POSITION (0x09)
+ * Save the camera position (opcode 0a restores it). */
+effect_script_result_e effect_opcode_save_camera_position(effect_record_t* record) {
     camera_save_real_coords();
     record->pc += 2;
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
-/* Opcode 0a: restore the camera position opcode 09 saved. */
-effect_script_result_e effect_script_opcode_0a_restore_camera_position(effect_record_t* record) {
+/* EFFECT_OPCODE_RESTORE_CAMERA_POSITION (0x0a)
+ * Restore the camera position opcode 09 saved. */
+effect_script_result_e effect_opcode_restore_camera_position(effect_record_t* record) {
     camera_restore_real_coords();
     record->pc += 2;
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
-/* Opcode 0b: set the camera rotation from the three 16-bit values that follow. */
-effect_script_result_e effect_script_opcode_0b_set_camera_rotation(effect_record_t* record) {
+/* EFFECT_OPCODE_SET_CAMERA_ROTATION (0x0b)
+ * Set the camera rotation from the three 16-bit values that follow. */
+effect_script_result_e effect_opcode_set_camera_rotation(effect_record_t* record) {
     SVECTOR rotation;
 
     setVector(&rotation, get_current_script_instruction(record)->vector.x,
@@ -1439,23 +1452,26 @@ effect_script_result_e effect_script_opcode_0b_set_camera_rotation(effect_record
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
-/* Opcode 0c: save the camera rotation (opcode 0d restores it). */
-effect_script_result_e effect_script_opcode_0c_save_camera_rotation(effect_record_t* record) {
+/* EFFECT_OPCODE_SAVE_CAMERA_ROTATION (0x0c)
+ * Save the camera rotation (opcode 0d restores it). */
+effect_script_result_e effect_opcode_save_camera_rotation(effect_record_t* record) {
     camera_save_rotation();
     record->pc += 2;
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
-/* Opcode 0d: restore the camera rotation opcode 0c saved. */
-effect_script_result_e effect_script_opcode_0d_restore_camera_rotation(effect_record_t* record) {
+/* EFFECT_OPCODE_RESTORE_CAMERA_ROTATION (0x0d)
+ * Restore the camera rotation opcode 0c saved. */
+effect_script_result_e effect_opcode_restore_camera_rotation(effect_record_t* record) {
     camera_restore_rotation();
     record->pc += 2;
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
-/* Opcode 0e: set the camera zoom from the three 16-bit values that follow (ONE is
+/* EFFECT_OPCODE_SET_CAMERA_ZOOM (0x0e)
+ * Set the camera zoom from the three 16-bit values that follow (ONE is
  * no zoom). */
-effect_script_result_e effect_script_opcode_0e_set_camera_zoom(effect_record_t* record) {
+effect_script_result_e effect_opcode_set_camera_zoom(effect_record_t* record) {
     VECTOR zoom;
 
     setVector(&zoom, get_current_script_instruction(record)->vector.x, get_current_script_instruction(record)->vector.y,
@@ -1465,16 +1481,18 @@ effect_script_result_e effect_script_opcode_0e_set_camera_zoom(effect_record_t* 
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
-/* Opcode 0f: save the camera zoom (opcode 24 restores it). */
-effect_script_result_e effect_script_opcode_0f_save_camera_zoom(effect_record_t* record) {
+/* EFFECT_OPCODE_SAVE_CAMERA_ZOOM (0x0f)
+ * Save the camera zoom (opcode 24 restores it). */
+effect_script_result_e effect_opcode_save_camera_zoom(effect_record_t* record) {
     camera_save_zoom();
     record->pc += 2;
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
-/* Opcode 10: set the counter selected by the top two bits of the
+/* EFFECT_OPCODE_SET_SELECTED_COUNTER (0x10)
+ * Set the counter selected by the top two bits of the
  * instruction's second byte to the second 16-bit value. */
-effect_script_result_e effect_script_opcode_10_set_selected_counter(effect_record_t* record) {
+effect_script_result_e effect_opcode_set_selected_counter(effect_record_t* record) {
     effect_script_parameters_t parameters;
     const effect_script_instruction_t* instruction = get_current_script_instruction(record);
 
@@ -1484,10 +1502,11 @@ effect_script_result_e effect_script_opcode_10_set_selected_counter(effect_recor
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
-/* Opcode 11: jump to the offset in the third 16-bit value when the counter
+/* EFFECT_OPCODE_JUMP_IF_COUNTER_EQUAL (0x11)
+ * Jump to the offset in the third 16-bit value when the counter
  * selected by the top two bits of the second byte equals the second 16-bit value;
  * otherwise step over the 6-byte instruction. */
-effect_script_result_e effect_script_opcode_11_jump_if_counter_equal(effect_record_t* record) {
+effect_script_result_e effect_opcode_jump_if_counter_equal(effect_record_t* record) {
     const effect_script_instruction_t* instruction = get_current_script_instruction(record);
     effect_script_parameters_t parameters = instruction->header.parameters;
     if (record->counters[parameters.counter.slot] == instruction->branch.comparison) {
@@ -1498,10 +1517,11 @@ effect_script_result_e effect_script_opcode_11_jump_if_counter_equal(effect_reco
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
-/* Opcode 12: jump to the offset in the third 16-bit value when the counter selected by the top two
+/* EFFECT_OPCODE_JUMP_IF_COUNTER_AT_LEAST (0x12)
+ * Jump to the offset in the third 16-bit value when the counter selected by the top two
  * bits of the second byte is at least the second 16-bit value; otherwise step over the 6-byte
  * instruction. */
-effect_script_result_e effect_script_opcode_12_jump_if_counter_at_least(effect_record_t* record) {
+effect_script_result_e effect_opcode_jump_if_counter_at_least(effect_record_t* record) {
     const effect_script_instruction_t* instruction = get_current_script_instruction(record);
     effect_script_parameters_t parameters = instruction->header.parameters;
     if (record->counters[parameters.counter.slot] >= instruction->branch.comparison) {
@@ -1512,10 +1532,11 @@ effect_script_result_e effect_script_opcode_12_jump_if_counter_at_least(effect_r
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
-/* Opcode 13: jump to the offset in the third 16-bit value when the counter
+/* EFFECT_OPCODE_JUMP_IF_COUNTER_GREATER (0x13)
+ * Jump to the offset in the third 16-bit value when the counter
  * selected by the top two bits of the second byte exceeds the second
  * 16-bit value; otherwise step over the 6-byte instruction. */
-effect_script_result_e effect_script_opcode_13_jump_if_counter_greater(effect_record_t* record) {
+effect_script_result_e effect_opcode_jump_if_counter_greater(effect_record_t* record) {
     const effect_script_instruction_t* instruction = get_current_script_instruction(record);
     effect_script_parameters_t parameters = instruction->header.parameters;
     if (record->counters[parameters.counter.slot] > instruction->branch.comparison) {
@@ -1526,10 +1547,11 @@ effect_script_result_e effect_script_opcode_13_jump_if_counter_greater(effect_re
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
-/* Opcode 14: jump to the offset in the third 16-bit value when the counter
+/* EFFECT_OPCODE_JUMP_IF_COUNTER_AT_MOST (0x14)
+ * Jump to the offset in the third 16-bit value when the counter
  * selected by the top two bits of the second byte is at most the second
  * 16-bit value; otherwise step over the 6-byte instruction. */
-effect_script_result_e effect_script_opcode_14_jump_if_counter_at_most(effect_record_t* record) {
+effect_script_result_e effect_opcode_jump_if_counter_at_most(effect_record_t* record) {
     const effect_script_instruction_t* instruction = get_current_script_instruction(record);
     effect_script_parameters_t parameters = instruction->header.parameters;
     if (record->counters[parameters.counter.slot] <= instruction->branch.comparison) {
@@ -1540,10 +1562,11 @@ effect_script_result_e effect_script_opcode_14_jump_if_counter_at_most(effect_re
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
-/* Opcode 15: jump to the offset in the third 16-bit value when the counter
+/* EFFECT_OPCODE_JUMP_IF_COUNTER_LESS (0x15)
+ * Jump to the offset in the third 16-bit value when the counter
  * selected by the top two bits of the second byte is below the second
  * 16-bit value; otherwise step over the 6-byte instruction. */
-effect_script_result_e effect_script_opcode_15_jump_if_counter_less(effect_record_t* record) {
+effect_script_result_e effect_opcode_jump_if_counter_less(effect_record_t* record) {
     const effect_script_instruction_t* instruction = get_current_script_instruction(record);
     effect_script_parameters_t parameters = instruction->header.parameters;
     if (record->counters[parameters.counter.slot] < instruction->branch.comparison) {
@@ -1554,10 +1577,11 @@ effect_script_result_e effect_script_opcode_15_jump_if_counter_less(effect_recor
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
-/* Opcode 16: jump to the offset in the third 16-bit value when the record has exactly as many
+/* EFFECT_OPCODE_JUMP_IF_PARTICLE_COUNT_EQUAL (0x16)
+ * Jump to the offset in the third 16-bit value when the record has exactly as many
  * particles as the second 16-bit value; otherwise step over the 6-byte instruction. Retail scripts
  * test 0 to end once the last particle is gone. */
-effect_script_result_e effect_script_opcode_16_jump_if_particle_count_equal(effect_record_t* record) {
+effect_script_result_e effect_opcode_jump_if_particle_count_equal(effect_record_t* record) {
     const effect_script_instruction_t* instruction = get_current_script_instruction(record);
     if (record->work_count == instruction->branch.comparison) {
         record->pc = instruction->branch.target_offset;
@@ -1567,10 +1591,11 @@ effect_script_result_e effect_script_opcode_16_jump_if_particle_count_equal(effe
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
-/* Opcode 17: jump to the offset in the third 16-bit value when the record has
+/* EFFECT_OPCODE_JUMP_IF_PARTICLE_COUNT_GREATER (0x17)
+ * Jump to the offset in the third 16-bit value when the record has
  * more particles than the second 16-bit value says; otherwise step over the
  * 6-byte instruction. */
-effect_script_result_e effect_script_opcode_17_jump_if_particle_count_greater(effect_record_t* record) {
+effect_script_result_e effect_opcode_jump_if_particle_count_greater(effect_record_t* record) {
     const effect_script_instruction_t* instruction = get_current_script_instruction(record);
     if (instruction->branch.comparison < record->work_count) {
         record->pc = instruction->branch.target_offset;
@@ -1580,10 +1605,11 @@ effect_script_result_e effect_script_opcode_17_jump_if_particle_count_greater(ef
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
-/* Opcode 18: jump to the offset in the third 16-bit value when the record has
+/* EFFECT_OPCODE_JUMP_IF_PARTICLE_COUNT_LESS (0x18)
+ * Jump to the offset in the third 16-bit value when the record has
  * fewer particles than the second 16-bit value says; otherwise step over the
  * 6-byte instruction. */
-effect_script_result_e effect_script_opcode_18_jump_if_particle_count_less(effect_record_t* record) {
+effect_script_result_e effect_opcode_jump_if_particle_count_less(effect_record_t* record) {
     const effect_script_instruction_t* instruction = get_current_script_instruction(record);
     if (record->work_count < instruction->branch.comparison) {
         record->pc = instruction->branch.target_offset;
@@ -1593,10 +1619,11 @@ effect_script_result_e effect_script_opcode_18_jump_if_particle_count_less(effec
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
-/* Opcode 19: jump to the offset in the third 16-bit value when the number of
+/* EFFECT_OPCODE_JUMP_IF_CHILD_COUNT_EQUAL (0x19)
+ * Jump to the offset in the third 16-bit value when the number of
  * occupied child slots equals the second 16-bit value; otherwise step over the
  * 6-byte instruction. */
-effect_script_result_e effect_script_opcode_19_jump_if_child_count_equal(effect_record_t* record) {
+effect_script_result_e effect_opcode_jump_if_child_count_equal(effect_record_t* record) {
     s16 i;
     s16 count;
     s16 target = get_current_script_instruction(record)->branch.comparison;
@@ -1615,9 +1642,10 @@ effect_script_result_e effect_script_opcode_19_jump_if_child_count_equal(effect_
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
-/* Opcode 1a: jump to the offset in the second 16-bit value when the child slot named by the second
+/* EFFECT_OPCODE_JUMP_IF_CHILD_ACTIVE (0x1a)
+ * Jump to the offset in the second 16-bit value when the child slot named by the second
  * byte's high nibble holds a record; otherwise step over the 4-byte instruction. */
-effect_script_result_e effect_script_opcode_1a_jump_if_child_active(effect_record_t* record) {
+effect_script_result_e effect_opcode_jump_if_child_active(effect_record_t* record) {
     effect_script_parameters_t parameters;
     const effect_script_instruction_t* instruction = get_current_script_instruction(record);
 
@@ -1630,10 +1658,11 @@ effect_script_result_e effect_script_opcode_1a_jump_if_child_active(effect_recor
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
-/* Opcode 1b: jump to the offset in the second 16-bit value when the child slot
+/* EFFECT_OPCODE_JUMP_IF_CHILD_INACTIVE (0x1b)
+ * Jump to the offset in the second 16-bit value when the child slot
  * named by the second byte's high nibble is empty; otherwise step over the
  * 4-byte instruction. */
-effect_script_result_e effect_script_opcode_1b_jump_if_child_inactive(effect_record_t* record) {
+effect_script_result_e effect_opcode_jump_if_child_inactive(effect_record_t* record) {
     effect_script_parameters_t parameters;
     const effect_script_instruction_t* instruction = get_current_script_instruction(record);
 
@@ -1646,10 +1675,11 @@ effect_script_result_e effect_script_opcode_1b_jump_if_child_inactive(effect_rec
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
-/* Opcode 1c: jump to the offset in the third 16-bit value when the counter
+/* EFFECT_OPCODE_JUMP_IF_COUNTER_NOT_EQUAL (0x1c)
+ * Jump to the offset in the third 16-bit value when the counter
  * selected by the second byte's top two bits differs from the second
  * 16-bit value; otherwise step over the 6-byte instruction. */
-effect_script_result_e effect_script_opcode_1c_jump_if_counter_not_equal(effect_record_t* record) {
+effect_script_result_e effect_opcode_jump_if_counter_not_equal(effect_record_t* record) {
     effect_script_parameters_t parameters;
     const effect_script_instruction_t* instruction = get_current_script_instruction(record);
 
@@ -1662,10 +1692,11 @@ effect_script_result_e effect_script_opcode_1c_jump_if_counter_not_equal(effect_
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
-/* Opcode 1d: jump to the offset in the second 16-bit value once the record's
+/* EFFECT_OPCODE_JUMP_AFTER_CHILD_TIMELINE_DURATION (0x1d)
+ * Jump to the offset in the second 16-bit value once the record's
  * timeline frame reaches the child timeline's duration; otherwise step over
  * the 4-byte instruction. */
-effect_script_result_e effect_script_opcode_1d_jump_after_child_timeline_duration(effect_record_t* record) {
+effect_script_result_e effect_opcode_jump_after_child_timeline_duration(effect_record_t* record) {
     if (record->timeline.frame >= g_effect_child_timeline->duration) {
         const effect_script_instruction_t* instruction = get_current_script_instruction(record);
 
@@ -1676,11 +1707,12 @@ effect_script_result_e effect_script_opcode_1d_jump_after_child_timeline_duratio
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
-/* Opcode 1e: jump to the offset in the second 16-bit value once the record's
+/* EFFECT_OPCODE_JUMP_AFTER_TOTAL_DURATION (0x1e)
+ * Jump to the offset in the second 16-bit value once the record's
  * timeline frame reaches the end of the parent timeline (phase 1, a spawn
  * delay for each target after the first, the last child's duration and phase
  * 2); otherwise step over the 4-byte instruction. */
-effect_script_result_e effect_script_opcode_1e_jump_after_total_duration(effect_record_t* record) {
+effect_script_result_e effect_opcode_jump_after_total_duration(effect_record_t* record) {
     effect_timeline_t* timing = g_effect_timeline;
 
     if (record->timeline.frame >= timing->phase1_duration + timing->phase2_duration
@@ -1694,9 +1726,10 @@ effect_script_result_e effect_script_opcode_1e_jump_after_total_duration(effect_
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
-/* Opcode 1f: jump when the target count equals the header's six-bit selector.
+/* EFFECT_OPCODE_JUMP_IF_TARGET_COUNT_EQUAL (0x1f)
+ * Jump when the target count equals the header's six-bit selector.
  * Retail scripts use zero to end an effect with no targets. */
-effect_script_result_e effect_script_opcode_1f_jump_if_target_count_equal(effect_record_t* record) {
+effect_script_result_e effect_opcode_jump_if_target_count_equal(effect_record_t* record) {
     const effect_script_instruction_t* instruction = get_current_script_instruction(record);
     effect_script_parameters_t parameters = instruction->header.parameters;
     if (g_effect_context.target_count == parameters.targets.count) {
@@ -1707,9 +1740,10 @@ effect_script_result_e effect_script_opcode_1f_jump_if_target_count_equal(effect
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
-/* Opcode 20: add 1 to the counter selected by the top two bits of the
+/* EFFECT_OPCODE_INCREMENT_SELECTED_COUNTER (0x20)
+ * Add 1 to the counter selected by the top two bits of the
  * instruction's second byte. */
-effect_script_result_e effect_script_opcode_20_increment_selected_counter(effect_record_t* record) {
+effect_script_result_e effect_opcode_increment_selected_counter(effect_record_t* record) {
     effect_script_parameters_t parameters;
 
     parameters = get_current_script_instruction(record)->header.parameters;
@@ -1718,9 +1752,10 @@ effect_script_result_e effect_script_opcode_20_increment_selected_counter(effect
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
-/* Opcode 21: subtract 1 from the counter selected by the top two bits of the
+/* EFFECT_OPCODE_DECREMENT_SELECTED_COUNTER (0x21)
+ * Subtract 1 from the counter selected by the top two bits of the
  * instruction's second byte. */
-effect_script_result_e effect_script_opcode_21_decrement_selected_counter(effect_record_t* record) {
+effect_script_result_e effect_opcode_decrement_selected_counter(effect_record_t* record) {
     effect_script_parameters_t parameters;
 
     parameters = get_current_script_instruction(record)->header.parameters;
@@ -1729,9 +1764,10 @@ effect_script_result_e effect_script_opcode_21_decrement_selected_counter(effect
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
-/* Opcode 22: add the second 16-bit value to the counter selected by the top two
+/* EFFECT_OPCODE_ADD_IMMEDIATE_TO_SELECTED_COUNTER (0x22)
+ * Add the second 16-bit value to the counter selected by the top two
  * bits of the instruction's second byte. */
-effect_script_result_e effect_script_opcode_22_add_immediate_to_selected_counter(effect_record_t* record) {
+effect_script_result_e effect_opcode_add_immediate_to_selected_counter(effect_record_t* record) {
     effect_script_parameters_t parameters;
     const effect_script_instruction_t* instruction = get_current_script_instruction(record);
     u16 amount;
@@ -1743,9 +1779,10 @@ effect_script_result_e effect_script_opcode_22_add_immediate_to_selected_counter
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
-/* Opcode 23: subtract the second 16-bit value from the counter selected by the
+/* EFFECT_OPCODE_SUBTRACT_IMMEDIATE_FROM_SELECTED_COUNTER (0x23)
+ * Subtract the second 16-bit value from the counter selected by the
  * top two bits of the instruction's second byte. */
-effect_script_result_e effect_script_opcode_23_subtract_immediate_from_selected_counter(effect_record_t* record) {
+effect_script_result_e effect_opcode_subtract_immediate_from_selected_counter(effect_record_t* record) {
     effect_script_parameters_t parameters;
     const effect_script_instruction_t* instruction = get_current_script_instruction(record);
     u16 amount;
@@ -1757,15 +1794,17 @@ effect_script_result_e effect_script_opcode_23_subtract_immediate_from_selected_
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
-/* Opcode 24: restore the camera zoom opcode 0f saved. */
-effect_script_result_e effect_script_opcode_24_restore_camera_zoom(effect_record_t* record) {
+/* EFFECT_OPCODE_RESTORE_CAMERA_ZOOM (0x24)
+ * Restore the camera zoom opcode 0f saved. */
+effect_script_result_e effect_opcode_restore_camera_zoom(effect_record_t* record) {
     camera_restore_zoom();
     record->pc += 2;
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
 /*
- * Effect-script opcode 0x25: update every particle on the record's work list.
+ * EFFECT_OPCODE_UPDATE_ALL_PARTICLES (0x25)
+ * Update every particle on the record's work list.
  *
  * Loads the camera matrix into the GTE and integrates the list's motion. Each
  * particle then ends its life once it is within a non-zero homing threshold
@@ -1779,7 +1818,7 @@ effect_script_result_e effect_script_opcode_24_restore_camera_zoom(effect_record
  * whose arms are identical (cross-jumping merges them): `mode == 1 || mode ==
  * 2` is folded into an unsigned range test that the target does not contain.
  */
-effect_script_result_e effect_script_opcode_25_update_all_particles(effect_record_t* record) {
+effect_script_result_e effect_opcode_update_all_particles(effect_record_t* record) {
     effect_work_record_t* work = record->work_head;
 
     gte_SetRotMatrix(&g_camera_matrix);
@@ -1847,9 +1886,10 @@ effect_script_result_e effect_script_opcode_25_update_all_particles(effect_recor
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
-/* Opcode 26: spawn this frame's particles of the emitter named by bits 10-13
+/* EFFECT_OPCODE_SPAWN_EMITTER_PARTICLES (0x26)
+ * Spawn this frame's particles of the emitter named by bits 10-13
  * of the 16-bit instruction header, at the record's frame counter. */
-effect_script_result_e effect_script_opcode_26_spawn_emitter_particles(effect_record_t* record) {
+effect_script_result_e effect_opcode_spawn_emitter_particles(effect_record_t* record) {
     /* A 16-bit header cache preserves the address operands; a direct field read changes them. */
     u16 header;
 
@@ -1860,9 +1900,10 @@ effect_script_result_e effect_script_opcode_26_spawn_emitter_particles(effect_re
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
-/* Opcode 27: take the gravity vector and the inertia threshold from the
+/* EFFECT_OPCODE_INIT_PARTICLE_PHYSICS (0x27)
+ * Take the gravity vector and the inertia threshold from the
  * effect file's particle-system section. */
-effect_script_result_e effect_script_opcode_27_init_particle_physics(effect_record_t* record) {
+effect_script_result_e effect_opcode_init_particle_physics(effect_record_t* record) {
     effect_set_gravity(&g_effect_geometry_table->gravity);
     effect_set_inertia_threshold(g_effect_geometry_table->inertia_threshold);
     record->pc += 2;
@@ -1945,12 +1986,13 @@ static s32 select_sound_id(s32 channel) {
     return sound;
 }
 
-/* Opcode 28: advance the record's child timeline one frame for its target: the particle channels,
+/* EFFECT_OPCODE_STEP_CHILD_TIMELINE (0x28)
+ * Advance the record's child timeline one frame for its target: the particle channels,
  * the surroundings, caster, target and screen color tracks and the sound tracks. The root record
  * also drives the camera keyframes, and EFFECT_FLAG_TIMING_CURVE_CHILD sets the time scale. A
  * reflected hit instead starts the Reflect animation on a unit target and jumps to the child
  * timeline's end. */
-effect_script_result_e effect_script_opcode_28_step_child_timeline(effect_record_t* record) {
+effect_script_result_e effect_opcode_step_child_timeline(effect_record_t* record) {
     map_background_gradient_colors_t colors;
     effect_context_t init;
     effect_record_timeline_t* timeline;
@@ -2544,7 +2586,8 @@ static void advance_parent_sound_track(
     }
 }
 
-/* Opcode 29: advance the record's parent timeline by one frame. The second
+/* EFFECT_OPCODE_STEP_PARENT_TIMELINE (0x29)
+ * Advance the record's parent timeline by one frame. The second
  * 16-bit value is the script offset its child records start at.
  *
  * Before phase1_duration the phase 1 particle channels, color tracks and
@@ -2553,7 +2596,7 @@ static void advance_parent_sound_track(
  * target is started, spawn_delay frames apart. Phase 2 runs from
  * phase1_duration + (target_count - 1) * spawn_delay + child_duration. The
  * camera tracks advance every frame. */
-effect_script_result_e effect_script_opcode_29_step_parent_timeline(effect_record_t* record) {
+effect_script_result_e effect_opcode_step_parent_timeline(effect_record_t* record) {
     effect_record_timeline_t* timeline;
     s32 i;
     s16 child;
@@ -2640,29 +2683,33 @@ effect_script_result_e effect_script_opcode_29_step_parent_timeline(effect_recor
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
-/* Opcode 2a: clear the child-timeline state that opcode 28 steps and select effect target 0. */
-effect_script_result_e effect_script_opcode_2a_reset_child_timeline(effect_record_t* record) {
+/* EFFECT_OPCODE_RESET_CHILD_TIMELINE (0x2a)
+ * Clear the child-timeline state that opcode 28 steps and select effect target 0. */
+effect_script_result_e effect_opcode_reset_child_timeline(effect_record_t* record) {
     reset_child_timeline(record, 0);
     record->pc += 2;
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
-/* Opcode 2b: clear the parent-timeline state (frame, spawn counters and
+/* EFFECT_OPCODE_RESET_PARENT_TIMELINE (0x2b)
+ * Clear the parent-timeline state (frame, spawn counters and
  * keyframe tracks) that opcode 29 steps. */
-effect_script_result_e effect_script_opcode_2b_reset_parent_timeline(effect_record_t* record) {
+effect_script_result_e effect_opcode_reset_parent_timeline(effect_record_t* record) {
     reset_parent_timeline(record);
     record->pc += 2;
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
-/* Opcode 2c: nothing. */
-effect_script_result_e effect_script_opcode_2c_nop(effect_record_t* record) {
+/* EFFECT_OPCODE_NOP_2C (0x2c)
+ * Nothing. */
+effect_script_result_e effect_opcode_nop_2c(effect_record_t* record) {
     record->pc += 2;
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
-/* Opcode 2d: nothing. */
-effect_script_result_e effect_script_opcode_2d_nop(effect_record_t* record) {
+/* EFFECT_OPCODE_NOP_2D (0x2d)
+ * Nothing. */
+effect_script_result_e effect_opcode_nop_2d(effect_record_t* record) {
     record->pc += 2;
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }

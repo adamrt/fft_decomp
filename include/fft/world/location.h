@@ -218,7 +218,7 @@ typedef enum location_script_request_flags {
 } location_script_request_flags_e;
 
 /* The interpreter's state; the opcode handlers read ip and data here. It is one object through the choice and
- * argument values: location_script_opcode_1a_request_choice reaches ip at -4 and the arguments at +0x10 from its
+ * argument values: location_opcode_request_choice reaches ip at -4 and the arguments at +0x10 from its
  * &choice_map_ids base. */
 typedef struct location_script_state {
     s32 flags;             /* 0x00; location_script_result_flags_e | location_script_action_flags_e */

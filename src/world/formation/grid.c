@@ -1276,7 +1276,7 @@ static void draw_unit_readout(
                 g_formation_gauge_max_number.x = num_x;
                 g_formation_gauge_max_number.y = num_y;
                 g_formation_gauge_max_number.value = unit_index;
-                menu_opcode_0d_draw_formatted_number((menu_instruction_t*)&g_formation_gauge_max_number);
+                menu_opcode_draw_formatted_number((menu_instruction_t*)&g_formation_gauge_max_number);
             }
             num_x = x + 20;
             num_y = top;
@@ -1284,7 +1284,7 @@ static void draw_unit_readout(
                 g_formation_gauge_value_number.x = num_x;
                 g_formation_gauge_value_number.y = num_y;
                 g_formation_gauge_value_number.value = unit_index;
-                menu_opcode_0d_draw_formatted_number((menu_instruction_t*)&g_formation_gauge_value_number);
+                menu_opcode_draw_formatted_number((menu_instruction_t*)&g_formation_gauge_value_number);
             }
             rect.x = x + 35;
             rect.y = top + 5;
@@ -1341,7 +1341,7 @@ static void draw_unit_readout(
                 g_formation_level_number.x = num_x;
                 g_formation_level_number.y = num_y;
                 g_formation_level_number.value = unit_index;
-                menu_opcode_0d_draw_formatted_number((menu_instruction_t*)&g_formation_level_number);
+                menu_opcode_draw_formatted_number((menu_instruction_t*)&g_formation_level_number);
             }
             num_x = x + 45;
             num_y = top;
@@ -1349,7 +1349,7 @@ static void draw_unit_readout(
                 g_formation_experience_number.x = num_x;
                 g_formation_experience_number.y = num_y;
                 g_formation_experience_number.value = unit_index;
-                menu_opcode_0d_draw_formatted_number((menu_instruction_t*)&g_formation_experience_number);
+                menu_opcode_draw_formatted_number((menu_instruction_t*)&g_formation_experience_number);
             }
         } else if (g_formation_stat_display_mode == MENU_UNIT_READOUT_BRAVE_FAITH) {
             s32 y40;
@@ -1388,9 +1388,9 @@ static void draw_unit_readout(
                 g_formation_brave_number_wide.value = g_formation_brave_number.value = unit_index;
                 if (g_formation_unit_pointers[unit_index]->identity.brave >= 100) {
                     g_formation_brave_number_wide.x = num_x - 3;
-                    menu_opcode_0d_draw_formatted_number((menu_instruction_t*)&g_formation_brave_number_wide);
+                    menu_opcode_draw_formatted_number((menu_instruction_t*)&g_formation_brave_number_wide);
                 } else {
-                    menu_opcode_0d_draw_formatted_number((menu_instruction_t*)&g_formation_brave_number);
+                    menu_opcode_draw_formatted_number((menu_instruction_t*)&g_formation_brave_number);
                 }
             }
             num_x = x + 45;
@@ -1401,9 +1401,9 @@ static void draw_unit_readout(
                 g_formation_faith_number_wide.value = g_formation_faith_number.value = unit_index;
                 if (g_formation_unit_pointers[unit_index]->identity.faith >= 100) {
                     g_formation_faith_number_wide.x = num_x - 5;
-                    menu_opcode_0d_draw_formatted_number((menu_instruction_t*)&g_formation_faith_number_wide);
+                    menu_opcode_draw_formatted_number((menu_instruction_t*)&g_formation_faith_number_wide);
                 } else {
-                    menu_opcode_0d_draw_formatted_number((menu_instruction_t*)&g_formation_faith_number);
+                    menu_opcode_draw_formatted_number((menu_instruction_t*)&g_formation_faith_number);
                 }
             }
         }

@@ -38,14 +38,15 @@ static RECT s_menu_portrait_palette_rect = { 320, 254, 64, 2 };
 
 #endif
 
-/* Thread body of the ShowGraphic event instruction: load the ETC overlay and show its graphic. */
-void script_opcode_7d_show_graphic_thread(void) {
+/* SCRIPT_OPCODE_SHOW_GRAPHIC (0x7d)
+ * Thread body of the ShowGraphic event instruction: load the ETC overlay and show its graphic. */
+void script_opcode_show_graphic_thread(void) {
     thread_current_set_task(THREAD_TASK_SHOW_GRAPHIC);
     overlay_companion_load(COMPANION_OVERLAY_ETC);
     etc_entrypoint();
 }
 
-/* Empty in BATTLE and WORLD; in BATTLE it sits between script_opcode_7d_show_graphic_thread and
+/* Empty in BATTLE and WORLD; in BATTLE it sits between script_opcode_show_graphic_thread and
  * portrait_load_image. Nothing on the disc calls it or points at it; the
  * name is a neutral placeholder until a reference turns up. */
 void script_noop_3(void) {
@@ -93,10 +94,11 @@ void sprite_sheet_load_evtchr_thread(void) {
     thread_current_exit();
 }
 
-/* Uploads eight 32x48 portraits and their palettes from one EVTFACE.BIN block, yielding while
+/* SCRIPT_OPCODE_PORTRAIT_COL (0x50)
+ * Uploads eight 32x48 portraits and their palettes from one EVTFACE.BIN block, yielding while
  * the file loads. Each portrait is 8 VRAM columns (32 4-bit pixels) wide, placed side by side
  * from g_menu_portrait_pixel_rect. */
-void script_opcode_50_portrait_col(s32 portrait_id) {
+void script_opcode_portrait_col(s32 portrait_id) {
     RECT rect;
     portrait_image_block_t* buffer;
     u32(*pixels)[48][4];

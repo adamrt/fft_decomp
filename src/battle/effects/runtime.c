@@ -1939,7 +1939,7 @@ static void draw_particle_sprite(effect_list_node_t* particle, s32 red, s32 gree
     if (node->frame_timer <= 0) {
         for (;;) {
             op = node->sequence_data[node->sequence_offset];
-            if (!(op & EFFECT_SEQUENCE_OP_FLAG)) {
+            if (!(op & EFFECT_SEQUENCE_OPCODE_FLAG)) {
                 if (node->sprite_frame_index != op) {
                     node->sprite_frame_index = op;
                     node->kind |= EFFECT_LIST_NODE_FRAME_CHANGED;
@@ -1952,18 +1952,18 @@ static void draw_particle_sprite(effect_list_node_t* particle, s32 red, s32 gree
                 }
                 break;
             }
-            switch (op & EFFECT_SEQUENCE_OP_MASK) {
-            case EFFECT_SEQUENCE_OP_LOOP:
+            switch (op & EFFECT_SEQUENCE_OPCODE_MASK) {
+            case EFFECT_SEQUENCE_OPCODE_LOOP:
                 node->sequence_offset = 0;
                 break;
-            case EFFECT_SEQUENCE_OP_SET_OFFSET:
+            case EFFECT_SEQUENCE_OPCODE_SET_OFFSET:
                 node->sprite_offset_x = get_current_sequence_instruction(node)->set_offset.x_le[0]
                     + (get_current_sequence_instruction(node)->set_offset.x_le[1] << 8);
                 node->sprite_offset_y = get_current_sequence_instruction(node)->set_offset.y_le[0]
                     + (get_current_sequence_instruction(node)->set_offset.y_le[1] << 8);
                 node->sequence_offset += 5;
                 break;
-            case EFFECT_SEQUENCE_OP_ADD_OFFSET:
+            case EFFECT_SEQUENCE_OPCODE_ADD_OFFSET:
                 node->sprite_offset_x += get_current_sequence_instruction(node)->add_offset.x;
                 node->sprite_offset_y += get_current_sequence_instruction(node)->add_offset.y;
                 node->sequence_offset += 3;

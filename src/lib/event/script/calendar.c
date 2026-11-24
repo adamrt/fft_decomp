@@ -15,8 +15,9 @@ static void assign_flag(u32* bits, s32 index, s32 set) {
     }
 }
 
-/* Store five day bits and four month bits in the indexed nine-bit date record. */
-void script_opcode_85_unlock_date(u32* bits, s32 record, s32 month, s32 day) {
+/* SCRIPT_OPCODE_UNLOCK_DATE (0x85)
+ * Store five day bits and four month bits in the indexed nine-bit date record. */
+void script_opcode_unlock_date(u32* bits, s32 record, s32 month, s32 day) {
     s32 base = record * 9;
     s32 i;
     u8 mask = 1;

@@ -171,9 +171,10 @@ static void lerp_rectangle_quad(POLY_FT4* poly, const RECT* from, const RECT* to
         lerp_value_q12(from->y + from->h, to->y + to->h, factor));
 }
 
-/* Pause: yield until Select, Cross or Circle is pressed, or until the thread's
+/* SCRIPT_OPCODE_PAUSE (0x16)
+ * Pause: yield until Select, Cross or Circle is pressed, or until the thread's
  * task id becomes the stop request. */
-void script_opcode_16_pause(void) {
+void script_opcode_pause(void) {
     do {
         thread_yield();
         if (thread_current_get_task() == THREAD_TASK_STOP_REQUEST) {
