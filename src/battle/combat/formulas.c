@@ -950,7 +950,7 @@ void formula_potion(void) {
 
 /* A second entry to formula 0x49's handler. The formula table does not point
  * here and no retail code calls it. */
-void formula_49_unused_with_extra_steps(void) {
+void formula_49_unused(void) {
     formula_ether();
 }
 

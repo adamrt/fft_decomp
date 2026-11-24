@@ -264,7 +264,7 @@ s32 save_run_screen(s32 mode_select_enabled) {
     /* 1 from the world menu, 0 from the title screen's Continue (load only). */
     g_save_mode_select_enabled = mode_select_enabled;
     music_handle = music_load_into_free_slot(MUSIC_SAVE);
-    while (music_is_loading_stub() != 0) { }
+    while (music_is_loading() != 0) { }
     music_switch_track(music_handle, 0x7f, 0);
     memcard_clear_events();
     g_save_directory_buffer = directory_buffer;
@@ -317,7 +317,7 @@ s32 save_run_screen(s32 mode_select_enabled) {
     }
     thread_set_parameters(THREAD_BORROWED_SLOT_CARD_BACKDROP, 0, -1, 0);
     free_work_buffer();
-    save_close_stub();
+    memcard_close_stub();
     music_unload_scenario_slot(music_handle);
     menu_screen_reset_context();
     formation_roster_build_names();

@@ -257,7 +257,7 @@ typedef char effect_polar_mesh_work_size_must_be_8444[sizeof(effect_polar_mesh_w
 
 s32 effect_polar_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame);
 
-/* ring and tube meshes */
+/* ring and sphere meshes */
 enum {
     EFFECT_RADIAL_MESH_QUAD_CAPACITY = 64,
     RING_MESH_SEGMENTS = 32, /* quads around one ring */
@@ -266,7 +266,7 @@ enum {
     RING_MESH_ARC_POINTS = RING_MESH_SEGMENTS_PER_QUADRANT + 1
 };
 
-/* Shared 64-quad buffers: two 32-segment rings, an 8-by-8 ring stack or an 8-by-8 tube. */
+/* Shared 64-quad buffers: two 32-segment rings, an 8-by-8 ring stack or an 8-by-8 sphere. */
 typedef struct effect_radial_mesh_work {
     s32 buffer;                                          /* 0x0000: 0 or 1, flipped after each update */
     POLY_GT4 quads[2][EFFECT_RADIAL_MESH_QUAD_CAPACITY]; /* 0x0004: indexed by each mesh topology */

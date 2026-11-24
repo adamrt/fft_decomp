@@ -181,7 +181,7 @@ int music_load_into_free_slot(int music_id) {
 }
 
 /* Always 0. Callers poll it after opening music and start the track once it returns 0. */
-int music_is_loading_stub(void) {
+int music_is_loading(void) {
     return 0;
 }
 
@@ -473,7 +473,7 @@ void music_unload_all(void) {
 }
 
 /* Return the music record loaded in slot (slots count from 1; an unloaded slot holds 0). */
-suzuki_music_t* music_get_handle(int slot) {
+suzuki_music_t* music_get_by_slot(int slot) {
     return g_music.slots.music[slot - 1];
 }
 

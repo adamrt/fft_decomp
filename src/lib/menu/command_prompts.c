@@ -712,7 +712,7 @@ s32 crystal_pickup_resolve(s32 battle_unit_id) {
     result = (crystal_pickup_result_t*)thread_call_on_main_stack(battle_unit);
     g_crystal_pickup_context = result;
     if (result->result == CRYSTAL_PICKUP_NONE || result->result == CRYSTAL_PICKUP_NOTHING) {
-        system_report_stub(0x11, 7);
+        system_report(0x11, 7);
     }
     /* Reload the published context after the call; reusing result changes the frame and registers. */
     if (g_crystal_pickup_context->result != CRYSTAL_PICKUP_TREASURE) {
@@ -755,7 +755,7 @@ static s32 dispatch_request(
             return MENU_REQUEST_RESULT_DONE;
         } else if (option != MENU_SCENARIO_CHECK_SKIP) {
             if (thread_is_running_asm(THREAD_SLOT_EVENT) != 0) {
-                system_report_stub(7, 3);
+                system_report(7, 3);
                 if (option != MENU_SCENARIO_CHECK_TEST) {
                     start_request_thread(MENU_PROMPT_CLOSE);
                 }
@@ -1024,7 +1024,7 @@ static s32 dispatch_request(
             start_request_thread(MENU_PROMPT_CLOSE);
         }
     } else {
-        system_report_stub(7, 5);
+        system_report(7, 5);
         start_request_thread(MENU_PROMPT_CLOSE);
         g_menu_request_command = command;
         g_menu_request_option = option;

@@ -181,7 +181,7 @@ sprite_display_t* sprite_display_init_weapon(s32 map_unit_id, s32 display_type);
 sprite_display_t* sprite_display_init_item(s32 map_unit_id);
 sprite_display_t* sprite_display_init_numeric(s32 map_unit_id, s32 display_section);
 sprite_display_t* sprite_display_init_status_bubble(s32 map_unit_id);
-void sprite_display_release_unit_stub(sprite_display_t* unused_display);
+void sprite_display_release_unit(sprite_display_t* unused_display);
 void sprite_display_set_part(
     sprite_display_t* display, s32 index, s16 x_shift, s16 y_shift, s16 u, s16 v, s16 width, s16 height, s16 flags);
 void sprite_display_set_part_semi_transparent(sprite_display_t* display, s32 part_index, s32 enabled);

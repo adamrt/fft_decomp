@@ -9,6 +9,6 @@ s32 text_return_argument_1(s32 value) {
 }
 
 /* The second of the pair, also returning its argument. */
-s32 battle_return_argument_8013349c(s32 value) {
+s32 text_return_argument_2(s32 value) {
     return value;
 }

@@ -27,9 +27,9 @@ s32 ability_list_is_non_action_enabled(s32 index) {
     return result;
 }
 
-/* Returns 1 for an ability of any type other than ABILITY_TYPE_DEFAULT (by
- * the type the "learned" callback cached) whose entry has bit 14 or 15 set;
- * 0 otherwise. */
+/* Row callback for ability lists: return 1 when the ability that
+ * ability_list_is_non_action_enabled cached is not an action ability and the
+ * listed entry carries disabled bits (bit 14 or 15); 0 otherwise. */
 s32 ability_list_is_non_action_disabled(s32 index) {
     s32 result = 0;
 
@@ -39,7 +39,7 @@ s32 ability_list_is_non_action_disabled(s32 index) {
     return result;
 }
 
-/* Row callback: whether the ability the learned callback cached is an action ability
+/* Row callback: whether the ability ability_list_is_non_action_enabled cached is an action ability
  * (ABILITY_TYPE_DEFAULT); the row is ignored. */
 s32 ability_list_is_action(s32 unused_row) {
     return s_ability_list_ability_type == ABILITY_TYPE_DEFAULT;

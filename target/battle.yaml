@@ -255,7 +255,7 @@ functions:
   - {addr: 0x8007134c, size: 84, name: enter_highlight_units, hash: a9e4bcbf860af5b9, unit: battle_state}
   - {addr: 0x800713a0, size: 148, name: open_active_unit_menu, hash: 6173df4fd8bf1552, unit: battle_state}
   - {addr: 0x80071434, size: 192, name: open_non_active_unit_menu, hash: dc2e012483604426, unit: battle_state}
-  - {addr: 0x800714f4, size: 180, name: dispatch_menu_action, hash: bb6b89767690ace1, unit: battle_state}
+  - {addr: 0x800714f4, size: 180, name: select_cursor_unit, hash: bb6b89767690ace1, unit: battle_state}
   - {addr: 0x800715a8, size: 64, name: enter_action_help_menu, hash: d25560f750b40f09, unit: battle_state}
   - {addr: 0x800715e8, size: 128, name: enter_display_move_area, hash: 6ce84ccadedd3cc6, unit: battle_state}
   - {addr: 0x80071668, size: 52, name: enter_mini_menu, hash: d70319e086ad0e59, unit: battle_state}
@@ -390,7 +390,7 @@ functions:
   - {addr: 0x80078e58, size: 348, name: battle_state_map_jumping_in_update, hash: 9c5f6e699dab45d0, unit: battle_state}
   - {addr: 0x80078fb4, size: 564, name: battle_state_change_map_jumping_in_update, hash: a015ccab6a9ac4ee, unit: battle_state}
   - {addr: 0x800791e8, size: 176, name: load_fixed_cluts, hash: cc67b40e2f684161, unit: battle_scene}
-  - {addr: 0x80079298, size: 8, name: deployment_frame_stub, hash: 6d64edf91449c1b1, unit: battle_scene}
+  - {addr: 0x80079298, size: 8, name: update_map_load, hash: 6d64edf91449c1b1, unit: battle_scene}
   - {addr: 0x800792a0, size: 2040, name: run_map_load, hash: 02138be28fa8c8d8, unit: battle_scene, rodata: [{addr: 0x800676a0, size: 8, hash: af5570f5a1810b7a}]}
   - {addr: 0x80079a98, size: 1852, name: battle_entrypoint, hash: 8ada54ca495c6cab, unit: battle_scene, rodata: [{addr: 0x800676a8, size: 240, hash: 2a2fabd4845aafe2}]}
   - {addr: 0x8007a1d4, size: 68, name: map_unit_get_casting, hash: 96b268eb8bbafc81, unit: map_unit_queries}
@@ -414,7 +414,7 @@ functions:
   - {addr: 0x8007ad08, size: 172, name: sprite_display_init_numeric, hash: 61be99cf59dfdfec, unit: sprite_display}
   - {addr: 0x8007adb4, size: 148, name: sprite_display_init_status_bubble, hash: 416c96a3c6890663, unit: sprite_display}
   - {addr: 0x8007ae48, size: 132, name: sprite_display_init_item, hash: f4852713b9b2075d, unit: sprite_display}
-  - {addr: 0x8007aecc, size: 8, name: sprite_display_release_unit_stub, hash: 6d64edf91449c1b1, unit: sprite_display}
+  - {addr: 0x8007aecc, size: 8, name: sprite_display_release_unit, hash: 6d64edf91449c1b1, unit: sprite_display}
   - {addr: 0x8007aed4, size: 52, name: sprite_init_render_frame, hash: d24a94ce7e694637, unit: sprite_display}
   - {addr: 0x8007af08, size: 60, name: sprite_take_primitive, hash: 81bb107d92b9ac66, unit: sprite_display}
   - {addr: 0x8007af44, size: 1448, name: sprite_display_draw_parts, hash: c38f2b2b6a57de76, unit: sprite_display}
@@ -975,7 +975,7 @@ functions:
   - {addr: 0x8013d0ac, size: 220, name: help_menu_start_thread, hash: 16b01027bdfcec7d, unit: overlay_dispatch}
   - {addr: 0x8013d188, size: 20, name: overlay_small_request, hash: 2304312a1a158a04, unit: overlay_dispatch}
   - {addr: 0x8013d19c, size: 84, name: overlay_small_poll, hash: 4db3a15d03401224, unit: overlay_dispatch}
-  - {addr: 0x8013d1f0, size: 8, name: map_return_zero_1, hash: 207819bf4ebe3078, unit: overlay_dispatch}
+  - {addr: 0x8013d1f0, size: 8, name: script_return_zero_2, hash: 207819bf4ebe3078, unit: overlay_dispatch}
   - {addr: 0x8013d1f8, size: 56, name: deploy_skip_thread, hash: f5d13c78756c2b83, unit: overlay_dispatch}
   - {addr: 0x8013d230, size: 72, name: music_wait_load, hash: 5cf0df43ec1c1bac, unit: music_tracks}
   - {addr: 0x8013d278, size: 168, name: music_play_tracks, hash: 5321f20b1e27a914, unit: music_tracks}
@@ -1553,7 +1553,7 @@ functions:
   - {addr: 0x8018a218, size: 8, name: formula_46_unused, hash: 6d64edf91449c1b1, unit: ability_formulas}
   - {addr: 0x8018a220, size: 48, name: formula_blood_suck, hash: ca12d2aead28b804, unit: ability_formulas}
   - {addr: 0x8018a250, size: 84, name: formula_potion, hash: 46282eefafd9cbcc, unit: ability_formulas}
-  - {addr: 0x8018a2a4, size: 32, name: formula_49_unused_with_extra_steps, hash: 0e55f6166a0fbdec, unit: ability_formulas}
+  - {addr: 0x8018a2a4, size: 32, name: formula_49_unused, hash: 0e55f6166a0fbdec, unit: ability_formulas}
   - {addr: 0x8018a2c4, size: 40, name: formula_elixir, hash: c9b47ad5a6f867c5, unit: ability_formulas}
   - {addr: 0x8018a2ec, size: 180, name: formula_phoenix_down, hash: 4f38459b7b95ce62, unit: ability_formulas}
   - {addr: 0x8018a3a0, size: 48, name: formula_heal_ma_times_y, hash: 666cebf1e4e1cc86, unit: ability_formulas}
@@ -1937,7 +1937,7 @@ functions:
   - {addr: 0x801aa0e8, size: 184, name: free_sprite_state, hash: b0891df5b7011828, unit: effect_runtime}
   - {addr: 0x801aa1a0, size: 88, name: init_sprite_sequence, hash: b6b63f4321aa8ae0, unit: effect_runtime}
   - {addr: 0x801aa1f8, size: 1484, name: draw_particle_sprite, hash: 41526e83b4fec8b9, unit: effect_runtime, rodata: [{addr: 0x801a0e34, size: 44, hash: f3bf1ef9fb3ad874}]}
-  - {addr: 0x801aa7c4, size: 24, name: effect_replace_flags_0006, hash: f2a1e2f48206ce5e, unit: effect_runtime}
+  - {addr: 0x801aa7c4, size: 24, name: effect_list_node_set_placement, hash: f2a1e2f48206ce5e, unit: effect_runtime}
   - {addr: 0x801aa7dc, size: 268, name: effect_slot_update, hash: 45c6110a0d0de422, unit: effect_runtime}
   - {addr: 0x801aa8e8, size: 56, name: effect_reset_subsystems, hash: f3527d103117930d, unit: effect_runtime}
   - {addr: 0x801aa920, size: 476, name: effect_camera_seed_tracks, hash: c7215f9b955ff294, unit: effect_runtime}

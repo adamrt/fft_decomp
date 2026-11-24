@@ -440,7 +440,7 @@ typedef struct effect_polar_mesh_geometry_view {
 typedef char
     effect_polar_mesh_geometry_view_size_must_be_196[sizeof(effect_polar_mesh_geometry_view_t) == 196 ? 1 : -1];
 
-/* ring, tube and dome meshes */
+/* ring, sphere and dome meshes */
 /* Radial motion bindings use one-based curve selectors; zero keeps the starting value. */
 typedef struct effect_radial_motion_curve_bindings {
     u32 origin : 4;
@@ -462,7 +462,7 @@ typedef struct effect_radial_shape_curve_bindings {
 typedef char
     effect_radial_shape_curve_bindings_size_must_be_4[sizeof(effect_radial_shape_curve_bindings_t) == 4 ? 1 : -1];
 
-/* Geometry parameters shared by ring, tube and summon-dome renderers.
+/* Geometry parameters shared by ring, sphere and summon-dome renderers.
  * Dome renderers leave the row-radius terms unread. */
 typedef struct effect_radial_mesh_geometry {
     u8 _unused_00[0x02];

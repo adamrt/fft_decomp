@@ -160,7 +160,7 @@ void music_test_update_menu(controller_record_t* record) {
             state->step = MUSIC_TEST_STEP_IDLE;
         }
     } else if (state->step == MUSIC_TEST_STEP_START_TRACK) {
-        if (music_is_loading_stub() == 0) {
+        if (music_is_loading() == 0) {
             g_music_test_sound_handle = music_switch_track(state->music_slot, 0x7F, 0x10);
             state->step = MUSIC_TEST_STEP_IDLE;
         }

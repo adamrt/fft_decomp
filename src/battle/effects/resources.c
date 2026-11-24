@@ -99,7 +99,7 @@ static u8 alloc_secondary_record(void) {
         }
         return id;
     }
-    system_report_stub(1, 0x66);
+    system_report(1, 0x66);
     return id;
 }
 
@@ -145,7 +145,7 @@ void effect_secondary_remove(u8 id) {
         slot->phase = EFFECT_SECONDARY_PHASE_ENDED;
         return;
     }
-    system_report_stub(1, 0x67);
+    system_report(1, 0x67);
 }
 
 /* Return the phase of secondary effect record secondary_id; ENDED once the record has been

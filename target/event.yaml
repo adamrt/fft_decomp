@@ -2420,8 +2420,8 @@ functions:
   - {addr: 0x801c73b8, size: 1984, name: war_trophy_list_thread, hash: bf50608a35ad2092, unit: war_trophies}
   - {addr: 0x801c7b78, size: 4124, name: war_trophy_gil_ticker_thread, hash: 5567bfd43013223e, unit: war_trophies}
   - {addr: 0x801c8b94, size: 420, name: scale_poly_gt4_colors, hash: 66ed05c27d4e424c, unit: conditions}
-  - {addr: 0x801c8d38, size: 292, name: init_poly_gt4_array_32, hash: f259cec1a6ecdc8c, unit: conditions}
-  - {addr: 0x801c8e5c, size: 292, name: init_poly_gt4_array_8, hash: 0f1ae6684e05e365, unit: conditions}
+  - {addr: 0x801c8d38, size: 292, name: init_banner_polys, hash: f259cec1a6ecdc8c, unit: conditions}
+  - {addr: 0x801c8e5c, size: 292, name: init_small_banner_polys, hash: 0f1ae6684e05e365, unit: conditions}
   - {addr: 0x801c8f80, size: 4132, name: conditions_show_general_banner, hash: 231240f68206f06c, unit: conditions}
   - {addr: 0x801c9fa4, size: 8, name: conditions_noop_1, hash: 6d64edf91449c1b1, unit: conditions}
   - {addr: 0x801c9fac, size: 1688, name: conditions_special_thread, hash: ac96742eb4a60b78, unit: conditions}

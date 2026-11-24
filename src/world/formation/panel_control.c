@@ -1,4 +1,5 @@
-/* The change banner and stat preview panel thread toggles. */
+/* Thread toggles for the formation screen's equipment panels: the selected unit's equipment panel
+ * with its numeric stats panel, and the preview equipment panel that lists a previewed loadout. */
 
 #include "fft/menu/menu_list.h"
 #include "fft/menu/menu_screen.h"
@@ -27,9 +28,10 @@ void unit_panel_toggle_equipment_threads(s32 enable) {
     }
 }
 
-/* Open or close the stat preview panel: unit_panel_equipment_thread in the character status
- * slot, with g_formation_stat_preview_panel_thread_params. Like the change banner, an open request
- * does nothing while the status panel slides. The normalized enable state (0 or 1) is stored in
+/* Open or close the preview equipment panel: unit_panel_equipment_thread in the character status
+ * slot, with g_formation_stat_preview_panel_thread_params, where it lists the five items of
+ * g_item_preview_stat_detail (the best-fit or shop loadout being previewed). Like the change banner,
+ * an open request does nothing while the status panel slides. The normalized enable state (0 or 1) is stored in
  * g_formation_change_banner_thread_params.style either way. */
 void formation_toggle_preview_equipment_panel(s32 enable) {
     if (enable != 0) {

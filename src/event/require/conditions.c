@@ -72,7 +72,7 @@ static void scale_poly_gt4_colors(const conditions_colors_t* colors, s32 scale, 
 /* Initialize the first 32 semi-transparent POLY_GT4s of buffer 0
  * with zeroed vertices, a one-texel texture cell, texture page 6 and the CLUT
  * at the bonus palette rectangle's origin offset by (x, y). */
-static void init_poly_gt4_array_32(s32 x, s32 y) {
+static void init_banner_polys(s32 x, s32 y) {
     s32 count = 0;
     s32 one = 1;
     s16* palette_origin;
@@ -99,7 +99,7 @@ static void init_poly_gt4_array_32(s32 x, s32 y) {
 /* Initialize the final 8 semi-transparent POLY_GT4s of buffer 0
  * with zeroed vertices, a one-texel texture cell, texture page 6 and the CLUT
  * at the bonus palette rectangle's origin offset by (x, y). */
-static void init_poly_gt4_array_8(s32 x, s32 y) {
+static void init_small_banner_polys(s32 x, s32 y) {
     s32 count = 0;
     s32 one = 1;
     s16* palette_origin;
@@ -227,7 +227,7 @@ void conditions_show_general_banner(s32 hold_frames) {
 
         quad_count = parameters[1] - parameters[0];
     }
-    init_poly_gt4_array_32(0, 1);
+    init_banner_polys(0, 1);
     quads = g_conditions_general_quads;
 
     for (index = 0; index < quad_count; index++) {
@@ -394,9 +394,9 @@ void conditions_special_thread(void) {
         quad_count = parameters[1] - parameters[0];
     }
     if (use_small_array == 0) {
-        init_poly_gt4_array_32(0x20, 0);
+        init_banner_polys(0x20, 0);
     } else {
-        init_poly_gt4_array_8(0x20, 0);
+        init_small_banner_polys(0x20, 0);
     }
 
     for (quad_index = 0; quad_index < quad_count; quad_index++) {

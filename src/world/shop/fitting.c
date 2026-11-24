@@ -303,9 +303,9 @@ void shop_fitting_update_equipment_menu(void) {
                 g_unit_panel_preview_stats_thread_params.redraw_request = result;
                 equipment_calculate_loadout_delta(&g_item_preview_stat_detail, &g_unit_panel_selected_unit_stat_summary,
                     g_formation_unit_pointers[g_unit_selected_index]->detail.equipment,
-                    g_formation_temp_unit->detail.equipment);
+                    g_formation_preview_unit->detail.equipment);
                 bcopy(g_formation_unit_pointers[g_unit_selected_index]->detail.equipment,
-                    g_formation_temp_unit->detail.equipment, sizeof(g_formation_temp_unit->detail.equipment));
+                    g_formation_preview_unit->detail.equipment, sizeof(g_formation_preview_unit->detail.equipment));
             } else {
                 unit_panel_toggle_preview_stats_thread(0);
             }

@@ -98,7 +98,7 @@ void system_report_error(s32 allocator_id, s32 error_code);
 
 /* A return-only hook. Main and overlay callers pass two 32-bit arguments, but
  * neither their original meaning nor the hook's original name is proven. */
-void system_report_stub(s32 category, s32 code);
+void system_report(s32 category, s32 code);
 
 /* debug */
 /* Provisional: the debug VARIABLE_LIST level pushed by open_variable_list;

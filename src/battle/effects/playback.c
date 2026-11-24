@@ -814,7 +814,7 @@ static effect_callback_t get_native_callback(s16 callback_id) {
     return g_effect_native_callbacks[callback_id];
 }
 
-/* Read effect file effect_id's disc sector and byte length from g_disc_extents; a
+/* Read effect file effect_id's disc sector and byte length from s_disc_extents; a
  * length of 0 means the file is missing. */
 static void get_disc_extent(s32 effect_id, s32* lba, s32* byte_length) {
     u32 stack_padding[2];
@@ -825,20 +825,20 @@ static void get_disc_extent(s32 effect_id, s32* lba, s32* byte_length) {
 
 /* Report an effect stub and return zero. */
 s32 effect_report_0x320_return_zero(void) {
-    system_report_stub(1, 0x320);
+    system_report(1, 0x320);
     return 0;
 }
 
 /* Report an effect stub. */
 void effect_report_0x320_1(void) {
-    system_report_stub(1, 0x320);
+    system_report(1, 0x320);
 }
 
-/* Calls the empty system_report_stub with (1, 0x320) from a 0x100-byte frame it
+/* Calls the empty system_report with (1, 0x320) from a 0x100-byte frame it
  * does not use. No code calls it. */
 void effect_report_0x320_2(void) {
     s32 unused[0x40];
-    system_report_stub(1, 0x320);
+    system_report(1, 0x320);
 }
 
 /* Seek the CD to the effect file of g_effect_id: the read request
@@ -1311,7 +1311,7 @@ static s16 start_script_instance(const u8* script, s16 start_pc, s16 parent_inde
  * $v0 still holds this handler's address, which run_script_block treats as 'continue'
  * without the pc moving, so an invalid opcode hangs the script loop. */
 effect_script_result_e effect_script_opcode_2e_invalid(effect_record_t* unused_record) {
-    system_report_stub(1, 0x22);
+    system_report(1, 0x22);
     /* Retail leaves the dispatch result undefined after an invalid opcode. */
 }
 

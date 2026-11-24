@@ -12,7 +12,7 @@
 
 static s16 s_equipment_input_unread_value;
 
-/* Store a value in g_equipment_input_unread_value. Nothing calls it and nothing reads that variable. */
+/* Store a value in s_equipment_input_unread_value. Nothing calls it and nothing reads that variable. */
 void equipment_set_unread_input_value(s32 value) {
     s_equipment_input_unread_value = value;
 }

@@ -736,7 +736,9 @@ s32 job_list_update(void) {
     return MENU_JOB_LIST_STEP_JOBS;
 }
 
-/* Store the selected ability-name text ID, then build the prompt. */
+/* Menu thread of the learn prompt: put the selected ability's name in text substitution 0, then
+ * run the prompt window as menu_icon_linked_entry_thread, which opens its linked entry and waits
+ * for input. */
 void formation_ability_learn_prompt_thread(void) {
     g_text_substitution_values[0]
         = g_ability_list_ability_entries[g_menu_list_selected_index] + TEXT_ID_ABILITY_NAME_BASE;

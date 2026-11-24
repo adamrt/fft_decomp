@@ -324,7 +324,7 @@ void shop_run_screen(s32 shop_type) {
 }
 
 /* The on_confirm callback of the shop's quantity range: nothing to do. */
-void shop_noop_callback(void) {
+void shop_quantity_confirm_noop(void) {
 }
 
 /* Shop main menu step: runs the Buy / Sell / Fitting Room menu and, when it

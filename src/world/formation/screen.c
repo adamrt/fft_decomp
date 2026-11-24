@@ -135,7 +135,7 @@ void formation_run_screen(s32 tutorial, s32 unused) {
     tutorial_start(tutorial);
     if (tutorial == 0) {
         g_menu_screen_music_slot = music_load_into_free_slot(MUSIC_FORMATION);
-        while (music_is_loading_stub() != 0) { }
+        while (music_is_loading() != 0) { }
         music_switch_track(g_menu_screen_music_slot, 0x7F, 0);
     }
 
@@ -641,7 +641,7 @@ void formation_stage_selected_unit(void) {
         sizeof(menu_unit_status_identity_t));
     bcopy(
         &units[g_unit_selected_index]->detail, &g_formation_selected_unit_stat_detail, sizeof(formation_unit_detail_t));
-    formation_unit_copy_to_temp(g_unit_selected_index, FORMATION_PREVIEW_UNIT_INDEX);
+    formation_unit_copy_to_preview(g_unit_selected_index, FORMATION_PREVIEW_UNIT_INDEX);
     if (g_unit_panel_status_display_thread_params.flags == MENU_STATUS_PANEL_HIDDEN) {
         g_formation_unit_slide_pending = !(units[g_unit_selected_index]->gender_flags & UNIT_FLAG_EGG);
     } else {
@@ -817,6 +817,6 @@ void formation_refresh_selected_stats(void) {
     bcopy(&record.detail, &g_formation_selected_unit_stat_detail, sizeof(formation_unit_detail_t));
     equipment_build_weapon_evade_totals(
         &g_formation_selected_unit_stat_detail, g_formation_unit_pointers[g_unit_selected_index]->detail.equipment);
-    formation_unit_copy_to_temp(g_unit_selected_index, FORMATION_PREVIEW_UNIT_INDEX);
+    formation_unit_copy_to_preview(g_unit_selected_index, FORMATION_PREVIEW_UNIT_INDEX);
     unit_panel_redraw_all();
 }

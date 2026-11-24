@@ -273,7 +273,7 @@ s32 overlay_small_poll(void) {
  * overlay_small_poll and deploy_skip_thread. Nothing on the disc
  * calls it or points at it; the name is a neutral placeholder until a
  * reference turns up. */
-s32 map_return_zero_1(void) {
+s32 script_return_zero_2(void) {
     return 0;
 }
 

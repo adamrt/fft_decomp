@@ -171,7 +171,7 @@ sprite_display_t* sprite_display_init_item(s32 map_unit_id) {
 
 /* Empty. map_unit_remove passes the removed unit's sprite display, a member of its
  * unit payload that sprite_display_init_unit handed out. */
-void sprite_display_release_unit_stub(sprite_display_t* unused_display) {
+void sprite_display_release_unit(sprite_display_t* unused_display) {
 }
 
 /* Starts a frame of sprite drawing: the GTE offset is reset to (0, 0) and the

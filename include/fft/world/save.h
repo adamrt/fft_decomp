@@ -222,7 +222,6 @@ void save_update_input(void);
 /* WORLD memory card screen */
 void save_init_screen(void);
 s32 save_run_screen(s32 mode_select_enabled);
-void save_close_stub(void);
 
 /* card file transfers */
 s32 save_read_file(const char* filename, u8* destination, u32 size);

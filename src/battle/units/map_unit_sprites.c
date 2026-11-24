@@ -1776,7 +1776,7 @@ void map_unit_remove(map_unit_t* unit) {
     map_unit_t* it;
     s32 shared = 0;
 
-    sprite_display_release_unit_stub(unit->animation.display);
+    sprite_display_release_unit(unit->animation.display);
     g_map_unit_slots[unit->map_unit_id].in_use = 0;
     /* The 32-bit list-head pointer doubles as a sentinel record (previous is at 0x000);
      * reading the first link through that view keeps the target's addressing. */

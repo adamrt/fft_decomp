@@ -41,7 +41,7 @@ s32 music_load_into_slot(s32 music_id, s32 slot);
 s32 music_load_into_free_slot(s32 music_id);
 s32 music_start_load_into_free_slot(s32 music_id);
 s32 music_poll_scenario_load(void);
-s32 music_is_loading_stub(void);
+s32 music_is_loading(void);
 void music_unload_current_scenario(void);
 s32 music_unload_scenario_slot(s32 slot);
 void music_unload_all(void);

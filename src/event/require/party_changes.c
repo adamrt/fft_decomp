@@ -225,7 +225,8 @@ static s32 update_brave_faith(void) {
     return warning_count;
 }
 
-/* Set the three panel dim flags and both status animation flags to `value`. */
+/* Set the three panel dim flags and the animation states of the two button prompts to `value`
+ * (for the prompts, 1 dimmed and 0 lit). */
 void unit_panel_set_dimmed(s32 value) {
     g_unit_panel_status_display_thread_params.style = value;
     g_unit_panel_numbers_thread_params.style = value;

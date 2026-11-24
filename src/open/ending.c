@@ -641,7 +641,8 @@ static s32 decode_hex_digit(s32 character) {
 }
 
 /*
- * Advance the script-controlled screen fade and tint the active fade quad.
+ * Advance the script-controlled fade of the OPNTEX picture and tint the active
+ * buffer's picture quad with its intensity.
  * Block-local control pointers retain the original materialized flag addresses.
  */
 static void update_opntex_fade(void) {

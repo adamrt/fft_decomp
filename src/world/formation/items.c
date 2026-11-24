@@ -299,9 +299,9 @@ static s32 update_equip_menu(void) {
                 g_unit_panel_preview_stats_thread_params.redraw_request = 1;
                 equipment_calculate_loadout_delta(&g_item_preview_stat_detail, &g_unit_panel_selected_unit_stat_summary,
                     g_formation_unit_pointers[g_unit_selected_index]->detail.equipment,
-                    g_formation_temp_unit->detail.equipment);
+                    g_formation_preview_unit->detail.equipment);
                 bcopy(g_formation_unit_pointers[g_unit_selected_index]->detail.equipment,
-                    g_formation_temp_unit->detail.equipment, sizeof(g_formation_temp_unit->detail.equipment));
+                    g_formation_preview_unit->detail.equipment, sizeof(g_formation_preview_unit->detail.equipment));
             } else {
                 g_formation_item_preview_active = 0;
             }
@@ -513,9 +513,9 @@ static s32 update_remove_menu(void) {
             equipment_set_slot_item(FORMATION_PREVIEW_UNIT_INDEX, slot, ITEM_ID_NOTHING);
             equipment_calculate_loadout_delta(&g_item_preview_stat_detail, &g_unit_panel_selected_unit_stat_summary,
                 g_formation_unit_pointers[g_unit_selected_index]->detail.equipment,
-                g_formation_temp_unit->detail.equipment);
+                g_formation_preview_unit->detail.equipment);
             bcopy(g_formation_unit_pointers[g_unit_selected_index]->detail.equipment,
-                g_formation_temp_unit->detail.equipment, sizeof(g_formation_temp_unit->detail.equipment));
+                g_formation_preview_unit->detail.equipment, sizeof(g_formation_preview_unit->detail.equipment));
             g_unit_panel_preview_stats_thread_params.redraw_request = 1;
         }
         unit_panel_toggle_preview_stats_thread(preview_item != ITEM_ID_NOTHING);

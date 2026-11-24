@@ -1072,8 +1072,9 @@ s32 effect_secondary_red_orbs_handler(void) {
 }
 
 /* Secondary effect function 0x07 in g_effect_secondary_handlers: an empty
- * handler. It sets no result, although effect_secondary_update
- * tests one to decide whether the effect ends. */
+ * handler that BATTLE.BIN's g_effect_secondary_animations never selects. It
+ * sets no result, although effect_secondary_update tests one to decide whether
+ * the effect ends. */
 s32 effect_secondary_unused_07_handler(void) {
 }
 
@@ -1182,14 +1183,16 @@ s32 effect_secondary_splash_handler(void) {
 }
 
 /* Secondary effect function 0x0a in g_effect_secondary_handlers: an empty
- * handler. It sets no result, although effect_secondary_update
- * tests one to decide whether the effect ends. */
+ * handler that BATTLE.BIN's g_effect_secondary_animations never selects. It
+ * sets no result, although effect_secondary_update tests one to decide whether
+ * the effect ends. */
 s32 effect_secondary_unused_0a_handler(void) {
 }
 
 /* Secondary effect function 0x0b in g_effect_secondary_handlers: an empty
- * handler. It sets no result, although effect_secondary_update
- * tests one to decide whether the effect ends. */
+ * handler that BATTLE.BIN's g_effect_secondary_animations never selects. It
+ * sets no result, although effect_secondary_update tests one to decide whether
+ * the effect ends. */
 s32 effect_secondary_unused_0b_handler(void) {
 }
 
@@ -1303,8 +1306,9 @@ s32 effect_secondary_level_up_handler(void) {
 }
 
 /* Secondary effect function 0x0e in g_effect_secondary_handlers: an empty
- * handler. It sets no result, although effect_secondary_update
- * tests one to decide whether the effect ends. */
+ * handler that BATTLE.BIN's g_effect_secondary_animations never selects. It
+ * sets no result, although effect_secondary_update tests one to decide whether
+ * the effect ends. */
 s32 effect_secondary_unused_0e_handler(void) {
 }
 
@@ -1409,8 +1413,9 @@ s32 effect_secondary_death_poof_handler(void) {
 }
 
 /* Secondary effect function 0x10 in g_effect_secondary_handlers: an empty
- * handler. It sets no result, although effect_secondary_update
- * tests one to decide whether the effect ends. */
+ * handler that BATTLE.BIN's g_effect_secondary_animations never selects. It
+ * sets no result, although effect_secondary_update tests one to decide whether
+ * the effect ends. */
 s32 effect_secondary_unused_10_handler(void) {
 }
 

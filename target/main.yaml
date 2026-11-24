@@ -733,7 +733,7 @@ functions:
   - {addr: 0x800435bc, size: 8, name: file_cd_read_callback, hash: 6d64edf91449c1b1, unit: system_callbacks}
   - {addr: 0x800435c4, size: 156, name: music_load_into_slot, hash: dc882519778a9dfe, unit: sound_requests}
   - {addr: 0x80043660, size: 168, name: music_load_into_free_slot, hash: 185c9e9bb1bb9c55, unit: sound_requests}
-  - {addr: 0x80043708, size: 8, name: music_is_loading_stub, hash: 207819bf4ebe3078, unit: sound_requests}
+  - {addr: 0x80043708, size: 8, name: music_is_loading, hash: 207819bf4ebe3078, unit: sound_requests}
   - {addr: 0x80043710, size: 200, name: music_start_load_into_slot, hash: d068d9f896a5379b, unit: sound_requests}
   - {addr: 0x800437d8, size: 248, name: music_start_load_into_free_slot, hash: 0b6f75c1755d440b, unit: sound_requests}
   - {addr: 0x800438d0, size: 136, name: music_poll_scenario_load, hash: 96a506be6e381a11, unit: sound_requests}
@@ -752,7 +752,7 @@ functions:
   - {addr: 0x80043d80, size: 96, name: music_fade_out_tune, hash: bb2b40daa06f22bf, unit: sound_requests}
   - {addr: 0x80043de0, size: 288, name: music_update_tunes, hash: 46f151791fb86bc2, unit: sound_requests}
   - {addr: 0x80043f00, size: 56, name: music_unload_all, hash: 8a55c4911959dc2e, unit: sound_requests}
-  - {addr: 0x80043f38, size: 24, name: music_get_handle, hash: 006705ceb0b16735, unit: sound_requests}
+  - {addr: 0x80043f38, size: 24, name: music_get_by_slot, hash: 006705ceb0b16735, unit: sound_requests}
   - {addr: 0x80043f50, size: 56, name: music_unload_current_scenario, hash: 00e6b4c7c08d9437, unit: sound_requests}
   - {addr: 0x80043f88, size: 112, name: music_set_track, hash: 990c6633acf74e71, unit: sound_requests}
   - {addr: 0x80043ff8, size: 32, name: sound_play_sfx, hash: 5460a41510478fdd, unit: sound_requests}
@@ -779,7 +779,7 @@ functions:
   - {addr: 0x80044954, size: 60, name: file_load_into_buffer_checked, hash: e4a2578d2206edfb, unit: file_loading}
   - {addr: 0x80044990, size: 60, name: file_load_into_heap_checked, hash: f704f1ec47fb6ed5, unit: file_loading}
   - {addr: 0x800449cc, size: 32, name: heap_release_block, hash: 68e41579281fa6e2, unit: file_loading}
-  - {addr: 0x800449f8, size: 8, name: system_report_stub, hash: 6d64edf91449c1b1, unit: system_handlers}
+  - {addr: 0x800449f8, size: 8, name: system_report, hash: 6d64edf91449c1b1, unit: system_handlers}
   - {addr: 0x80044a00, size: 8, name: system_report_error, hash: 6d64edf91449c1b1, unit: system_handlers}
   - {addr: 0x80044a08, size: 44, name: system_handle_error, hash: 0520ba9fd79942b9, unit: system_handlers}
   - {addr: 0x80044a34, size: 44, name: system_handle_pointer_exception, hash: c49c56d6a872179f, unit: system_handlers}

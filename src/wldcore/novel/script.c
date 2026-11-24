@@ -897,7 +897,7 @@ static void change_reading_music(s32 music_id) {
     VSync(2);
     music_load_into_slot(music_id, slot);
     g_novel_reading.music_selection = (slot << 8) | music_id;
-    while (music_is_loading_stub() != 0) {
+    while (music_is_loading() != 0) {
         VSync(0);
     }
     g_music_queue.music.tracks[slot - 1] = music_id;
@@ -1178,8 +1178,9 @@ static void novel_opcode_30_set_master_volume(void) {
     g_novel_reading.state_flags |= NOVEL_STATE_FETCH;
 }
 
-/* Script opcode: stop the pending music track, clear its state slot, and mark
- * the opcode complete. */
+/* Script opcode: when the sound novel has music, stop it, unload the music slot
+ * change_reading_music loaded it into and clear the selection; then mark the
+ * opcode complete. */
 static void novel_opcode_31_unload_music(void) {
     s16* music = &g_novel_reading.music_selection;
     music_queue_slots_t* state;

@@ -1147,7 +1147,7 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
   bypassing `camera_start_zoom` and `camera_start_tilt`. The linear
   position, screen-offset, zoom and rotation countdown setters have no retail
   callers, so their per-frame update routines never move anything.
-- `formula_49_unused_with_extra_steps` is a second entry to formula 0x49's
+- `formula_49_unused` is a second entry to formula 0x49's
   handler, but neither the formula table nor any caller names it.
 - `battle_state_effect_playback_try_enter` and
   `battle_state_effect_enter` are the only code that enters

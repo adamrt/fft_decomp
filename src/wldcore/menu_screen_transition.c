@@ -43,7 +43,7 @@ void world_map_open_screen_transition(menu_stack_level_e destination_level, s32 
         break;
     case MENU_STACK_LEVEL_BRAVE_STORY_EVENTS:
         display_object_set_queues_enabled(0);
-        menu_screen_set_entry_4_cursor(2);
+        menu_screen_set_world_menu_cursor(2);
         count = 0;
         music_queue_wait_until_empty();
         music_queue_start_track(MUSIC_QUEUE_TRACK(2, MUSIC_BRAVE_STORY));
@@ -78,7 +78,7 @@ void world_map_open_screen_transition(menu_stack_level_e destination_level, s32 
         break;
     case MENU_STACK_LEVEL_TUTORIAL_BATTLE_LIST:
         display_object_set_queues_enabled(0);
-        menu_screen_set_entry_4_cursor(3);
+        menu_screen_set_world_menu_cursor(3);
         world_map_suspend_cursor_level(&g_menu_stack_records[g_menu_stack_depth - 1]);
         tutorial_open_menu(1, 0);
         hide_parent_tutorial_menu();

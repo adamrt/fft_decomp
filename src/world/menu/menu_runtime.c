@@ -259,7 +259,7 @@ void menu_screen_submenu_page_thread(void) {
 }
 
 /* Preset the selected row of default menu entry 4. */
-void menu_screen_set_entry_4_cursor(s32 index) {
+void menu_screen_set_world_menu_cursor(s32 index) {
     g_menu_screen_default_entries[4].selected_index = index;
 }
 
@@ -327,14 +327,15 @@ static void load_graphics(s32 load_extra_pages) {
     }
 }
 
-/* Set the two substitution values of default menu entry 0: text id
- * 0xA000 + text_index and `value`. */
+/* Set the two substitution values of default menu entry 0, the first of the world
+ * map menu's two text windows: text id 0xA000 + text_index and `value`. */
 void menu_screen_set_default_entry_0_text(u32 text_index, u32 value) {
     g_menu_screen_default_entry_0_text_values[0] = text_index + 0xA000;
     g_menu_screen_default_entry_0_text_values[1] = value;
 }
 
-/* Set the value shown in default menu entry 1's text and clear the second value. */
+/* Set the value shown in default menu entry 1, the second of the world map menu's
+ * two text windows, and clear its second value. */
 void menu_screen_set_default_entry_1_text(s32 value) {
     g_menu_screen_default_entry_1_text_values[0] = value;
     g_menu_screen_default_entry_1_text_values[1] = 0;

@@ -6,11 +6,11 @@
 #include "psx/types.h"
 
 /* Wait one vertical blank at a time while the music is loading, checking on the main stack. The
- * check (music_is_loading_stub) always reports done, so this waits a single VSync. */
+ * check (music_is_loading) always reports done, so this waits a single VSync. */
 void music_wait_load(void) {
     do {
         VSync(0);
-        g_thread_call_target = music_is_loading_stub;
+        g_thread_call_target = music_is_loading;
     } while (thread_call_on_main_stack() != 0);
 }
 

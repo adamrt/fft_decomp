@@ -437,7 +437,7 @@ static effect_work_record_t* alloc_particle_record(s16 record_index, s16 kind) {
         g_effect_work_record_peak = g_effect_work_record_count;
     }
     if (work == 0) {
-        system_report_stub(1, 0x3E);
+        system_report(1, 0x3E);
     }
     g_effect_free_work_record_head = work->next;
     switch (kind & EFFECT_WORK_KIND_MASK) {
@@ -1150,9 +1150,9 @@ s32 effect_slot_init_motion(const effect_emitter_values_t* values, effect_motion
     return get_random_s32(values->lifetime_min, values->lifetime_max);
 }
 
-/* Calls the empty system_report_stub with (1, 0x50). No code calls it. */
+/* Calls the empty system_report with (1, 0x50). No code calls it. */
 void effect_report_0x50(void) {
-    system_report_stub(1, 0x50);
+    system_report(1, 0x50);
 }
 
 /* Return a signed 16-bit value in the half-open interval between two bounds. */
@@ -2098,7 +2098,7 @@ static void draw_particle_sprite(effect_list_node_t* particle, s32 red, s32 gree
     }
 }
 
-/* Verified prefix only: effect_replace_flags_0006 reads and writes a 16-bit value at +6.
+/* Verified prefix only: effect_list_node_set_placement reads and writes a 16-bit value at +6.
  * Neither the full record nor the individual bit meanings are known. */
 typedef struct effect_flag_prefix {
     u8 _unused_00[6];
@@ -2110,7 +2110,7 @@ typedef char effect_flag_prefix_size_must_be_8[(sizeof(effect_flag_prefix_t) == 
 enum { EFFECT_REPLACED_FLAGS_MASK = 0x0006 };
 
 /* Nothing in the game calls it. */
-void effect_replace_flags_0006(effect_flag_prefix_t* object, s32 value) {
+void effect_list_node_set_placement(effect_flag_prefix_t* object, s32 value) {
     object->flags = (object->flags & ~EFFECT_REPLACED_FLAGS_MASK) | (value & EFFECT_REPLACED_FLAGS_MASK);
 }
 

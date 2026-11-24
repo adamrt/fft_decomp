@@ -193,6 +193,6 @@ void formation_job_build_sprite_source(s32 job_id, s16 is_female, texture_source
  * The snapshot caller supplies the preview index as a second argument; this
  * routine ignores it and always uses g_formation_temp_unit.
  */
-void formation_unit_copy_to_temp(s16 index, s32 unused_slot) {
-    bcopy(g_formation_unit_pointers[index], g_formation_temp_unit, sizeof(formation_unit_t));
+void formation_unit_copy_to_preview(s16 index, s32 unused_slot) {
+    bcopy(g_formation_unit_pointers[index], g_formation_preview_unit, sizeof(formation_unit_t));
 }

@@ -51,7 +51,7 @@ static void load_fixed_cluts(void) {
 }
 
 /* Empty. run_map_load calls it each frame while the map is still being set up. */
-static void deployment_frame_stub(void) {
+static void update_map_load(void) {
 }
 
 /* Load the battle map, its units, sprites, event and music, showing a loading screen.
@@ -147,7 +147,7 @@ static void run_map_load(void) {
              * past the loop end, which the target keeps inline. */
             goto done;
         }
-        deployment_frame_stub();
+        update_map_load();
         (g_fade_battle_polygons + g_gfx_screen_polarity)->r0 = fade;
         (g_fade_battle_polygons + g_gfx_screen_polarity)->g0 = fade;
         (g_fade_battle_polygons + g_gfx_screen_polarity)->b0 = fade;

@@ -312,7 +312,7 @@ static s32 trace_arc_path(const SVECTOR* origin, const s32* launch_slope_q12, co
     if (advance != 0) {
         steps = ((advance + *distance) - 1) / advance;
     } else {
-        system_report_stub(1, 0);
+        system_report(1, 0);
         steps = 0;
     }
 

@@ -222,11 +222,11 @@ profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
 
 functions:
-  - {addr: 0x801c2500, size: 5904, name: effect_tube_mesh_update, hash: ab2a4ed17ff0ffe5, source: src/effect/tube_mesh.c}
+  - {addr: 0x801c2500, size: 5904, name: effect_sphere_mesh_update, hash: ab2a4ed17ff0ffe5, source: src/effect/sphere_mesh.c}
 
 data:
-  - {addr: 0x801c3c10, name: g_effect_tube_mesh_brightness_table}
-  - {addr: 0x801c3ce8, name: g_effect_tube_mesh_ring_scales}
+  - {addr: 0x801c3c10, name: g_effect_sphere_mesh_brightness_table}
+  - {addr: 0x801c3ce8, name: g_effect_sphere_mesh_ring_scales}
 ---
 module: effect-e069
 file: EFFECT/E069.BIN
@@ -1030,12 +1030,12 @@ links: [battle]
 
 functions:
   - {addr: 0x801c2500, size: 8096, name: effect_particle_ribbon_short_update, hash: ce6b5c91a6580576, source: src/effect/particle_ribbon_short.c}
-  - {addr: 0x801c44a0, size: 5904, name: effect_tube_mesh_update, hash: 85bbd16de21ca07c, source: src/effect/tube_mesh.c}
+  - {addr: 0x801c44a0, size: 5904, name: effect_sphere_mesh_update, hash: 85bbd16de21ca07c, source: src/effect/sphere_mesh.c}
 
 data:
   - {addr: 0x801c5bb0, name: g_effect_particle_ribbon_short_brightness_table}
-  - {addr: 0x801c5c88, name: g_effect_tube_mesh_brightness_table}
-  - {addr: 0x801c5d60, name: g_effect_tube_mesh_ring_scales}
+  - {addr: 0x801c5c88, name: g_effect_sphere_mesh_brightness_table}
+  - {addr: 0x801c5d60, name: g_effect_sphere_mesh_ring_scales}
 ---
 module: effect-e336
 file: EFFECT/E336.BIN
@@ -1084,11 +1084,11 @@ profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
 
 functions:
-  - {addr: 0x801c2500, size: 5904, name: effect_tube_mesh_update, hash: ab2a4ed17ff0ffe5, source: src/effect/tube_mesh.c}
+  - {addr: 0x801c2500, size: 5904, name: effect_sphere_mesh_update, hash: ab2a4ed17ff0ffe5, source: src/effect/sphere_mesh.c}
 
 data:
-  - {addr: 0x801c3c10, name: g_effect_tube_mesh_brightness_table}
-  - {addr: 0x801c3ce8, name: g_effect_tube_mesh_ring_scales}
+  - {addr: 0x801c3c10, name: g_effect_sphere_mesh_brightness_table}
+  - {addr: 0x801c3ce8, name: g_effect_sphere_mesh_ring_scales}
 ---
 module: effect-e355
 file: EFFECT/E355.BIN
@@ -1207,13 +1207,13 @@ links: [battle]
 functions:
   - {addr: 0x801c2500, size: 5584, name: effect_ring_mesh_update, hash: ba6441ae190407fc, source: src/effect/ring_mesh.c}
   - {addr: 0x801c3ad0, size: 5368, name: effect_ring_stack_mesh_update, hash: 50fe44656e8b101f, source: src/effect/ring_stack_mesh.c}
-  - {addr: 0x801c4fc8, size: 5904, name: effect_tube_mesh_update, hash: 496a5c6e101b1f8b, source: src/effect/tube_mesh.c}
+  - {addr: 0x801c4fc8, size: 5904, name: effect_sphere_mesh_update, hash: 496a5c6e101b1f8b, source: src/effect/sphere_mesh.c}
 
 data:
   - {addr: 0x801c66d8, name: g_effect_ring_mesh_brightness_table}
   - {addr: 0x801c6720, name: g_effect_ring_stack_mesh_brightness_table}
-  - {addr: 0x801c67f8, name: g_effect_tube_mesh_brightness_table}
-  - {addr: 0x801c68d0, name: g_effect_tube_mesh_ring_scales}
+  - {addr: 0x801c67f8, name: g_effect_sphere_mesh_brightness_table}
+  - {addr: 0x801c68d0, name: g_effect_sphere_mesh_ring_scales}
 ---
 module: effect-e384
 file: EFFECT/E384.BIN

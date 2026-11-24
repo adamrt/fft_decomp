@@ -528,7 +528,7 @@ static void open_non_active_unit_menu(void) {
  * The source unit, with the status menu closed, gets its own turn menu when the
  * player controls it and otherwise restarts the AI-command state. Any
  * other unit gets the non-active-unit menu. An empty tile does nothing. */
-static void dispatch_menu_action(void) {
+static void select_cursor_unit(void) {
     map_unit_t* unit = map_unit_find_selectable_at_tile(g_cursor_x, g_cursor_y, g_cursor_layer);
 
     if (unit == 0) {
@@ -2170,7 +2170,7 @@ static void select_target_tile(void) {
         cursor_show_attack_preview_panel();
         break;
     case -1:
-        dispatch_menu_action();
+        select_cursor_unit();
         break;
     }
     cursor_hide();
@@ -2221,7 +2221,7 @@ static target_panels_e start_target_tile_selection(void) {
         break;
     case TARGET_PANELS_INVALID:
     case TARGET_PANELS_NONE:
-        dispatch_menu_action();
+        select_cursor_unit();
         break;
     }
     return unit->ability_preview_phase;
@@ -2507,7 +2507,7 @@ void battle_state_free_cursor_update(void) {
         map_set_tile_mark_colors(MAP_TILE_MARK_NONE, 0);
         sound_play_sfx(SOUND_SFX_CONFIRM);
         if (map_unit_find_selectable_at_tile(g_cursor_x, g_cursor_y, g_cursor_layer) != 0) {
-            dispatch_menu_action();
+            select_cursor_unit();
         } else {
             unit = map_unit_get_source();
             if (unit != 0) {
@@ -2574,7 +2574,7 @@ void battle_state_open_action_menus_update(void) {
     }
     if ((g_camera_step_vector.vx | g_camera_step_vector.vy | g_camera_step_vector.vz) == 0
         && g_camera_rotation_action == CAMERA_ROTATION_NONE && g_battle_window_closed != 0) {
-        dispatch_menu_action();
+        select_cursor_unit();
     }
 }
 
@@ -2990,7 +2990,7 @@ void battle_state_move_range_exception_update(void) {
     selected_command = command_get_selected()->kind;
     if (selected_command >= TURN_COMMAND_PROMPT_YES
         && (selected_command <= TURN_COMMAND_PROMPT_NO || selected_command == TURN_COMMAND_UNRESOLVED_FF)) {
-        dispatch_menu_action();
+        select_cursor_unit();
     }
 }
 

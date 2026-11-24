@@ -77,7 +77,8 @@ void loading_message_build(u32 visible, s32 x, s32 y) {
     LoadClut2((u32*)g_loading_palette, 0x70, 0x1e2);
 }
 
-/* Build the Now Loading message centered horizontally (x = 0x80). */
+/* Build the Now Loading message for BATTLE's screen: x = 0x80 is GFX_BATTLE_SCREEN_X,
+ * BATTLE's draw-area origin. */
 void loading_message_build_offset(u32 visible) {
     loading_message_build(visible, 0x80, 0);
 }

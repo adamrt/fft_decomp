@@ -32,7 +32,7 @@ static s32 get_slot(void) {
 
 #ifdef FFT_WORLD
 /* Empty. Called before a soft reset and when the memory card screen closes. */
-void save_close_stub(void) {
+void memcard_close_stub(void) {
 }
 #endif
 

@@ -104,7 +104,7 @@ extern struct formation_unit g_formation_unit_records[FORMATION_UNIT_RECORD_COUN
 extern formation_unit_t* g_formation_unit_pointers[];
 extern s16 g_formation_record_count; /* records in g_formation_unit_records */
 extern s16 g_formation_record_order[];
-extern struct formation_unit* g_formation_temp_unit;
+extern struct formation_unit* g_formation_preview_unit;
 
 /* Menu callers cache the builder's return here; rebuilding the record list
  * does not itself refresh this byte. */
@@ -115,7 +115,7 @@ void formation_unit_build_record(
     const struct battle_unit* unit, struct formation_unit* record, const struct party_unit* party);
 void formation_rebuild_lists(void);
 s32 formation_unit_find_by_roster_slot(s16 roster_slot);
-void formation_unit_copy_to_temp(s16 index, s32 unused_slot);
+void formation_unit_copy_to_preview(s16 index, s32 unused_slot);
 void formation_save_records(void);
 void formation_roster_sort(s32 index);
 s32 formation_unit_get_lock(s32 unit_id);

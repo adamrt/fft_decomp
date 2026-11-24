@@ -1052,8 +1052,9 @@ void menu_scrollable_list_open(const s16* values, s32 selected_index, u8* text_t
     menu_scrollable_list_refresh(script);
 }
 
-/* Built at -O1: the unscheduled prologue (sw ra, sw s0, lw s0) is the -O1 signature shared by the
- * neighboring menu-script handlers. */
+/* Initialize the list state with the given scroll base, then load its visible entries from the
+ * menu definition. Built at -O1: the unscheduled prologue (sw ra, sw s0, lw s0) is the -O1
+ * signature shared by the neighboring menu-script handlers. */
 void menu_scrollable_list_open_at_scroll_base(
     const s16* entries, s32 selected_index, s32 scroll_base_index, u8* text_table, const menu_instruction_t* script) {
     menu_scrollable_list_init(entries, selected_index, scroll_base_index, text_table);

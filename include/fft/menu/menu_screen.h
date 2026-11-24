@@ -135,7 +135,7 @@ extern s32 g_menu_screen_thread_result;
 extern s32 g_menu_screen_dialog_waiting;
 
 void menu_screen_open_entry_window(s32 index, s32 unused_x, s32 unused_y);
-void menu_screen_set_entry_4_cursor(s32 index);
+void menu_screen_set_world_menu_cursor(s32 index);
 s32 menu_screen_is_dialog_waiting(void);
 
 /* display script */

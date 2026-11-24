@@ -263,7 +263,7 @@ void card_entrypoint(s32 unused) {
         0, tile_storage, 0, 0, 0, 0, 0, 0, 0, 0);
     init_graphics();
     music_slot = music_load_into_free_slot(MUSIC_SAVE);
-    while (music_is_loading_stub() != 0) { }
+    while (music_is_loading() != 0) { }
     music_switch_track(music_slot, 0x7f, 0);
     memcard_clear_events();
     g_save_menu_work_buffer = save_buffer;

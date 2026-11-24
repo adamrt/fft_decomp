@@ -51,6 +51,9 @@ s32 memcard_format_slot(void);
 memcard_result_e memcard_info_retry(s32 port, s32 retry_limit);
 memcard_result_e memcard_poll_operation(void);
 
+/* Empty. Called before a soft reset and when the memory card screen closes. */
+void memcard_close_stub(void);
+
 /* files */
 struct DIRENTRY;
 

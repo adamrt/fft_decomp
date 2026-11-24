@@ -1,4 +1,4 @@
-/* Deployment panel status icons and shaded background primitives. */
+/* Deployment panel button prompts and shaded background primitives. */
 
 #include "fft/battle/deploy.h"
 #include "fft/gfx/gfx_primitive.h"

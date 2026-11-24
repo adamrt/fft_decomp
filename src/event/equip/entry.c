@@ -37,8 +37,8 @@ void unit_panel_toggle_preview_stats_thread(s32 enable) {
     g_unit_panel_numeric_panel_params.style = enable;
 }
 
-/* Prime the four "menu section dirty" flags before the
- * next redraw pass. */
+/* Request a redraw from the four EQUIP panel threads: unit status, numeric
+ * panel, item numeric panel and equipment list. */
 static void redraw_unit_panels(void) {
     g_unit_panel_unit_status_panel_params.redraw_request = 1;
     g_unit_panel_numeric_panel_params.redraw_request = 1;
