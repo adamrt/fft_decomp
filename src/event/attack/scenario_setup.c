@@ -300,7 +300,7 @@ void scenario_restore_music_and_darkness(void) {
         g_sound_music_track_2_id = g_event_scenario_music_2_id;
     }
 
-    map_light_dispatch_state_command(MAP_LIGHT_COMMAND_SET_DARKNESS_COLOR, &darkness);
+    map_light_dispatch_command(MAP_LIGHT_COMMAND_SET_DARKNESS_COLOR, &darkness);
     text_build_unit_name_list();
 }
 

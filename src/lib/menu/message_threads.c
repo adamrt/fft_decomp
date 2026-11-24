@@ -82,7 +82,7 @@ void menu_icon_timed_thread(void) {
     size_entry_to_text(param, &width, &height, &pad, 1);
     menu_build_window_sprites(&rect, param, &records[0]);
     mem_copy_bytes_nonempty(&records[1], &records[0], sizeof(menu_icon_record_t));
-    buffer = menu_build_and_upload_window_frame_image(width, height, &rect, MENU_WINDOW_FRAME_BUILD);
+    buffer = menu_build_window_frame_image(width, height, &rect, MENU_WINDOW_FRAME_BUILD);
     g_menu_window_text_pen.stride = width;
     menu_text_set_origin(pad + 8, 9);
     text_render_entry_to_image(param->text_id, buffer, &g_menu_window_text_pen);
@@ -99,7 +99,7 @@ void menu_icon_timed_thread(void) {
             g_script_event_input = PSX_PAD_CIRCLE;
             g_sound_suppressed = 1;
         }
-        if (menu_should_close_thread(&g_script_event_input)) {
+        if (menu_poll_thread_close(&g_script_event_input)) {
             break;
         }
         /* Retail bug: unset is never assigned. The linked-entry thread tests its linked
@@ -114,7 +114,7 @@ void menu_icon_timed_thread(void) {
         record = &records[i & 1];
         menu_update_icon_cursor_sprites(param, &record->base, i, -1);
         if (hold == 0) {
-            menu_handle_action(param, 0);
+            menu_handle_confirm_input(param, 0);
             menu_handle_cancel_input(param);
         }
         menu_submit_icon_primitives(&record->base);
@@ -156,7 +156,7 @@ void menu_icon_linked_entry_thread(void) {
         thread_start(g_thread_current_id - 1, g_menu_thread_menu_data[linked_index].thread_entry);
         thread_set_parameters(g_thread_current_id - 1, (s32)&g_menu_thread_menu_data[linked_index], 0, 0);
     }
-    buffer = menu_build_and_upload_window_frame_image(width, height, &rect, MENU_WINDOW_FRAME_BUILD);
+    buffer = menu_build_window_frame_image(width, height, &rect, MENU_WINDOW_FRAME_BUILD);
     g_menu_window_text_pen.stride = width;
     menu_text_set_origin(8, 9);
     text_render_entry_to_image(param->text_id, buffer, &g_menu_window_text_pen);
@@ -166,7 +166,7 @@ void menu_icon_linked_entry_thread(void) {
         if (i == 0) {
             menu_free_memory(buffer);
         }
-        if (menu_should_close_thread(&g_script_event_input)) {
+        if (menu_poll_thread_close(&g_script_event_input)) {
             break;
         }
         if (linked_index >= 0) {
@@ -178,7 +178,7 @@ void menu_icon_linked_entry_thread(void) {
         }
         record = &records[i & 1];
         menu_update_icon_cursor_sprites(param, &record->base, i, -1);
-        menu_handle_action(param, 0);
+        menu_handle_confirm_input(param, 0);
         menu_handle_cancel_input(param);
         menu_submit_icon_primitives(&record->base);
     }
@@ -197,10 +197,10 @@ void menu_input_thread(void) {
     g_sound_suppressed = 1;
     for (;;) {
         thread_yield();
-        if (menu_should_close_thread(&g_script_event_input)) {
+        if (menu_poll_thread_close(&g_script_event_input)) {
             break;
         }
-        menu_handle_action(menu, 0);
+        menu_handle_confirm_input(menu, 0);
         menu_handle_cancel_input(menu);
     }
     thread_yield();

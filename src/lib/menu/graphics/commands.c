@@ -52,7 +52,7 @@ menu_instruction_t* menu_opcode_0e_set_semi_trans(menu_instruction_t* data) {
 #endif
 
 /* Draw a textured quad at its literal position or current list row. */
-menu_instruction_t* menu_opcode_04_draw_textured_quad(menu_instruction_t* cmd) {
+menu_instruction_t* menu_opcode_04_05_draw_textured_quad(menu_instruction_t* cmd) {
     RECT rect;
     s32 y;
     rgb24_t* color;
@@ -125,7 +125,7 @@ menu_instruction_t* menu_opcode_06_draw_callback_quad(menu_instruction_t* cmd) {
         g_menu_script_quad_command.sprite.v = entry->v;
         g_menu_gfx_clut_id = entry->clut;
         g_menu_gfx_texture_page = entry->tpage;
-        menu_opcode_04_draw_textured_quad((menu_instruction_t*)&g_menu_script_quad_command);
+        menu_opcode_04_05_draw_textured_quad((menu_instruction_t*)&g_menu_script_quad_command);
     }
     return menu_next_instruction(cmd);
 }

@@ -73,7 +73,7 @@ extern u8 g_formation_ability_learn_job_list_script[217];
 static void idle_thread(void);
 static s32 update_removal_menu(void);
 static s32 update_removal_prompt(void);
-static s32 update_slot_menu(void);
+static s32 update_set_menu(void);
 static s32 update_learn_menu(void);
 static s32 check_equipment_support_change(s16 unit_id, s16 ability_id);
 static s32 calculate_job_list_jp(s32 index);
@@ -116,7 +116,7 @@ void formation_ability_update_menu(void) {
             g_formation_ability_menu_slots_changed = 0;
         }
         if (g_formation_current_menu == FORMATION_MENU_ABILITY_ENTER) {
-            g_formation_ability_menu_initialized = formation_grid_update_transition(1);
+            g_formation_ability_menu_initialized = formation_grid_update_slide_out(1);
         } else {
             g_formation_ability_menu_initialized = formation_sprite_update_slide();
         }
@@ -154,7 +154,7 @@ void formation_ability_update_menu(void) {
         g_menu_screen_text_redraw_request = 1;
     }
     if (g_formation_current_menu == FORMATION_MENU_ABILITY) {
-        running = menu_managed_thread_start(MENU_SCREEN_THREAD_SLOT_UPPER_MENU, &g_formation_ability_menu);
+        running = menu_managed_thread_start_or_poll(MENU_SCREEN_THREAD_SLOT_UPPER_MENU, &g_formation_ability_menu);
         g_formation_ability_menu_initialized = running;
         g_formation_unit_cycle_mode = 2;
         if (running == 0) {
@@ -194,11 +194,11 @@ void formation_ability_update_menu(void) {
             thread_suspend(MENU_SCREEN_THREAD_SLOT_UPPER_MENU_CHILD);
             value = g_formation_unit_pointers[g_unit_selected_index]->identity.roster_slot;
             formation_build_record_list(0, g_formation_unit_pointers, FORMATION_RECORD_LIST_ALL);
-            g_unit_selected_index = formation_unit_find_by_roster_slot(value);
+            g_unit_selected_index = formation_unit_find_index_by_roster_slot(value);
             g_formation_ability_submenu_running = 1;
         }
         if (g_formation_current_menu == FORMATION_MENU_ABILITY_SET) {
-            g_formation_ability_submenu_running = update_slot_menu();
+            g_formation_ability_submenu_running = update_set_menu();
         }
         if (g_formation_current_menu == FORMATION_MENU_ABILITY_REMOVE) {
             g_formation_ability_submenu_running = update_removal_menu();
@@ -390,7 +390,7 @@ static s32 update_removal_prompt(void) {
  * `(u16)` casts keep the Move+N range checks in unsigned-short arithmetic
  * (`li 0xfe1a` / `addu` / `andi 0xffff`).
  */
-static s32 update_slot_menu(void) {
+static s32 update_set_menu(void) {
     s32 unused[2]; /* never referenced; reproduces the 0x40 frame */
     s16 x;
     s16 y;

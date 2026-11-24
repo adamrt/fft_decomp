@@ -30,7 +30,7 @@ static void location_script_opcode_1a_request_choice(void);
 static void location_script_opcode_1c_set_var(void);
 static void location_script_opcode_1d_request_text(void);
 static void location_script_opcode_1e_request_deep_dungeon_entry(void);
-static void location_script_opcode_1f_request_set_var_2(void);
+static void location_script_opcode_1f_request_set_var(void);
 static void location_script_opcode_20_request_draw_path(void);
 static void location_script_opcode_21_request_erase_path(void);
 static void location_script_opcode_22_request_draw_location(void);
@@ -321,7 +321,7 @@ static void location_script_opcode_1e_request_deep_dungeon_entry(void) {
  *
  * This opcode only prepares the request; a later dispatcher performs it.
  */
-static void location_script_opcode_1f_request_set_var_2(void) {
+static void location_script_opcode_1f_request_set_var(void) {
     g_location_script_state.args[0] = g_location_script_state.data[g_location_script_state.ip];
     g_location_script_state.ip++;
     g_location_script_state.args[1] = g_location_script_state.data[g_location_script_state.ip];
@@ -494,7 +494,7 @@ static void (*s_location_script_opcodes[41])(void) = {
     location_script_opcode_1c_set_var,
     location_script_opcode_1d_request_text,
     location_script_opcode_1e_request_deep_dungeon_entry,
-    location_script_opcode_1f_request_set_var_2,
+    location_script_opcode_1f_request_set_var,
     location_script_opcode_20_request_draw_path,
     location_script_opcode_21_request_erase_path,
     location_script_opcode_22_request_draw_location,

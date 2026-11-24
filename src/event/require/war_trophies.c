@@ -258,8 +258,7 @@ void war_trophy_list_thread(void) {
                     break;
                 }
 
-                image = menu_build_and_upload_window_frame_image(
-                    0x50, 0x10, &g_war_trophy_image_rect, MENU_WINDOW_FRAME_BUILD);
+                image = menu_build_window_frame_image(0x50, 0x10, &g_war_trophy_image_rect, MENU_WINDOW_FRAME_BUILD);
                 mem_zero_words(image, 0x280);
                 g_menu_window_text_pen.stride = 0x50;
                 timer = 0;

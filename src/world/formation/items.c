@@ -82,7 +82,7 @@ void formation_item_update_menu(void) {
             g_formation_item_menu_initialized = 1;
         }
         if (g_formation_current_menu == FORMATION_MENU_ITEM_ENTER) {
-            g_formation_item_menu_initialized = formation_grid_update_transition(0);
+            g_formation_item_menu_initialized = formation_grid_update_slide_out(0);
         } else {
             g_formation_item_menu_initialized = 0;
         }
@@ -151,7 +151,7 @@ void formation_item_update_menu(void) {
             unit_panel_toggle_equipment_threads(0);
             roster_slot = g_formation_unit_pointers[g_unit_selected_index]->identity.roster_slot;
             formation_build_record_list(0, g_formation_unit_pointers, FORMATION_RECORD_LIST_ALL);
-            g_unit_selected_index = formation_unit_find_by_roster_slot(roster_slot);
+            g_unit_selected_index = formation_unit_find_index_by_roster_slot(roster_slot);
             g_formation_current_menu = FORMATION_MENU_ITEM_LEAVE;
             g_formation_unit_browse_enabled = g_formation_item_menu_saved_browse_enabled;
             g_formation_unit_banner_enabled = g_formation_saved_banner_enabled;
@@ -252,7 +252,7 @@ static s32 update_equip_menu(void) {
             menu_scrollable_list_init(g_item_list_entries, x, y, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
             g_menu_row_callbacks[0].value = equipment_row_get_equipped_count;
             g_menu_row_callbacks[1].value = equipment_row_get_item_count;
-            g_menu_row_callbacks[2].icon = item_list_build_type_icon_source;
+            g_menu_row_callbacks[2].icon = equipment_row_get_type_icon_source;
             g_menu_row_callbacks[3].icon = equipment_row_get_icon_source;
             g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
             g_formation_item_previewed_cursor = -1;
@@ -364,7 +364,7 @@ static s32 update_best_fit_menu(void) {
         g_sound_suppressed = 1;
     }
     g_formation_item_best_remove_initialized
-        = menu_managed_thread_start(THREAD_SCREEN_SLOT_MENU, &g_formation_item_best_fit_confirm_menu);
+        = menu_managed_thread_start_or_poll(THREAD_SCREEN_SLOT_MENU, &g_formation_item_best_fit_confirm_menu);
     if (g_formation_item_best_remove_initialized == 0) {
         choice = &g_menu_screen_selection_results[11];
         if (*choice == 0) {

@@ -56,7 +56,7 @@ void help_start_text(s32 position) {
  * Cross latches the menu id as the description text and closes the grid;
  * Circle opens the cell's description (its text id plus the cell's offset),
  * except for empty cells 18-27. */
-void menu_screen_update_grid_cursor(s16 alternate) {
+void menu_screen_update_help_grid(s16 alternate) {
     point16_t cursor;
     s32 busy;
     s32 cell;
@@ -140,7 +140,7 @@ void menu_screen_update_grid_cursor(s16 alternate) {
 /* Starts the banner menu for `message_id` (0xD811 after auto-equip) in the screen menu thread
  * slot and counts `frames` calls down before stopping it; returns 1 while the banner is up and 0
  * once it has closed. */
-s32 formation_banner_countdown(s32 message_id, s32 frames) {
+s32 formation_update_banner(s32 message_id, s32 frames) {
     s8 current;
 
     if (s_formation_banner_state == 0) {

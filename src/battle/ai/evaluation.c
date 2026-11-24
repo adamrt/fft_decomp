@@ -60,7 +60,7 @@ static facing_tile_offsets_t s_facing_tile_offsets = { { { 0, 0xff }, { 0xff, 0 
 
 static void build_monster_skill_mask(void);
 
-static void build_origin_targetable_mask(tile_mask_mode_e mode, s32 radius);
+static void build_range_diamond_mask(tile_mask_mode_e mode, s32 radius);
 
 static s32 can_status_cancellation_affect_turn(const battle_unit_t* unit, s32 status);
 
@@ -68,7 +68,7 @@ static s32 can_unit_move_by_charge_deadline(s32 unit_index);
 
 static s32 origin_can_use_elemental(const ai_coords_t* coords);
 
-static void clear_current_decision(void);
+static void clear_current_action_decided(void);
 
 static s32 evaluate_math_targets(void);
 
@@ -88,7 +88,7 @@ static void finalize_origin_destination(void);
 
 static s32 find_unit_on_target_panel(void);
 
-static s32 facing_is_tile_blocked(const ai_coords_t* source, const ai_coords_t* target);
+static s32 is_facing_tile_rejected(const ai_coords_t* source, const ai_coords_t* target);
 
 static s32 can_unit_move_after_delay(s32 limit, s32 unit_id);
 
@@ -190,7 +190,7 @@ s32 ai_choose_wait_facing(void) {
         work.target_coords.fields.y
             = ai->acting_unit_coords.fields.y + s_facing_tile_offsets.by_direction[direction][1];
         work.target_coords.fields.layer = 0;
-        if (facing_is_tile_blocked(&ai->acting_unit_coords, &work.target_coords) != 0) {
+        if (is_facing_tile_rejected(&ai->acting_unit_coords, &work.target_coords) != 0) {
             work.viability.by_direction[direction] = 0;
         } else {
             fallback_direction = direction;
@@ -233,7 +233,7 @@ s32 ai_choose_wait_facing(void) {
  * Only the destination's lower layer is checked; a rise of 3 is rejected,
  * but descents are unrestricted. Slope and depth do not affect this test.
  */
-static s32 facing_is_tile_blocked(const ai_coords_t* source, const ai_coords_t* target) {
+static s32 is_facing_tile_rejected(const ai_coords_t* source, const ai_coords_t* target) {
     u8 x = target->fields.x;
     u8 width = g_ai_workspace_storage.terrain_width;
     u8 y;
@@ -310,7 +310,7 @@ s32 ai_pathfinding_budget_is_exhausted(void) {
  * tile-targeted casts without the enemies that act first. The best cast so far
  * is added to the ranked list as stages finish.
  */
-s32 ai_evaluate_ability_outcome(void) {
+s32 ai_evaluate_considered_ability(void) {
     ai_workspace_t* ai = &g_ai_workspace_storage;
     s32 i;
 
@@ -380,7 +380,7 @@ s32 ai_evaluate_ability_outcome(void) {
         if (!filter_useful_targets())
             return 0;
     evaluate_map_targets:
-        if (ai_evaluate_move_origins() == -1) {
+        if (ai_evaluate_act_move_orders() == -1) {
             ai->outcome_evaluation_state = AI_ABILITY_EVALUATION_MAP_TARGETS;
             return -1;
         }
@@ -494,7 +494,7 @@ static s32 evaluate_self_target(void) {
         g_ai_workspace_storage.current_action.command.targeting_type = TARGET_TYPE_UNIT;
         g_ai_workspace_storage.current_action.command.target_id = g_ai_workspace_storage.acting_unit_id;
     evaluate_map:
-        if (ai_evaluate_move_origins() == -1) {
+        if (ai_evaluate_act_move_orders() == -1) {
             s_ai_origin_self_target_stage = 0;
             return -1;
         }
@@ -507,10 +507,10 @@ prepare_origin:
     mode = AI_TILE_MASK_AOE;
     if (ai->current_action.command.targeting_type == TARGET_TYPE_UNIT)
         mode = AI_TILE_MASK_EXPLICIT;
-    build_origin_targetable_mask(mode, 0);
+    build_range_diamond_mask(mode, 0);
     ai_mem_copy_u16_values(ai->aim_tiles, ai->targetable_tiles, sizeof(ai->aim_tiles));
     /* Both passes test the unit's current tile, even when it casts after moving
-     * (ai_evaluate_move_origins tests the destination). */
+     * (ai_evaluate_act_move_orders tests the destination). */
     if (ai_origin_is_allowed(&ai->acting_unit_coords)) {
     evaluate_targets:
         if (evaluate_origin_aim_tiles() == -1) {
@@ -662,7 +662,7 @@ static s32 evaluate_reflected_origins(void) {
             continue;
         if (decision->targeting_flags_2 & AI_TARGET_DEAD_WITHOUT_RERAISE) {
             ct = ai->considered_ability.ct;
-            if (ai_calculate_unit_death_delay(reflector) < ct)
+            if (ai_calculate_unit_death_counter_delay(reflector) < ct)
                 continue;
         }
         ai->current_action.command.targeting_type = TARGET_TYPE_TILE;
@@ -670,7 +670,7 @@ static s32 evaluate_reflected_origins(void) {
         mode = AI_TILE_MASK_AOE;
         if (ai->current_action.command.targeting_type == TARGET_TYPE_UNIT)
             mode = AI_TILE_MASK_EXPLICIT;
-        build_origin_targetable_mask(mode, 0);
+        build_range_diamond_mask(mode, 0);
         ai_mem_copy_u16_values(ai->aim_tiles, ai->targetable_tiles, sizeof(ai->aim_tiles));
         for (ai->reflected_target_unit_index = 0; ai->reflected_target_unit_index < BATTLE_UNIT_SLOT_COUNT;
             ai->reflected_target_unit_index++) {
@@ -769,7 +769,7 @@ static s32 evaluate_math_targets(void) {
     for (s_ai_math_skillset_index = 0; s_ai_math_skillset_index < AI_MATH_SOURCE_SKILLSET_COUNT;
         s_ai_math_skillset_index++) {
         s_ai_math_skillset_id = g_ai_math_source_skillsets[s_ai_math_skillset_index];
-        s_ai_math_ability_list = ability_build_skillset_list(s_ai_math_skillset_id, SKILLSET_ABILITY_FILTER_ACTION);
+        s_ai_math_ability_list = skillset_build_ability_list(s_ai_math_skillset_id, SKILLSET_ABILITY_FILTER_ACTION);
         for (s_ai_math_ability_index = 0; s_ai_math_ability_index < HUMAN_SKILLSET_ACTION_SLOT_COUNT;
             s_ai_math_ability_index++) {
             /* Math targeting reads only the low byte of each 16-bit ID. */
@@ -1001,9 +1001,9 @@ void ai_build_cast_aim_tiles(void) {
             if (ai->targetability.live.unit_targetable[unit_id]) {
                 ai_copy_unit_coordinates(unit_id, &ai->considered_unit_coords);
                 if (ai->current_action.command.targeting_type == TARGET_TYPE_UNIT)
-                    build_origin_targetable_mask(AI_TILE_MASK_RANGE, 0);
+                    build_range_diamond_mask(AI_TILE_MASK_RANGE, 0);
                 else
-                    build_origin_targetable_mask(AI_TILE_MASK_RANGE_PLUS_AOE, 0);
+                    build_range_diamond_mask(AI_TILE_MASK_RANGE_PLUS_AOE, 0);
                 for (i = 0; i < ai->terrain_depth; i++) {
                     ai->aim_tiles[0][i] |= ai->targetable_tiles[0][i];
                     ai->aim_tiles[1][i] |= ai->targetable_tiles[1][i];
@@ -1054,9 +1054,9 @@ void ai_build_cast_aim_tiles(void) {
         if (ai->targetability.live.unit_targetable[unit_id]) {
             ai_copy_unit_coordinates(unit_id, &ai->considered_unit_coords);
             if (ai->current_action.command.targeting_type == TARGET_TYPE_UNIT)
-                build_origin_targetable_mask(AI_TILE_MASK_EXPLICIT, 0);
+                build_range_diamond_mask(AI_TILE_MASK_EXPLICIT, 0);
             else
-                build_origin_targetable_mask(AI_TILE_MASK_AOE, 0);
+                build_range_diamond_mask(AI_TILE_MASK_AOE, 0);
             for (i = 0; i < ai->terrain_depth; i++) {
                 ai->aim_tiles[0][i] |= ai->targetable_tiles[0][i];
                 ai->aim_tiles[1][i] |= ai->targetable_tiles[1][i];
@@ -1100,7 +1100,7 @@ void ai_build_cast_aim_tiles(void) {
  * row templates. Jump Level 8 can supply radius 8 on non-arcing origin scans.
  * The lookup is unchecked.
  */
-static void build_origin_targetable_mask(tile_mask_mode_e mode, s32 radius) {
+static void build_range_diamond_mask(tile_mask_mode_e mode, s32 radius) {
     ai_workspace_t* ai = &g_ai_workspace_storage;
     s32 i;
     s32 x;
@@ -1611,7 +1611,7 @@ score_state:
                 decision->flags |= AI_DECISION_CONSIDERED;
         }
     } else {
-        clear_current_decision();
+        clear_current_action_decided();
         /* Score every unit on HP, statuses, kept equipment, MP and Golem; enemies count negative. */
         for (unit_index = 0; unit_index < BATTLE_UNIT_SLOT_COUNT; unit_index++) {
             status = ai->unit_compact_indices[unit_index];
@@ -1757,7 +1757,7 @@ static void simulate_movement_pickup(void) {
 
 /* Mark the candidate action as not decided on: only the selected action ever
  * holds AI_ACTION_DECIDED (ai_build_command). */
-static void clear_current_decision(void) {
+static void clear_current_action_decided(void) {
     g_ai_workspace_storage.current_action.rank.decided = 0;
 }
 
@@ -1815,7 +1815,7 @@ static void simulate_strikes(action_command_t* action, s32 reaction_mode) {
     s32 positive;
     s32 negative;
 
-    if (reaction_mode == 0 && action_init_current_data(action->actor_id) != 0) {
+    if (reaction_mode == 0 && action_init_resolution(action->actor_id) != 0) {
         return;
     }
     behavior = &g_ability_data[action->ability_id].ai_flags;
@@ -1884,7 +1884,7 @@ static void simulate_strikes(action_command_t* action, s32 reaction_mode) {
             ai->consume_aim_tile = 1;
         }
     }
-    action_store_actor_data(&g_battle_units[action->actor_id]);
+    action_finish_actor(&g_battle_units[action->actor_id]);
     if (reaction_mode == 0) {
         /* Reuse the finished loop counter's low 16 bits for the reaction ID. */
         while ((target_id = reaction_prepare_next((s16*)&target_index)) != -1) {
@@ -2033,9 +2033,9 @@ static s32 filter_useful_targets(void) {
  * Return the AI's usefulness category for one target.
  *
  * This is the acting side's heuristic, not the sign of HP damage or a success
- * guarantee. Nonzero check_reflect enables the timing-aware Reflect restriction.
+ * guarantee. Nonzero try_reflect enables the timing-aware Reflect restriction.
  */
-ai_ability_effect_e ai_classify_target_ability_effect(s32 unit_id, s32 check_reflect) {
+ai_ability_effect_e ai_classify_target_ability_effect(s32 unit_id, s32 try_reflect) {
     ai_workspace_t* ai = &g_ai_workspace_storage;
     battle_unit_t* unit = &g_battle_units[unit_id];
     ai_unit_decision_t* decision = &ai->unit_decisions[unit_id];
@@ -2057,7 +2057,7 @@ ai_ability_effect_e ai_classify_target_ability_effect(s32 unit_id, s32 check_ref
             && (g_ability_range_data[ability_id].flags_2 & ABILITY_SECONDARY_FLAG_2_CANNOT_HIT_CASTER))
             return AI_ABILITY_EFFECT_NONE;
     }
-    if (check_reflect && (ai->considered_ability.ai_flags.word & AI_ABILITY_REFLECTABLE)
+    if (try_reflect && (ai->considered_ability.ai_flags.word & AI_ABILITY_REFLECTABLE)
         && ai_status_is_active_through_delay(ct, unit, STATUS_ID_REFLECT))
         return AI_ABILITY_EFFECT_NONE;
     if ((ai->considered_ability.ai_flags.word & AI_ABILITY_AFFECTED_BY_FAITH)
@@ -2082,7 +2082,7 @@ ai_ability_effect_e ai_classify_target_ability_effect(s32 unit_id, s32 check_ref
     }
     if (decision->targeting_flags_2 & AI_TARGET_DEAD_WITHOUT_RERAISE) {
         s32 ability_ct = ai->considered_ability.ct;
-        if (ai_calculate_unit_death_delay(unit) < ability_ct)
+        if (ai_calculate_unit_death_counter_delay(unit) < ability_ct)
             return AI_ABILITY_EFFECT_NONE;
         if (!i)
             return AI_ABILITY_EFFECT_NONE;

@@ -73,7 +73,7 @@ extern u16 g_tutorial_pressed_button;
 void tutorial_start(s32 index);
 void tutorial_load_files(s32 index, tutorial_state_t* record);
 s32 tutorial_update(void);
-s32 tutorial_get_buttons(void);
+s32 tutorial_get_pad_buttons(void);
 
 /* tutorial events */
 /* The values tutorial_pulse_wait_value holds in EVENT_SCRIPT_VAR_TUTORIAL_WAIT_VALUE as a menu

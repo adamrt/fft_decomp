@@ -150,7 +150,6 @@ void item_list_build_stat_preview(
  * texture cell of an item type's 12x12 icon. */
 void item_list_build_type_icon(s32 item_type, struct menu_icon_source* output);
 void item_list_build_icon_source(struct menu_icon_source* output, u32 item_id);
-struct menu_icon_source* item_list_build_type_icon_source(s32 index);
 
 /* A weapon's hand marks on the item panel: two-handed, or the Two Hands and Two Swords marks it allows. */
 void item_list_draw_weapon_hand_icons(s16 weapon_id);

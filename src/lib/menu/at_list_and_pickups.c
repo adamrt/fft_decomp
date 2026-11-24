@@ -190,7 +190,7 @@ void crystal_pickup_run_menus(void) {
         if ((context->result == (CRYSTAL_PICKUP_CRYSTAL | CRYSTAL_PICKUP_LEARNED)
                 && g_crystal_pickup_choice_result == 0)
             || context->result == CRYSTAL_PICKUP_LEARNED) {
-            thread_start(g_thread_current_id - 2, at_list_run);
+            thread_start(g_thread_current_id - 2, menu_text_list_thread);
             thread_set_parameters(g_thread_current_id - 2, (s32)g_menu_thread_menu_data, 0, 0);
             thread_start(THREAD_BORROWED_SLOT_AT_LIST_MENU, menu_icon_linked_entry_thread);
             thread_set_parameters(
@@ -407,7 +407,7 @@ void at_list_select_unit_thread(void) {
     }
     g_at_list_selection_finished = 0;
     g_menu_transition_state = 0;
-    unit_view_start(UNIT_VIEW_MODE_NONE, 0xFF, 0xFF);
+    unit_view_request_mode(UNIT_VIEW_MODE_NONE, 0xFF, 0xFF);
     thread_wait_inactive(THREAD_SLOT_HOVERED_UNIT_STATS);
     thread_wait_inactive(THREAD_SLOT_RIGHT_UNIT_STATS);
     thread_wait_inactive(THREAD_SLOT_UNIT_SUMMARY_PANEL);
@@ -424,7 +424,7 @@ void at_list_select_unit_thread(void) {
 
 /* Runs the g_at_list_state menu on the thread two below the current one and
  * waits until that thread and the one below it have finished. */
-void at_list_start_thread(void) {
+void at_list_run(void) {
     menu_entry_t* list = &g_at_list_state;
     menu_entry_t* saved = g_menu_thread_menu_data;
 
@@ -432,7 +432,7 @@ void at_list_start_thread(void) {
     g_menu_thread_menu_data = list;
     g_at_list_state.context = &g_at_list_entry_table;
     init_at_list(list);
-    thread_start(g_thread_current_id - 2, at_list_run);
+    thread_start(g_thread_current_id - 2, menu_text_list_thread);
     thread_set_parameters(g_thread_current_id - 2, (s32)list, 0, 0);
     do {
         thread_yield();

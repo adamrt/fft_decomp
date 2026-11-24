@@ -32,7 +32,7 @@ void music_play_tracks(s32 slot_1_music_id, s32 slot_2_music_id) {
     }
 
     if (slot_1_music_id != 0) {
-        g_thread_call_target = (void (*)(void))music_switch_track;
+        g_thread_call_target = (void (*)(void))music_play_slot;
         thread_call_on_main_stack(1, 0x7f, 0);
     }
 }

@@ -35,7 +35,7 @@ static u16 s_tutorial_previous_input = 0;
  * the activation timer reaches 4 (VSyncs), except a D-pad press, which counts
  * at once.
  */
-static void update_tutorial_controller(void) {
+static void update_controller(void) {
     s16 bit;
     s32 index;
     u32 current_input;
@@ -153,12 +153,12 @@ static void update_tutorial_controller(void) {
  * thread is not running, the input lock and the held-loop sound release are
  * cleared.
  */
-void menu_input_update_message_state(void) {
+void menu_input_update(void) {
     s32 running = 0;
     s32 step;
     u8 value;
 
-    update_tutorial_controller();
+    update_controller();
     step = menu_window_get_scale_step();
     if (step >= 1 && step <= 3) {
         menu_input_clear_state();

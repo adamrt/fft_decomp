@@ -99,7 +99,7 @@ static u8 s_unit_status_staging_masks[UNIT_STATUS_STAGING_MASK_COUNT][8] = {
         0xff & ~(STATUS_BYTE_MASK(STATUS_ID_FLOAT) | STATUS_BYTE_MASK(STATUS_ID_CRITICAL)), 0xff, 0xff, 0, 0, 0 }
 };
 
-static void inflict_event_unit_status(s32 event_unit_id, s32 status, s32 which, s32 removal_only);
+static void change_event_unit_status(s32 event_unit_id, s32 status, s32 which, s32 removal_only);
 
 /* Wait until no thread runs a task from THREAD_TASK_CAMERA to THREAD_TASK_ADD_UNIT, then
  * load the event the current-event variable names unless it is already loaded. Returns
@@ -186,7 +186,7 @@ void camera_clear_zoom_flag(void) {
  * mode 1 and late mode 2 paths while first and elapsed are block-local, which
  * gives the target's s0-s3 assignment.
  */
-void camera_thread(void) {
+void script_opcode_19_camera_thread(void) {
     s32 target[EVENT_CAMERA_COMPONENT_COUNT + 1];
     s32 start[EVENT_CAMERA_COMPONENT_COUNT];
     s32 i;
@@ -447,8 +447,8 @@ void script_opcode_3e_color_screen_thread(void) {
 }
 
 /*
- * Sprite-move worker called by script_sprite_move_thread (mode 0) and
- * script_sprite_move_beta_thread (mode 1) with the script cursor: a unit
+ * Sprite-move worker called by script_opcode_3b_sprite_move_thread (mode 0) and
+ * script_opcode_6e_sprite_move_beta_thread (mode 1) with the script cursor: a unit
  * 16-bit value, three 16-bit destination coordinates, an easing byte, a weight byte and a
  * 16-bit value that is a frame count (mode 0) or a speed (mode 1). pos[0] is the
  * start, pos[1] the destination, pos[2] the current position and pos[3] the
@@ -589,7 +589,7 @@ static void run_sprite_move(const event_sprite_move_parameters_t* arg, s32 use_s
 
 /* Thread body of SpriteMove: run the sprite move with the last operand taken as a
  * frame count. */
-void script_sprite_move_thread(void) {
+void script_opcode_3b_sprite_move_thread(void) {
     thread_current_set_task(THREAD_TASK_SPRITE_MOVE);
     run_sprite_move((const event_sprite_move_parameters_t*)thread_current_get_parameter_1(), 0);
     thread_current_exit();
@@ -597,7 +597,7 @@ void script_sprite_move_thread(void) {
 
 /* Thread body of SpriteMoveBeta: run the sprite move with the last operand taken
  * as a speed. */
-void script_sprite_move_beta_thread(void) {
+void script_opcode_6e_sprite_move_beta_thread(void) {
     thread_current_set_task(THREAD_TASK_SPRITE_MOVE);
     run_sprite_move((const event_sprite_move_parameters_t*)thread_current_get_parameter_1(), 1);
     thread_current_exit();
@@ -638,7 +638,7 @@ static void copy_matrix(MATRIX* destination, const MATRIX* source) {
  * the script's frame count, rebuilding the GTE light matrix each frame, then
  * commits the final values back to the live light state.
  */
-void map_light_thread(void) {
+void script_opcode_1b_map_light_thread(void) {
     /* The instruction stores rotation XYZ followed by color scale RGB. */
     enum {
         LIGHT_ROTATION_X = 0,
@@ -727,7 +727,7 @@ static s16 choose_unblocked_yaw(s32 map_unit_id_a, s32 map_unit_id_b) {
     s32 wrapped;
     s32 dist;
 
-    yaw = camera_wrap_yaw() & 0xFFF;
+    yaw = camera_get_nonnegative_yaw() & 0xFFF;
     map_unit_copy_map_coords(map_unit_id_a, &g_unit_scratch_coords);
     /* The raw result is assigned before it is masked: combine then knows
      * nothing about the mask's high bits and the loop test keeps its sll 16. */
@@ -821,7 +821,7 @@ void script_apply_relative_camera(event_camera_values_t* parameters, const s32* 
  * second unit Altima's first form. Unless keep_angle is set, its yaw becomes the nearest diagonal not
  * blocked at either unit's tile. When either unit is missing, the Camera instruction is
  * disabled and system error 7 is reported. */
-void script_focus(event_focus_parameters_t* parameters) {
+void script_opcode_1f_focus(event_focus_parameters_t* parameters) {
     s32 coords[2][4];
     s32 unit_a;
     s32 unit_b;
@@ -879,7 +879,7 @@ void script_focus(event_focus_parameters_t* parameters) {
  * distance between the current and requested position/rotation and the speed.
  *
  * The original leaves rotation_sum uninitialized (s6 is never set). */
-void script_focus_speed(u8* parameters, s32* position, s32* rotation) {
+void script_opcode_38_focus_speed(u8* parameters, s32* position, s32* rotation) {
     s32 position_delta[4]; /* four slots: the target spaces the arrays 0x10 apart */
     s32 rotation_delta[4];
     s32 speed;
@@ -1204,7 +1204,7 @@ void script_opcode_8c_unit_anim_rotate(const event_unit_anim_rotate_parameters_t
  * toward the second. Successive second-unit records are staggered like FaceTile.
  * The angle is built in place (negate, then add) so combine cannot fold the two
  * constant additions into one. */
-void script_opcode_2c_face_unit(const event_face_unit_parameters_t* parameters, s32 second_only) {
+void script_opcode_2c_53_face_each_other(const event_face_unit_parameters_t* parameters, s32 second_only) {
     SVECTOR position;
     SVECTOR target;
     u16 unit_id;
@@ -1293,7 +1293,7 @@ void script_opcode_2d_rotate_unit(const event_rotate_unit_parameters_t* paramete
                     facing = map_unit_get_facing_sixteenth(unit_id) + facing * 4;
                     facing = facing & 0xF;
                 } else if (facing == EVENT_ROTATE_UNIT_FACING_CAMERA) {
-                    facing = s_unit_facing_by_camera_quadrant[(camera_wrap_yaw() & 0xC00) >> 10] * 4;
+                    facing = s_unit_facing_by_camera_quadrant[(camera_get_nonnegative_yaw() & 0xC00) >> 10] * 4;
                 } else if (facing == EVENT_ROTATE_UNIT_FACING_RESTORE) {
                     state = &g_unit_animation_states[unit_id];
                     if (state->initial_facing != 0xFF) {
@@ -1523,7 +1523,7 @@ static void apply_staged_status(s32 battle_unit_id, s32 map_unit_id) {
             unit->charged_ability_ct = g_unit_status_staging_data->charged_ability_ct[battle_unit_id];
         }
         g_unit_status_staging_data->state[battle_unit_id] = UNIT_STATUS_STAGING_RESTORED;
-        g_thread_call_target = (void (*)(void))map_unit_update_graphics;
+        g_thread_call_target = (void (*)(void))map_unit_update_display_for_script;
         thread_call_on_main_stack(map_unit_id);
     }
 }
@@ -1553,7 +1553,7 @@ void battle_unit_status_staging_run(u16 unit_id, u16 restore) {
                     if (battle_unit_id >= 0) {
                         if (restore == 0) {
                             if (battle_unit_status_staging_save(battle_unit_index) != 0) {
-                                g_thread_call_target = (void (*)(void))map_unit_update_graphics;
+                                g_thread_call_target = (void (*)(void))map_unit_update_display_for_script;
                                 thread_call_on_main_stack(unit_id);
                             }
                         } else {
@@ -1615,25 +1615,25 @@ void script_inflict_status_thread(void) {
         }
     }
     if (mode == EVENT_INFLICT_STATUS_POISON) {
-        inflict_event_unit_status(unit_id, STATUS_LSB_INDEX(STATUS_ID_POISON), 1, 1);
+        change_event_unit_status(unit_id, STATUS_LSB_INDEX(STATUS_ID_POISON), 1, 1);
         g_unit_status_staging_data->inflict_status_mode[battle_unit_index] = UNIT_INFLICT_STATUS_MODE_POISON;
-        g_thread_call_target = (void (*)(void))map_unit_update_graphics;
+        g_thread_call_target = (void (*)(void))map_unit_update_display_for_script;
         thread_call_on_main_stack(map_unit_id);
         map_unit_set_event_animation(map_unit_id, ANIMATION_KNEEL);
     } else if (mode == EVENT_INFLICT_STATUS_CRYSTAL) {
-        inflict_event_unit_status(unit_id, STATUS_LSB_INDEX(STATUS_ID_DEAD), 0, 1);
-        inflict_event_unit_status(unit_id, STATUS_LSB_INDEX(STATUS_ID_CRITICAL), 0, 1);
-        inflict_event_unit_status(unit_id, STATUS_LSB_INDEX(STATUS_ID_CRYSTAL), 1, 1);
+        change_event_unit_status(unit_id, STATUS_LSB_INDEX(STATUS_ID_DEAD), 0, 1);
+        change_event_unit_status(unit_id, STATUS_LSB_INDEX(STATUS_ID_CRITICAL), 0, 1);
+        change_event_unit_status(unit_id, STATUS_LSB_INDEX(STATUS_ID_CRYSTAL), 1, 1);
         g_unit_status_staging_data->inflict_status_mode[battle_unit_index] = UNIT_INFLICT_STATUS_MODE_CRYSTAL;
-        g_thread_call_target = (void (*)(void))map_unit_update_graphics;
+        g_thread_call_target = (void (*)(void))map_unit_update_display_for_script;
         thread_call_on_main_stack(map_unit_id);
     } else if (mode == EVENT_INFLICT_STATUS_REVIVE) {
         if (health == 0) {
             g_unit_status_staging_data->inflict_status_mode[battle_unit_index] = UNIT_INFLICT_STATUS_MODE_REVIVE;
-            inflict_event_unit_status(unit_id, STATUS_LSB_INDEX(STATUS_ID_DEAD), 0, 1);
+            change_event_unit_status(unit_id, STATUS_LSB_INDEX(STATUS_ID_DEAD), 0, 1);
             unit->hp = 1;
-            inflict_event_unit_status(unit_id, STATUS_LSB_INDEX(STATUS_ID_CRITICAL), 1, 1);
-            g_thread_call_target = (void (*)(void))map_unit_update_graphics;
+            change_event_unit_status(unit_id, STATUS_LSB_INDEX(STATUS_ID_CRITICAL), 1, 1);
+            g_thread_call_target = (void (*)(void))map_unit_update_display_for_script;
             thread_call_on_main_stack(map_unit_id);
             g_sound_pending_sfx_id = SOUND_SFX_EVENT_REVIVE;
         } else if (health == 2) {
@@ -1653,7 +1653,7 @@ void script_inflict_status_thread(void) {
  * The unit's pending infliction and removal bytes are cleared, the one status bit
  * is set and status_resolve_unit_changes runs on the main stack with
  * removal_only. Nothing happens when the id resolves to no unit on the field. */
-static void inflict_event_unit_status(s32 event_unit_id, s32 status, s32 which, s32 removal_only) {
+static void change_event_unit_status(s32 event_unit_id, s32 status, s32 which, s32 removal_only) {
     s32 battle_unit_id = battle_unit_get_id_by_event_unit_id(event_unit_id);
     battle_unit_t* unit;
     s32 i;
@@ -1852,7 +1852,7 @@ void script_opcode_32_color_unit(const event_color_unit_parameters_t* parameters
  *
  * 0x80149698 stores a0 directly as a 16-bit value. The interpreter passes a
  * zero-extended 32-bit value; signed argument normalization is not part of this ABI. */
-void script_suppress_unit_palette_updates(s32 event_unit_id, s32 enable) {
+void script_opcode_6c_6d_set_unit_palette_updates(s32 event_unit_id, s32 enable) {
     u16 unit_id = event_unit_id;
     s32 filter_mode;
     s32 i;
@@ -1875,9 +1875,9 @@ void script_suppress_unit_palette_updates(s32 event_unit_id, s32 enable) {
 
 /* Nonzero when the unit's facing, relative to the camera yaw quadrant, is
  * one of the six "away from camera" directions 7..12 (of 16). */
-s32 map_unit_check_camera_facing_by_event_unit_id(s32 event_unit_id) {
+s32 map_unit_is_facing_away_from_camera_by_event_unit_id(s32 event_unit_id) {
     s32 map_unit_id = script_resolve_map_unit_id(event_unit_id);
-    s32 camera_facing = camera_wrap_yaw();
+    s32 camera_facing = camera_get_nonnegative_yaw();
 
     camera_facing += 0x200;
     camera_facing &= 0xf00;
@@ -1936,7 +1936,7 @@ void script_opcode_69_face_tile(const event_face_tile_parameters_t* parameters) 
 }
 
 /* WaitRotateUnit/All: resolved units yield at least once; -1 waits for all 21 slots. */
-void script_opcode_65_wait_rotate_all(s32 unit_id) {
+void script_opcode_64_65_wait_rotate(s32 unit_id) {
     s32 i;
     s32 index;
 

@@ -162,7 +162,7 @@ static void open_land_detail(s32 value) {
     base = &g_display_object_gs_image_pool[index].position;
     base->x = -0x74;
     base->y = -0x22;
-    calendar_read_date(g_brave_story_land_discovery_date_bits, value, &date);
+    calendar_read_date_bits(g_brave_story_land_discovery_date_bits, value, &date);
     g_text_window.text_id = value + TEXT_ID_WORLD_MESSAGE_BASE;
     switch (coordinate_mode) {
     case 0:
@@ -416,7 +416,7 @@ void brave_story_open_treasure_detail(s32 value) {
     index = display_object_append_image(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].detail.render_index = index;
     g_display_object_gs_image_pool[index].flags |= DISPLAY_OBJECT_HIDDEN;
-    calendar_read_date(g_brave_story_treasure_acquisition_date_bits, value, &date);
+    calendar_read_date_bits(g_brave_story_treasure_acquisition_date_bits, value, &date);
     g_text_window.text_id = value + TEXT_ID_WORLD_MESSAGE_BASE;
     switch (coordinate_mode) {
     case 0:

@@ -329,7 +329,7 @@ void unit_panel_set_numeric_frame_dimmed_colors(unit_panel_numeric_frame_t* menu
 void unit_panel_init_primitives(unit_panel_frame_t* menu);
 
 /* The dimmed frame colors for style 1 or while the input lock mode is 1, otherwise the normal ones. */
-void unit_panel_select_palette(unit_panel_numeric_frame_t* primitives, const unit_panel_thread_t* thread);
+void unit_panel_set_numeric_frame_colors(unit_panel_numeric_frame_t* primitives, const unit_panel_thread_t* thread);
 
 /* The panel's sprite CLUTs and the tint of its last five sprites: dimmed and blue for style 1 or while the input
  * lock mode is 1, otherwise normal. */
@@ -498,7 +498,7 @@ extern unit_panel_thread_t g_unit_panel_unit_status_panel_params;
 
 /* panel state (REQUIRE) */
 void unit_panel_set_dimmed(s32 value);
-void unit_panel_transition_thread(void);
+void unit_panel_backdrop_thread(void);
 
 /* help levels (WLDCORE) */
 /* The window-layout request that opens a MENU_STACK_LEVEL_UNIT_PANEL_HELP level. move_help_cursor reads the

@@ -156,7 +156,7 @@ void unit_panel_numbers_thread(void) {
             buffer->sprites[16].clut = 0x7FFC;
         }
 
-        unit_panel_select_palette(&buffer->numeric_frame, thread);
+        unit_panel_set_numeric_frame_colors(&buffer->numeric_frame, thread);
 
         /* Primitives link in at the head of the ordering-table entry, so they draw in reverse:
          * each draw mode or offset added below applies to the sprites added above it. */

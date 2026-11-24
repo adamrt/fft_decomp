@@ -81,14 +81,14 @@ void map_unit_set_event_animation(s32 map_unit_id, u32 animation) {
             } else if ((depth & 0xFF) >= 2) {
                 g_thread_call_target = (void (*)(void))animation_map_unit_set_stand;
             } else {
-                animation_map_unit_set_sequence(map_unit_id, animation);
+                animation_map_unit_request(map_unit_id, animation);
                 return;
             }
             thread_call_on_main_stack(map_unit_id);
             return;
         }
     }
-    animation_map_unit_set_sequence(map_unit_id, animation);
+    animation_map_unit_request(map_unit_id, animation);
 }
 
 /* Faces a unit, and its mount partner when one is linked, in a direction given in
@@ -174,16 +174,16 @@ s32 battle_unit_get_id_by_event_unit_id(s32 event_unit_id) {
     return EVENT_BATTLE_UNIT_ID_NONE;
 }
 
-/* Set the flag that menu_close_modal clears: the companion overlay openers (OPTION.OUT and
+/* Set the flag that menu_mark_modal_closed clears: the companion overlay openers (OPTION.OUT and
  * the others) call it before loading their executable. */
-void menu_open_modal(void) {
+void menu_mark_modal_open(void) {
     g_menu_modal_open = 1;
 }
 
 /* Clears the "an options/menu overlay is on screen" flag. Called from the
  * BATTLE.BIN overlay loaders (EQUIP.OUT, DEBUGCHR.OUT, ...) once the overlay
  * has been torn down. */
-void menu_close_modal(void) {
+void menu_mark_modal_closed(void) {
     g_menu_modal_open = 0;
 }
 
@@ -276,7 +276,7 @@ void camera_settle_tilt_zoom(void) {
 }
 
 /* Raise negative yaw by whole turns; retain positive values of ONE or greater. */
-s32 camera_wrap_yaw(void) {
+s32 camera_get_nonnegative_yaw(void) {
     s32 yaw = g_script_variables[EVENT_SCRIPT_VAR_CAMERA_YAW];
 
     while (yaw < 0) {

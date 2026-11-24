@@ -194,7 +194,7 @@ static void queue_confirm_sound(void) {
 static void confirm_action_silently(menu_entry_t* menu) {
     g_sound_suppressed = 1;
     g_script_event_input = PSX_PAD_CIRCLE;
-    menu_handle_action(menu, 0);
+    menu_handle_confirm_input(menu, 0);
     g_sound_suppressed = 0;
     g_script_event_input = 0;
 }
@@ -249,7 +249,7 @@ void command_move_thread(void) {
  * options can suppress status warnings, but messages 0x1002/0x1003 always
  * stop the current thread after any warning thread finishes.
  */
-void command_check_restrictions(void) {
+void command_check_act_restrictions(void) {
     s32 message = 0;
     battle_unit_t* unit;
     s32 menu;
@@ -769,7 +769,7 @@ static s32 dispatch_request(
                     && script_variable_get(EVENT_SCRIPT_VAR_BATTLE_NOT_STARTED) == 0) {
                     if (option != MENU_SCENARIO_CHECK_TEST) {
                         script_variable_set(EVENT_SCRIPT_VAR_CURRENT_EVENT, EVENT_ID_GAME_OVER);
-                        unit_view_start(UNIT_VIEW_MODE_NONE, 0xFF, 0xFF);
+                        unit_view_request_mode(UNIT_VIEW_MODE_NONE, 0xFF, 0xFF);
                         g_menu_overlay_state = 1;
                         g_scenario_event_active = 1;
                         script_start_current_event_thread();
@@ -781,7 +781,7 @@ static s32 dispatch_request(
                 if (g_scenario_event_active != 0) {
                     if (scenario_run_conditions() != 0) {
                         if (option != MENU_SCENARIO_CHECK_TEST) {
-                            unit_view_start(UNIT_VIEW_MODE_NONE, 0xFF, 0xFF);
+                            unit_view_request_mode(UNIT_VIEW_MODE_NONE, 0xFF, 0xFF);
                             g_menu_overlay_state = 1;
                             script_start_current_event_thread();
                         } else {
@@ -796,7 +796,7 @@ static s32 dispatch_request(
                     return MENU_REQUEST_RESULT_DONE;
                 } else if (script_variable_get(EVENT_SCRIPT_VAR_BATTLE_NOT_STARTED) != 0) {
                     if (option != MENU_SCENARIO_CHECK_TEST) {
-                        unit_view_start(UNIT_VIEW_MODE_NONE, 0xFF, 0xFF);
+                        unit_view_request_mode(UNIT_VIEW_MODE_NONE, 0xFF, 0xFF);
                         g_menu_overlay_state = 1;
                         if (script_variable_get(EVENT_SCRIPT_VAR_WORLD_DEBUG_BATTLE_STYLE) != 0) {
                             script_variable_set(EVENT_SCRIPT_VAR_CURRENT_EVENT, EVENT_ID_DEBUG_BATTLE_START);
@@ -810,7 +810,7 @@ static s32 dispatch_request(
                     return MENU_REQUEST_RESULT_EVENT;
                 } else if (battle_check_outcome() == 0) {
                     if (option != MENU_SCENARIO_CHECK_TEST) {
-                        unit_view_start(UNIT_VIEW_MODE_NONE, 0xFF, 0xFF);
+                        unit_view_request_mode(UNIT_VIEW_MODE_NONE, 0xFF, 0xFF);
                         g_menu_overlay_state = 1;
                         script_variable_set(EVENT_SCRIPT_VAR_CURRENT_EVENT, EVENT_ID_BATTLE_WON);
                         g_scenario_event_active = 1;

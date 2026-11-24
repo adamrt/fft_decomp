@@ -43,13 +43,13 @@ extern u8 g_memcard_slot;
 extern u8 g_memcard_info_pending;
 
 void memcard_set_slot(s32 slot);
-memcard_result_e memcard_wait_operation(s32 retry_limit);
+memcard_result_e memcard_wait_info(s32 retry_limit);
 memcard_result_e memcard_open_slot(void);
 s32 memcard_format_slot(void);
 
 /* OPEN builds its own bodies of these two. */
 memcard_result_e memcard_info_retry(s32 port, s32 retry_limit);
-memcard_result_e memcard_poll_operation(void);
+memcard_result_e memcard_poll_info(void);
 
 /* Empty. Called before a soft reset and when the memory card screen closes. */
 void memcard_close_stub(void);
@@ -57,7 +57,7 @@ void memcard_close_stub(void);
 /* files */
 struct DIRENTRY;
 
-s32 memcard_enumerate_saves(struct DIRENTRY* entries, s32 all_files);
+s32 memcard_enumerate_files(struct DIRENTRY* entries, s32 all_files);
 s32 memcard_count_free_blocks(const struct DIRENTRY* entries, s32 entry_count);
 s32 memcard_file_open_retry(const char* filename, s32 mode);
 s32 memcard_file_close_retry(s32 descriptor);

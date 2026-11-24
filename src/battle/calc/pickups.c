@@ -282,7 +282,7 @@ s32 crystal_pickup_apply_choice(battle_unit_t* unit, s32 flags) {
     s32 i;
     s32 j;
 
-    action_clear_current_data(&unit->action);
+    action_reset_result(&unit->action);
     unit->action.miss_type = ACTION_MISS_TYPE_CANCELED;
     unit->action.hit = 0;
     if (flags & CRYSTAL_TAKE_TREASURE) {

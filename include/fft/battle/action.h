@@ -98,7 +98,7 @@ enum { ACTION_EXP_CHANGE_VALUE_MASK = 0x7f, ACTION_EXP_CHANGE_LOSS = 0x80 };
 /* HP and MP damage and healing stop at 999. */
 enum { ACTION_VALUE_MAX = 999 };
 
-void action_clear_current_data(action_data_t* action);
+void action_reset_result(action_data_t* action);
 void action_finalize_target_result(void);
 s32 action_apply_target_result(s32 battle_unit_id);
 s32 action_apply_attacker_result(s32 unit_id);
@@ -114,7 +114,7 @@ typedef enum action_state {
     ACTION_STATE_PREVIEW = 2
 } action_state_e;
 
-/* Why action_init_current_data rejects an action; result_queue_charge_failure
+/* Why action_init_resolution rejects an action; result_queue_charge_failure
  * shows a pop-up for the codes below 4. */
 typedef enum action_rejection {
     ACTION_REJECTION_NONE = 0,
@@ -178,7 +178,7 @@ typedef struct action_work {
     u8 defaulted_to_attack;                     /* 0x29 */
     u8 random_damage_factor;                    /* 0x2a */
     u8 mp_cost;                                 /* 0x2b: effective cost recorded before the MP checks of
-                                                 * check_and_consume_mp; reaction
+                                                 * check_action_and_spend_mp; reaction
                                                  * eligibility reads it even when no MP was subtracted */
     u8 target_count;                            /* 0x2c */
     u8 knockback_flags;                         /* 0x2d */
@@ -244,15 +244,15 @@ extern s16 g_action_actor_used_ability_id;
 /* Golem barrier HP per team, shared by action resolution and AI snapshots. */
 extern u16 g_action_team_golem[UNIT_TEAM_COUNT];
 
-s32 action_init_current_data(s32 unit_id);
-void action_store_actor_data(battle_unit_t* unit);
+s32 action_init_resolution(s32 unit_id);
+void action_finish_actor(battle_unit_t* unit);
 s32 action_resolve_strike(s32 battle_unit_id, action_strike_work_t* work);
 void action_store_used_weapon(action_command_t* action);
 s32 action_calculate_target_result(const action_command_t* source, u8 target_id);
-void action_switch_ability_to_default_attack(void);
+void action_recalculate_target_result_as_attack(void);
 void action_start_target_response(map_unit_t* attacker, map_unit_t* target);
 s32 action_map_unit_start_target_response(s32 map_unit_id);
-void action_store_target_ids(u8* src);
+void action_store_ability_targets(u8* src);
 s32 action_copy_ability_targets(u8* out);
 void action_remove_ability_target(s32 target_battle_unit_id);
 void action_post_action_facing_stub(battle_unit_t* unused_unit, s32 unused_facing);
@@ -262,7 +262,7 @@ s32 action_calculate_projected_effect(battle_unit_t* attacker, battle_unit_t* ta
 
 /* mimic */
 /* g_action_mimic_attacker, filled by action_mimic_record and read
- * by action_mimic_set_ability. The AI saves and restores it whole as 30 bytes
+ * by action_mimic_prepare. The AI saves and restores it whole as 30 bytes
  * (ai_simulation_begin and ai_simulation_end). */
 typedef struct action_mimic_attacker {
     u8 facing;               /* 0x00 */
@@ -280,7 +280,7 @@ typedef char action_mimic_attacker_size_must_be_30[(sizeof(action_mimic_attacker
 extern action_mimic_attacker_t g_action_mimic_attacker;
 
 void action_mimic_record(battle_unit_t* unit);
-s32 action_mimic_set_ability(battle_unit_t* unit);
+s32 action_mimic_prepare(battle_unit_t* unit);
 
 /* weapon sounds */
 void action_play_weapon_sfx(struct map_unit* unit, s32 hit);

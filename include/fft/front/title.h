@@ -48,7 +48,7 @@ typedef enum title_state {
 } title_state_e;
 
 /* Title-menu controller state (handler 2), pushed into the next controller
- * record by title_push_menu and run by update_main_menu. */
+ * record by title_push_menu and run by update_title_menu. */
 typedef struct title_menu_state {
     /* 0x00 */ s32 render_indices[5]; /* logo, then the four menu items */
     /* 0x14 */ s32 idle_timer;
@@ -102,7 +102,7 @@ typedef struct new_game_state {
     /* 0x20 */ s32 name_text_id;
 } new_game_state_t;
 
-void title_prepare_new_game(s32 party_mode, s32 world_load_mode);
+void title_prepare_party(s32 party_mode, s32 world_load_mode);
 
 /* birthday */
 /* Birthday date-selection controller state (handler 5), shared with its redraw routine. */

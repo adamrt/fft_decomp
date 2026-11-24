@@ -13,7 +13,7 @@ struct map_unit;
 
 /* sequences */
 /* SEQ sequence bytes, as run_unit_seq (unit sheets) and
- * run_weapon_seq (weapon and effect sheets) read them.
+ * run_block_seq (weapon and effect sheets) read them.
  * A sequence is a run of two-byte frame instructions (an SHP frame, then the
  * frames to wait; a wait of 0 holds the frame for good) and of commands:
  * ANIMATION_SEQ_OP_PREFIX, an opcode and its operand bytes. A jump offset is a
@@ -138,7 +138,7 @@ typedef enum animation {
     ANIMATION_IDLE_FLYING = 6, /* sheets with the flying flag */
     ANIMATION_IDLE_FLYING_HASTE = 7,
     ANIMATION_IDLE_FLYING_SLOW = 8,
-    ANIMATION_SUBMERGED_IDLE = 9, /* in water two or more deep (get_water_mode); also the crystal sprite */
+    ANIMATION_SUBMERGED_IDLE = 9, /* in water two or more deep (get_water_depth); also the crystal sprite */
     ANIMATION_SUBMERGED_IDLE_HASTE = 10,
     ANIMATION_SUBMERGED_IDLE_SLOW = 11,
     ANIMATION_WALK = 12, /* a movement step on foot (animation_set_walk) */
@@ -219,9 +219,9 @@ typedef enum animation {
 /* The teleport animation and the attack animations after it are ATTACK_FIRST and up. */
 enum { ANIMATION_ATTACK_FIRST = ANIMATION_TELEPORT };
 
-void animation_map_unit_set_sequence(u32 map_unit_id, u32 animation);
-void animation_store_with_facing(u32 animation, s32 facing, struct map_unit* unit);
-void animation_force_with_facing(s32 animation, s32 facing, struct map_unit* unit);
+void animation_map_unit_request(u32 map_unit_id, u32 animation);
+void animation_request(u32 animation, s32 facing, struct map_unit* unit);
+void animation_request_forced(s32 animation, s32 facing, struct map_unit* unit);
 void animation_set_walk(struct map_unit* unit);
 void animation_set_level_up(struct map_unit* unit);
 void animation_set_stand(struct map_unit* unit);

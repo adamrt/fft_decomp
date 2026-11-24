@@ -58,7 +58,7 @@ s32 deploy_init_party_member(s32 unused0, s32 unused1, s32 unit_index) {
  * PARTY_UNIT_LOAD or PARTY_PLACEMENT plus the slot. The target reloads each
  * row from g_unit_deployed_coords at its distinct uses.
  */
-static s32 init_units(unit_deployment_coordinates_t* formation, s32 is_red_team_debug) {
+static s32 init_deployed_units(unit_deployment_coordinates_t* formation, s32 is_red_team_debug) {
     s32 failures = 0;
     s32 failure_bit = 1;
     s32 i;
@@ -131,17 +131,17 @@ static s32 init_units(unit_deployment_coordinates_t* formation, s32 is_red_team_
     return failures;
 }
 
-/* Clears g_reward_enemy_level_sum, then runs init_units
+/* Clears g_reward_enemy_level_sum, then runs init_deployed_units
  * as the red team's debug deployment. The second argument is ignored. */
 void deploy_init_debug_red_team_units(unit_deployment_coordinates_t* formation, s32 unused_1) {
     g_reward_enemy_level_sum = 0;
-    init_units(formation, 1);
+    init_deployed_units(formation, 1);
 }
 
-/* init_units for a normal deployment. The second
+/* init_deployed_units for a normal deployment. The second
  * argument is ignored. */
 s32 deploy_init_units(unit_deployment_coordinates_t* formation, s32 unused_1) {
-    return init_units(formation, 0);
+    return init_deployed_units(formation, 0);
 }
 
 /* Store the deployment position and return its placement validation result. */
@@ -482,7 +482,7 @@ s32 battle_unit_set_tile_position(s32 battle_unit_id, u8 x, u8 y, u8 layer, u8 f
  * crystal or treasure on its tile; for a rider, the mount-removal statuses applied to its mount; a
  * Move-Find Item find (the mount's ability when riding) or else a trap; a canceled Charge; and the
  * Move-HP/MP Up and Move-Get EXP/JP flags. */
-u32 move_get_post_events(battle_unit_t* unit) {
+u32 move_resolve_post_events(battle_unit_t* unit) {
     battle_unit_t* target;
     u32 flags;
     s32 i;
@@ -501,11 +501,11 @@ u32 move_get_post_events(battle_unit_t* unit) {
         target = &g_battle_units[unit->mount_info & UNIT_MOUNT_INFO_PARTNER_ID_MASK];
         g_action_target = target;
         g_action_target_data = &target->action;
-        action_clear_current_data(&target->action);
+        action_reset_result(&target->action);
         for (i = 0; i < STATUS_BYTE_COUNT; i++) {
             g_action_target_data->status_changes.removal[i] = g_status_check_sets[STATUS_CHECK_SET_MOUNT_REMOVAL][i];
         }
-        if (status_modify_inflictions(0) != 0) {
+        if (status_filter_action_changes(0) != 0) {
             g_action_target_data->attack_type = ACTION_TYPE_STATUS_CHANGE;
             status_resolve_unit_changes(target->battle_unit_id, 0);
             flags |= MOVE_POST_EVENT_MOUNT_STATUS_CHANGE;

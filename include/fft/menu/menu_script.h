@@ -90,7 +90,7 @@ typedef struct menu_draw_number_command {
 typedef char menu_draw_number_command_size_must_be_10[sizeof(menu_draw_number_command_t) == 10 ? 1 : -1];
 
 /* Variable-length list command (0x10) in the menu display stream: the layout menu_scrollable_list_refresh reads and
- * the placement each program's menu_opcode_10_draw_scrollable_list draws with. */
+ * the placement each program's menu_opcode_10_update_scrollable_list draws with. */
 typedef struct menu_list_record {
     u8 opcode;          /* 0x00: 0x10 = list layout */
     u8 length;          /* 0x01: byte length of this record */
@@ -292,19 +292,23 @@ menu_instruction_t* menu_opcode_00_draw_window_frame(menu_instruction_t* instruc
 menu_instruction_t* menu_opcode_01_if_group(menu_instruction_t* command);
 menu_instruction_t* menu_opcode_02_if_else_group(menu_instruction_t* command);
 menu_instruction_t* menu_opcode_03_draw_tile(menu_instruction_t* instruction);
-menu_instruction_t* menu_opcode_04_draw_textured_quad(menu_instruction_t* instruction);
+menu_instruction_t* menu_opcode_04_05_draw_textured_quad(menu_instruction_t* instruction);
 menu_instruction_t* menu_opcode_06_draw_callback_quad(menu_instruction_t* instruction);
 menu_instruction_t* menu_opcode_07_draw_line(menu_instruction_t* instruction);
 menu_instruction_t* menu_opcode_09_set_fixed_clut(menu_instruction_t* command);
 menu_instruction_t* menu_opcode_0a_set_clut(menu_instruction_t* command);
 menu_instruction_t* menu_opcode_0b_set_draw_color(menu_instruction_t* command);
 menu_instruction_t* menu_opcode_0c_set_texture_page(menu_instruction_t* command);
+#ifdef FFT_EVENT_CARD
+/* CARD's reduced copy reads the command as its NUMBER record. */
+menu_draw_number_command_t* menu_opcode_0d_draw_formatted_number(menu_draw_number_command_t* command);
+#else
 menu_instruction_t* menu_opcode_0d_draw_formatted_number(menu_instruction_t* instruction);
-menu_draw_number_command_t* menu_opcode_0d_draw_decimal_number(menu_draw_number_command_t* command);
+#endif
 menu_instruction_t* menu_opcode_0e_set_semi_trans(menu_instruction_t* instruction);
 menu_instruction_t* menu_opcode_0f_set_draw_priority(menu_instruction_t* instruction);
 menu_instruction_t* menu_opcode_0f_set_draw_priority_if_unlocked(menu_instruction_t* instruction);
-menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* instruction);
+menu_instruction_t* menu_opcode_10_update_scrollable_list(menu_instruction_t* instruction);
 menu_instruction_t* menu_opcode_11_draw_background_tiles(menu_instruction_t* instruction);
 menu_instruction_t* menu_opcode_12_draw_opening_window_frame(menu_instruction_t* instruction);
 
@@ -318,7 +322,7 @@ menu_instruction_t* menu_opcode_18_add_blend_draw_mode(menu_instruction_t* instr
 
 /* scrollable lists */
 /* A scrollable list shows the rows of a -1 terminated entry list by name from a text table, under the geometry of a
- * list record (menu_list_record_t). Each program draws the rows with its own menu_opcode_10_draw_scrollable_list. */
+ * list record (menu_list_record_t). Each program draws the rows with its own menu_opcode_10_update_scrollable_list. */
 
 /* Page scroll direction of the overlay unit, item and job lists. */
 typedef enum menu_vertical_scroll_direction {
@@ -344,7 +348,7 @@ extern u8 g_menu_list_text_columns;
 extern u16 g_menu_list_vram_width;
 extern s8 g_menu_list_scroll_direction; /* read with lb */
 extern u16 g_menu_list_scroll_progress;
-extern s8 g_menu_list_redraw_pending; /* read with lb (each program's menu_opcode_10_draw_scrollable_list) */
+extern s8 g_menu_list_redraw_pending; /* read with lb (each program's menu_opcode_10_update_scrollable_list) */
 
 /* The row being drawn, its row mode and its scroll offset, which the row instructions read. */
 extern s32 g_menu_list_row_index;
@@ -356,7 +360,12 @@ void menu_scrollable_list_init(const s16* entries, s32 selected_index, s32 scrol
 /* BUNIT, EQUIP and JOBSTTS share the core; WORLD uses its screen state. */
 void menu_scrollable_list_init_core(const s16* entries, s32 selected_index, u8* text_table);
 void menu_scrollable_list_refresh(const menu_instruction_t* script);
+#ifdef FFT_EVENT
+/* The overlays' copies take a read-only script instead of read-only entries. */
+void menu_scrollable_list_open(s16* entries, s32 selected_index, u8* text_table, const menu_instruction_t* script);
+#else
 void menu_scrollable_list_open(const s16* values, s32 selected_index, u8* text_table, menu_instruction_t* script);
+#endif
 void menu_scrollable_list_open_at_scroll_base(
     const s16* entries, s32 selected_index, s32 scroll_base_index, u8* text_table, const menu_instruction_t* script);
 void menu_scroll_list_by_page(menu_vertical_scroll_direction_e direction, const menu_instruction_t* list);

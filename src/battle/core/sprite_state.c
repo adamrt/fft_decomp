@@ -15,15 +15,15 @@
 /* Request `animation` with facing `facing` (0x400 per quarter turn) for the next animation update;
  * the request is dropped when that sequence is already playing in the same view. The request
  * is stored as the animation plus one, so 0 means none. */
-void animation_store_with_facing(u32 animation, s32 facing, map_unit_t* unit) {
+void animation_request(u32 animation, s32 facing, map_unit_t* unit) {
     animation++;
     unit->requested_animation = animation;
     unit->facing = facing;
 }
 
-/* animation_store_with_facing with the force flag: the animation
+/* animation_request with the force flag: the animation
  * starts on the next update, from its beginning even when it is playing. */
-void animation_force_with_facing(s32 animation, s32 facing, map_unit_t* unit) {
+void animation_request_forced(s32 animation, s32 facing, map_unit_t* unit) {
     animation++;
     unit->requested_animation = animation;
     unit->facing = facing;
@@ -316,23 +316,23 @@ void sprite_palette_tint_unit(map_unit_t* unit, s32 level, s32 update_current_co
     /* Crystal, chicken, frog and treasure sheets tint fixed RAM palettes instead of the slot's. */
     switch (unit->spritesheet_id) {
     case SPRITE_SHEET_ID_CRYSTAL:
-        map_palette_set_from_other(g_sprite_other_palettes.crystal[stored_palette], MAP_CLUT_ROW_UNITS, clut_index, 0,
+        map_palette_set_from_source(g_sprite_other_palettes.crystal[stored_palette], MAP_CLUT_ROW_UNITS, clut_index, 0,
             red, green, blue, update_current_colors);
         break;
     case SPRITE_SHEET_ID_CHICKEN:
-        map_palette_set_from_other(g_sprite_other_palettes.chicken[stored_palette], MAP_CLUT_ROW_UNITS, clut_index, 0,
+        map_palette_set_from_source(g_sprite_other_palettes.chicken[stored_palette], MAP_CLUT_ROW_UNITS, clut_index, 0,
             red, green, blue, update_current_colors);
         break;
     case SPRITE_SHEET_ID_FROG:
-        map_palette_set_from_other(g_sprite_other_palettes.frog[stored_palette], MAP_CLUT_ROW_UNITS, clut_index, 0, red,
-            green, blue, update_current_colors);
+        map_palette_set_from_source(g_sprite_other_palettes.frog[stored_palette], MAP_CLUT_ROW_UNITS, clut_index, 0,
+            red, green, blue, update_current_colors);
         break;
     case SPRITE_SHEET_ID_TREASURE:
-        map_palette_set_from_other(g_sprite_other_palettes.treasure[stored_palette], MAP_CLUT_ROW_UNITS, clut_index, 0,
+        map_palette_set_from_source(g_sprite_other_palettes.treasure[stored_palette], MAP_CLUT_ROW_UNITS, clut_index, 0,
             red, green, blue, update_current_colors);
         break;
     default:
-        map_palette_set_from_other(g_sprite_sheet_slots[slot].clut[stored_palette], MAP_CLUT_ROW_UNITS, clut_index, 0,
+        map_palette_set_from_source(g_sprite_sheet_slots[slot].clut[stored_palette], MAP_CLUT_ROW_UNITS, clut_index, 0,
             red, green, blue, update_current_colors);
         break;
     }
@@ -356,23 +356,23 @@ static void modify_unit_palette(map_unit_t* unit, s32 mode, s32 clut_row, s32 cl
     palette = unit->stored_palette;
     switch (sheet) {
     case SPRITE_SHEET_ID_CRYSTAL:
-        map_palette_modify_from_other(mode, g_sprite_other_palettes.crystal[palette], clut_row, clut_index, all_colors,
+        map_palette_modify_from_source(mode, g_sprite_other_palettes.crystal[palette], clut_row, clut_index, all_colors,
             red, green, blue, update_current_colors);
         break;
     case SPRITE_SHEET_ID_CHICKEN:
-        map_palette_modify_from_other(mode, g_sprite_other_palettes.chicken[palette], clut_row, clut_index, all_colors,
+        map_palette_modify_from_source(mode, g_sprite_other_palettes.chicken[palette], clut_row, clut_index, all_colors,
             red, green, blue, update_current_colors);
         break;
     case SPRITE_SHEET_ID_FROG:
-        map_palette_modify_from_other(mode, g_sprite_other_palettes.frog[palette], clut_row, clut_index, all_colors,
+        map_palette_modify_from_source(mode, g_sprite_other_palettes.frog[palette], clut_row, clut_index, all_colors,
             red, green, blue, update_current_colors);
         break;
     case SPRITE_SHEET_ID_TREASURE:
-        map_palette_modify_from_other(mode, g_sprite_other_palettes.treasure[palette], clut_row, clut_index, all_colors,
-            red, green, blue, update_current_colors);
+        map_palette_modify_from_source(mode, g_sprite_other_palettes.treasure[palette], clut_row, clut_index,
+            all_colors, red, green, blue, update_current_colors);
         break;
     default:
-        map_palette_modify_from_other(mode, g_sprite_sheet_slots[slot].clut[palette], clut_row, clut_index, all_colors,
+        map_palette_modify_from_source(mode, g_sprite_sheet_slots[slot].clut[palette], clut_row, clut_index, all_colors,
             red, green, blue, update_current_colors);
         break;
     }

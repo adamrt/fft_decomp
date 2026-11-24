@@ -21,9 +21,9 @@ void effect_vector_add_rotations_mod_q12(const SVECTOR* first, const SVECTOR* se
 void effect_vector_add_random_offsets(const VECTOR* source, const VECTOR* ranges, VECTOR* destination);
 void effect_vector_add_random_offsets_and_store_q12(const VECTOR* source, const VECTOR* ranges, VECTOR* destination);
 void effect_vector_add_random_rotation_offsets(const SVECTOR* source, const SVECTOR* ranges, SVECTOR* destination);
-void effect_vector_scale_q12(const VECTOR* src, VECTOR* dst);
-void effect_vector_shift_right_12(const VECTOR* src, VECTOR* dst);
-void effect_vector_mask_low_12_bits(const SVECTOR* src, SVECTOR* dst);
+void effect_vector_to_q12(const VECTOR* src, VECTOR* dst);
+void effect_vector_from_q12(const VECTOR* src, VECTOR* dst);
+void effect_vector_wrap_rotations(const SVECTOR* src, SVECTOR* dst);
 
 /* magnitudes */
 s16 effect_s16_select_largest_magnitude(s16 first, s16 second, s16 third);
@@ -34,9 +34,9 @@ void effect_svector_interpolate_linear(const SVECTOR* from, const SVECTOR* to, s
 void effect_svector_interpolate_cos(const SVECTOR* from, const SVECTOR* to, s32 duration, s32 current, SVECTOR* out);
 void effect_svector_interpolate_cos_out_back(
     const SVECTOR* from, const SVECTOR* to, s32 duration, s32 current, SVECTOR* out);
-void effect_vector_interpolate_linear_q13(const VECTOR* from, const VECTOR* to, s32 duration, s32 current, VECTOR* out);
-void effect_vector_interpolate_cos_q13(const VECTOR* from, const VECTOR* to, s32 duration, s32 current, VECTOR* out);
-void effect_vector_interpolate_cos_out_back_q13(
+void effect_vector_interpolate_linear(const VECTOR* from, const VECTOR* to, s32 duration, s32 current, VECTOR* out);
+void effect_vector_interpolate_cos(const VECTOR* from, const VECTOR* to, s32 duration, s32 current, VECTOR* out);
+void effect_vector_interpolate_cos_out_back(
     const VECTOR* from, const VECTOR* to, s32 duration, s32 current, VECTOR* out);
 
 /* start + (end - start) * factor / 256, the division an arithmetic shift. */

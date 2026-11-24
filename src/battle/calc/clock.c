@@ -149,7 +149,7 @@ s32 turn_run_clock(turn_clock_mode_e mode) {
                      * a turn; only the first counts as a casualty. */
                     if (ret & 1) {
                         if (ret == STATUS_UPKEEP_CRYSTAL_OR_TREASURE) {
-                            battle_unit_count_casualties(unit);
+                            battle_unit_record_casualty(unit);
                         }
                         return result;
                     }
@@ -357,7 +357,7 @@ s32 turn_run_clock(turn_clock_mode_e mode) {
                 unit = &g_battle_units[i];
                 if (s_turn_pending_flags[i] != 0 && unit->active_battle_unit_id != UNIT_ACTIVE_BATTLE_UNIT_ID_NONE) {
                     s_turn_pending_flags[i] = 0;
-                    ret = action_mimic_set_ability(unit);
+                    ret = action_mimic_prepare(unit);
                     if (ret == 1) {
                         result = i | TURN_EVENT_ABILITY_READY;
                         return result;
@@ -401,7 +401,7 @@ static upkeep_result_e build_upkeep_action(s32 unit_id, battle_unit_t* unit) {
     s32 mask;
     u8 counter;
 
-    action_clear_current_data(action);
+    action_reset_result(action);
     roll = rand();
     if ((unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_DEAD)]
             & (STATUS_BYTE_MASK(STATUS_ID_DEAD) | STATUS_BYTE_MASK(STATUS_ID_UNDEAD)))

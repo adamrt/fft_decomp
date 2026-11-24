@@ -38,7 +38,7 @@ typedef enum world_map_flags {
     WORLD_MAP_FLAG_SKIP_MENU_FRAME = 0x00000080,
     /* Set by update_brave_story_request: the return level opens the Brave Story screen. */
     WORLD_MAP_FLAG_REQUEST_BRAVE_STORY = 0x00000100,
-    /* world_map_draw_frame does not load the scratch image into the display buffer. */
+    /* world_map_draw_backdrop_frame does not load the scratch image into the display buffer. */
     WORLD_MAP_FLAG_NO_BACKGROUND_IMAGE = 0x00000200,
     /* display_object_draw_list draws nothing and world_map_pulse_dots returns. */
     WORLD_MAP_FLAG_HIDE_DISPLAY_OBJECTS = 0x00000400,
@@ -58,7 +58,7 @@ typedef enum world_map_flags {
     WORLD_MAP_FLAG_UNIT_PANEL_THREADS = 0x00020000,
     /* A story event replays: wldcore_entrypoint returns 2 and the next entry reopens the story-event list. */
     WORLD_MAP_FLAG_STORY_EVENT_REPLAY = 0x00040000,
-    /* Set by update_main_menu: the world entry opens the tutorial menu, which leaves through RETURN_TO_TITLE. */
+    /* Set by update_title_menu: the world entry opens the tutorial menu, which leaves through RETURN_TO_TITLE. */
     WORLD_MAP_FLAG_TITLE_TUTORIAL = 0x00080000,
     /* Set by update_tutorial_request: the return level opens the tutorial menu. */
     WORLD_MAP_FLAG_REQUEST_TUTORIAL = 0x00100000,
@@ -141,8 +141,8 @@ extern GsOT g_world_map_aux_ordering_tables[2];
 /* Begins with the 256x240 16-bit backdrop image, WORLD_MAP_BACKDROP_WORDS 32-bit words. */
 extern u32* g_world_map_scratch_buffer;
 
-void world_map_draw_frame(void);
-void world_map_set_display_rect(s32 buffer_index, RECT* rect);
+void world_map_draw_backdrop_frame(void);
+void world_map_get_display_rect(s32 buffer_index, RECT* rect);
 void world_map_clear_image_buffers(s32 clear_scratch);
 void world_map_clear_screen(s32 mode);
 void world_map_capture_backdrop(void);
@@ -448,7 +448,7 @@ typedef enum world_map_text_id {
 
 /* menu levels */
 /* Provisional: the WORLD_MENU level that closes the world map, pushed by world_map_open_menu_level.
- * update_map_menu_return is its only reader: delay counts down the frames the fade needs and pending latches
+ * update_world_menu_level is its only reader: delay counts down the frames the fade needs and pending latches
  * while WORLD_MAP_FLAG_SCREEN_CLEARED is up. */
 typedef struct world_map_menu_level {
     s32 delay;
@@ -491,7 +491,7 @@ typedef char world_map_path_level_size_must_be_92[sizeof(world_map_path_level_t)
 extern s32 g_world_map_window_index;
 extern s32 g_world_map_cursor_window;
 
-void world_map_init_menu_state(void);
+void world_map_init_menu_resources(void);
 void world_map_update_menus(GsOT* context);
 void world_map_open_menu_level(void);
 void world_map_suspend_cursor_level(menu_stack_record_t* level);

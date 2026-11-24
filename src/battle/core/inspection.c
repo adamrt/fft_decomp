@@ -139,7 +139,7 @@ void at_list_show_next_entry(void) {
 
 /* Open the status menu once: mark it open and restart the AT list cursor at entry
  * 0. */
-void command_open_status_menu(void) {
+void command_mark_status_menu_open(void) {
     if (g_menu_status_open == 0) {
         g_menu_status_open = 1;
         s_at_list_cursor = 0;

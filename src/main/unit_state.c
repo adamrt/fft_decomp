@@ -310,7 +310,7 @@ void mem_zero(void* destination, s32 count) {
 
 /* Count a KO in the script variables: a unit that started on the blue team adds to
  * EVENT_SCRIPT_VAR_CASUALTIES, any other unit to EVENT_SCRIPT_VAR_INJURED; both stop at 9999. */
-void battle_unit_count_casualties(const battle_unit_t* unit) {
+void battle_unit_record_casualty(const battle_unit_t* unit) {
     s32 id;
     s32 count;
 

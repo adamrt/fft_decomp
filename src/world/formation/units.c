@@ -50,7 +50,7 @@ s32 formation_ability_set_slot(s16 unit_id, s16 slot, s16 ability, s32 update_eq
                 item_adjust_inventory_count(equipment[i], -1);
             }
             formation_save_records();
-            formation_banner_countdown(0xD811, 0x1E);
+            formation_update_banner(0xD811, 0x1E);
         }
         return 1;
     }
@@ -86,7 +86,7 @@ s32 formation_unit_get_lock(s32 unit_id) {
 void formation_ability_learn(s16 unit_id, s16 job_id, s16 ability_id) {
     s32 skillset = job_get_skillset(job_id);
     s16 generic_job = job_get_generic_index(job_id);
-    s16* list = (s16*)ability_build_skillset_list(skillset, SKILLSET_ABILITY_FILTER_ALL);
+    s16* list = (s16*)skillset_build_ability_list(skillset, SKILLSET_ABILITY_FILTER_ALL);
     s32 i = 0;
     s32 byte;
     s32 bit;
@@ -149,7 +149,7 @@ void formation_unit_build_sprite_source(s16 formation_index, texture_source_t* d
  *
  * Narrow the requested slot to s16. On a miss, return the number of entries searched.
  */
-s32 formation_unit_find_by_roster_slot(s16 roster_slot) {
+s32 formation_unit_find_index_by_roster_slot(s16 roster_slot) {
     s32 index;
 
     for (index = 0; index < g_formation_record_count; index++) {

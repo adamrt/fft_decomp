@@ -134,7 +134,7 @@ s32 equip_entrypoint(s32 unit, u32* otag) {
         restore_text = g_equipment_text_message_thread_active == 0;
     }
     s_equipment_text_restore_pending = restore_text;
-    menu_input_update_message_state();
+    menu_input_update();
     if (g_menu_input_primary_repeat & PSX_PAD_SELECT) {
         help_start_text(3);
     }

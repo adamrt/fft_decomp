@@ -115,7 +115,7 @@ void music_test_open_menu(void) {
     four = 4;
     g_music_test_menu_otag_index = four;
     g_system_runtime_flags |= SYSTEM_RUNTIME_FLAG_WORLD_MENU_FRAME;
-    fade_tile_start_out(0x20);
+    fade_tile_start_in(0x20);
 
     controller = g_controller_depth;
     g_controller_records[controller].music_test.music_id = 0;
@@ -161,7 +161,7 @@ void music_test_update_menu(controller_record_t* record) {
         }
     } else if (state->step == MUSIC_TEST_STEP_START_TRACK) {
         if (!music_is_loading()) {
-            g_music_test_sound_handle = music_switch_track(state->music_slot, 0x7F, 0x10);
+            g_music_test_sound_handle = music_play_slot(state->music_slot, 0x7F, 0x10);
             state->step = MUSIC_TEST_STEP_IDLE;
         }
     } else if (state->step == MUSIC_TEST_STEP_FADE_OUT) {
@@ -175,7 +175,7 @@ void music_test_update_menu(controller_record_t* record) {
     } else if (state->step == MUSIC_TEST_STEP_CLOSE) {
         if (!thread_is_running(MUSIC_TEST_THREAD_SLOT_LIST)) {
             state->step = MUSIC_TEST_STEP_FADE_OUT;
-            fade_tile_start_in(0x20);
+            fade_tile_start_out(0x20);
         }
     } else if (state->delay != 0) {
         /* A queued change: once the old track has faded, release its slot and
@@ -238,7 +238,7 @@ static void start_text_message(s32 parameter, s32 use_world_text) {
     }
     if (use_world_text != 0) {
         text_save_section_pointers();
-        text_relocate_pointer_table(&g_menu_screen_text_bank);
+        text_bind_section_pointers(&g_menu_screen_text_bank);
     }
 
     thread_start(THREAD_SCREEN_SLOT_MESSAGE, message_dialog_thread);

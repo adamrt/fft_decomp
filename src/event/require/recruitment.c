@@ -181,7 +181,7 @@ void unit_panel_load_party_unit(s32 unused, s32 party_index) {
         editor->generic_monster = 1;
 
     if (editor->generic_monster != 0) {
-        abilities = ability_build_skillset_list(unit->primary_skillset, SKILLSET_ABILITY_FILTER_ACTION);
+        abilities = skillset_build_ability_list(unit->primary_skillset, SKILLSET_ABILITY_FILTER_ACTION);
         for (i = 0; i < 5; i++) {
             editor->ability_ids[i] = *abilities++;
         }
@@ -409,7 +409,7 @@ static s32 run_dismissal_selection(void) {
     g_unit_panel_character_status_redraw_request = 1;
     thread_yield();
 
-    thread_start(AFTER_BATTLE_THREAD_SLOT_TRANSITION, unit_panel_transition_thread);
+    thread_start(AFTER_BATTLE_THREAD_SLOT_TRANSITION, unit_panel_backdrop_thread);
     thread_set_parameters(AFTER_BATTLE_THREAD_SLOT_TRANSITION, 0, 0, 0);
     g_fade_event_level = 0xff;
     do {
@@ -825,7 +825,7 @@ void after_battle_apply_unit_changes(void) {
                         s_after_battle_message_menu_result = 0;
                     } else {
                         g_after_battle_menu_selection_result = 0xff;
-                        thread_start(AFTER_BATTLE_THREAD_SLOT_MESSAGE, menu_icon_strip_thread);
+                        thread_start(AFTER_BATTLE_THREAD_SLOT_MESSAGE, menu_icon_message_thread);
                         thread_set_parameters(AFTER_BATTLE_THREAD_SLOT_MESSAGE,
                             (s32)(menu_fields - offsetof(menu_entry_t, inner_width)), 0, 0);
                         if (g_unit_panel_selected_unit_fields.state.generic_monster != 0) {

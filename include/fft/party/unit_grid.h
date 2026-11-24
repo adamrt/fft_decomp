@@ -21,4 +21,6 @@ s32 unit_grid_check_scroll(void);
 /* WORLD's Formation screen: move the grid cursor and update the selected unit. */
 void unit_grid_update_selection(void);
 
+void unit_grid_init(s32 unused_selected_index);
+
 #endif

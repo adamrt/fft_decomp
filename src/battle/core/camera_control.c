@@ -463,7 +463,7 @@ void camera_update_tilt(void) {
 
 /* Aims the camera step vector from the camera position at the acting unit: the
  * unit-length direction (ONE) with its height component multiplied by four. */
-static void calculate_acting_unit_vector_normal(void) {
+static void aim_step_vector_at_acting_unit(void) {
     VECTOR delta;
     map_unit_t* unit = map_unit_get_source();
 
@@ -476,7 +476,7 @@ static void calculate_acting_unit_vector_normal(void) {
 /* The acting-unit camera step vector at double length, used when the unit is
  * outside the wider screen window. */
 static void scale_acting_unit_vector(void) {
-    calculate_acting_unit_vector_normal();
+    aim_step_vector_at_acting_unit();
     g_camera_step_vector.vx *= 2;
     g_camera_step_vector.vy *= 2;
     g_camera_step_vector.vz *= 2;
@@ -488,7 +488,7 @@ static void scale_acting_unit_vector(void) {
  * units above the floor, negated because world Y points down. The focus
  * offset is normalized by VectorNormal into g_camera_step_vector and
  * tripled. Returns the negated tile height. */
-static s32 calculate_cursor_tile_vector_normal(void) {
+static s32 aim_step_vector_at_cursor_tile(void) {
     map_tile_t* tile = map_get_tile(g_cursor_x, g_cursor_y, g_cursor_layer);
     SVECTOR tile_position;
     VECTOR delta;
@@ -511,10 +511,10 @@ static s32 calculate_cursor_tile_vector_normal(void) {
 }
 
 /* Doubles the cursor tile vector computed by
- * calculate_cursor_tile_vector_normal and passes that routine's
+ * aim_step_vector_at_cursor_tile and passes that routine's
  * result through; callers hand it to step_cursor_focus. */
-static s32 scale_cursor_tile_vector(void) {
-    s32 result = calculate_cursor_tile_vector_normal();
+static s32 aim_fast_step_vector_at_cursor_tile(void) {
+    s32 result = aim_step_vector_at_cursor_tile();
 
     g_camera_step_vector.vx *= 2;
     g_camera_step_vector.vy *= 2;
@@ -572,7 +572,7 @@ static void step_cursor_focus(s16 height) {
  * while it is still short of the target in the step's direction, and is set to
  * the target exactly when the step carries it past. Called for the acting unit
  * while it moves, chooses its wait direction or starts an attack animation. */
-static void step_real_coords_toward_target(const map_unit_t* target) {
+static void step_unit_focus(const map_unit_t* target) {
     if (g_camera_step_vector.vx < 0) {
         if (g_camera_real_coords.vx / ONE > target->world_coords.vx) {
             g_camera_real_coords.vx += g_camera_step_vector.vx;
@@ -637,7 +637,7 @@ static void step_real_coords_toward_target(const map_unit_t* target) {
  * spelled inverted with the clear-vector call as the function's last
  * statement. Written the natural way, the merged block lands mid-function
  * with an extra `j`. */
-void camera_update_scene_focus(void) {
+void camera_update_focus(void) {
     map_unit_t* unit;
     s32 height;
 
@@ -653,7 +653,7 @@ void camera_update_scene_focus(void) {
             return;
         }
         /* The scaling routine passes through the normal routine's height bound. */
-        step_cursor_focus(scale_cursor_tile_vector());
+        step_cursor_focus(aim_fast_step_vector_at_cursor_tile());
         return;
     }
     if (g_battle_state == BATTLE_STATE_UNIT_MOVING || g_battle_state == BATTLE_STATE_WAIT_DIRECTION
@@ -667,11 +667,11 @@ void camera_update_scene_focus(void) {
         }
         if (unit->camera_relative_x >= 0xA1 && unit->camera_relative_x < 0x160
             && unit->camera_relative_y - height >= 0x41 && unit->camera_relative_y < 0xB0) {
-            calculate_acting_unit_vector_normal();
+            aim_step_vector_at_acting_unit();
         } else {
             scale_acting_unit_vector();
         }
-        step_real_coords_toward_target(unit);
+        step_unit_focus(unit);
         return;
     }
     if (g_battle_state >= BATTLE_STATE_ACTION_ANNOUNCEMENT) {
@@ -689,10 +689,10 @@ void camera_update_scene_focus(void) {
             || g_cursor_screen_y >= 0xA0) {
             if (g_cursor_screen_x >= 0xA1 && g_cursor_screen_x < 0x160 && g_cursor_screen_y - height >= 0x41
                 && g_cursor_screen_y < 0xB0) {
-                step_cursor_focus(calculate_cursor_tile_vector_normal());
+                step_cursor_focus(aim_step_vector_at_cursor_tile());
             } else {
                 /* The scaling routine passes the normal routine's result through. */
-                step_cursor_focus(scale_cursor_tile_vector());
+                step_cursor_focus(aim_fast_step_vector_at_cursor_tile());
             }
             return;
         }
@@ -729,10 +729,10 @@ void camera_update_cursor_focus(void) {
         }
         if (g_cursor_screen_x >= 0xA1 && g_cursor_screen_x < 0x160 && g_cursor_screen_y - height >= 0x41
             && g_cursor_screen_y < 0xB0) {
-            step_cursor_focus(calculate_cursor_tile_vector_normal());
+            step_cursor_focus(aim_step_vector_at_cursor_tile());
         } else {
             /* The scaling routine passes through the normal routine's height bound. */
-            step_cursor_focus(scale_cursor_tile_vector());
+            step_cursor_focus(aim_fast_step_vector_at_cursor_tile());
         }
     }
 }

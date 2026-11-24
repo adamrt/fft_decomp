@@ -118,7 +118,7 @@ s8 item_list_update_action_menu(void) {
         g_formation_item_action_menu_initialized = 1;
     }
 
-    result = menu_managed_thread_start(THREAD_SCREEN_SLOT_MENU, &g_item_action_menu);
+    result = menu_managed_thread_start_or_poll(THREAD_SCREEN_SLOT_MENU, &g_item_action_menu);
     if (result == 0) {
         g_formation_item_action_menu_initialized = 0;
         if (g_menu_screen_selection_results[3] == -1) {
@@ -304,7 +304,7 @@ s8 item_list_update_sort_menu(void) {
             &g_unit_panel_selected_unit_stat_summary, &g_item_preview_stat_detail, 0);
         g_unit_panel_preview_stats_thread_params.redraw_request = 1;
     }
-    if (menu_managed_thread_start(THREAD_SCREEN_SLOT_MENU, s_formation_item_category_icon_strip) == 0) {
+    if (menu_managed_thread_start_or_poll(THREAD_SCREEN_SLOT_MENU, s_formation_item_category_icon_strip) == 0) {
         g_formation_item_sort_order_initialized = 0;
         return MENU_ITEM_LIST_STATE_ACTION;
     }

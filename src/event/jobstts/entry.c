@@ -106,7 +106,7 @@ u32* jobstts_entrypoint(s32 unit, void* unused_otag) {
     menu_gfx_swap_context(0, -1);
     result = g_menu_gfx_context->otag;
     g_status_screen_previous_event_mode = g_menu_input_lock_mode;
-    menu_input_update_message_state();
+    menu_input_update();
     if (g_menu_input_primary_repeat & PSX_PAD_SELECT) {
         help_start_text(3);
     }

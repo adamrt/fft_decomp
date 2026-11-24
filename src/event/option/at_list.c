@@ -24,13 +24,13 @@
  * the menu entry, whose context is the three-column text layout init_at_list
  * filled with the turn order. Rows scroll smoothly through a 256-line ring of text rows in
  * VRAM, drawn from two double-buffered copies of the page primitives; the window frame runs
- * on the thread slot above, and confirm and cancel go through menu_handle_action and
+ * on the thread slot above, and confirm and cancel go through menu_handle_confirm_input and
  * menu_handle_cancel_input.
  *
  * The do/while (0) around the scroll redraw puts its render-buffer
  * references one loop level deeper, which raises the buffer's global-alloc priority above the
  * page pointer's (target: buffer s3, page s4; without it the two swap). */
-void at_list_run(void) {
+void menu_text_list_thread(void) {
     image_layout_t image_parameters;
     RECT image_rect;
     RECT clear;
@@ -272,12 +272,12 @@ void at_list_run(void) {
         }
 
         entry->selected_index = cursor + row_offset;
-        if (menu_should_close_thread(input) != 0) {
+        if (menu_poll_thread_close(input) != 0) {
             break;
         }
 
         if (delta == 0) {
-            menu_handle_action(entry, cursor);
+            menu_handle_confirm_input(entry, cursor);
         }
         menu_handle_cancel_input(entry);
 
@@ -331,7 +331,7 @@ void at_list_run(void) {
             gfx_draw_or_append_gpu_primitive(&page->thumb);
         }
 
-        gfx_build_scaled_draw_area_pair_swapped(&page->draw_areas, &entry->window, i, g_gfx_screen_polarity);
+        menu_build_scaled_draw_area_pair_swapped(&page->draw_areas, &entry->window, i, g_gfx_screen_polarity);
         menu_select_icon_sprite_clut(page->icons.icons[0]);
         if (entry->header_id >= 5) {
             gfx_draw_or_append_gpu_primitive(page->icons.icons[0]);

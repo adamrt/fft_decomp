@@ -101,11 +101,11 @@ void camera_fusion_thread(void) {
         } else {
             for (;;) {
                 if (*cursor == EVENT_OPCODE_FOCUS) {
-                    script_focus((event_focus_parameters_t*)(cursor + 1));
+                    script_opcode_1f_focus((event_focus_parameters_t*)(cursor + 1));
                 } else if (*cursor == EVENT_OPCODE_RELATIVE_CAMERA) {
                     script_apply_relative_camera((event_camera_values_t*)(cursor + 1), values);
                 } else if (*cursor == EVENT_OPCODE_FOCUS_SPEED) {
-                    script_focus_speed(cursor + 1, values, values + EVENT_CAMERA_COMPONENT_TILT);
+                    script_opcode_38_focus_speed(cursor + 1, values, values + EVENT_CAMERA_COMPONENT_TILT);
                 } else if (*cursor == EVENT_OPCODE_CAMERA) {
                     for (i = 0; i < EVENT_CAMERA_COMPONENT_COUNT; i++) {
                         /* Indexed field access replaces retail's two additions with a shift. */

@@ -77,7 +77,7 @@ next:
         if (*slot_track == track) {
             g_music_queue.current_slot = slot;
             g_music_queue.current_command = MUSIC_QUEUE_COMMAND_NONE;
-            music_switch_track(slot, 0, 0);
+            music_play_slot(slot, 0, 0);
             return;
         }
         if (*slot_track != 0) {
@@ -99,7 +99,7 @@ next:
         g_music_queue.current_command = MUSIC_QUEUE_COMMAND_WAIT_FADE_OUT;
         return;
     case MUSIC_QUEUE_COMMAND_FADE_IN:
-        music_switch_track(g_music_queue.current_slot, 0, 0);
+        music_play_slot(g_music_queue.current_slot, 0, 0);
         music_set_target_volume(g_music_queue.volume, g_music_queue.current_value << 2);
         g_music_queue.current_command = MUSIC_QUEUE_COMMAND_WAIT_FADE_IN;
         return;

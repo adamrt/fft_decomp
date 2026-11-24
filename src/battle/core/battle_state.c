@@ -62,8 +62,8 @@ typedef enum action_phase {
 enum { ACTION_PHASE_COUNT = 3 };
 
 /* Queue of post-action "effect message" popups (s_post_effect_messages), filled by
- * queue_messages_for_unit and drained newest first by
- * show_next_message. */
+ * queue_unit_post_effect_messages and drained newest first by
+ * show_next_post_effect_message. */
 typedef struct action_post_effect_msg {
     u8 code;           /* 0x00 action_display_image_id_e of the popup */
     u8 unit;           /* 0x01 battle unit id of the reported unit */
@@ -151,7 +151,7 @@ static s32 try_enter_event(map_unit_t* unit) {
     } else if (g_turn_event_type == TURN_EVENT_ABILITY_READY || g_turn_event_type == TURN_EVENT_ACTION_RESULT) {
         result = command_dispatch_request(
             MENU_REQUEST_SCENARIO_CHECK, MENU_SCENARIO_CHECK_TEST, unit->battle_unit->battle_unit_id, 0, 1);
-        if (result == MENU_REQUEST_RESULT_EVENT && script_get_event_finish_operation() != 0) {
+        if (result == MENU_REQUEST_RESULT_EVENT && scenario_get_next_event_finish_operation() != 0) {
             if (unit->spritesheet_id < SPRITE_SHEET_ID_RAMZA_END) {
                 result = command_dispatch_request(
                     MENU_REQUEST_SCENARIO_CHECK, MENU_SCENARIO_CHECK_SKIP, unit->battle_unit->battle_unit_id, 0, 1);
@@ -249,7 +249,7 @@ static void enter_free_cursor_help(void) {
  * those maps select on. A new count is stored and a map data load started; the
  * old count is put back when the load cannot start. Returns whether a reload is
  * in progress. */
-static s32 check_deep_dungeon_crystal_count(void) {
+static s32 update_deep_dungeon_map_reload(void) {
     s32 crystal_count;
     s32 previous_count;
 
@@ -275,10 +275,10 @@ static s32 check_deep_dungeon_crystal_count(void) {
 }
 
 /* Between turns: when the crystal count calls for a map reload
- * (check_deep_dungeon_crystal_count), enter the Deep Dungeon
+ * (update_deep_dungeon_map_reload), enter the Deep Dungeon
  * mesh-load state at vsync interval 1. Returns 1 when the state changed. */
 static s32 try_enter_deep_dungeon_mesh_load(void) {
-    if (check_deep_dungeon_crystal_count()) {
+    if (update_deep_dungeon_map_reload()) {
         g_battle_state = BATTLE_STATE_DEEP_DUNGEON_MESH_LOAD;
         g_system_vsync_interval = 1;
         return 1;
@@ -290,7 +290,7 @@ static s32 try_enter_deep_dungeon_mesh_load(void) {
 /* As try_enter_deep_dungeon_mesh_load, entering the mesh-finish state
  * instead: the crystal count check made when a unit's post-movement steps end. */
 static s32 try_enter_deep_dungeon_mesh_finish(void) {
-    if (check_deep_dungeon_crystal_count()) {
+    if (update_deep_dungeon_map_reload()) {
         g_battle_state = BATTLE_STATE_DEEP_DUNGEON_MESH_FINISH;
         g_system_vsync_interval = 1;
         return 1;
@@ -393,7 +393,7 @@ static void start_next_turn_event(void) {
             && g_turn_event_type == TURN_EVENT_UNIT_READY) {
             map_unit_update_display(unit->map_unit_id);
             sound_play_sfx(SOUND_SFX_STATUS_MENU_REQUEST);
-            command_open_status_menu();
+            command_mark_status_menu_open();
             at_list_show_next_entry();
             enter_open_action_menus();
             return;
@@ -403,7 +403,7 @@ static void start_next_turn_event(void) {
             map_unit_update_display(unit->map_unit_id);
         }
         if (!try_enter_event(unit)) {
-            unit_view_start(UNIT_VIEW_MODE_TILE_INFO, 0xff, 0xff);
+            unit_view_request_mode(UNIT_VIEW_MODE_TILE_INFO, 0xff, 0xff);
             g_battle_state = BATTLE_STATE_CHANGE_TURN;
             ai_reset_selected_action();
             g_menu_status_enabled = 1;
@@ -433,7 +433,7 @@ static void enter_status_execute(void) {
         message_set_duration(60);
         command_dispatch_request(MENU_REQUEST_EFFECT_MESSAGE, TEXT_ID_BATTLE_MESSAGE_MIME,
             unit->battle_unit->battle_unit_id, unit->battle_unit->battle_unit_id, 1);
-        animation_force_with_facing(ANIMATION_KNEEL, unit->facing, unit);
+        animation_request_forced(ANIMATION_KNEEL, unit->facing, unit);
         return;
     }
     message_set_duration(180);
@@ -463,7 +463,7 @@ static void enter_ai_command(void) {
     unit->command_ready = 0;
     map_set_tile_mark_colors(MAP_TILE_MARK_NONE, 0);
     if (unit != 0 && unit->battle_unit != 0) {
-        unit_view_start(UNIT_VIEW_MODE_UNIT_SUMMARY, unit->battle_unit->battle_unit_id, 0);
+        unit_view_request_mode(UNIT_VIEW_MODE_UNIT_SUMMARY, unit->battle_unit->battle_unit_id, 0);
     }
 }
 
@@ -491,7 +491,7 @@ static void open_active_unit_menu(void) {
     g_battle_state = BATTLE_STATE_IDLING_ACTION_MENUS;
 
     if (unit != 0 && unit->battle_unit != 0) {
-        unit_view_start(UNIT_VIEW_MODE_UNIT_SUMMARY, unit->battle_unit->battle_unit_id, 0);
+        unit_view_request_mode(UNIT_VIEW_MODE_UNIT_SUMMARY, unit->battle_unit->battle_unit_id, 0);
     }
     command_open_menu(command_get_menu_id_by_battle_unit_id(unit->battle_unit->battle_unit_id));
 }
@@ -510,7 +510,7 @@ static void open_non_active_unit_menu(void) {
     camera_disable_pan();
     battle_unit = unit->battle_unit;
     g_battle_state = BATTLE_STATE_IDLING_ACTION_MENUS;
-    unit_view_start(UNIT_VIEW_MODE_UNIT_SUMMARY, battle_unit->battle_unit_id, 0);
+    unit_view_request_mode(UNIT_VIEW_MODE_UNIT_SUMMARY, battle_unit->battle_unit_id, 0);
     menu_id = command_get_menu_id_by_battle_unit_id(unit->battle_unit->battle_unit_id);
     if (g_menu_status_open) {
         if (menu_id == MENU_COMMAND_ID_PLAYER_UNIT) {
@@ -731,9 +731,9 @@ static void enter_unit_moving_setup(void) {
 }
 
 /* Save the unit's tile, facing, mount link and stood-on unit before it moves;
- * restore_previous_state restores them. Every field is read
+ * restore_position_before_move restores them. Every field is read
  * before any is stored, as the retail code orders them. */
-static void save_previous_state(map_unit_t* unit) {
+static void save_position_before_move(map_unit_t* unit) {
     u8 x = unit->map_x;
     u8 y = unit->map_y;
     u8 layer = unit->map_layer;
@@ -761,11 +761,11 @@ static void enter_unit_moving(void) {
     g_battle_state = BATTLE_STATE_UNIT_MOVING;
     cursor_show_hovered_unit_panel();
     unit = map_unit_get_casting();
-    save_previous_state(unit);
+    save_position_before_move(unit);
     if (unit->mount_state == UNIT_MOUNT_STATE_MOUNT) {
         map_unit_t* mount = map_unit_get(unit->mount_partner_map_unit_id);
         if (mount != 0) {
-            save_previous_state(mount);
+            save_position_before_move(mount);
         }
     }
     unit->step_speed = 0x2000;
@@ -934,10 +934,10 @@ static s32 start_next_post_move_event(void) {
         if (item == -1) {
             animation = ANIMATION_RAISE_HANDS;
         } else {
-            sprite_item_display_set(source, item);
+            sprite_item_display_set_icon(source, item);
             animation = ANIMATION_HOLD_ITEM;
         }
-        animation_force_with_facing(animation, source->facing, source);
+        animation_request_forced(animation, source->facing, source);
         if (item == -1) {
             /* A player-controlled unit of the player team picks from the
              * crystal menu; any other unit takes the HP/MP restore at once. */
@@ -990,8 +990,8 @@ static s32 start_next_post_move_event(void) {
     }
     if (g_move_post_events & MOVE_POST_EVENT_ITEM_FOUND) {
         g_move_find_display_item = *move_find_determine_item(casting->battle_unit);
-        sprite_item_display_set(source, g_move_find_display_item.item_id);
-        animation_force_with_facing(ANIMATION_FOUND_ITEM, source->facing, source);
+        sprite_item_display_set_icon(source, g_move_find_display_item.item_id);
+        animation_request_forced(ANIMATION_FOUND_ITEM, source->facing, source);
         if (!(source->team_flags & UNIT_TEAM_MASK)) {
             command_dispatch_request(MENU_REQUEST_MOVE_FIND_ITEM, g_move_find_display_item.item_id,
                 source->battle_unit->battle_unit_id, 0, 1);
@@ -1050,7 +1050,7 @@ static s32 start_next_post_move_event(void) {
 /* Stop the game flow after the casting unit's move and start the post-movement
  * steps.
  *
- * move_get_post_events builds the step flags in
+ * move_resolve_post_events builds the step flags in
  * g_move_post_events (0 for a unit without battle data), and the
  * post-action display starts at the level-up report. When any step is pending the
  * map cursor and its tile glow are hidden. */
@@ -1060,7 +1060,7 @@ static void start_post_move_events(void) {
     camera_disable_pan();
     battle_unit = map_unit_get_casting()->battle_unit;
     if (battle_unit != 0) {
-        g_move_post_events = move_get_post_events(battle_unit);
+        g_move_post_events = move_resolve_post_events(battle_unit);
     } else {
         g_move_post_events = 0;
     }
@@ -1115,7 +1115,7 @@ static void enter_wait_menu(void) {
     if (command_dispatch_request(
             MENU_REQUEST_SCENARIO_CHECK, MENU_SCENARIO_CHECK_TEST, unit->battle_unit->battle_unit_id, 0, 1)
             == MENU_REQUEST_RESULT_EVENT
-        && script_get_event_finish_operation() != 0) {
+        && scenario_get_next_event_finish_operation() != 0) {
         g_battle_state_previous = g_battle_state;
         command_dispatch_request(
             MENU_REQUEST_SCENARIO_CHECK, MENU_SCENARIO_CHECK_START, unit->battle_unit->battle_unit_id, 0, 1);
@@ -1369,7 +1369,7 @@ static void enter_action_execute(void) {
         cursor_hide();
         return;
     }
-    if (effect_ability_has_no_file(ability)) {
+    if (effect_ability_has_no_effect(ability)) {
         g_system_vsync_interval = 1;
         cursor_hide();
         return;
@@ -1398,7 +1398,7 @@ static void enter_action_execute(void) {
  * message, if any, as a post-action result; the queue therefore shows in
  * reverse order. Returns 1 after showing a message and 0 when the queue is
  * empty. */
-static s32 show_next_message(void) {
+static s32 show_next_post_effect_message(void) {
     s32 index;
 
     g_battle_state = BATTLE_STATE_RESUME_ATTACK_PHASE;
@@ -1425,7 +1425,7 @@ static s32 show_next_message(void) {
  * item and a stolen item) and appends one record per outcome: the
  * action_display_image_id_e of the popup, the unit's battle unit id and the value.
  * s_post_effect_message_count is the record count, drained newest
- * first by show_next_message.
+ * first by show_next_post_effect_message.
  *
  * The queue holds 16 records, but the capacity is tested once before the walk,
  * which may add up to 11 more.
@@ -1433,7 +1433,7 @@ static s32 show_next_message(void) {
  * The loop over a switch is the retail shape: its 11 cases compile to the
  * jump table the binary has.
  */
-static void queue_messages_for_unit(map_unit_t* unit) {
+static void queue_unit_post_effect_messages(map_unit_t* unit) {
     action_data_t* action;
     s32 i;
     s32 queued;
@@ -1549,28 +1549,28 @@ static void queue_messages_for_unit(map_unit_t* unit) {
 
 /* Empty the post-effect message queue, then queue the messages of every target of
  * the casting unit. */
-static void queue_messages_for_targets(void) {
+static void queue_target_post_effect_messages(void) {
     map_unit_t* caster;
     s32 i;
 
     s_post_effect_message_count = 0;
     caster = map_unit_get_casting();
     for (i = 0; i < caster->strike.target_count; i++) {
-        queue_messages_for_unit(map_unit_get_by_battle_unit_id(caster->strike.target_list[i]));
+        queue_unit_post_effect_messages(map_unit_get_by_battle_unit_id(caster->strike.target_list[i]));
     }
 }
 
 /* Queue the casting unit's own post-effect messages and show the first one. With
  * effect messages turned off, or nothing to report, an effect message with text
  * id 0 is requested instead. */
-static void show_caster_message(void) {
+static void start_post_effect_messages(void) {
     map_unit_t* unit = map_unit_get_casting();
 
-    queue_messages_for_unit(unit);
+    queue_unit_post_effect_messages(unit);
     if (g_game_options.fields.effect_messages != GAME_OPTION_ON) {
         s_post_effect_message_count = 0;
     }
-    if (!show_next_message()) {
+    if (!show_next_post_effect_message()) {
         command_dispatch_request(MENU_REQUEST_EFFECT_MESSAGE, 0, unit->battle_unit->battle_unit_id, 0, 0);
     }
 }
@@ -1610,7 +1610,7 @@ static void enter_battle_message_display(void) {
     g_system_vsync_interval = 1;
     g_battle_window_closed = 0;
     unit = map_unit_get_casting();
-    queue_messages_for_targets();
+    queue_target_post_effect_messages();
     apply_attacker_result(unit);
     unit->item_display_active = 0;
     message_set_duration(60);
@@ -1698,14 +1698,15 @@ static void enter_post_action_reports(void) {
  * unit's EXP and JP rewards (clearing the display values when nothing is
  * awarded), start the earned EXP/JP display and enter the level-up phase of
  * enter_post_action_reports. */
-static void grant_reward(void) {
+static void start_post_action_reports(void) {
     map_unit_t* unit = map_unit_get_source();
     battle_unit_t* battle_unit;
 
     restore_all_facings_after_attack();
     if (unit != 0) {
         battle_unit = unit->battle_unit;
-        if (battle_unit != 0 && reward_apply_action(battle_unit->battle_unit_id, &unit->strike.action_rewards) == -1) {
+        if (battle_unit != 0
+            && reward_apply_exp_and_jp(battle_unit->battle_unit_id, &unit->strike.action_rewards) == -1) {
             unit->strike.action_rewards.job_level_for_display = 0;
             unit->strike.action_rewards.level_for_display = 0;
             unit->strike.action_rewards.earned_jp = 0;
@@ -1853,7 +1854,7 @@ static s32 announce_next_action(void) {
             }
             break;
         case ACTION_PHASE_ACTING_UNIT:
-            result = action_init_current_data(unit->battle_unit->battle_unit_id);
+            result = action_init_resolution(unit->battle_unit->battle_unit_id);
             if (result == 0) {
                 g_battle_state = BATTLE_STATE_ACTION_ANNOUNCEMENT;
                 g_unit_casting_map_unit_id = unit->map_unit_id;
@@ -1916,7 +1917,7 @@ static s32 announce_next_action(void) {
  *
  * continue_attack_count is nonzero on the follow-up strikes of a continued
  * attack. */
-static void apply_strike_results(void) {
+static void enter_action_execute_start(void) {
     map_unit_t* unit;
     map_unit_t* target;
     action_strike_work_t* action;
@@ -2003,8 +2004,8 @@ static void start_next_strike(void) {
     unit->used_ability_id = attack_id;
     sprite_set_weapon_graphic(unit->strike.used_weapon_id, unit);
     if ((reaction != 0 && ability != reaction) || ability == ABILITY_ID_KNOCKBACK || ability == 0
-        || effect_ability_has_no_file(ability)) {
-        apply_strike_results();
+        || effect_ability_has_no_effect(ability)) {
+        enter_action_execute_start();
         return;
     }
     g_battle_state = BATTLE_STATE_START_EFFECT_FILE_OPEN;
@@ -2035,7 +2036,7 @@ static void enter_pre_attack_animation(void) {
         animation_start_ability_charge(unit);
     } else {
         /* facing is read signed (lh) here. */
-        animation_store_with_facing(ANIMATION_STAND, unit->facing, unit);
+        animation_request(ANIMATION_STAND, unit->facing, unit);
     }
     cursor_hide();
 }
@@ -2061,11 +2062,11 @@ static void enter_action_cast(void) {
  * charge set. A charged action starts its charge-hold animation and ends the
  * command until the charge comes due; any other result raises a pointer
  * exception and ends the command. */
-static void execute_ability(void) {
+static void commit_action(void) {
     map_unit_t* unit;
     s32 result;
 
-    unit_view_start(UNIT_VIEW_MODE_NONE, 0, 0);
+    unit_view_request_mode(UNIT_VIEW_MODE_NONE, 0, 0);
     unit = map_unit_get_source();
     turn_set_act_taken(unit->battle_unit->battle_unit_id);
     unit->turn_action_flags |= TURN_ACTION_ACTED;
@@ -2134,7 +2135,7 @@ void battle_state_ability_preview_help_enter(void) {
  * the pre-attack animation, and -1 (an invalid action) returns to the idle action
  * menu.
  */
-static void select_target_tile(void) {
+static void enter_ability_preview(void) {
     map_unit_t* unit = map_unit_get_source();
     s32 result;
     s32 saved_input_mode;
@@ -2217,7 +2218,7 @@ static target_panels_e start_target_tile_selection(void) {
         break;
     case TARGET_PANELS_NO_TARGETING:
         camera_disable_pan();
-        select_target_tile();
+        enter_ability_preview();
         cursor_show_right_unit_panel();
         break;
     case TARGET_PANELS_INVALID:
@@ -2280,7 +2281,7 @@ static void enter_confirm_action(void) {
  * TURN_COMMAND_AUTOBATTLE_FIGHT_FOR_LIFE_SELECT, blue on every unit of its own
  * team for TURN_COMMAND_AUTOBATTLE_PROTECT_ALLIES_SELECT. Other modes tint
  * nothing. */
-static void highlight_blue_or_red_palettes(s32 mode) {
+static void tint_target_candidates(s32 mode) {
     map_unit_t* caster = map_unit_get_casting();
     map_unit_t* unit;
     s32 i;
@@ -2332,7 +2333,7 @@ static void enter_target_select(void) {
     camera_disable_pan();
     g_battle_state = BATTLE_STATE_TARGET_SELECT;
     cursor_show_hovered_unit_panel();
-    highlight_blue_or_red_palettes(map_unit_get_casting()->target_select_command);
+    tint_target_candidates(map_unit_get_casting()->target_select_command);
 }
 
 /* Enter the target-select-denied state for the cursor tile: show the summary of a
@@ -2354,7 +2355,7 @@ static void enter_target_select_denied(void) {
     if (occupant != 0) {
         battle_unit = occupant->battle_unit;
         if (battle_unit != 0) {
-            unit_view_start(UNIT_VIEW_MODE_UNIT_SUMMARY, battle_unit->battle_unit_id, 0);
+            unit_view_request_mode(UNIT_VIEW_MODE_UNIT_SUMMARY, battle_unit->battle_unit_id, 0);
         }
     }
     caster = map_unit_get_casting();
@@ -2384,7 +2385,7 @@ static void enter_target_select_confirm(void) {
     if (unit != 0) {
         battle_unit = unit->battle_unit;
         if (battle_unit != 0) {
-            unit_view_start(UNIT_VIEW_MODE_UNIT_SUMMARY, battle_unit->battle_unit_id, 0);
+            unit_view_request_mode(UNIT_VIEW_MODE_UNIT_SUMMARY, battle_unit->battle_unit_id, 0);
         }
     }
     battle_unit = map_unit_get_casting()->battle_unit;
@@ -2396,7 +2397,7 @@ static void enter_target_select_confirm(void) {
 static void enter_target_display_start(void) {
     camera_disable_pan();
     g_battle_state = BATTLE_STATE_TARGET_DISPLAY_START;
-    unit_view_start(UNIT_VIEW_MODE_TILE_INFO, 0xFF, 0xFF);
+    unit_view_request_mode(UNIT_VIEW_MODE_TILE_INFO, 0xFF, 0xFF);
     command_dispatch_request(MENU_REQUEST_TARGETING_PROMPT, MENU_TARGETING_PROMPT_DEFAULT,
         map_unit_get_casting()->battle_unit->battle_unit_id, 0, 1);
     g_battle_window_closed = 0;
@@ -2420,7 +2421,7 @@ static void enter_target_display(void) {
     if (target != 0) {
         target_stats = target->battle_unit;
         if (target_stats != 0) {
-            unit_view_start(UNIT_VIEW_MODE_UNIT_SUMMARY, target_stats->battle_unit_id, 0);
+            unit_view_request_mode(UNIT_VIEW_MODE_UNIT_SUMMARY, target_stats->battle_unit_id, 0);
         }
     }
 }
@@ -2463,7 +2464,7 @@ static void update_cursor(void) {
     VECTOR projected;
 
     if (g_cursor_visible) {
-        cursor_draw_tile_glow();
+        cursor_draw();
         return;
     }
     cursor_project_tile(&projected, &position, &raised);
@@ -2480,7 +2481,7 @@ static void update_scene(void) {
     if (g_menu_status_screen_selected != 1) {
         map_unit_update_animations();
     }
-    sprite_update_units_display();
+    sprite_draw_units();
     update_cursor();
 }
 
@@ -2635,7 +2636,7 @@ void battle_state_idling_action_menus_update(void) {
             unit->command_state.command = *command;
             unit->turn_action_flags |= TURN_ACTION_ACTED;
             status_clear_action_state(unit->battle_unit);
-            ai_init_unit_abilities(unit->battle_unit->battle_unit_id);
+            ai_init_unit(unit->battle_unit->battle_unit_id);
             map_unit_update_display(unit->map_unit_id);
             turn_set_act_taken(unit->battle_unit->battle_unit_id);
         case SKILLSET_ID_BLANK_04:
@@ -2659,7 +2660,7 @@ void battle_state_idling_action_menus_update(void) {
                 break;
             case TARGET_PANELS_NO_TARGETING:
             default:
-                select_target_tile();
+                enter_ability_preview();
                 break;
             }
             break;
@@ -2754,7 +2755,7 @@ void battle_state_ai_command_update(void) {
         case SKILLSET_ID_EQUIP_CHANGE:
             unit->turn_action_flags |= TURN_ACTION_ACTED;
             status_clear_action_state(unit->battle_unit);
-            ai_init_unit_abilities(unit->battle_unit->battle_unit_id);
+            ai_init_unit(unit->battle_unit->battle_unit_id);
             map_unit_update_display(unit->map_unit_id);
             turn_set_act_taken(unit->battle_unit->battle_unit_id);
             enter_after_command();
@@ -2797,7 +2798,7 @@ void battle_state_ai_command_update(void) {
                 return;
             case TARGET_PANELS_NO_TARGETING:
             default:
-                select_target_tile();
+                enter_ability_preview();
                 return;
             }
         }
@@ -3055,7 +3056,7 @@ void battle_state_unit_moving_update(void) {
 /* Put the unit back where it was before its move: restore its tile, facing, mount link and
  * standing-on id from the previous_* fields, re-register the tile in its battle stats and restart
  * its current animation. */
-static void restore_previous_state(map_unit_t* unit) {
+static void restore_position_before_move(map_unit_t* unit) {
     unit->map_x = unit->previous_map_x;
     unit->map_y = unit->previous_map_y;
     unit->map_layer = unit->previous_map_layer;
@@ -3066,7 +3067,7 @@ static void restore_previous_state(map_unit_t* unit) {
     map_unit_set_move_and_world_coords(unit);
     battle_unit_set_tile_position(unit->battle_unit->battle_unit_id, unit->map_x, unit->map_y, unit->map_layer,
         unit->facing / UNIT_FACING_QUARTER_TURN);
-    animation_force_with_facing(unit->animation.sequence_id >> 1, unit->facing, unit);
+    animation_request_forced(unit->animation.sequence_id >> 1, unit->facing, unit);
 }
 
 /* Cancel a move at the confirm prompt. The unit returns to its previous tile;
@@ -3080,11 +3081,11 @@ static void undo_move(map_unit_t* unit) {
         other->mount_state = UNIT_MOUNT_STATE_NONE;
         map_unit_update_display(other->map_unit_id);
     }
-    restore_previous_state(unit);
+    restore_position_before_move(unit);
     if (unit->mount_state == UNIT_MOUNT_STATE_MOUNT) {
         other = map_unit_get(unit->mount_partner_map_unit_id);
         if (other != 0) {
-            restore_previous_state(other);
+            restore_position_before_move(other);
             map_unit_update_display(other->map_unit_id);
         }
     } else if (unit->mount_state == UNIT_MOUNT_STATE_RIDER) {
@@ -3240,7 +3241,7 @@ void battle_state_wait_direction_update(void) {
     if (unit->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED) {
         map_unit_facing_draw_wait_direction();
     }
-    sprite_update_units_display();
+    sprite_draw_units();
     menu_update_event_frame(gfx_get_battle_otag(), g_input_current_buttons);
     if (unit->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED) {
         camera_handle_rotation_input();
@@ -3426,7 +3427,7 @@ void battle_state_targeting_range_update(void) {
         }
         if (g_input_pressed_buttons & PSX_PAD_CIRCLE) {
             if (map_get_tile(g_cursor_x, g_cursor_y, g_cursor_layer)->ceiling_depth_and_marks.ability_range) {
-                select_target_tile();
+                enter_ability_preview();
                 return;
             }
             enter_illegal_range();
@@ -3440,7 +3441,7 @@ void battle_state_targeting_range_update(void) {
                 /* This lookup and the one below discard their result. */
                 map_get_tile(unit->command_state.cursor.target_panel.vx, unit->command_state.cursor.target_panel.vz,
                     unit->command_state.cursor.target_panel.vy);
-                select_target_tile();
+                enter_ability_preview();
             }
             return;
         case TARGET_TYPE_UNIT:
@@ -3450,7 +3451,7 @@ void battle_state_targeting_range_update(void) {
                 frame = unit->state_frame_counter++;
                 if (frame >= 0x1f) {
                     map_get_tile(target->map_x, target->map_y, target->map_layer);
-                    select_target_tile();
+                    enter_ability_preview();
                 }
             } else {
                 enter_open_action_menus();
@@ -3607,7 +3608,7 @@ void battle_state_pre_attack_animation_update(void) {
     if ((unit->animation.wait == 0 || unit->animation.restart_count != 0 || unit->state_frame_counter >= 0x3d)
         && (g_camera_step_vector.vx | g_camera_step_vector.vy | g_camera_step_vector.vz) == 0
         && g_camera_rotation_action == CAMERA_ROTATION_NONE) {
-        execute_ability();
+        commit_action();
     }
 }
 
@@ -3688,7 +3689,7 @@ void battle_state_open_sp2_files_update(void) {
 
     if (g_sprite_sp2_data == 0) {
         g_sprite_sp2_data = heap_alloc(0x8000);
-        open_result = sprite_open_sp2_file(unit, g_sprite_sp2_data);
+        open_result = sprite_request_sp2_read(unit, g_sprite_sp2_data);
         if (open_result == -1) {
             heap_free(g_sprite_sp2_data);
             g_sprite_sp2_data = 0;
@@ -3725,7 +3726,7 @@ void battle_state_start_effect_file_open_update(void) {
         g_battle_animation_wait_state = 0;
     }
     if (!g_battle_animation_wait_state) {
-        apply_strike_results();
+        enter_action_execute_start();
     }
     update_scene();
 }
@@ -3781,7 +3782,7 @@ void battle_state_action_execute_update(void) {
         camera_update_zoom_move();
         camera_update_rotation_move();
     }
-    sprite_update_units_display();
+    sprite_draw_units();
     fade_tint_draw();
     update_cursor();
 
@@ -3801,7 +3802,7 @@ void battle_state_action_execute_update(void) {
 
     if (unit->used_ability_id != 0 && unit->used_ability_id != ABILITY_ID_KNOCKBACK
         && unit->used_ability_id != ABILITY_ID_BASIC_SKILL_THROW_STONE) {
-        if (effect_ability_has_no_file(unit->used_ability_id)
+        if (effect_ability_has_no_effect(unit->used_ability_id)
             || (unit->used_ability_id >= ABILITY_ID_CHARGE_FIRST && unit->used_ability_id < ABILITY_ID_MATH_FIRST)) {
             camera_update_cursor_focus();
         }
@@ -3814,7 +3815,7 @@ void battle_state_action_execute_update(void) {
                     if (target != 0) {
                         if (unit->used_ability_id >= ABILITY_ID_REACTION_FIRST
                             && unit->used_ability_id < ABILITY_ID_SUPPORT_FIRST) {
-                            if (effect_ability_has_no_file(unit->used_ability_id)
+                            if (effect_ability_has_no_effect(unit->used_ability_id)
                                 && g_ability_animation_data[unit->used_ability_id].attack_animation
                                     != ANIMATION_ATTACK_USE_WEAPON) {
                                 start_target_animation_display(unit, target);
@@ -3861,14 +3862,14 @@ void battle_state_battle_message_display_update(void) {
         g_battle_window_closed = 1;
     }
     if (g_battle_window_closed) {
-        show_caster_message();
+        start_post_effect_messages();
     }
 }
 
 /* ResumeAttackPhase game-state handler: show the remaining post-effect messages, then finish the
  * strike.
  *
- * Each closed message (any answer) lets show_next_message open the next queued
+ * Each closed message (any answer) lets show_next_post_effect_message open the next queued
  * one. When none remains and the casting unit's numeric display is idle, a continued attack starts
  * its next strike. Otherwise the SP2 buffer and VRAM slot are released, the acting unit's data is
  * stored and the units return to their status animations. Outside the pre-action phase the action
@@ -3891,7 +3892,7 @@ void battle_state_resume_attack_phase_update(void) {
         g_battle_window_closed = 1;
     }
     unit = map_unit_get_casting();
-    if (g_battle_window_closed && !show_next_message() && !unit->numeric_display.active) {
+    if (g_battle_window_closed && !show_next_post_effect_message() && !unit->numeric_display.active) {
         if (unit->strike.continue_attack) {
             unit->continue_attack_count++;
             start_next_strike();
@@ -3913,7 +3914,7 @@ void battle_state_resume_attack_phase_update(void) {
             battle_unit = unit->battle_unit;
             action_post_action_facing_stub(battle_unit, facing & 0xff);
         }
-        action_store_actor_data(unit->battle_unit);
+        action_finish_actor(unit->battle_unit);
         animation_set_status_after_action(unit);
         map_unit_update_target_displays(unit);
         map_unit_get_source(); /* result unused */
@@ -3925,7 +3926,7 @@ void battle_state_resume_attack_phase_update(void) {
                 return;
             }
         }
-        grant_reward();
+        start_post_action_reports();
     }
 }
 
@@ -4199,7 +4200,7 @@ void battle_state_continue_turn_update(void) {
         if (command_dispatch_request(
                 MENU_REQUEST_SCENARIO_CHECK, MENU_SCENARIO_CHECK_TEST, unit->battle_unit->battle_unit_id, 0, 1)
                 == MENU_REQUEST_RESULT_EVENT
-            && script_get_event_finish_operation() != 0) {
+            && scenario_get_next_event_finish_operation() != 0) {
             g_battle_state_previous = g_battle_state;
             command_dispatch_request(
                 MENU_REQUEST_SCENARIO_CHECK, MENU_SCENARIO_CHECK_START, unit->battle_unit->battle_unit_id, 0, 1);
@@ -4297,7 +4298,7 @@ void battle_state_effect_update(void) {
         camera_update_zoom_move();
         camera_update_rotation_move();
     }
-    sprite_update_units_display();
+    sprite_draw_units();
     fade_tint_draw();
     if (!g_battle_animation_wait_state) {
         g_battle_state = g_battle_state_previous;
@@ -4330,7 +4331,7 @@ void battle_state_event_update(void) {
         camera_update_rotation_move();
         move_update_units();
     }
-    sprite_update_units_display();
+    sprite_draw_units();
     fade_tint_draw();
     switch (script_update_event_frame(gfx_get_battle_otag(), g_input_current_buttons)) {
     case SCRIPT_EVENT_FRAME_NO_FINISH:
@@ -4545,7 +4546,7 @@ void battle_state_change_map_jumping_in_update(void) {
         camera_update_rotation_move();
         move_update_units();
     }
-    sprite_update_units_display();
+    sprite_draw_units();
     fade_tint_draw();
     /* TO_WORLD and NEXT_EVENT lead the other way round from battle_state_event_update
      * (QUIRKS.md). */

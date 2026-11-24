@@ -27,7 +27,7 @@ static u8 s_action_actor_elevation;
 static s32 s_unit_relocated_count = 0;
 extern move_tile_coordinates_t g_unit_relocated_coords[];
 
-static s32 check_and_consume_mp(battle_unit_t* unit);
+static s32 check_action_and_spend_mp(battle_unit_t* unit);
 
 static void finalize_draw_out_katana(battle_unit_t* attacker, action_strike_work_t* work, u8 hit_count);
 
@@ -37,9 +37,9 @@ static s32 select_auto_potion_item(battle_unit_t* unit);
 
 static s32 store_counter_ability(battle_unit_t* unit, s8 skillset_id, s16 ability_id, s32 validate_target);
 
-static s32 apply_reflect(battle_unit_t* unit);
+static s32 store_reflect_ability(battle_unit_t* unit);
 
-static s32 list_units_on_panels(u8* list, const battle_unit_t* origin);
+static s32 list_targeted_units(u8* list, const battle_unit_t* origin);
 
 static void select_random_fire_tile(void);
 
@@ -59,7 +59,7 @@ static void set_strike_coordinates(const battle_unit_t* acting, action_strike_wo
  * with the 0xff constant in $v0, which puts the job load in $v1, and `level`
  * outranks `depth` in allocation, which gives it $v1 and `depth` $a1.
  */
-unit_height_data_t* battle_unit_calculate_action_height(unit_height_data_t* out, s32 unit_id) {
+unit_height_data_t* battle_unit_calculate_height_data(unit_height_data_t* out, s32 unit_id) {
     unit_height_data_t height;
     battle_unit_t* unit;
     battle_unit_t* candidate;
@@ -425,9 +425,9 @@ s32 item_decrement_party_quantity(battle_unit_t* unit, s32 item_id, s32 spend) {
  *
  * Returns 0 when the action can run, -1 for an empty unit slot, ACTION_REJECTION_HAMEDO
  * when Hamedo pre-empted the action (g_reaction_hamedo_flag set), or the nonzero
- * action_rejection_e of check_and_consume_mp; on those failures only
+ * action_rejection_e of check_action_and_spend_mp; on those failures only
  * the acting-unit data is stored. */
-s32 action_init_current_data(s32 id) {
+s32 action_init_resolution(s32 id) {
     battle_unit_t* unit;
     s32 i;
     battle_unit_t* base;
@@ -445,12 +445,12 @@ s32 action_init_current_data(s32 id) {
         return -1;
     }
     if (g_reaction_hamedo_flag) {
-        action_store_actor_data(unit);
+        action_finish_actor(unit);
         return ACTION_REJECTION_HAMEDO;
     }
-    mp_result = check_and_consume_mp(unit);
+    mp_result = check_action_and_spend_mp(unit);
     if (mp_result != 0) {
-        action_store_actor_data(unit);
+        action_finish_actor(unit);
         return mp_result;
     }
     /* The target loads the s16 action_command.ability_id unsigned (lhu). */
@@ -591,7 +591,7 @@ static s32 build_reaction_targets(s32 actor_id, action_strike_work_t* work, s32*
  * weapon-range actions use the weapon/direct resolver. Random-fire selection
  * runs only after successful ordinary targeting while an action executes.
  */
-static s32 calculate_action_tiles(const action_command_t* action, u8* flags_3) {
+static s32 set_targeted_tiles(const action_command_t* action, u8* flags_3) {
     ability_secondary_data_t* ability;
     u8 menu_type;
     u8 flags_4 = 0;
@@ -616,7 +616,7 @@ static s32 calculate_action_tiles(const action_command_t* action, u8* flags_3) {
     if (menu_type == ACTION_MENU_TYPE_ATTACK || menu_type == ACTION_MENU_TYPE_CHARGE
         || menu_type == ACTION_MENU_TYPE_ITEM_INVENTORY || menu_type == ACTION_MENU_TYPE_WEAPON_INVENTORY
         || (flags_4 & ABILITY_SECONDARY_FLAG_4_DIRECT_TARGETING) || (flags_1 & ABILITY_SECONDARY_FLAG_1_WEAPON_RANGE)) {
-        result = target_validate_for_weapon(action);
+        result = target_set_area_by_trajectory(action);
     } else {
         result = target_set_area_for_action(action);
         if (result != -1 && (flags_2 & ABILITY_SECONDARY_FLAG_2_RANDOM_FIRE)
@@ -658,10 +658,10 @@ s32 action_resolve_strike(s32 battle_unit_id, action_strike_work_t* work) {
     }
 
     attacker = &g_battle_units[battle_unit_id];
-    action_clear_current_data(&attacker->action);
+    action_reset_result(&attacker->action);
     attacker->action.hit = 0;
     attacker->action.miss_type = ACTION_MISS_TYPE_CANCELED;
-    action_clear_current_data(&g_action_attacker_action_data);
+    action_reset_result(&g_action_attacker_action_data);
     g_action_attacker_action_data.hit = 0;
     work->knockback_flags = 0;
     work->post_action_message = ACTION_POST_MESSAGE_NONE;
@@ -686,7 +686,7 @@ s32 action_resolve_strike(s32 battle_unit_id, action_strike_work_t* work) {
     }
 
     if (!reaction_targeted) {
-        if (calculate_action_tiles(&attacker->action_command, &flags_3) == -1) {
+        if (set_targeted_tiles(&attacker->action_command, &flags_3) == -1) {
             work->target_count = 0;
             work->continue_attack = 0;
             return -1;
@@ -705,11 +705,11 @@ s32 action_resolve_strike(s32 battle_unit_id, action_strike_work_t* work) {
             tile = &g_map_tile_data[location];
             tile->ceiling_depth_and_marks.targeted = 1;
         }
-        count = list_units_on_panels(targets, attacker);
+        count = list_targeted_units(targets, attacker);
     }
 
     g_action_work.target_count = count;
-    action_store_target_ids(targets);
+    action_store_ability_targets(targets);
     action_store_used_weapon(&attacker->action_command);
     for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
         target_id = targets[i];
@@ -719,7 +719,7 @@ s32 action_resolve_strike(s32 battle_unit_id, action_strike_work_t* work) {
         }
     }
 
-    status_remove_transparent_if_jump_used(attacker);
+    status_prepare_jump_transparent_removal(attacker);
     count = action_copy_ability_targets(work->target_list);
     work->target_count = count;
     g_action_work.target_count = count;
@@ -994,7 +994,7 @@ static void select_random_fire_tile(void) {
  * ordering is enabled the list is insertion-sorted by Manhattan distance from
  * `origin`.
  */
-static s32 list_units_on_panels(u8* list, const battle_unit_t* origin) {
+static s32 list_targeted_units(u8* list, const battle_unit_t* origin) {
     s32 distance[BATTLE_UNIT_SLOT_COUNT];
     s32 tile;
     s32 count;
@@ -1062,7 +1062,7 @@ static s32 list_units_on_panels(u8* list, const battle_unit_t* origin) {
  * Preview skips only subtraction; earlier bookkeeping still runs. In the primary
  * context the unit's Charging, Jump and Defending end first (Performing stays).
  */
-static s32 check_and_consume_mp(battle_unit_t* unit) {
+static s32 check_action_and_spend_mp(battle_unit_t* unit) {
     s16 ability_id;
     u8 menu;
     s32 result;
@@ -1127,7 +1127,7 @@ static s32 check_and_consume_mp(battle_unit_t* unit) {
  * save X/Y and elevation; reactions restore the action command saved in
  * g_action_saved_command and return to the primary context.
  */
-void action_store_actor_data(battle_unit_t* unit) {
+void action_finish_actor(battle_unit_t* unit) {
     if (unit->job_id == JOB_ID_MIME) {
         unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON] = ITEM_ID_NONE;
         unit->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON] = ITEM_ID_NONE;
@@ -1247,7 +1247,7 @@ void target_clear_panels(void) {
  * is set, which makes the actor's own action fail; a Mime actor drops its
  * borrowed weapons. Returns the reacting unit's slot, or -1 when nothing reacts.
  *
- * target_validate_for_weapon takes only the action record (it copies the record and
+ * target_set_area_by_trajectory takes only the action record (it copies the record and
  * rederives the menu type itself); menu_type and flags_1 merely happen to sit
  * in $a1/$a2 at that call. Passing them as arguments would set $a2 twice and
  * change the scheduling of the counter-ability call's argument setup.
@@ -1274,7 +1274,7 @@ s32 reaction_prepare_hamedo(s32 id, s16* out_ability) {
         return -1;
     }
     mp = unit->mp;
-    result = check_and_consume_mp(unit);
+    result = check_action_and_spend_mp(unit);
     unit->mp = mp;
     if (result != 0) {
         return -1;
@@ -1297,14 +1297,14 @@ s32 reaction_prepare_hamedo(s32 id, s16* out_ability) {
     result = -1;
     if (menu_type == ACTION_MENU_TYPE_ATTACK || menu_type == ACTION_MENU_TYPE_CHARGE
         || menu_type == ACTION_MENU_TYPE_WEAPON_INVENTORY || (flags_1 & ABILITY_SECONDARY_FLAG_1_WEAPON_RANGE)) {
-        result = target_validate_for_weapon(&unit->action_command);
+        result = target_set_area_by_trajectory(&unit->action_command);
     }
     if (result == -1) {
         return -1;
     }
 
     g_target_sort_nearest_first = 0;
-    count = list_units_on_panels(targets, unit);
+    count = list_targeted_units(targets, unit);
     if (count != 1) {
         return -1;
     }
@@ -1329,7 +1329,7 @@ s32 reaction_prepare_hamedo(s32 id, s16* out_ability) {
     g_reaction_ability_id = ABILITY_ID_REACTION_HAMEDO;
     g_action_actor_id = id;
     target->action_command.actor_id = target_id;
-    if (store_counter_ability(target, SKILLSET_ID_ATTACK, 0, 1) == 0 && check_and_consume_mp(target) == 0) {
+    if (store_counter_ability(target, SKILLSET_ID_ATTACK, 0, 1) == 0 && check_action_and_spend_mp(target) == 0) {
         init_strike_data(target);
         *out_ability = g_reaction_ability_id;
         g_reaction_hamedo_flag = 1;
@@ -1417,7 +1417,7 @@ s32 reaction_prepare_next(s16* out_ability) {
 
         switch (reaction_id) {
         case ABILITY_ID_REACTION_REFLECT:
-            outcome = apply_reflect(unit) == 0 ? REACTION_OUTCOME_REFLECT : REACTION_OUTCOME_NONE;
+            outcome = store_reflect_ability(unit) == 0 ? REACTION_OUTCOME_REFLECT : REACTION_OUTCOME_NONE;
             break;
         case ABILITY_ID_REACTION_MEATBONE_SLASH:
             if (store_counter_ability(unit, SKILLSET_ID_ATTACK, 0, 1) != 0) {
@@ -1479,7 +1479,7 @@ s32 reaction_prepare_next(s16* out_ability) {
         }
 
         if ((outcome == REACTION_OUTCOME_ATTACK || outcome == REACTION_OUTCOME_COUNTER)
-            && check_and_consume_mp(unit) != 0) {
+            && check_action_and_spend_mp(unit) != 0) {
             outcome = REACTION_OUTCOME_NONE;
         }
         if (outcome == REACTION_OUTCOME_NONE) {
@@ -1522,7 +1522,7 @@ s32 reaction_prepare_next(s16* out_ability) {
  * Black Magic skillset, at the tile as far beyond it as the caster is in front
  * of it. -1 when the caster stands on the unit's tile or that tile is off the
  * map or blocked. */
-static s32 apply_reflect(battle_unit_t* unit) {
+static s32 store_reflect_ability(battle_unit_t* unit) {
     action_command_t* action = &unit->action_command;
     s32 x;
     s32 y;
@@ -1623,7 +1623,7 @@ static s32 select_auto_potion_item(battle_unit_t* unit) {
  * Gained JP Up; other units whose original team matches the actor's current team get JP/4 (before
  * the bonus) in the actor's job. Returns -1 when the unit cannot earn (Hamedo, absent, Crystal,
  * Dead, Petrify, Treasure). */
-s32 reward_apply_action(s32 unit_index, action_reward_display_t* display) {
+s32 reward_apply_exp_and_jp(s32 unit_index, action_reward_display_t* display) {
     s32 job_slot;
     battle_unit_t* unit;
     u8 old_level;
@@ -1668,7 +1668,7 @@ s32 reward_apply_action(s32 unit_index, action_reward_display_t* display) {
         experience = 0xff;
     }
     unit->experience = experience;
-    if (battle_unit_check_level_up(unit) || g_action_work.level_gained_flag) {
+    if (battle_unit_try_level_up(unit) || g_action_work.level_gained_flag) {
         display->level_for_display = unit->level;
     }
     display->earned_experience = g_action_work.earned_experience;
@@ -2027,12 +2027,12 @@ s32 action_calculate_projected_effect(battle_unit_t* attacker, battle_unit_t* ta
     saved_action_state = g_action_state;
     g_action_state = ACTION_STATE_PREVIEW;
     if (!(g_action_loaded_ability_flags_1 & ABILITY_SECONDARY_FLAG_1_AUTO)) {
-        result = calculate_action_tiles(command, &flags_3);
+        result = set_targeted_tiles(command, &flags_3);
         if (result != -1 && !g_map_tile_data[battle_unit_get_tile_index(target)].ceiling_depth_and_marks.targeted) {
             result = -1;
         }
         if (result == -1) {
-            action_clear_current_data(&target->action);
+            action_reset_result(&target->action);
             target->action.hit = 0;
             target->action.attack_accuracy = 0;
             g_action_state = saved_action_state;

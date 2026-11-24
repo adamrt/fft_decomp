@@ -97,7 +97,7 @@ void window_load_render_record_image(s32 index, u32* image) {
 /* Draw a text entry into the window image, using its record's width as the stride.
  * `point` is passed by value: GCC spills the two 32-bit register values to their
  * home slots before narrowing them into the origin record. */
-void window_display_text_entry(s32 record_index, s32 text_id, point32_t point, u32* buffer) {
+void window_render_text_entry(s32 record_index, s32 text_id, point32_t point, u32* buffer) {
     glyph_blit_t origin;
 
     origin.rect.x = point.x;
@@ -126,7 +126,7 @@ void window_init_text_record(s32 record_index, RECT bounds, s32 coordinate_mode,
     text_origin.x = 8;
     text_origin.y = 8;
     if (text_id != 0) {
-        window_display_text_entry(record_index, text_id, text_origin, image);
+        window_render_text_entry(record_index, text_id, text_origin, image);
     }
     window_load_render_record_image(record_index, image);
     g_display_object_gs_image_pool[record_index].flags |= DISPLAY_OBJECT_POP_IN;
@@ -356,7 +356,7 @@ void window_open_paged_text(text_window_t* state) {
     g_display_object_animated_pool[state->scroll_thumb_record].position.x = window_x;
     g_display_object_animated_pool[state->scroll_thumb_record].position.y = lower_y;
 
-    text_measure(&text_metrics[0], &text_metrics[1], text_find_entry(state->text_id));
+    text_measure_columns(&text_metrics[0], &text_metrics[1], text_find_entry(state->text_id));
     rows = text_metrics[1];
     last_page_row = (rows - 1) / state->rows_per_page * state->rows_per_page;
     state->page_start_row = 0;
@@ -511,7 +511,7 @@ static void render_page(text_window_t* state, s32 row) {
     }
     point.x = 8;
     point.y = 8;
-    window_display_text_entry(state->render_record_index, state->text_id, point, g_window_image_buffer);
+    window_render_text_entry(state->render_record_index, state->text_id, point, g_window_image_buffer);
     window_load_render_record_image(state->render_record_index, g_window_image_buffer);
     g_display_object_gs_image_pool[state->render_record_index].position = state->base;
 }

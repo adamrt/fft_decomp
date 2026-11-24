@@ -11,7 +11,7 @@ u32* gfx_get_battle_otag(void) {
 
 /* Make the other of BATTLE's two render buffers the current one and clear its
  * 0x180-entry ordering table. */
-void gfx_swap_battle_otag(void) {
+void gfx_swap_render_buffers(void) {
     render_buffer_t* buffer = g_render_buffers;
     u32* otag;
 

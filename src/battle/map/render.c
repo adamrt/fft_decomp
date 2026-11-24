@@ -123,7 +123,7 @@ extern MATRIX g_map_light_transition_start_light_matrix; /* transition start lig
 extern MATRIX g_map_light_transition_target_color_matrix;
 extern MATRIX g_map_light_transition_target_light_matrix;
 
-/* The applied background gradient pair. The copies in map_light_dispatch_state_command
+/* The applied background gradient pair. The copies in map_light_dispatch_command
  * move each color as an independent unaligned 32-bit value (lwl/lwr + swl/swr). */
 extern map_background_gradient_colors_t g_map_background_gradient_colors;
 extern CVECTOR g_map_saved_background_gradient_first;
@@ -207,17 +207,17 @@ static void update_mesh_animations(void);
 
 static void update_texture_animations(void);
 
-static void dispatch_polygon_flags(s32 command);
+static void dispatch_polygon_flag_command(s32 command);
 
 static void set_light_matrices(MATRIX* first, MATRIX* second);
 
-static map_state_record_t* load_animation_record(map_state_record_t* record);
+static map_state_record_t* load_mesh_animation_record(map_state_record_t* record);
 
 /* Apply a map_polygon_flag_command_e to the textured map polygons: reset or clear
  * their per-frame lit flag, or repaint the unlit ones in the ambient color in the
  * current render buffer. The repaint's pointer-plus form, not gt3[i] indexing,
- * is what the bytes require (as in map_mesh_draw_weather). */
-static void dispatch_polygon_flags(s32 command) {
+ * is what the bytes require (as in map_draw). */
+static void dispatch_polygon_flag_command(s32 command) {
     s32 i;
 
     switch (command) {
@@ -365,7 +365,7 @@ s32* map_light_dispatch_back_color_command(s32 command, s32 value_1, s32 value_2
  * The translation rows add the start matrix element m[i][3] (the loop index
  * after the inner loop) rather than the start translation, as in the target.
  * Commands 0x5e-0x60 and 0x66-0x69 return the uninitialized result, like
- * map_light_dispatch_state_command.
+ * map_light_dispatch_command.
  */
 MATRIX* map_light_dispatch_matrix_command(
     map_light_matrix_command_e command, MATRIX* color, MATRIX* light, s32 duration) {
@@ -469,7 +469,7 @@ MATRIX* map_light_dispatch_matrix_command(
  *
  * Only the GET arms assign `result`; the others return it uninitialized, as
  * the target does. */
-void* map_light_dispatch_state_command(map_light_command_e command, void* data) {
+void* map_light_dispatch_command(map_light_command_e command, void* data) {
     void* result;
 
     switch (command) {
@@ -544,7 +544,7 @@ void* map_light_dispatch_state_command(map_light_command_e command, void* data) 
  * the E458 particle swell, or rain with splashes), repeat an ambient repaint in
  * this buffer, and finally apply the SHOW and HIDE requests of the three
  * tile-mark layers. */
-void map_mesh_draw_weather(MATRIX* camera) {
+void map_draw(MATRIX* camera) {
     MATRIX light_rotation;
     MATRIX light_matrix;
     MATRIX effect_matrix;
@@ -612,10 +612,9 @@ void map_mesh_draw_weather(MATRIX* camera) {
                 - g_weather_lightning_state.base_colors[1].g * remaining / 60 + remaining * 112 / 60;
             g_weather_lightning_state.colors[1].b = g_weather_lightning_state.base_colors[1].b
                 - g_weather_lightning_state.base_colors[1].b * remaining / 60 + remaining * 96 / 60;
-            map_light_dispatch_state_command(
-                MAP_LIGHT_COMMAND_SET_BACKGROUND_GRADIENT, &g_weather_lightning_state.colors[0]);
+            map_light_dispatch_command(MAP_LIGHT_COMMAND_SET_BACKGROUND_GRADIENT, &g_weather_lightning_state.colors[0]);
         } else {
-            map_light_dispatch_state_command(MAP_LIGHT_COMMAND_RESTORE_BACKGROUND_GRADIENT, 0);
+            map_light_dispatch_command(MAP_LIGHT_COMMAND_RESTORE_BACKGROUND_GRADIENT, 0);
             if (g_weather_lightning_mode == MAP_LIGHTNING_ONCE) {
                 g_weather_lightning_mode = MAP_LIGHTNING_OFF;
             }
@@ -657,7 +656,7 @@ void map_mesh_draw_weather(MATRIX* camera) {
 
     if (g_map_polygon_flag_clear_countdown != 0) {
         if (--g_map_polygon_flag_clear_countdown == 0) {
-            dispatch_polygon_flags(MAP_POLYGON_FLAG_COMMAND_CLEAR_ACTIVE);
+            dispatch_polygon_flag_command(MAP_POLYGON_FLAG_COMMAND_CLEAR_ACTIVE);
         }
     }
 
@@ -1431,8 +1430,8 @@ void map_set_tile_mark_colors(s32 mode, s32 unused) {
         g_map_tile_mark_modes.move = MAP_TILE_MARK_HIDE_MOVE;
         g_map_tile_mark_modes.range = MAP_TILE_MARK_HIDE_RANGE;
         g_map_tile_mark_modes.targets = MAP_TILE_MARK_HIDE_TARGETS;
-        dispatch_polygon_flags(MAP_POLYGON_FLAG_COMMAND_RESET_ACTIVE);
-        dispatch_polygon_flags(MAP_POLYGON_FLAG_COMMAND_RESTORE_AMBIENT);
+        dispatch_polygon_flag_command(MAP_POLYGON_FLAG_COMMAND_RESET_ACTIVE);
+        dispatch_polygon_flag_command(MAP_POLYGON_FLAG_COMMAND_RESTORE_AMBIENT);
         g_map_tile_mark_color_buffer = g_render_current_buffer;
         break;
     case MAP_TILE_MARK_SHOW_MOVE:
@@ -1910,7 +1909,7 @@ void gfx_init_render_buffers(void) {
 /* Reset the map render state before a new GNS map loads: no polygons or tile links, every textured
  * polygon lit, ambient color 0x80 gray, weather and lightning off, texture and mesh part
  * animations stopped, GNS resource records cleared. */
-void map_mesh_reset_render_state(void) {
+void map_reset_render_state(void) {
     SVECTOR zero_vector = s_zero_svector;
     VECTOR unit_scale = s_unit_scale_vector;
     s32 i;
@@ -2043,7 +2042,7 @@ void weather_dispatch_command(u8 command) {
 
     switch (command) {
     case MAP_WEATHER_COMMAND_RESTORE_LIGHTING:
-        map_light_dispatch_state_command(MAP_LIGHT_COMMAND_RESTORE_BACKGROUND_GRADIENT, 0);
+        map_light_dispatch_command(MAP_LIGHT_COMMAND_RESTORE_BACKGROUND_GRADIENT, 0);
         SetColorMatrix(g_weather_lightning_state.color_matrices);
         SetBackColor(g_map_back_color.red, g_map_back_color.green, g_map_back_color.blue);
         break;
@@ -2276,7 +2275,7 @@ static void init_weather_particles(weather_command_e command) {
  * ability effect: BEGIN places them by depth (OT z mask -1, fixed index 0), END
  * returns them to fixed slot 4 (mask 0), the values a map load sets. Returns 4
  * for END, and -1 for BEGIN or any other command. */
-s32 map_set_effect_data_state(map_effect_data_command_e command) {
+s32 map_set_untextured_ot_mode(map_effect_data_command_e command) {
     s32 result;
 
     switch (command) {
@@ -2298,7 +2297,7 @@ s32 map_set_effect_data_state(map_effect_data_command_e command) {
 }
 
 /* Advance the keyframe animations of map mesh parts 1-8 by one frame, from
- * map_mesh_draw_weather.
+ * map_draw.
  *
  * A part whose running instruction row has a successor (states[0][1].next) adds
  * (speed >> 4) * g_system_vsync_interval to its elapsed time. When that
@@ -3047,7 +3046,7 @@ static void update_texture_animations(void) {
  * entry, extra entries skipped). The caller stops at type 0 before calling.
  * An unknown nonzero type leaves `next` unset (the target returns $a1), yet
  * the caller uses that result to read the next record's type. */
-static map_state_record_t* load_animation_record(map_state_record_t* record) {
+static map_state_record_t* load_mesh_animation_record(map_state_record_t* record) {
     map_state_record_t* next;
     u32 count;
     u32 i;
@@ -3307,7 +3306,7 @@ s32 map_gns_dispatch_resource(u8 resource_type, map_resource_t* data) {
             g_map_untextured_quad_positions[i].polygon_flags = *polygon_flags++;
         }
 
-        dispatch_polygon_flags(MAP_POLYGON_FLAG_COMMAND_RESET_ACTIVE);
+        dispatch_polygon_flag_command(MAP_POLYGON_FLAG_COMMAND_RESET_ACTIVE);
         break;
     case MAP_RESOURCE_PALETTES:
         g_map_palette_pending = 1;
@@ -3442,7 +3441,7 @@ s32 map_gns_dispatch_resource(u8 resource_type, map_resource_t* data) {
         g_weather_lightning_state.base_colors[0] = g_map_background_gradient_colors.colors[MAP_BACKGROUND_GRADIENT_TOP];
         g_weather_lightning_state.base_colors[1]
             = g_map_background_gradient_colors.colors[MAP_BACKGROUND_GRADIENT_BOTTOM];
-        map_light_dispatch_state_command(MAP_LIGHT_COMMAND_SAVE_BACKGROUND_GRADIENT, 0);
+        map_light_dispatch_command(MAP_LIGHT_COMMAND_SAVE_BACKGROUND_GRADIENT, 0);
         break;
     case MAP_RESOURCE_TEXTURE_ANIMATIONS:
         source = data->texture_animations;
@@ -3481,7 +3480,7 @@ s32 map_gns_dispatch_resource(u8 resource_type, map_resource_t* data) {
     case MAP_RESOURCE_STATE_RECORDS:
         cursor = &data->state_record;
         while (cursor->type != MAP_MESH_ANIMATION_RECORD_END) {
-            cursor = load_animation_record(cursor);
+            cursor = load_mesh_animation_record(cursor);
         }
 
         break;

@@ -61,7 +61,7 @@ void formula_force_attack_miss(void) {
 }
 
 /* Miss decided by the accuracy roll: no hit, the accuracy-miss type. */
-void formula_cause_action_miss(void) {
+void formula_cause_accuracy_miss(void) {
     g_action_target_data->hit = 0;
     g_action_target_data->miss_type = ACTION_MISS_TYPE_ACCURACY_MISS;
 }
@@ -77,7 +77,7 @@ s32 formula_calculate_dance_song_hit(void) {
     if (action_state != ACTION_STATE_EXECUTE || random_roll_pass_fail(100, hit_percent) == 0) {
         return 0;
     }
-    formula_cause_action_miss();
+    formula_cause_accuracy_miss();
     return 1;
 }
 
@@ -383,7 +383,7 @@ void formula_apply_zodiac_compatibility(void) {
  * cancels. Removals always drop innate statuses and keep only statuses the
  * target has. Returns the sum of the remaining bytes, so 0 means nothing is
  * left to inflict or remove. */
-s32 status_modify_inflictions(s32 removal_only) {
+s32 status_filter_action_changes(s32 removal_only) {
     u8 inflicted;
     s32 immortal;
     s32 total = 0;
@@ -610,7 +610,7 @@ void formula_evade_calculate_concentrate(void) {
 
 /* A Dark or Confused attacker halves the base hit, which doubles every evade.
  * Then the Transparent step. */
-void formula_evade_calculate_dark_confuse(void) {
+void formula_evade_apply_attacker_statuses(void) {
     if (g_action_attacker->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_DARKNESS)]
         & (STATUS_BYTE_MASK(STATUS_ID_DARKNESS) | STATUS_BYTE_MASK(STATUS_ID_CONFUSION))) {
         g_action_work.base_hit >>= 1;
@@ -771,7 +771,7 @@ void formula_evade_apply_weather_on_bows(void) {
  * base-hit odds and they are independent, so together they hit as often as the
  * shown accuracy, up to its truncation. The earlier base-hit halvings (Dark or
  * Confused attacker, Abandon, Defending) stack. */
-void formula_evade_calculate_final_hit_percent(void) {
+void formula_evade_roll_sources(void) {
     u8 hit;
     u8 accessory;
     u8 right;
@@ -827,7 +827,7 @@ void formula_evade_calculate_final_hit_percent(void) {
  * / 2 for instruments, dictionaries and cloths. Other types leave XA unchanged.
  * The attacker's stats must be u8 locals for the (PA + MA) zero-extension.
  */
-void formula_calculate_base_xa(void) {
+void formula_store_weapon_xa_ya(void) {
     u8 type;
     u8 pa;
     u8 ma;
@@ -1267,7 +1267,7 @@ void formula_apply_song_abilities(void) {
 }
 
 /* Effect of each dance. XA + YA is the weapon's XA plus its power
- * (formula_calculate_base_xa); the stat dances take 1. */
+ * (formula_store_weapon_xa_ya); the stat dances take 1. */
 void formula_apply_dance_abilities(void) {
     switch (g_action_work.ability_id) {
     case ABILITY_ID_DANCE_WITCH_HUNT:

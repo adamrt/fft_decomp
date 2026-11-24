@@ -421,7 +421,7 @@ void menu_screen_init_world_text(void) {
 /* Return from WLDCORE to the formation screen: unload the scenario music, reload the face text,
  * restore the input repeat timings from the cursor-speed option, run the formation screen, then
  * resume the event saved for the return and clear the pending scenario. */
-void formation_run_world_map_return(void) {
+void formation_run_for_return_event(void) {
     s32 profile;
 
     music_unload_all();
@@ -485,7 +485,7 @@ void menu_screen_text_resume_printing(s32 thread_id) {
 }
 
 /* Returns 1 while the text thread's task id is RESUME. */
-s32 menu_screen_text_check_printing(s32 thread_id) {
+s32 menu_screen_text_is_printing(s32 thread_id) {
     return g_threads[thread_id].task_id == THREAD_TASK_RESUME;
 }
 
@@ -534,7 +534,7 @@ void menu_screen_reset_context(void) {
     DrawSync(0);
     menu_init_subsystem_pointers();
     menu_subsystems_reset();
-    text_relocate_pointer_table((text_bank_t*)s_menu_text_file_buffer);
+    text_bind_section_pointers((text_bank_t*)s_menu_text_file_buffer);
     formation_roster_build_names();
     DrawSync(0);
     g_menu_thread_menu_data = g_menu_screen_default_entries;
@@ -587,7 +587,7 @@ void world_map_menu_text_window_thread(void) {
     g_text_substitution_values[0] = text_values[0];
     text_values = entry->value;
     g_text_substitution_values[1] = text_values[1];
-    text_measure(&width, &height, text_find_entry(entry->text_id));
+    text_measure_columns(&width, &height, text_find_entry(entry->text_id));
     mem_copy_bytes_nonempty(g_text_substitution_values, s_saved_text_values, sizeof(g_text_substitution_values));
     /* 10-pixel columns plus a 24-pixel border, rounded up past the next multiple of four. */
     x = width * 10;
@@ -623,7 +623,7 @@ void world_map_menu_text_window_thread(void) {
         record = &records[i & 1];
         phase = i & 31;
         if (phase == 0) {
-            buffer = menu_build_and_upload_window_frame_image(
+            buffer = menu_build_window_frame_image(
                 entry->inner_width, entry->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
             g_menu_window_text_pen.stride = entry->inner_width;
             menu_text_set_origin(10, 8);
@@ -699,7 +699,7 @@ static void options_thread(void) {
 
 /* Runs the game options thread in the slot below the current thread,
  * handing it this thread's first parameter, then waits for it and stops. */
-void option_open_game_options_in_previous_thread(void) {
+void option_open_game_options_thread(void) {
     thread_start(g_thread_current_id - 1, options_thread);
     thread_set_parameters(g_thread_current_id - 1, g_threads[g_thread_current_id].function_parameter_1, 0, 0);
     thread_wait_inactive(g_thread_current_id - 1);
@@ -913,7 +913,7 @@ static void update_party_number_request(void) {
         menu_screen_reset_context();
         g_thread_call_target = (void (*)(void))file_load_into_buffer_checked;
         thread_call_on_main_stack(DISC_SECTOR_EVENT_WORLD_LZW, 0xE800, s_menu_text_file_buffer);
-        text_relocate_pointer_table((text_bank_t*)s_menu_text_file_buffer);
+        text_bind_section_pointers((text_bank_t*)s_menu_text_file_buffer);
         menu_screen_set_brightness(0x80, 0x80, 0x80);
         s_world_map_debug_party_number_request_state = 0;
         g_world_map_flags |= WORLD_MAP_FLAG_REQUEST_DEBUG_PARTY_NUMBER;

@@ -104,8 +104,8 @@ void unit_panel_banner_thread(void) {
     for (frame = 0; frame < 4; frame++) {
         menu_init_default_poly_ft4(&editor->portrait[frame]);
     }
-    text_configure_sprite_vram(&rects[0], 0x38, 0x28, &editor->value_sprites[0], 2);
-    text_configure_sprite_vram(&rects[1], 0x60, 0x10, &editor->value_sprites[1], 2);
+    text_alloc_image_rect(&rects[0], 0x38, 0x28, &editor->value_sprites[0], 2);
+    text_alloc_image_rect(&rects[1], 0x60, 0x10, &editor->value_sprites[1], 2);
     for (frame = 0; frame < 4; frame++) {
         gfx_set_image_primitive_layout(&editor->value_sprites[frame], &g_unit_panel_texture_origin,
             &g_menu_portrait_origin, &g_unit_panel_editor_value_cells[frame]);
@@ -133,10 +133,10 @@ void unit_panel_banner_thread(void) {
     panel_sprites = &panel->sprites[0];
     menu_init_sprite_array(panel_sprites, 7, MENU_CLUT_NORMAL);
     menu_init_default_poly_ft4(&panel->portrait);
-    text_configure_sprite_vram(&rects[2], 0x58, 0x20, panel_sprites, 0);
-    text_configure_sprite_vram(&rects[3], 0x10, 0xA, &panel->sprites[1], 0);
-    text_configure_sprite_vram(&rects[4], 0x10, 0xA, &panel->sprites[2], 0);
-    text_configure_sprite_vram(&rects[5], 0x10, 0xA, &panel->sprites[3], 0);
+    text_alloc_image_rect(&rects[2], 0x58, 0x20, panel_sprites, 0);
+    text_alloc_image_rect(&rects[3], 0x10, 0xA, &panel->sprites[1], 0);
+    text_alloc_image_rect(&rects[4], 0x10, 0xA, &panel->sprites[2], 0);
+    text_alloc_image_rect(&rects[5], 0x10, 0xA, &panel->sprites[3], 0);
     for (frame = 0; frame < 7; frame++) {
         gfx_set_image_primitive_layout(&panel->sprites[frame], &g_unit_panel_texture_origin, &g_unit_panel_frame_rect,
             &g_unit_panel_sprite_cells[frame]);

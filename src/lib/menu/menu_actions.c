@@ -41,7 +41,7 @@ s32 menu_can_accept_input(void) {
  * to close. Stores the row as the entry's result and plays the confirm sound unless the action is
  * silent; in tutorial input mode rows disabled by EVENT_SCRIPT_VAR_DISABLED_MENU_ACTIONS do
  * nothing. */
-void menu_handle_action(menu_entry_t* entry, s32 row_index) {
+void menu_handle_confirm_input(menu_entry_t* entry, s32 row_index) {
     s32 silent;
     s32 target;
     s32 i;
@@ -187,7 +187,7 @@ void menu_handle_cancel_input(menu_entry_t* context) {
  * completion: 1 once no other running thread has a stop request and this
  * thread's parameter 3 is set. In WORLD, SELECT first opens the entry's
  * auxiliary text thread when its table selector is nonzero. */
-s32 menu_should_close_thread(u32* input) {
+s32 menu_poll_thread_close(u32* input) {
 #ifdef FFT_WORLD
     menu_entry_t* parameter;
 #endif

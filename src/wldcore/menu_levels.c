@@ -66,7 +66,7 @@ static void open_path_level(s32 from, s32 to, s32 erase);
 static void update_path_level(menu_stack_record_t* level);
 static void open_visibility_level(s32 dot_index, s32 erase);
 static void update_visibility_level(menu_stack_record_t* level);
-static void update_map_menu_return(menu_stack_record_t* level);
+static void update_world_menu_level(menu_stack_record_t* level);
 static void update_text_level(menu_stack_record_t* level);
 static void update_message_level(menu_stack_record_t* level);
 static void open_variable_list(void);
@@ -81,7 +81,7 @@ static void update_panel_help(menu_stack_record_t* request);
 static void resume_location_menu(menu_stack_record_t* level);
 static void suspend_location_menu(menu_stack_record_t* slots);
 static void update_location_menu(menu_stack_record_t* level);
-static void release_level_records(menu_stack_slot_set_t* slots, s32 restore);
+static void close_location_menu(menu_stack_slot_set_t* slots, s32 restore);
 static void run_location_shop(s32 shop_id);
 static void update_scrollable_text_level(menu_stack_record_t* level);
 static void open_party_number(void);
@@ -90,7 +90,7 @@ static void update_party_number(menu_stack_record_t* level);
 /* Indexed by menu_stack_level_e. */
 static void (*s_level_update_handlers[MENU_STACK_LEVEL_COUNT])(menu_stack_record_t*) = {
     update_cursor_level,                           /* MENU_STACK_LEVEL_WORLD_MAP */
-    update_map_menu_return,                        /* MENU_STACK_LEVEL_WORLD_MENU */
+    update_world_menu_level,                       /* MENU_STACK_LEVEL_WORLD_MENU */
     update_text_level,                             /* MENU_STACK_LEVEL_TEXT_WINDOW */
     update_message_level,                          /* MENU_STACK_LEVEL_MESSAGE */
     update_location_menu,                          /* MENU_STACK_LEVEL_LOCATION */
@@ -136,7 +136,7 @@ static void (*s_level_update_handlers[MENU_STACK_LEVEL_COUNT])(menu_stack_record
     tutorial_update_formation_list_input,          /* MENU_STACK_LEVEL_TUTORIAL_FORMATION_LIST */
     tutorial_update_battle_list_input,             /* MENU_STACK_LEVEL_TUTORIAL_BATTLE_LIST */
     brave_story_update_fact_list_input,            /* MENU_STACK_LEVEL_BRAVE_STORY_FACTS */
-    brave_story_update_fact_window,                /* MENU_STACK_LEVEL_BRAVE_STORY_FACT */
+    brave_story_update_fact_detail,                /* MENU_STACK_LEVEL_BRAVE_STORY_FACT */
     update_variable_edit,                          /* MENU_STACK_LEVEL_DEBUG_VARIABLE_EDIT */
     world_map_update_screen_transition,            /* MENU_STACK_LEVEL_MENU_SCREEN_TRANSITION */
     update_focus_level,                            /* MENU_STACK_LEVEL_WORLD_MAP_FOCUS */
@@ -272,7 +272,7 @@ static void (*s_level_suspend_handlers[MENU_STACK_LEVEL_COUNT])(menu_stack_recor
 
 /* Init step: load WORLD's menu text and unit portraits, build the formation unit name strings,
  * then apply and clear any day advance pending in EVENT_SCRIPT_VAR_DATE_ADVANCE. */
-void world_map_init_menu_state(void) {
+void world_map_init_menu_resources(void) {
     s32 value;
 
     menu_screen_init_world_resources();
@@ -980,7 +980,7 @@ void world_map_open_menu_level(void) {
 /* Per-frame handler of the world-map return level: waits out its own delay,
  * then pops the level and dispatches whichever pending system-flag request
  * asked for the return. */
-static void update_map_menu_return(menu_stack_record_t* level) {
+static void update_world_menu_level(menu_stack_record_t* level) {
     s32 flags;
     s32 cleared;
     s32 location;
@@ -1099,7 +1099,7 @@ void menu_stack_open_text_window(s32 text, s32 reload_text) {
     g_menu_stack_records[g_menu_stack_depth].message.reload_text = reload_text;
     if (reload_text != 0) {
         text_save_section_pointers();
-        text_relocate_pointer_table(&g_menu_screen_text_bank);
+        text_bind_section_pointers(&g_menu_screen_text_bank);
     }
 
     index = display_object_append_animated(g_display_object_queue, &g_display_object_queue_count);
@@ -1182,7 +1182,7 @@ void menu_stack_open_message(s32 text, s32 reload_text) {
     g_menu_stack_records[g_menu_stack_depth].message.reload_text = reload_text;
     if (reload_text != 0) {
         text_save_section_pointers();
-        text_relocate_pointer_table(&g_menu_screen_text_bank);
+        text_bind_section_pointers(&g_menu_screen_text_bank);
     }
     thread_start(THREAD_SCREEN_SLOT_MESSAGE, message_dialog_thread);
     if (g_world_map_flags & WORLD_MAP_FLAG_UNIT_PANEL_THREADS) {
@@ -1310,7 +1310,7 @@ static void draw_variable_list(debug_variable_list_level_t* level) {
             g_text_substitution_values[0] = variable;
             text_id = TEXT_ID_DEBUG_VARIABLE & TEXT_ID_ENTRY_MASK;
         }
-        window_display_text_entry(index, text_id | TEXT_ID_WORLD_MENU_BASE, point, g_window_image_buffer);
+        window_render_text_entry(index, text_id | TEXT_ID_WORLD_MENU_BASE, point, g_window_image_buffer);
         point.y += 0x10;
         variable++;
     }
@@ -1888,26 +1888,26 @@ static void update_location_menu(menu_stack_record_t* level) {
                 value &= TEXT_ID_ENTRY_MASK;
                 switch (value) {
                 case TEXT_ID_BAR& TEXT_ID_ENTRY_MASK:
-                    release_level_records(&level->location_menu.slots, 0);
+                    close_location_menu(&level->location_menu.slots, 0);
                     music_queue_start_track(MUSIC_QUEUE_TRACK(2, MUSIC_BAR));
                     bar_open_menu();
                     return;
                 case TEXT_ID_SHOP& TEXT_ID_ENTRY_MASK:
-                    release_level_records(&level->location_menu.slots, 0);
+                    close_location_menu(&level->location_menu.slots, 0);
                     run_location_shop(0);
                     return;
                 case TEXT_ID_SOLDIER_OFFICE& TEXT_ID_ENTRY_MASK:
-                    release_level_records(&level->location_menu.slots, 0);
+                    close_location_menu(&level->location_menu.slots, 0);
                     run_location_shop(MENU_SCREEN_CONTEXT_SOLDIER_OFFICE);
                     return;
                 case TEXT_ID_FUR_SHOP& TEXT_ID_ENTRY_MASK:
-                    release_level_records(&level->location_menu.slots, 0);
+                    close_location_menu(&level->location_menu.slots, 0);
                     run_location_shop(MENU_SCREEN_CONTEXT_FUR_SHOP);
                     return;
                 default:
                     script_variable_set(EVENT_SCRIPT_VAR_DEEP_DUNGEON_SELECTION,
                         value - (TEXT_ID_DEEP_DUNGEON_FLOOR_FIRST & TEXT_ID_ENTRY_MASK));
-                    release_level_records(&level->location_menu.slots, 0);
+                    close_location_menu(&level->location_menu.slots, 0);
                     if (location_script_run(
                             g_world_map_marker_state.marker.location_id, LOCATION_SCRIPT_ACTION_DEEP_DUNGEON_ENTRY)
                         != 0) {
@@ -1944,7 +1944,7 @@ static void update_location_menu(menu_stack_record_t* level) {
 
         g_world_map_flags = (g_world_map_flags | WORLD_MAP_FLAG_DRAW_MAP) & ~WORLD_MAP_FLAG_INPUT_BLOCKED;
         menu_stack_clear_cursor(MENU_STACK_CURSOR_SLOT_LOCATION);
-        release_level_records(&level->location_menu.slots, 1);
+        close_location_menu(&level->location_menu.slots, 1);
         return;
     }
 
@@ -1988,7 +1988,7 @@ static void update_location_menu(menu_stack_record_t* level) {
  * each of the four slots that is not -1 releases one window or render record
  * and its queue entry. With `restore` the level underneath is resumed. Also
  * unblocks the menu buttons and re-shows the location label. */
-static void release_level_records(menu_stack_slot_set_t* slots, s32 restore) {
+static void close_location_menu(menu_stack_slot_set_t* slots, s32 restore) {
     g_menu_blocked_buttons = 0;
     if (slots->window_a != -1) {
         g_display_object_animated_count--;

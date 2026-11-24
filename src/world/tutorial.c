@@ -97,7 +97,7 @@ static s32 tutorial_opcode_17_end(void);
 
 /* The pad state tutorial_update read this frame; the tutorial text
  * thread takes its button input from it. */
-s32 tutorial_get_buttons(void) {
+s32 tutorial_get_pad_buttons(void) {
     return s_tutorial_buttons;
 }
 
@@ -260,7 +260,7 @@ static void tutorial_opcode_12_wait_for_message(void) {
  * and the target adds the bias to the low byte first. Taking the address of
  * the operand fields preserves the -O0 byte-address steps. */
 static void tutorial_opcode_11_change_dialog(void) {
-    if (menu_screen_text_check_printing(MENU_SCREEN_THREAD_SLOT_TUTORIAL_TEXT) != 1) {
+    if (menu_screen_text_is_printing(MENU_SCREEN_THREAD_SLOT_TUTORIAL_TEXT) != 1) {
         thread_set_parameters(MENU_SCREEN_THREAD_SLOT_TUTORIAL_TEXT, 0x99,
             (s32)((u8*)(s_tutorial_command_ptr[2] * 0x100) + (s_tutorial_command_ptr[1] + 0xB800)), 0);
         s_tutorial_command_ptr += 3;
@@ -406,7 +406,7 @@ static void tutorial_opcode_16_wait_for_button(void) {
         if (s_tutorial_button_input != 0) {
             s_tutorial_command_ptr++;
         }
-    } else if (menu_screen_text_check_printing(MENU_SCREEN_THREAD_SLOT_TUTORIAL_TEXT) != 1
+    } else if (menu_screen_text_is_printing(MENU_SCREEN_THREAD_SLOT_TUTORIAL_TEXT) != 1
         && s_tutorial_button_input != 0) {
         s_tutorial_command_ptr++;
     }

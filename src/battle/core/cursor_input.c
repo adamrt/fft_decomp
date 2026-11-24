@@ -420,7 +420,7 @@ void cursor_show_hovered_unit_panel(void) {
         mode = UNIT_VIEW_MODE_TILE_INFO;
         unit_id = 0xFF;
     }
-    unit_view_start(mode, unit_id, 0xFF);
+    unit_view_request_mode(mode, unit_id, 0xFF);
 }
 
 /* Start the right-side stats panel for the unit on the cursor tile, or the tile
@@ -431,9 +431,9 @@ void cursor_show_right_unit_panel(void) {
     /* Retail looks up the source unit here and ignores it. */
     map_unit_get_source();
     if (unit != 0) {
-        unit_view_start(UNIT_VIEW_MODE_RIGHT_UNIT, 0xFF, unit->battle_unit->battle_unit_id);
+        unit_view_request_mode(UNIT_VIEW_MODE_RIGHT_UNIT, 0xFF, unit->battle_unit->battle_unit_id);
     } else {
-        unit_view_start(UNIT_VIEW_MODE_TILE_INFO, 0xFF, 0xFF);
+        unit_view_request_mode(UNIT_VIEW_MODE_TILE_INFO, 0xFF, 0xFF);
     }
 }
 
@@ -445,10 +445,10 @@ void cursor_show_attack_preview_panel(void) {
     map_unit_t* source = map_unit_get_source();
 
     if (target != 0) {
-        unit_view_start(
+        unit_view_request_mode(
             UNIT_VIEW_MODE_ATTACK_PREVIEW, source->battle_unit->battle_unit_id, target->battle_unit->battle_unit_id);
     } else {
-        unit_view_start(UNIT_VIEW_MODE_HOVERED_UNIT, source->battle_unit->battle_unit_id, 0xFF);
+        unit_view_request_mode(UNIT_VIEW_MODE_HOVERED_UNIT, source->battle_unit->battle_unit_id, 0xFF);
     }
 }
 

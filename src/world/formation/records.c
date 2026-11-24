@@ -95,7 +95,7 @@ void formation_unit_build_record(const battle_unit_t* unit, formation_unit_t* re
         s32 count;
 
         /* The signed view keeps the original single-load copy loop. */
-        abilities = (s16*)ability_build_skillset_list(unit->primary_skillset, SKILLSET_ABILITY_FILTER_ACTION);
+        abilities = (s16*)skillset_build_ability_list(unit->primary_skillset, SKILLSET_ABILITY_FILTER_ACTION);
         count = 0;
         for (i = 0; i < 3; i++) {
             if (abilities[i] != 0) {

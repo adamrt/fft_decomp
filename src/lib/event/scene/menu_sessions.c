@@ -76,7 +76,7 @@ static void view_supervisor_thread(void);
  * and unit state and, for a tutorial, fix the game options. Then start the deployment
  * screen and return 0, or start the thread that releases the deployment gate and return 1
  * when deployment is skipped. The battle loop drives map loading in either case. */
-s32 deploy_open(void) {
+s32 deploy_start(void) {
     s32 result;
     s32 return_value;
     game_options_fields_t* options;
@@ -93,7 +93,7 @@ s32 deploy_open(void) {
     }
     result = scenario_load_setup();
     if (g_script_attack_entry_mode != SCRIPT_ATTACK_ENTRY_PRELOAD_USED) {
-        deploy_build_sprites();
+        deploy_load_sprites();
         portrait_party_load();
     }
     g_menu_panel_fade_mode = MENU_PANEL_FADE_NONE;
@@ -111,7 +111,7 @@ s32 deploy_open(void) {
     } else {
         g_fade_event_level = 0;
     }
-    deploy_find_fieldable_units();
+    deploy_init_roster();
     if (result != 0) {
         thread_start(THREAD_BORROWED_SLOT_DEPLOYMENT, deploy_skip_thread);
         return_value = 1;
@@ -208,7 +208,7 @@ void menu_noop_5(void) {
 }
 
 /* Empty in BATTLE and WORLD; in BATTLE it sits between menu_noop_5 and
- * unit_view_start. Nothing on the disc calls it or points at it;
+ * unit_view_request_mode. Nothing on the disc calls it or points at it;
  * the name is a neutral placeholder until a reference turns up. */
 void menu_noop_6(void) {
 }
@@ -220,7 +220,7 @@ void menu_noop_6(void) {
  * g_menu_panel_fade_modes[mode]. unit_a becomes the active-turn unit of
  * the banner and unit_b the previewed target of the status billboard; 0xff leaves
  * either unchanged. Ignored while g_menu_overlay_state is 1. */
-void unit_view_start(s32 mode, s32 unit_a, s32 unit_b) {
+void unit_view_request_mode(s32 mode, s32 unit_a, s32 unit_b) {
     if (g_menu_overlay_state == 1) {
         return;
     }

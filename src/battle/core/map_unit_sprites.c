@@ -185,7 +185,7 @@ static map_unit_t* claim_map_unit_slot(s16 requested_map_unit_id);
 
 static void run_unit_seq(map_unit_t* unit, animation_state_t* state, s32 advance);
 
-static void run_weapon_seq(map_unit_t* unit, sprite_block_t* sprite, s32 index, s32 advance);
+static void run_block_seq(map_unit_t* unit, sprite_block_t* sprite, s32 index, s32 advance);
 
 /*
  * Claim a map unit record slot and stamp its map unit ID.
@@ -910,7 +910,7 @@ static void load_casting_unit_frame(void) {
  * function-scope (global allocation) while the other part temporaries are
  * block-local and `mode` is single-set, which gives the target's register
  * ties and schedule. */
-static void run_weapon_seq(map_unit_t* unit, sprite_block_t* sprite, s32 index, s32 advance) {
+static void run_block_seq(map_unit_t* unit, sprite_block_t* sprite, s32 index, s32 advance) {
     const sprite_weapon_shp_t* shp;
     u8** seq;
     u8 op;
@@ -1182,7 +1182,7 @@ static void run_weapon_seq(map_unit_t* unit, sprite_block_t* sprite, s32 index, 
  * image (map unit id | SPRITE_EVTCHR_SLOT_OWNER_ATTACK_IMAGE), and the image
  * buffer stays busy for SPRITE_EVTCHR_SLOT_UPLOAD_FRAMES frames while the
  * upload completes. */
-static void load_unit_evtchr(map_unit_t* unit, s32 slot, s32 image_slot) {
+static void load_attack_image(map_unit_t* unit, s32 slot, s32 image_slot) {
     RECT rect;
 
     sprite_decompress_attack_image(g_sprite_sheet_slots[unit->spritesheet_vram_slot].compressed_attack_image,
@@ -1201,7 +1201,7 @@ static void load_unit_evtchr(map_unit_t* unit, s32 slot, s32 image_slot) {
 
 /* Free the EVTCHR slots whose page holds the unit's attack image. One that
  * holds its SP2 image stays. */
-static void release_unit_evtchr(map_unit_t* unit) {
+static void release_attack_image(map_unit_t* unit) {
     s32 i;
     s32 slot_id;
 
@@ -1296,7 +1296,7 @@ static void update_animation(map_unit_t* unit_data) {
 
             run_unit_seq(unit, &unit->animation, 1);
             unit->requested_animation = 0;
-            release_unit_evtchr(unit);
+            release_attack_image(unit);
         } else if (unit->requested_animation >= 12 || (unit->map_unit_id & 3) == g_frame_counter % 4
             || (unit->movement.force_animation_update)) {
             /* An animation below 11 waits for the unit's frame in four. */
@@ -1323,7 +1323,7 @@ static void update_animation(map_unit_t* unit_data) {
                                         for (j = 0; j < SPRITE_EVTCHR_SLOT_COUNT; j++) {
                                             if (g_sprite_evtchr_slots[j].image_buffer_state
                                                 == SPRITE_EVTCHR_SLOT_BUFFER_FREE) {
-                                                load_unit_evtchr(unit, i, j);
+                                                load_attack_image(unit, i, j);
                                                 break;
                                             }
                                         }
@@ -1359,13 +1359,13 @@ static void update_animation(map_unit_t* unit_data) {
                                                 other->animation.sequence_id);
                                             ok = 1;
                                             unit->animation.wait = 0;
-                                            load_unit_evtchr(unit, 1, 1);
+                                            load_attack_image(unit, 1, 1);
                                         }
                                     }
                                 }
                             }
                         } else {
-                            release_unit_evtchr(unit);
+                            release_attack_image(unit);
                         }
                     }
                 }
@@ -1483,7 +1483,7 @@ static void update_animation(map_unit_t* unit_data) {
                 if (unit->sprite_blocks[i].wait != 0) {
                     unit->sprite_blocks[i].wait--;
                     if (unit->sprite_blocks[i].wait == 0) {
-                        run_weapon_seq(unit, &unit->sprite_blocks[i], i, 1);
+                        run_block_seq(unit, &unit->sprite_blocks[i], i, 1);
                     }
                 }
             }
@@ -1497,7 +1497,7 @@ static void update_animation(map_unit_t* unit_data) {
  * and y -0x1f..0x10f, the ordering-table depth within 1..0x17f,
  * animation.trigger is set, the unit is not a mount carrying its rider and
  * status_bubble_active is set. */
-static void update_bubble_display(map_unit_t* unit) {
+static void draw_status_bubble(map_unit_t* unit) {
     DVECTOR screen_coords;
 
     /* The camera-relative position is read unsigned (lhu) here. */
@@ -1673,7 +1673,7 @@ void sprite_project_units(void) {
 
     unit = g_map_unit_list_head;
     while (unit != 0) {
-        map_unit_copy_draw_coords(&screen, unit);
+        map_unit_get_draw_coords(&screen, unit);
         RotTrans(&screen, &transformed, &unit->gte_flag);
 
         if (unit->sprite_display_flags & SPRITE_DISPLAY_HORIZONTAL_FLIP) {
@@ -1729,7 +1729,7 @@ void sprite_project_units(void) {
  * its bubble. Every state then reloads the casting unit's frame parts and
  * draws every unit record's sprite layers.
  */
-void sprite_update_units_display(void) {
+void sprite_draw_units(void) {
     map_unit_t* unit;
 
     switch (g_battle_state) {
@@ -1755,7 +1755,7 @@ void sprite_update_units_display(void) {
                 }
             } else {
                 for (unit = g_map_unit_list_head; unit != 0; unit = unit->previous) {
-                    update_bubble_display(unit);
+                    draw_status_bubble(unit);
                 }
             }
         } else {
@@ -1848,7 +1848,7 @@ void map_unit_update_animations(void) {
 
     while (unit != 0) {
         update_animation(unit);
-        map_unit_update_float_and_status_bubble(unit);
+        map_unit_update_float_height_and_status_bubble(unit);
         update_fade_out_removal(unit);
         unit = unit->previous;
     }
@@ -1900,7 +1900,7 @@ static void unpack_unit_seq_data(sprite_native_unit_seq_table_t* destination, co
  * used for the entry base and the payload address), which only a second
  * variable reproduces; and it reserves an 8-byte frame that no instruction
  * touches, which only a declared local aggregate reproduces. */
-static void resolve_packed_offset_table(u8** entries, const packed_seq_file_t* record) {
+static void unpack_weapon_seq_data(u8** entries, const packed_seq_file_t* record) {
     const u8(*entry)[4];
     u32 index;
     u32 payload_size;
@@ -2009,7 +2009,7 @@ static void unpack_unit_shp_data(sprite_unit_shp_frame_tables_t* dst, const unit
  * The header loops read through `data` while the blob copy indexes `src`;
  * using one name for both loses the target's separate copy of the argument.
  */
-static void copy_shp_frames(sprite_weapon_shp_t* dst, const weapon_shp_file_t* src) {
+static void unpack_weapon_shp_data(sprite_weapon_shp_t* dst, const weapon_shp_file_t* src) {
     u32 i;
     u32 j;
     s32 offset;
@@ -2052,7 +2052,7 @@ static void copy_shp_frames(sprite_weapon_shp_t* dst, const weapon_shp_file_t* s
  * body strip to the SPRITE_SHEET_STRIP_VRAM_X/Y area (column
  * index / 8, row index % 8). The
  * compressed attack image is copied into the slot for
- * load_unit_evtchr to expand later; its fixed length
+ * load_attack_image to expand later; its fixed length
  * overruns most files (QUIRKS.md). A null file loads nothing, and `unused`
  * and `unused_palette` are not read.
  *
@@ -2328,7 +2328,7 @@ static map_unit_t* init_map_unit(s32 map_x, s32 map_y, s32 map_level, s16 facing
          * blocks wait for their first sequence command. */
         if ((s16)id < SPRITE_SHEET_ID_CHOCOBO && (s16)id < SPRITE_SHEET_ID_VELIUS && (s16)id >= SPRITE_SHEET_ID_BOY
             && (s16)id != SPRITE_SHEET_ID_DAMI) {
-            run_weapon_seq(unit, &unit->sprite_blocks[i], i, 1);
+            run_block_seq(unit, &unit->sprite_blocks[i], i, 1);
         }
     }
 
@@ -2354,7 +2354,7 @@ static map_unit_t* init_map_unit(s32 map_x, s32 map_y, s32 map_level, s16 facing
  * walk leaves GCC with both the index and the scaled address as induction
  * variables, adding an `addiu`/`li` pair to each loop; the byte offset is what
  * reproduces the target's single `bgez` on the address offset. */
-void sprite_reset_load_state(void) {
+void sprite_reset_unit_graphics(void) {
     s32 i;
     s32 offset;
 
@@ -2392,7 +2392,7 @@ void sprite_reset_load_state(void) {
  * single-assignment pointer local reproduces that (a plain `g++` folds %lo into
  * each access), and a block-scoped one per case also lets the scheduler hoist
  * the g_sprite_load_state.file_kind load above the counter store, as the target does. */
-s32 sprite_update_shp_seq_load(void) {
+s32 sprite_update_shared_load(void) {
     s32* phase;
     s32* index;
     void** slot;
@@ -2525,18 +2525,18 @@ s32 sprite_update_shp_seq_load(void) {
             unpack_unit_seq_data(&g_sprite_unit_seq_tables[g_sprite_load_state.index], g_sprite_load_state.buffer);
             break;
         case SPRITE_LOAD_SHARED_WEAPON_SHP:
-            copy_shp_frames(&g_sprite_weapon_graphics[g_sprite_load_state.index].shp, g_sprite_load_state.buffer);
+            unpack_weapon_shp_data(
+                &g_sprite_weapon_graphics[g_sprite_load_state.index].shp, g_sprite_load_state.buffer);
             break;
         case SPRITE_LOAD_SHARED_WEAPON_SEQ:
-            resolve_packed_offset_table(
-                g_sprite_weapon_graphics[g_sprite_load_state.index].seq, g_sprite_load_state.buffer);
+            unpack_weapon_seq_data(g_sprite_weapon_graphics[g_sprite_load_state.index].seq, g_sprite_load_state.buffer);
             break;
         case SPRITE_LOAD_SHARED_EFFECT_SHP:
-            copy_shp_frames(&g_sprite_effect_graphics[g_sprite_load_state.index].shp, g_sprite_load_state.buffer);
+            unpack_weapon_shp_data(
+                &g_sprite_effect_graphics[g_sprite_load_state.index].shp, g_sprite_load_state.buffer);
             break;
         case SPRITE_LOAD_SHARED_EFFECT_SEQ:
-            resolve_packed_offset_table(
-                g_sprite_effect_graphics[g_sprite_load_state.index].seq, g_sprite_load_state.buffer);
+            unpack_weapon_seq_data(g_sprite_effect_graphics[g_sprite_load_state.index].seq, g_sprite_load_state.buffer);
             break;
         case SPRITE_LOAD_SHARED_WEAPON_SPR:
             load_wep_spr_data(g_sprite_load_state.buffer);
@@ -2636,7 +2636,7 @@ void sprite_clear_load_state(s32 unused_map_id) {
  * g_deploy_deployed_unit_map_coordinates; otherwise the coordinate slots of the
  * deployment screen are used, and in the debug battle style the red team is set
  * up from them first. */
-void deploy_init_sprite_load(void) {
+void deploy_init_placed_units(void) {
     g_unit_graphics_load_queue.count = 0;
     if (script_variable_get(EVENT_SCRIPT_VAR_WORLD_DEBUG_BATTLE_STYLE) == 0) {
         if (g_deploy_skipped != 0) {

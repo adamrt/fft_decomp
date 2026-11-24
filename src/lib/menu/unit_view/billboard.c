@@ -179,7 +179,7 @@ void unit_panel_load_selected(void) {
     }
 
     if (fields->generic_monster != 0) {
-        ability_ids = ability_build_skillset_list(unit->primary_skillset, SKILLSET_ABILITY_FILTER_ACTION);
+        ability_ids = skillset_build_ability_list(unit->primary_skillset, SKILLSET_ABILITY_FILTER_ACTION);
         for (i = 0; i < 5; i++) {
             fields->ability_ids[i] = *ability_ids++;
         }

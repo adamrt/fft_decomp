@@ -117,7 +117,6 @@ extern s8 g_unit_list_page_offset;
 extern s8 g_unit_list_scroll_step;
 extern u8 g_unit_list_browse_enabled;
 
-void unit_list_init(s32 unused_selected_index);
 void unit_list_build_index_map(void);
 
 /* unit grid */

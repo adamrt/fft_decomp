@@ -42,8 +42,8 @@ menu_opcode_handler_t g_menu_opcode_handlers[MENU_SCREEN_SCRIPT_END] = {
     menu_opcode_01_if_group,                  /* 0x01 */
     menu_opcode_02_if_else_group,             /* 0x02 */
     menu_opcode_03_draw_tile,                 /* 0x03 */
-    menu_opcode_04_draw_textured_quad,        /* 0x04 */
-    menu_opcode_04_draw_textured_quad,        /* 0x05 */
+    menu_opcode_04_05_draw_textured_quad,     /* 0x04 */
+    menu_opcode_04_05_draw_textured_quad,     /* 0x05 */
     menu_opcode_06_draw_callback_quad,        /* 0x06 */
     menu_opcode_07_draw_line,                 /* 0x07 */
     0,                                        /* 0x08 */
@@ -54,7 +54,7 @@ menu_opcode_handler_t g_menu_opcode_handlers[MENU_SCREEN_SCRIPT_END] = {
     menu_opcode_0d_draw_formatted_number,     /* 0x0d */
     menu_opcode_0e_set_semi_trans,            /* 0x0e */
     menu_opcode_0f_set_draw_priority,         /* 0x0f */
-    menu_opcode_10_draw_scrollable_list,      /* 0x10 */
+    menu_opcode_10_update_scrollable_list,    /* 0x10 */
     menu_opcode_11_draw_background_tiles,     /* 0x11 */
     menu_opcode_12_draw_opening_window_frame, /* 0x12 */
     menu_opcode_13_clear_temporary_draw_area, /* 0x13 */
@@ -184,7 +184,7 @@ menu_instruction_t* menu_opcode_03_draw_tile(menu_instruction_t* instruction) {
  * with the current texture page and CLUT, tinted by the menu sprite color
  * unless it is the uncolored variant, and returns the next command. Inside a
  * list body, y follows the row being drawn. */
-menu_instruction_t* menu_opcode_04_draw_textured_quad(menu_instruction_t* instruction) {
+menu_instruction_t* menu_opcode_04_05_draw_textured_quad(menu_instruction_t* instruction) {
     RECT rect;
     s32 y;
     s16 step;
@@ -252,7 +252,7 @@ menu_instruction_t* menu_opcode_06_draw_callback_quad(menu_instruction_t* instru
         s_screen_script_sprite_command.sprite.v = entry->v;
         s_screen_clut = entry->clut;
         g_menu_screen_texture_page = entry->tpage;
-        menu_opcode_04_draw_textured_quad((menu_instruction_t*)&s_screen_script_sprite_command);
+        menu_opcode_04_05_draw_textured_quad((menu_instruction_t*)&s_screen_script_sprite_command);
     }
     return menu_next_instruction(instruction);
 }
@@ -604,6 +604,7 @@ menu_instruction_t* menu_opcode_0f_set_draw_priority(menu_instruction_t* instruc
  *
  * The command selects its value source, width, spacing, palette, and one of
  * three glyph layouts. High value bits request a disabled palette or dashes.
+ * The handler table also runs it for opcodes 0x19 through 0x1b.
  */
 menu_instruction_t* menu_opcode_0d_draw_formatted_number(menu_instruction_t* command) {
     s8 text[16];
@@ -1078,7 +1079,7 @@ void menu_scrollable_list_open_at_scroll_base(
  * An empty list skips the list command and its following row group. Returns
  * the record that follows the list.
  */
-menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* command) {
+menu_instruction_t* menu_opcode_10_update_scrollable_list(menu_instruction_t* command) {
     RECT rect;
     s32 unused[4];
     point16_t marker;

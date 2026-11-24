@@ -13,7 +13,7 @@ extern u8 g_bits_secondary_reset;
 extern const u8* g_bits_secondary_cursor;
 
 /* WORLD builds its own bodies of these two. */
-void bits_primary_init_reader(u8* data);
+void bits_primary_init(u8* data);
 void bits_secondary_init_reader(const u8* data);
 
 /* The first read or write after a reset starts at bit 7 of the current byte. */

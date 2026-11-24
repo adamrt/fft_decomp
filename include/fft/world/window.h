@@ -16,9 +16,7 @@ extern u32 g_window_image_buffer[];
 void window_build_render_record_image(s32 index, RECT bounds, s32 coordinate_mode, u32* image);
 void window_load_render_record_image(s32 index, u32* image);
 void window_init_text_record(s32 record_index, RECT quad, s32 image_placement, s32 combined_text_index, u32* image);
-void window_display_text_entry(s32 record_index, s32 combined_text_index, point32_t position, u32* image);
-
-void window_draw_centered_text(s32 window_index, s32 text_id);
+void window_render_text_entry(s32 record_index, s32 combined_text_index, point32_t position, u32* image);
 
 /* text window */
 /* Values of text_window_t.scroll_state. */

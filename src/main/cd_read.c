@@ -45,7 +45,7 @@ void file_poll_load(file_load_descriptor_t* header) {
                 header->state = FILE_LOAD_STATE_IDLE;
             }
         } else if (result == CdlDiskError) {
-            file_reset_cd_subsystems();
+            file_cd_reset();
             header->state = FILE_LOAD_STATE_SET_DOUBLE_SPEED;
             header->error_count++;
         }
@@ -67,7 +67,7 @@ void file_poll_load(file_load_descriptor_t* header) {
             if (g_system_wait_frames > 0x100) {
                 g_system_wait_frames = 0;
                 header->wait_frames = 0;
-                file_reset_cd_subsystems();
+                file_cd_reset();
                 header->state = FILE_LOAD_STATE_SET_DOUBLE_SPEED;
                 header->error_count++;
             } else {

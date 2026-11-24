@@ -25,7 +25,7 @@ static void build_directional_attack_panels(const action_command_t* source, u8 m
 
 static void mark_tile_in_height_band(s32 x, s32 y, s32 lo, s32 hi);
 
-static void calculate_linear_attack_tiles(s32 dir, s32 x, s32 y);
+static void mark_line_panels(s32 dir, s32 x, s32 y);
 
 static void calculate_strike_lunge_range(const battle_unit_t* unit, u8 flags);
 
@@ -35,7 +35,7 @@ static s32 set_range_flags_from_marks(void);
 
 static s32 keep_target_tile(const action_command_t* action);
 
-static s32 run_calculator(const action_command_t* source);
+static s32 set_math_skill_area(const action_command_t* source);
 
 static s32 set_range_flags(void);
 
@@ -52,7 +52,7 @@ static s32 validate_lunge(s32 unit_id, s32 x, s32 y, s32 elevation, s32 target_i
 
 /* Moldball Virus cannot reach water: for that ability only, clear the range of every panel, on
  * both levels, whose tile has depth. */
-static void check_moldball_virus_depth(s16 ability_id) {
+static void clear_moldball_virus_water_panels(s16 ability_id) {
     map_tile_t* tile;
     target_panel_t* panel;
     s32 i;
@@ -76,7 +76,7 @@ static void check_moldball_virus_depth(s16 ability_id) {
 
 /* Clear the range and the mark of each panel whose tile is flagged untargetable.
  * Only the 256 lower-level panels are visited. */
-static void clear_untargetable_panels(void) {
+static void clear_untargetable_lower_panels(void) {
     /* The bytes require the counter set at its declaration. */
     s32 i = 0;
     map_tile_t* src;
@@ -577,7 +577,7 @@ static s32 set_jump_range(const action_command_t* source) {
     tile = &g_map_tile_data[location];
     tile_height = tile->height;
     height = tile->depth_half_height.half_height + tile_height * 2;
-    count = skillset_get_unit_ability_data(
+    count = skillset_build_ability_lists(
         action.actor_id, action.skillset_id, abilities, mp_costs, ability_ct, 0, usable, turns);
     for (i = 0; i < count; i++) {
         ability_id = abilities[i];
@@ -785,7 +785,7 @@ static s32 set_ability_range(const action_command_t* source) {
         apply_vertical_tolerance(elevation, vertical, 0);
     }
     if (aoe == 0 || (flags_4 & ABILITY_SECONDARY_FLAG_4_DIRECT_TARGETING)) {
-        clear_untargetable_panels();
+        clear_untargetable_lower_panels();
     }
     if (flags_1 & (ABILITY_SECONDARY_FLAG_1_ENEMY_UNIT_PANELS | ABILITY_SECONDARY_FLAG_1_ALLY_UNIT_PANELS)) {
         mark_unit_panels(unit, flags_1);
@@ -1095,7 +1095,7 @@ s32 target_set_area_for_action(const action_command_t* source) {
         mode = 2;
         break;
     case ACTION_MENU_TYPE_MATH_SKILL:
-        result = run_calculator(&action);
+        result = set_math_skill_area(&action);
         mode = 0;
         break;
     case ACTION_MENU_TYPE_ELEMENTS:
@@ -1146,7 +1146,7 @@ s32 target_set_area_for_action(const action_command_t* source) {
  * One `hand` variable carries both hands, so the right-hand load stays after
  * the left-hand mask; `target` is reused for the result unit, which keeps it a
  * global pseudo and gives the target's v1 for the copied position. */
-s32 target_validate_for_weapon(const action_command_t* source) {
+s32 target_set_area_by_trajectory(const action_command_t* source) {
     action_command_t action;
     s16 x;
     battle_unit_t* unit;
@@ -1254,7 +1254,7 @@ s32 target_validate_for_weapon(const action_command_t* source) {
 
 /* Validates a lunging-weapon target one or two tiles away in a straight line.
  *
- * Called by target_validate_for_weapon for WEAPON_FLAG_LUNGING. Adjacent targets
+ * Called by target_set_area_by_trajectory for WEAPON_FLAG_LUNGING. Adjacent targets
  * pass the plain height-overlap test. At distance 2 the middle tile's two
  * layers (surface height, or an occupant's total height) must leave part of
  * the attacker/target height window open; otherwise a unit on the middle tile
@@ -1323,14 +1323,14 @@ static s32 validate_lunge(s32 unit_id, s32 x, s32 y, s32 elevation, s32 target_i
         return -1;
     }
 
-    battle_unit_calculate_action_height(&height, target_id);
+    battle_unit_calculate_height_data(&height, target_id);
     if (height.unit_flags & UNIT_HEIGHT_UNAVAILABLE) {
         target_id = -1;
     }
     target_total = height.total_height;
     target_walking = height.walking_height;
 
-    battle_unit_calculate_action_height(&height, unit_id);
+    battle_unit_calculate_height_data(&height, unit_id);
     if (height.unit_flags & UNIT_HEIGHT_UNAVAILABLE) {
         return -1;
     }
@@ -1385,7 +1385,7 @@ static s32 validate_lunge(s32 unit_id, s32 x, s32 y, s32 elevation, s32 target_i
         }
 
         if (lower_height != 0xff) {
-            battle_unit_calculate_action_height(&height, lower_id);
+            battle_unit_calculate_height_data(&height, lower_id);
             if (!(height.unit_flags & UNIT_HEIGHT_UNAVAILABLE)) {
                 lower_height = height.total_height;
             }
@@ -1398,7 +1398,7 @@ static s32 validate_lunge(s32 unit_id, s32 x, s32 y, s32 elevation, s32 target_i
         }
 
         if (upper_height != 0xff) {
-            battle_unit_calculate_action_height(&height, upper_id);
+            battle_unit_calculate_height_data(&height, upper_id);
             if (!(height.unit_flags & UNIT_HEIGHT_UNAVAILABLE)) {
                 total = height.total_height;
                 if (low >= upper_height && total >= high) {
@@ -1417,7 +1417,7 @@ static s32 validate_lunge(s32 unit_id, s32 x, s32 y, s32 elevation, s32 target_i
     middle = (u32)(unit_walking + unit_total) >> 1;
     for (layer = 0; layer < 2; layer++) {
         target_id = target_find_unit_at_tile(mid_x, mid_y, layer);
-        battle_unit_calculate_action_height(&height, target_id);
+        battle_unit_calculate_height_data(&height, target_id);
         if (!(height.unit_flags & UNIT_HEIGHT_UNAVAILABLE)) {
             target_walking = height.walking_height;
             target_total = height.total_height;
@@ -1440,13 +1440,13 @@ static s32 validate_height_overlap(
     u32 attacker_total_height;
     u32 attacker_walking_height;
 
-    battle_unit_calculate_action_height(&height_data, target_id);
+    battle_unit_calculate_height_data(&height_data, target_id);
     if (height_data.unit_flags & UNIT_HEIGHT_UNAVAILABLE) {
         return -1;
     }
     target_walking_height = height_data.walking_height;
     target_total_height = height_data.total_height;
-    battle_unit_calculate_action_height(&height_data, attacker_id);
+    battle_unit_calculate_height_data(&height_data, attacker_id);
     if (height_data.unit_flags & UNIT_HEIGHT_UNAVAILABLE) {
         return -1;
     }
@@ -1478,7 +1478,7 @@ void target_clear_area_flags(void) {
  * mounts carrying a rider are skipped, and a value of 0 never qualifies.
  * Returns the number of marked units, or -1 when the command does not name
  * one type and one multiplier ability. */
-static s32 run_calculator(const action_command_t* source) {
+static s32 set_math_skill_area(const action_command_t* source) {
     unit_height_data_t height;
     action_command_t action;
     battle_unit_t* actor;
@@ -1540,7 +1540,7 @@ static s32 run_calculator(const action_command_t* source) {
         } else if (type_flags & CALCULATOR_ATTRIBUTE_EXP) {
             value = unit->experience;
         } else {
-            battle_unit_calculate_action_height(&height, i);
+            battle_unit_calculate_height_data(&height, i);
             value = height.walking_height;
             if (value & 1) {
                 continue;
@@ -1713,7 +1713,7 @@ static s32 set_ability_area(const action_command_t* action) {
             other_panel->remaining_range = aoe + 1;
             spread_panels(aoe, 0);
             apply_vertical_tolerance(height, vertical, (flags_2 & ABILITY_SECONDARY_FLAG_2_TOP_DOWN) != 0);
-            check_moldball_virus_depth(action_copy.ability_id);
+            clear_moldball_virus_water_panels(action_copy.ability_id);
         }
     }
 
@@ -1856,31 +1856,31 @@ static void build_directional_attack_panels(const action_command_t* source, u8 m
     target_x = action.target_position.vx;
     target_y = action.target_position.vz;
     if (x < target_x) {
-        calculate_linear_attack_tiles(TARGET_LINE_EAST, x, y);
+        mark_line_panels(TARGET_LINE_EAST, x, y);
         if (mode == 3) {
-            calculate_linear_attack_tiles(TARGET_LINE_NORTH, x, y);
-            calculate_linear_attack_tiles(TARGET_LINE_SOUTH, x, y);
+            mark_line_panels(TARGET_LINE_NORTH, x, y);
+            mark_line_panels(TARGET_LINE_SOUTH, x, y);
         }
     }
     if (target_x < x) {
-        calculate_linear_attack_tiles(TARGET_LINE_WEST, x, y);
+        mark_line_panels(TARGET_LINE_WEST, x, y);
         if (mode == 3) {
-            calculate_linear_attack_tiles(TARGET_LINE_NORTH, x, y);
-            calculate_linear_attack_tiles(TARGET_LINE_SOUTH, x, y);
+            mark_line_panels(TARGET_LINE_NORTH, x, y);
+            mark_line_panels(TARGET_LINE_SOUTH, x, y);
         }
     }
     if (y < target_y) {
-        calculate_linear_attack_tiles(TARGET_LINE_NORTH, x, y);
+        mark_line_panels(TARGET_LINE_NORTH, x, y);
         if (mode == 3) {
-            calculate_linear_attack_tiles(TARGET_LINE_EAST, x, y);
-            calculate_linear_attack_tiles(TARGET_LINE_WEST, x, y);
+            mark_line_panels(TARGET_LINE_EAST, x, y);
+            mark_line_panels(TARGET_LINE_WEST, x, y);
         }
     }
     if (target_y < y) {
-        calculate_linear_attack_tiles(TARGET_LINE_SOUTH, x, y);
+        mark_line_panels(TARGET_LINE_SOUTH, x, y);
         if (mode == 3) {
-            calculate_linear_attack_tiles(TARGET_LINE_WEST, x, y);
-            calculate_linear_attack_tiles(TARGET_LINE_EAST, x, y);
+            mark_line_panels(TARGET_LINE_WEST, x, y);
+            mark_line_panels(TARGET_LINE_EAST, x, y);
         }
     }
     for (i = 0; i < MAP_TILE_COUNT; i++) {
@@ -1900,7 +1900,7 @@ static void build_directional_attack_panels(const action_command_t* source, u8 m
  * the table is g_target_panels. The walk stops
  * at the map edge or after 32 tiles, and any other direction value marks nothing.
  * `dir` is reused as the panel index. */
-static void calculate_linear_attack_tiles(s32 dir, s32 x, s32 y) {
+static void mark_line_panels(s32 dir, s32 x, s32 y) {
     s32 i;
     s32 dx;
     s32 dy;

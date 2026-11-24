@@ -14,7 +14,7 @@
 /* Window images are 4bpp images built from the glyph sheet's eight-tile border and interior patterns; a message
  * window can add a tail that points at the speaker. */
 
-/* Last argument of menu_build_and_upload_window_frame_image. The UPLOAD
+/* Last argument of menu_build_window_frame_image. The UPLOAD
  * modes load the image into VRAM and free the buffer; the BUILD modes return
  * the buffer for the caller to draw into and upload. The ALTERNATE modes use
  * the frame pattern with sixteen-row top and bottom borders. */
@@ -28,12 +28,12 @@ typedef enum menu_window_frame_mode {
 void menu_build_window_image_row(const u16* tiles, u16* row, s32 count, s32 index);
 
 /* With keep set, returns the image instead of uploading and freeing it. */
-u8* menu_build_window_image(s32 width, s32 height, RECT* rect, s32 mode, s32 tail_offset, s32 keep);
-void menu_build_and_upload_window_image(s32 width, s32 height, RECT* rect, s32 mode, s32 tail_offset);
+u8* menu_build_dialog_window_image(s32 width, s32 height, RECT* rect, s32 mode, s32 tail_offset, s32 keep);
+void menu_upload_dialog_window_image(s32 width, s32 height, RECT* rect, s32 mode, s32 tail_offset);
 
 /* In BATTLE, MENU_WINDOW_FRAME_ALTERNATE_UPLOAD at scroll list depth 2 draws into the fixed UI buffer past the
  * companion overlay instead of allocating. */
-u8* menu_build_and_upload_window_frame_image(s32 width, s32 height, RECT* rect, s32 mode);
+u8* menu_build_window_frame_image(s32 width, s32 height, RECT* rect, s32 mode);
 
 /* window buffers */
 /* menu_window_buffer_t::icon_flags: which of the window's three icon sprites

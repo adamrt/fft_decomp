@@ -9,7 +9,7 @@
 #include "psx/types.h"
 
 /* story list */
-/* Row kinds of the Brave Story list (build_story_rows), named after the level each row
+/* Row kinds of the Brave Story list (build_menu_rows), named after the level each row
  * opens. */
 typedef enum brave_story_row {
     BRAVE_STORY_ROW_FACTS = 0, /* EVENT_SCRIPT_VAR_FACT_FIRST */
@@ -81,7 +81,7 @@ void brave_story_open_fact_list(void);
 void brave_story_suspend_fact_list(menu_stack_record_t* unused_level);
 void brave_story_update_fact_list_input(menu_stack_record_t* level);
 void brave_story_resume_fact_list(menu_stack_record_t* level);
-void brave_story_update_fact_window(menu_stack_record_t* level);
+void brave_story_update_fact_detail(menu_stack_record_t* level);
 void brave_story_open_event_detail(s32 value);
 void brave_story_update_event_detail_input(menu_stack_record_t* level);
 void brave_story_suspend_event_list(menu_stack_record_t* unused_level);

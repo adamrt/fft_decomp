@@ -64,10 +64,10 @@ extern s16 g_save_menu_selection_index;
 extern s8 g_save_completed;
 
 /* prompts */
-/* The g_save_*_descriptor menu-thread descriptors are 0x3c-byte menu_entry_t menu records. menu_managed_thread_start
- * and its delayed twin start descriptor->thread_entry (+0x28). The yes/no prompts are a message record followed by a
- * choice record whose text_id is 0xd810; the choice's selected_index (+0x74 of the prompt) is the default answer,
- * and the message window.y (+0x0a) places the prompt. */
+/* The g_save_*_descriptor menu-thread descriptors are 0x3c-byte menu_entry_t menu records.
+ * menu_managed_thread_start_or_poll and its delayed twin start descriptor->thread_entry (+0x28). The yes/no prompts are
+ * a message record followed by a choice record whose text_id is 0xd810; the choice's selected_index (+0x74 of the
+ * prompt) is the default answer, and the message window.y (+0x0a) places the prompt. */
 extern menu_entry_t g_save_initial_prompt_descriptor[2];
 extern menu_entry_t g_save_card_slot_selection_descriptor[2];
 extern menu_entry_t g_save_checking_message_descriptor;
@@ -136,7 +136,7 @@ extern const u8 g_save_text_location_name[688];
 
 static void build_file_header(s32 slot, s32 level, save_file_header_t* header);
 static void build_slot_description(s32 mode, u8* destination);
-static s32 init_slot_cursor(void);
+static s32 init_slot_list(void);
 static void render_slot_text(s32 slot);
 static void update_slot_list(u16 input);
 static void update_card_selection(void);
@@ -264,7 +264,7 @@ void card_entrypoint(s32 unused) {
     init_graphics();
     music_slot = music_load_into_free_slot(MUSIC_SAVE);
     while (music_is_loading() != 0) { }
-    music_switch_track(music_slot, 0x7f, 0);
+    music_play_slot(music_slot, 0x7f, 0);
     memcard_clear_events();
     g_save_menu_work_buffer = save_buffer;
     save_init_screen();
@@ -297,7 +297,7 @@ void card_entrypoint(s32 unused) {
             update_write(g_save_list_selected_slot);
         } else if (g_save_menu_state == SAVE_MENU_LEAVE || g_save_menu_state == SAVE_MENU_LEAVE_ALT) {
             music_set_target_volume(0, 0xf0);
-            while (memcard_poll_operation() == MEMCARD_RESULT_PENDING) { }
+            while (memcard_poll_info() == MEMCARD_RESULT_PENDING) { }
             fade_menu_start_out();
             g_save_menu_state = SAVE_MENU_CLOSING;
         }
@@ -347,7 +347,7 @@ static void update_initial_prompt(void) {
         }
     } else {
         g_save_initial_prompt_thread_state
-            = menu_managed_thread_start(THREAD_SCREEN_SLOT_MENU, g_save_initial_prompt_descriptor);
+            = menu_managed_thread_start_or_poll(THREAD_SCREEN_SLOT_MENU, g_save_initial_prompt_descriptor);
         if (g_save_initial_prompt_thread_state == 0) {
             if (g_save_slot_index != 0) {
                 g_save_menu_state = SAVE_MENU_LEAVE;
@@ -375,7 +375,7 @@ static void update_card_selection(void) {
     }
 
     g_save_slot_selection_thread_state
-        = menu_managed_thread_start(THREAD_SCREEN_SLOT_MENU, g_save_card_slot_selection_descriptor);
+        = menu_managed_thread_start_or_poll(THREAD_SCREEN_SLOT_MENU, g_save_card_slot_selection_descriptor);
     if (g_save_slot_selection_thread_state == 0) {
         if (g_save_slot_index == -1) {
             if (g_save_completed != 0) {
@@ -408,14 +408,14 @@ static void update_scan_result(void) {
     s32 index;
     s32 all_empty;
 
-    if (memcard_poll_operation() > MEMCARD_RESULT_COMPLETE) {
+    if (memcard_poll_info() > MEMCARD_RESULT_COMPLETE) {
         g_save_slot_scan_prompt_descriptor = 0;
         g_save_last_used_slot = SAVE_LAST_USED_SLOT_NONE;
         menu_thread_stop_and_wait(14);
         menu_thread_stop_and_wait(THREAD_SCREEN_SLOT_MENU);
         g_save_menu_state = SAVE_MENU_SCANNING;
     } else if (g_save_slot_scan_prompt_descriptor != 0) {
-        menu_thread_start_or_poll(THREAD_SCREEN_SLOT_MENU, g_save_slot_scan_prompt_descriptor);
+        menu_managed_thread_replace_or_poll(THREAD_SCREEN_SLOT_MENU, g_save_slot_scan_prompt_descriptor);
         if ((g_menu_input_primary_repeat & PSX_PAD_CROSS) != 0 || (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) != 0) {
             g_save_slot_scan_prompt_descriptor = 0;
             g_save_last_used_slot = SAVE_LAST_USED_SLOT_NONE;
@@ -441,7 +441,7 @@ static void update_scan_result(void) {
             g_save_list_top_row = 0;
             g_save_list_selected_slot = 0;
             g_save_list_cursor_index = 0;
-            g_save_listed_slot_count = init_slot_cursor();
+            g_save_listed_slot_count = init_slot_list();
             g_save_menu_state = SAVE_MENU_SELECT_SAVE;
         } else {
             g_save_sound_queued_effect_id = SOUND_SFX_ERROR_MESSAGE;
@@ -478,7 +478,7 @@ static void update_write(s32 slot) {
         g_save_write_failed = 0;
         g_save_unread_flag = 0;
         save_image_build(slot);
-        menu_thread_start_or_poll(THREAD_SCREEN_SLOT_MENU, &g_save_in_progress_thread_descriptor);
+        menu_managed_thread_replace_or_poll(THREAD_SCREEN_SLOT_MENU, &g_save_in_progress_thread_descriptor);
         g_sound_suppressed = 1;
         return;
     } else {
@@ -490,7 +490,7 @@ static void update_write(s32 slot) {
 
     g_sound_suppressed = 0;
     if (g_save_write_failed != 0) {
-        menu_thread_start_or_poll(THREAD_SCREEN_SLOT_MENU, &g_save_failure_thread_descriptor);
+        menu_managed_thread_replace_or_poll(THREAD_SCREEN_SLOT_MENU, &g_save_failure_thread_descriptor);
         if ((g_menu_input_primary_repeat & PSX_PAD_CIRCLE) != 0 || (g_menu_input_primary_repeat & PSX_PAD_CROSS) != 0) {
             menu_thread_stop_and_wait(THREAD_SCREEN_SLOT_MENU);
             g_save_write_phase = 0;
@@ -623,7 +623,7 @@ void save_image_build(s32 slot) {
     bcopy(g_proposition_active, g_save_buffer_pointer->active_propositions,
         sizeof(g_save_buffer_pointer->active_propositions));
 
-    bits_primary_init_reader(g_save_buffer_pointer->parity_bits);
+    bits_primary_init(g_save_buffer_pointer->parity_bits);
     block = (u8*)g_save_buffer_pointer;
     for (i = 0; (u32)i < SAVE_PARITY_BLOCK_COUNT; i++) {
         parity = 0;
@@ -731,7 +731,7 @@ static void update_card_scan(void) {
         /* While a slot is recorded as last used, the stored slot metadata is current: if the card
          * reports no change, rebuild the descriptions from it and skip the directory scan. */
         if (g_save_last_used_slot < 0x10) {
-            result = memcard_wait_operation(5);
+            result = memcard_wait_info(5);
             if (result == MEMCARD_RESULT_COMPLETE) {
                 g_save_slot_scan_index = 0;
                 while (g_save_slot_scan_index < SAVE_SLOT_COUNT) {
@@ -762,7 +762,7 @@ static void update_card_scan(void) {
                 ClearImage(&rect, 0, 0, 0);
             }
             if (g_save_scan_setup_step == 1) {
-                menu_thread_start_or_poll(THREAD_SCREEN_SLOT_MENU, &g_save_checking_message_descriptor);
+                menu_managed_thread_replace_or_poll(THREAD_SCREEN_SLOT_MENU, &g_save_checking_message_descriptor);
             }
             g_save_scan_setup_step++;
             return;
@@ -770,11 +770,11 @@ static void update_card_scan(void) {
 
         s_save_open_result = memcard_open_slot();
         if (s_save_open_result == MEMCARD_RESULT_COMPLETE) {
-            g_save_file_count = memcard_enumerate_saves(g_save_menu_work_buffer, 1);
+            g_save_file_count = memcard_enumerate_files(g_save_menu_work_buffer, 1);
             result = 0;
             /* Re-read the directory until two reads agree, at most 15 times, two vsyncs apart. */
             while (result < 15) {
-                status = memcard_enumerate_saves(g_save_menu_work_buffer, 1);
+                status = memcard_enumerate_files(g_save_menu_work_buffer, 1);
                 if (status == g_save_file_count) {
                     break;
                 } else {
@@ -806,7 +806,7 @@ static void update_card_scan(void) {
     }
 
     if (s_save_open_result == MEMCARD_RESULT_NEW_CARD) {
-        result = memcard_poll_operation();
+        result = memcard_poll_info();
         if (result > MEMCARD_RESULT_COMPLETE) {
             menu_thread_stop_and_wait(THREAD_SCREEN_SLOT_MENU);
             menu_thread_stop_and_wait(THREAD_SCREEN_SLOT_MENU_CHILD);
@@ -820,17 +820,17 @@ static void update_card_scan(void) {
             g_save_slot_scan_active = 0;
         } else {
             g_save_format_prompt_active
-                = menu_managed_thread_start(THREAD_SCREEN_SLOT_MENU, g_save_format_prompt_descriptor);
+                = menu_managed_thread_start_or_poll(THREAD_SCREEN_SLOT_MENU, g_save_format_prompt_descriptor);
             if (g_save_format_prompt_active == 0 && g_save_slot_index == 0) {
-                menu_thread_start_or_poll(THREAD_SCREEN_SLOT_MENU, &g_save_formatting_message_descriptor);
+                menu_managed_thread_replace_or_poll(THREAD_SCREEN_SLOT_MENU, &g_save_formatting_message_descriptor);
             }
         }
         return;
     }
 
     if (s_save_open_result == MEMCARD_RESULT_ERROR || s_save_open_result == MEMCARD_RESULT_TIMEOUT) {
-        result = memcard_poll_operation();
-        menu_thread_start_or_poll(THREAD_SCREEN_SLOT_MENU, &g_save_card_error_prompt_descriptor);
+        result = memcard_poll_info();
+        menu_managed_thread_replace_or_poll(THREAD_SCREEN_SLOT_MENU, &g_save_card_error_prompt_descriptor);
         if ((g_menu_input_primary_repeat & PSX_PAD_CROSS) != 0 || (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) != 0) {
             menu_managed_thread_stop(THREAD_SCREEN_SLOT_MENU);
             g_save_sound_queued_effect_id = SOUND_SFX_CANCEL;
@@ -1008,7 +1008,7 @@ static void render_slot_text(s32 slot) {
  * slots (every slot that is not SAVE_SLOT_UNAVAILABLE). The scroll step is then
  * run until it has rested for ten calls in a row, so the list opens already scrolled
  * to the cursor. */
-static s32 init_slot_cursor(void) {
+static s32 init_slot_list(void) {
     s32 slot;
     s32 listed_count;
 
@@ -1075,9 +1075,9 @@ static void update_slot_list(u16 input) {
 
         /* `row` briefly holds the card status: after an error or a new card, rescan unless the card
          * still answers. */
-        row = memcard_poll_operation();
+        row = memcard_poll_info();
         if (row > MEMCARD_RESULT_COMPLETE) {
-            if (memcard_wait_operation(3) != MEMCARD_RESULT_COMPLETE) {
+            if (memcard_wait_info(3) != MEMCARD_RESULT_COMPLETE) {
                 menu_thread_stop_and_wait(THREAD_SCREEN_SLOT_MENU);
                 menu_thread_stop_and_wait(THREAD_SCREEN_SLOT_MENU_CHILD);
                 g_save_overwrite_prompt_active = 0;
@@ -1086,7 +1086,7 @@ static void update_slot_list(u16 input) {
             }
         } else if (g_save_overwrite_prompt_active != 0) {
             g_save_overwrite_prompt_active
-                = menu_managed_thread_start(THREAD_SCREEN_SLOT_MENU, g_save_overwrite_prompt_descriptor);
+                = menu_managed_thread_start_or_poll(THREAD_SCREEN_SLOT_MENU, g_save_overwrite_prompt_descriptor);
             if (g_save_overwrite_prompt_active == 0 && g_save_slot_index == 0) {
                 g_save_menu_state = SAVE_MENU_WRITING;
             }
@@ -1199,7 +1199,7 @@ static void update_slot_list(u16 input) {
             gfx_set_otag_index(11);
             s_save_slot_number_command.y = g_save_slot_quads[0].position.y;
             s_save_slot_number_command.value = index + 1;
-            menu_opcode_0d_draw_decimal_number(&s_save_slot_number_command);
+            menu_opcode_0d_draw_formatted_number(&s_save_slot_number_command);
         }
 
         g_save_slot_quads[2].position.y = g_save_slot_quads[0].position.y;
@@ -1214,9 +1214,9 @@ static void update_slot_list(u16 input) {
             if (s_save_playtime_hours_command.value >= 100) {
                 s_save_playtime_hours_command.value = 99;
             }
-            menu_opcode_0d_draw_decimal_number(&s_save_playtime_hours_command);
-            menu_opcode_0d_draw_decimal_number(&s_save_playtime_minutes_command);
-            menu_opcode_0d_draw_decimal_number(&s_save_playtime_seconds_command);
+            menu_opcode_0d_draw_formatted_number(&s_save_playtime_hours_command);
+            menu_opcode_0d_draw_formatted_number(&s_save_playtime_minutes_command);
+            menu_opcode_0d_draw_formatted_number(&s_save_playtime_seconds_command);
         }
 
         if (g_save_slot_file_states[index] == SAVE_SLOT_AVAILABLE) {

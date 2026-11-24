@@ -19,7 +19,7 @@ static const u8* s_sprite_compressed_data;
 /* Start reading the SP2 file that holds the attack animation of the unit's SP2 ability into
  * destination. Worker 8 uses its own file table, indexed from animation 0x73. Returns -1 when the
  * animation is in the SP1 range or has no file, else whether the read was queued. */
-s32 sprite_open_sp2_file(map_unit_t* unit, u32* destination) {
+s32 sprite_request_sp2_read(map_unit_t* unit, u32* destination) {
     s32 spritesheet_id;
     u8 animation_id;
     s32 index;

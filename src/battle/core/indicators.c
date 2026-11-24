@@ -160,7 +160,7 @@ void sprite_draw_shadow(map_unit_t* unit, u32* ot) {
     }
     vector_set_short(&position, unit->world_coords.vx + unit->event_offset.vx + unit->seq_offset.vx, 0,
         unit->world_coords.vz + unit->event_offset.vz + unit->seq_offset.vz);
-    position.vy = map_calculate_slope_height(&position, unit->map_layer);
+    position.vy = map_calculate_surface_height(&position, unit->map_layer);
     if (unit->world_coords.vy >= position.vy) {
         packet = ot;
     } else {
@@ -832,7 +832,7 @@ void sprite_status_bubble_draw(map_unit_t* unit, const DVECTOR* unused_screen_co
 /* Per-frame float and status-bubble update of one unit: adjusts its float height
  * except during the four float-jump step phases, then advances its status bubble
  * when one is active. */
-void map_unit_update_float_and_status_bubble(map_unit_t* unit) {
+void map_unit_update_float_height_and_status_bubble(map_unit_t* unit) {
     u8 phase = unit->step_phase;
 
     if (phase != MOVE_STEP_PHASE_FLOAT_JUMP_SOUTH && phase != MOVE_STEP_PHASE_FLOAT_JUMP_EAST
@@ -900,12 +900,12 @@ void sprite_afterimage_shift_and_fill(map_unit_t* unit) {
     for (index = 5; index > 0; index--) {
         unit->position_copies[index] = unit->position_copies[index - 1];
     }
-    map_unit_copy_draw_coords(unit->position_copies, unit);
+    map_unit_get_draw_coords(unit->position_copies, unit);
 }
 
 /* Make the unit's item display show an item's 16x16 icon, centered on the
  * display's origin. */
-void sprite_item_display_set(map_unit_t* unit, u32 item_id) {
+void sprite_item_display_set_icon(map_unit_t* unit, u32 item_id) {
     SPRT data;
 
     item_set_icon_sprite(&data, item_id);
@@ -1401,7 +1401,7 @@ void result_prepare_display(map_unit_t* unit) {
  * 0x02000000 and above. Returns 0 when no flag is pending. Reading the
  * flags into a block-local before clearing keeps the target's and operand
  * order. */
-static s32 build_next_special_result_display(map_unit_t* unit) {
+static s32 build_next_exp_jp_or_failure_display(map_unit_t* unit) {
     action_result_display_t* display;
     sprite_display_t* display_0;
     sprite_display_t* display_1;
@@ -1538,13 +1538,13 @@ void result_queue_exp_jp_display(map_unit_t* unit) {
         }
         if (!unit->numeric_display.active) {
             unit->numeric_display.progress = 0;
-            build_next_special_result_display(unit);
+            build_next_exp_jp_or_failure_display(unit);
         }
     }
 }
 
 /* Queues the failure message for a charged action that cannot start: mode is the
- * action_rejection_e of action_init_current_data, and only no target,
+ * action_rejection_e of action_init_resolution, and only no target,
  * silenced and not enough MP queue one.
  *
  * The three numeric displays are pointed at the FRAME.BIN page, and the first
@@ -1570,7 +1570,7 @@ void result_queue_charge_failure(map_unit_t* unit, s32 reason) {
     }
     if (!unit->numeric_display.active) {
         unit->numeric_display.progress = 0;
-        build_next_special_result_display(unit);
+        build_next_exp_jp_or_failure_display(unit);
     }
 }
 
@@ -1639,7 +1639,7 @@ void result_animate_text(map_unit_t* unit, const SVECTOR* screen_coords) {
         if (build_next_result_display(unit)) {
             return;
         }
-        if (build_next_special_result_display(unit)) {
+        if (build_next_exp_jp_or_failure_display(unit)) {
             return;
         }
         unit->numeric_display.displays[0]->tpage = unit->numeric_display.displays[1]->tpage
@@ -1652,7 +1652,7 @@ void result_animate_text(map_unit_t* unit, const SVECTOR* screen_coords) {
         if (build_next_result_display(unit)) {
             return;
         }
-        if (build_next_special_result_display(unit)) {
+        if (build_next_exp_jp_or_failure_display(unit)) {
             return;
         }
         unit->numeric_display.active = 0;

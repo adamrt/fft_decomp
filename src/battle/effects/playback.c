@@ -43,7 +43,7 @@ typedef enum playback_load_state {
     EFFECT_LOAD_ENDING_SECONDARY = 3 /* wait for the charge secondary effect to end */
 } playback_load_state_e;
 
-/* What an opcode handler returns to run_script_block. */
+/* What an opcode handler returns to run_script_instance. */
 typedef enum effect_script_result {
     EFFECT_SCRIPT_RESULT_YIELD = 0,    /* stop for this frame */
     EFFECT_SCRIPT_RESULT_CONTINUE = 1, /* run the next instruction */
@@ -630,7 +630,7 @@ extern u16 g_effect_script_opcode_05_value;
 
 static void free_script_instance(s16 record_index);
 
-static s32 run_script_block(s16 index);
+static s32 run_script_instance(s16 index);
 
 static s16 start_script_instance(const u8* script, s16 start_pc, s16 parent_index);
 
@@ -643,7 +643,7 @@ static effect_callback_t get_native_callback(s16 callback_id);
 /* Upload effect file `index`'s two CLUTs to the effect CLUT rows and its texture to
  * VRAM x 0x180, 0x80 bytes a row or 0x100 for a wide image. The section's address is
  * kept in g_effect_palette_ptr, where the effect heap later starts. */
-static void init_palette(s16 index) {
+static void upload_palette_and_texture(s16 index) {
     RECT rect;
     effect_file_header_t* base = g_effect_file_data_ptrs[index];
     effect_palette_section_t* data = (effect_palette_section_t*)((u8*)base + base->palette_and_texture);
@@ -724,7 +724,7 @@ static void bind_animation_curves(s16 effect_id) {
 
 /* Bind effect file effect_id's particle-system section (gravity, inertia threshold and the emitter
  * records) as g_effect_geometry_table. */
-static void bind_emitters(s16 effect_id) {
+static void bind_particle_system(s16 effect_id) {
     effect_file_header_t* header = g_effect_file_data_ptrs[effect_id];
 
     g_effect_geometry_table = (const effect_geometry_table_t*)((u8*)header + header->particle_system);
@@ -963,8 +963,8 @@ void effect_playback_request(u32 packed, s32 ability, const effect_context_t* so
         g_effect_id &= EFFECT_ABILITY_FILE_MASK;
         s_effect_playback_phase = EFFECT_PLAYBACK_PHASE_REQUESTED;
         if (g_effect_secondary_by_charge_animation[packed & 0xffff] != 0) {
-            g_effect_secondary_charge_id
-                = effect_secondary_init(g_effect_secondary_by_charge_animation[packed & 0xffff], packed >> 16, source);
+            g_effect_secondary_charge_id = effect_secondary_init_animation(
+                g_effect_secondary_by_charge_animation[packed & 0xffff], packed >> 16, source);
         } else {
             g_effect_secondary_charge_id = 0;
         }
@@ -978,16 +978,16 @@ void effect_playback_request(u32 packed, s32 ability, const effect_context_t* so
     }
 
     if (ability >= ABILITY_ID_BATTLE_SKILL_HEAD_BREAK && ability <= ABILITY_ID_BATTLE_SKILL_MIND_BREAK)
-        effect_secondary_init(EFFECT_SECONDARY_ANIMATION_EQUIP_BREAK, 0, source);
+        effect_secondary_init_animation(EFFECT_SECONDARY_ANIMATION_EQUIP_BREAK, 0, source);
     if ((ability >= ABILITY_ID_CHARGE_FIRST && ability < ABILITY_ID_MATH_FIRST)
         || ability == ABILITY_ID_BASIC_SKILL_ACCUMULATE)
-        effect_secondary_init(EFFECT_SECONDARY_ANIMATION_RED_ORBS, 0, source);
+        effect_secondary_init_animation(EFFECT_SECONDARY_ANIMATION_RED_ORBS, 0, source);
 }
 
 /* Returns 1 when the ability has no effect file (effect id 0xffff), 0 for
  * Vertical Jump8, all Charge abilities and Accumulate. The target's range
  * starts at Vertical Jump8 rather than Charge +1. */
-u32 effect_ability_has_no_file(s32 ability_id) {
+u32 effect_ability_has_no_effect(s32 ability_id) {
     u32 result;
 
     if (ability_id >= ABILITY_ID_JUMP_VERTICAL_8 && ability_id < ABILITY_ID_MATH_FIRST) {
@@ -1012,7 +1012,7 @@ s32 effect_is_item_ability(s32 ability_id) {
     return (entry & EFFECT_ABILITY_FLAG_ITEM) > 0;
 }
 
-/* Releases a requested effect: update_stage starts it on its
+/* Releases a requested effect: update_playback_phase starts it on its
  * next frame. */
 void effect_playback_start(void) {
     if (s_effect_playback_phase == EFFECT_PLAYBACK_PHASE_REQUESTED) {
@@ -1042,7 +1042,7 @@ s32 effect_playback_get_phase(void) {
  * the effect is over when none is left. Phase 5 has no case and would return
  * `result` unset, but nothing stores 5 or RESTART_SCRIPT (6), so the restart
  * path is dead in retail. */
-static s32 update_stage(void) {
+static s32 update_playback_phase(void) {
     s32 result;
     s32 id = g_effect_allocated_record_head;
     s32 next;
@@ -1057,7 +1057,7 @@ static s32 update_stage(void) {
     case EFFECT_PLAYBACK_PHASE_INIT_PALETTE:
         map_freeze();
         unit_view_hide_tile_depth();
-        init_palette(g_effect_id);
+        upload_palette_and_texture(g_effect_id);
         s_effect_playback_phase = EFFECT_PLAYBACK_PHASE_START_SCRIPT;
         g_effect_script_opcode_05_value = 0;
         system_reset_frame_pacing();
@@ -1066,14 +1066,14 @@ static s32 update_stage(void) {
     case EFFECT_PLAYBACK_PHASE_START_SCRIPT:
         effect_heap_init(
             (effect_heap_node_t*)g_effect_palette_ptr, g_heap_battle_end_address - (u32)g_effect_palette_ptr);
-        effect_reset_subsystems();
+        effect_init_playback_pools();
         effect_camera_seed_tracks();
         system_clear_min_vsync_interval();
         set_frame_data_pointer(g_effect_id);
         set_animation_sequences_pointer(g_effect_id);
         set_script_pointer(g_effect_id);
         bind_animation_curves(g_effect_id);
-        bind_emitters(g_effect_id);
+        bind_particle_system(g_effect_id);
         bind_timeline_sections(g_effect_id);
         load_sound_section(g_effect_id);
         init_flags_section_pointer(g_effect_id);
@@ -1087,7 +1087,7 @@ static s32 update_stage(void) {
         }
         g_effect_root_record_index = start_script_instance(g_effect_script, 0, 0);
         s_effect_playback_phase = EFFECT_PLAYBACK_PHASE_RUNNING;
-        map_set_effect_data_state(MAP_EFFECT_DATA_BEGIN);
+        map_set_untextured_ot_mode(MAP_EFFECT_DATA_BEGIN);
         result = 1;
         break;
     case EFFECT_PLAYBACK_PHASE_RUNNING:
@@ -1097,7 +1097,7 @@ static s32 update_stage(void) {
             next = g_effect_state_records[id].next_index;
             g_effect_current_record_index = id;
             g_effect_state_records[id].frame_counter++;
-            if (run_script_block(id) == 0) {
+            if (run_script_instance(id) == 0) {
                 free_script_instance(id);
             }
             id = next;
@@ -1112,7 +1112,7 @@ static s32 update_stage(void) {
                 suzuki_sound_remove_resource(g_effect_sound_section_ptr);
                 g_effect_sound_section_ptr = 0;
             }
-            map_set_effect_data_state(MAP_EFFECT_DATA_END);
+            map_set_untextured_ot_mode(MAP_EFFECT_DATA_END);
             map_unfreeze();
             unit_view_show_tile_depth();
             system_clear_min_vsync_interval();
@@ -1123,7 +1123,7 @@ static s32 update_stage(void) {
     case EFFECT_PLAYBACK_PHASE_RESTART_SCRIPT:
         effect_heap_init(
             (effect_heap_node_t*)g_effect_palette_ptr, g_heap_battle_end_address - (u32)g_effect_palette_ptr);
-        effect_reset_subsystems();
+        effect_init_playback_pools();
         reset_frame_data_pointer();
         reset_animation_sequences_pointer();
         g_effect_root_record_index = start_script_instance(g_effect_script, 0, 0);
@@ -1136,7 +1136,7 @@ static s32 update_stage(void) {
 /* The effect system's frame: the effect file, the secondary effects and the
  * effect camera moves. Returns 1 while an effect of either kind runs. */
 s32 effect_playback_update(void) {
-    s32 stage_result = update_stage();
+    s32 stage_result = update_playback_phase();
     s32 related_result = effect_secondary_update();
 
     effect_camera_update_tracks();
@@ -1307,7 +1307,7 @@ static s16 start_script_instance(const u8* script, s16 start_pc, s16 parent_inde
 }
 
 /* Handler for opcodes 2e-77: calls the empty stub reporter and returns no defined value. In retail
- * $v0 still holds this handler's address, which run_script_block treats as 'continue'
+ * $v0 still holds this handler's address, which run_script_instance treats as 'continue'
  * without the pc moving, so an invalid opcode hangs the script loop. */
 effect_script_result_e effect_script_opcode_2e_invalid(effect_record_t* unused_record) {
     system_report(1, 0x22);
@@ -1358,7 +1358,7 @@ effect_script_result_e effect_script_opcode_03_free_child(effect_record_t* recor
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
-/* Opcode 04: end the script; run_script_block's caller then frees the
+/* Opcode 04: end the script; run_script_instance's caller then frees the
  * record. */
 effect_script_result_e effect_script_opcode_04_end(effect_record_t* unused_record) {
     return EFFECT_SCRIPT_RESULT_ABORT;
@@ -1557,7 +1557,7 @@ effect_script_result_e effect_script_opcode_15_jump_if_counter_less(effect_recor
 /* Opcode 16: jump to the offset in the third 16-bit value when the record has exactly as many
  * particles as the second 16-bit value; otherwise step over the 6-byte instruction. Retail scripts
  * test 0 to end once the last particle is gone. */
-effect_script_result_e effect_script_opcode_16_jump_if_work_count_equal(effect_record_t* record) {
+effect_script_result_e effect_script_opcode_16_jump_if_particle_count_equal(effect_record_t* record) {
     const effect_script_instruction_t* instruction = get_current_script_instruction(record);
     if (record->work_count == instruction->branch.comparison) {
         record->pc = instruction->branch.target_offset;
@@ -1570,7 +1570,7 @@ effect_script_result_e effect_script_opcode_16_jump_if_work_count_equal(effect_r
 /* Opcode 17: jump to the offset in the third 16-bit value when the record has
  * more particles than the second 16-bit value says; otherwise step over the
  * 6-byte instruction. */
-effect_script_result_e effect_script_opcode_17_jump_if_work_count_greater(effect_record_t* record) {
+effect_script_result_e effect_script_opcode_17_jump_if_particle_count_greater(effect_record_t* record) {
     const effect_script_instruction_t* instruction = get_current_script_instruction(record);
     if (instruction->branch.comparison < record->work_count) {
         record->pc = instruction->branch.target_offset;
@@ -1583,7 +1583,7 @@ effect_script_result_e effect_script_opcode_17_jump_if_work_count_greater(effect
 /* Opcode 18: jump to the offset in the third 16-bit value when the record has
  * fewer particles than the second 16-bit value says; otherwise step over the
  * 6-byte instruction. */
-effect_script_result_e effect_script_opcode_18_jump_if_work_count_less(effect_record_t* record) {
+effect_script_result_e effect_script_opcode_18_jump_if_particle_count_less(effect_record_t* record) {
     const effect_script_instruction_t* instruction = get_current_script_instruction(record);
     if (record->work_count < instruction->branch.comparison) {
         record->pc = instruction->branch.target_offset;
@@ -1901,7 +1901,7 @@ static void run_keyframe_actions(u16 flags, u8 target, effect_record_t* state) {
     }
     animation = (flags & EFFECT_KEYFRAME_ACTION_ANIMATION_MASK) >> EFFECT_KEYFRAME_ACTION_ANIMATION_SHIFT;
     if (animation != 0 && map_unit_id != -1) {
-        animation_map_unit_set_sequence(map_unit_id, animation);
+        animation_map_unit_request(map_unit_id, animation);
     }
     if (flags & EFFECT_KEYFRAME_ACTION_CALLBACK_MASK) {
         slot = (flags & EFFECT_KEYFRAME_ACTION_CALLBACK_MASK) - 1;
@@ -2189,7 +2189,7 @@ effect_script_result_e effect_script_opcode_28_step_child_timeline(effect_record
         if (g_effect_context.targets[target].target_type == EFFECT_TARGET_TYPE_UNIT) {
             init.targets[EFFECT_CASTER_ENTRY] = g_effect_context.targets[EFFECT_CASTER_ENTRY];
             init.targets[0] = g_effect_context.targets[target];
-            effect_secondary_init(EFFECT_SECONDARY_ANIMATION_REFLECT, g_effect_timeline->spawn_delay, &init);
+            effect_secondary_init_animation(EFFECT_SECONDARY_ANIMATION_REFLECT, g_effect_timeline->spawn_delay, &init);
         }
         record->timeline.frame = g_effect_child_timeline->duration;
     }
@@ -2259,12 +2259,12 @@ static void run_keyframe_actions_for_all_targets(u16 flags, effect_record_t* sta
     if (animation != 0) {
         if (flags & EFFECT_KEYFRAME_ACTION_FLAG_CASTER_ONLY) {
             if (map_unit_id != -1) {
-                animation_map_unit_set_sequence(map_unit_id, animation);
+                animation_map_unit_request(map_unit_id, animation);
             }
         } else {
             for (i = 0; i < g_effect_context.target_count; i++) {
                 if (g_effect_context.targets[i].target_type == EFFECT_TARGET_TYPE_UNIT) {
-                    animation_map_unit_set_sequence(g_effect_context.targets[i].data.unit.map_unit_id, animation);
+                    animation_map_unit_request(g_effect_context.targets[i].data.unit.map_unit_id, animation);
                 }
             }
         }
@@ -2283,7 +2283,7 @@ static void run_keyframe_actions_for_all_targets(u16 flags, effect_record_t* sta
  * told to destroy its work on the call made with two frames of the keyframe
  * left. index, remaining and step are the channel's keyframe, the frames left
  * in it and the frames it has run. */
-static void step_emitter(
+static void advance_particle_track(
     effect_record_t* state, effect_keyframe_table_t* table, s16* index, s16* remaining, s16* step) {
     s16 k;
     s32 sel;
@@ -2573,7 +2573,7 @@ effect_script_result_e effect_script_opcode_29_step_parent_timeline(effect_recor
         timeline->state.parent.spawn_countdown--;
     } else {
         for (i = 0; i < EFFECT_PARTICLE_CHANNEL_COUNT; i++) {
-            step_emitter(record, &g_effect_timeline->particle_channels[0][i],
+            advance_particle_track(record, &g_effect_timeline->particle_channels[0][i],
                 &timeline->state.parent.keyframe.tracks.particle[0][i],
                 &timeline->state.parent.remaining.tracks.particle[0][i],
                 &timeline->state.parent.step.tracks.particle[0][i]);
@@ -2607,7 +2607,7 @@ effect_script_result_e effect_script_opcode_29_step_parent_timeline(effect_recor
         + g_effect_timeline->child.duration;
     if (timeline->frame >= i) {
         for (i = 0; i < EFFECT_PARTICLE_CHANNEL_COUNT; i++) {
-            step_emitter(record, &g_effect_timeline->particle_channels[1][i],
+            advance_particle_track(record, &g_effect_timeline->particle_channels[1][i],
                 &timeline->state.parent.keyframe.tracks.particle[1][i],
                 &timeline->state.parent.remaining.tracks.particle[1][i],
                 &timeline->state.parent.step.tracks.particle[1][i]);
@@ -2670,7 +2670,7 @@ effect_script_result_e effect_script_opcode_2d_nop(effect_record_t* record) {
 /* Run record `index`'s script from its pc, one opcode handler after another,
  * until a handler returns YIELD or ABORT. This runner returns 1 on YIELD
  * (resume next frame) and 0 on ABORT (the caller frees the record). */
-static s32 run_script_block(s16 index) {
+static s32 run_script_instance(s16 index) {
     effect_record_t* rec;
     /* A narrow result preserves the retail sign extension before the tests. */
     s16 result;

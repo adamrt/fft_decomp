@@ -195,7 +195,7 @@ static memcard_result_e clear_new_card_retry(s32 port, s32 retry_limit) {
             if (result == MEMCARD_RESULT_COMPLETE) {
                 break;
             }
-            if (memcard_wait_operation(1) == MEMCARD_RESULT_COMPLETE) {
+            if (memcard_wait_info(1) == MEMCARD_RESULT_COMPLETE) {
                 result = MEMCARD_RESULT_COMPLETE;
                 break;
             }
@@ -212,7 +212,7 @@ static memcard_result_e clear_new_card_retry(s32 port, s32 retry_limit) {
  * other than "complete" is checked again with a retried info request, and an
  * error is reported as a timeout. The opening's own body reissues the request
  * instead of timing out. */
-memcard_result_e memcard_poll_operation(void) {
+memcard_result_e memcard_poll_info(void) {
     s32 status;
     memcard_result_e result;
 
@@ -240,13 +240,13 @@ memcard_result_e memcard_poll_operation(void) {
 
 /* Run the card status poll to a result, repeating it up to `retry_limit`
  * times until it reports completion. Returns the last result. */
-memcard_result_e memcard_wait_operation(s32 retry_limit) {
+memcard_result_e memcard_wait_info(s32 retry_limit) {
     memcard_result_e result;
     s32 i = 0;
 
     while (i < retry_limit) {
         do {
-            result = memcard_poll_operation();
+            result = memcard_poll_info();
         } while (result == MEMCARD_RESULT_PENDING);
         if (result == MEMCARD_RESULT_COMPLETE) {
             break;
@@ -258,7 +258,7 @@ memcard_result_e memcard_wait_operation(s32 retry_limit) {
 
 /* Count the files of the selected slot into `entries`: the game's saves, or
  * every file when `all_files` is set. */
-s32 memcard_enumerate_saves(DIRENTRY* entries, s32 all_files) {
+s32 memcard_enumerate_files(DIRENTRY* entries, s32 all_files) {
     s32 count;
     char path[128];
 
@@ -307,7 +307,7 @@ s32 memcard_count_free_blocks(const DIRENTRY* entries, s32 entry_count) {
  * MEMCARD_RESULT_NEW_CARD (the load still reports a new, unformatted card)
  * or MEMCARD_RESULT_TIMEOUT for any failure. */
 memcard_result_e memcard_open_slot(void) {
-    memcard_result_e result = memcard_wait_operation(10);
+    memcard_result_e result = memcard_wait_info(10);
 
     if (result == MEMCARD_RESULT_NEW_CARD) {
         result = clear_new_card_retry(g_memcard_slot << 4, 10);
@@ -333,7 +333,7 @@ s32 memcard_format_slot(void) {
     s32 result;
     char path[8];
 
-    result = memcard_wait_operation(10);
+    result = memcard_wait_info(10);
     if (result > MEMCARD_RESULT_COMPLETE) {
         return 0;
     }
@@ -374,7 +374,7 @@ s32 memcard_file_open_retry(const char* filename, s32 mode) {
     strcat(path, filename);
 
     while (i < 40) {
-        result = memcard_wait_operation(10);
+        result = memcard_wait_info(10);
         if (result != MEMCARD_RESULT_COMPLETE) {
             return -2;
         }
@@ -396,7 +396,7 @@ s32 memcard_file_close_retry(s32 descriptor) {
     s32 close_result;
 
     for (i = 0; i < 10; i++) {
-        wait_success = memcard_wait_operation(10) == MEMCARD_RESULT_COMPLETE;
+        wait_success = memcard_wait_info(10) == MEMCARD_RESULT_COMPLETE;
         close_result = close(descriptor);
         if (close_result == descriptor) {
             break;
@@ -417,7 +417,7 @@ s32 memcard_file_seek_retry(s32 descriptor, s32 offset, s32 origin) {
     s32 result;
 
     for (i = 0; i < 10; i++) {
-        if (memcard_wait_operation(10) != MEMCARD_RESULT_COMPLETE) {
+        if (memcard_wait_info(10) != MEMCARD_RESULT_COMPLETE) {
             return -1;
         }
         result = lseek(descriptor, offset, origin);
@@ -516,7 +516,7 @@ s32 memcard_file_delete_retry(const char* filename) {
     strcat(path, filename);
 
     for (i = 0; i < 10; i++) {
-        if (memcard_wait_operation(10) != MEMCARD_RESULT_COMPLETE) {
+        if (memcard_wait_info(10) != MEMCARD_RESULT_COMPLETE) {
             return 0;
         }
         result = erase(path);

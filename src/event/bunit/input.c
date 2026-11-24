@@ -129,7 +129,7 @@ static void update_controller(void) {
  * The help text state goes 1 on the text thread's first frame (which queues
  * the window-open sound), 2 after it and 0 otherwise.
  */
-void menu_input_update_message_state(void) {
+void menu_input_update(void) {
     s32 running;
 
     update_controller();

@@ -16,10 +16,10 @@ static glyph_blit_t s_menu_window_sprite_glyph = { { 0, 0, 16, 16 }, 256, 0 };
 
 static glyph_blit_t s_menu_window_sprite_position = { { 0, 0, 16, 16 }, 0, 0 };
 
-/* Build a dialog window image with menu_build_window_image and upload it to `rect`,
+/* Build a dialog window image with menu_build_dialog_window_image and upload it to `rect`,
  * freeing the image a frame later. */
-void menu_build_and_upload_window_image(s32 width, s32 height, RECT* rect, s32 mode, s32 tail_offset) {
-    menu_build_window_image(width, height, rect, mode, tail_offset, 0);
+void menu_upload_dialog_window_image(s32 width, s32 height, RECT* rect, s32 mode, s32 tail_offset) {
+    menu_build_dialog_window_image(width, height, rect, mode, tail_offset, 0);
 }
 
 /* Build a 4bpp dialog window image, width x height pixels plus 16 rows for the speech tail,
@@ -31,7 +31,7 @@ void menu_build_and_upload_window_image(s32 width, s32 height, RECT* rect, s32 m
  *
  * With keep set the image is returned to the caller. Otherwise it is uploaded to rect and
  * freed a frame later, and the function falls off its end without a return value (retail). */
-u8* menu_build_window_image(s32 width, s32 height, RECT* rect, s32 mode, s32 tail_offset, s32 keep) {
+u8* menu_build_dialog_window_image(s32 width, s32 height, RECT* rect, s32 mode, s32 tail_offset, s32 keep) {
     u16 kind = mode & DIALOG_TYPE_OPTIONS_MASK;
     s32 words;
     s32 partial;
@@ -137,7 +137,7 @@ u8* menu_build_window_image(s32 width, s32 height, RECT* rect, s32 mode, s32 tai
  * rows are written below the buffer start; and the remaining-height test has its operands
  * swapped (i - height is never 96 or more), so every later band is sized to all remaining
  * rows. */
-u8* menu_build_and_upload_window_frame_image(s32 width, s32 height, RECT* rect, s32 mode) {
+u8* menu_build_window_frame_image(s32 width, s32 height, RECT* rect, s32 mode) {
     RECT upload;
     s32 first;
     s32 words;

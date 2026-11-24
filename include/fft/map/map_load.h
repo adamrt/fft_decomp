@@ -235,7 +235,7 @@ s32 map_poll_load(void);
 void* map_start_file_load(const char* unused_directory_path, const map_gns_load_info_t* load_info, void* destination,
     s32 unused_resource_type);
 s32 map_mesh_load_palette(s32 palette_mode);
-map_gns_record_t* map_load_gns_and_move_find(s32 map_id);
+map_gns_record_t* map_start_gns_load(s32 map_id);
 s32 map_update_init_sequence(s32 map_id, s32 step);
 s32 map_update_deployment_init_sequence(s32 map_id, s32 step, s32 deployment_running);
 

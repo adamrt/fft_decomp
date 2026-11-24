@@ -307,7 +307,7 @@ s32 music_stop(void) {
 /* Stops the current music and restarts the music loaded in slot from its
  * beginning, fading in to volume over fade ticks. Returns the music record
  * as a handle, or 0 for slot 0. */
-suzuki_music_t* music_switch_track(s32 slot, s32 volume, s32 fade) {
+suzuki_music_t* music_play_slot(s32 slot, s32 volume, s32 fade) {
     music_stop();
     if (slot != 0) {
         if (g_music.slots.smd[slot - 1] != 0) {
@@ -498,7 +498,7 @@ void music_set_track(int music_id) {
     }
     slot = music_load_into_free_slot(music_id);
     if (slot != 0) {
-        music_switch_track(slot, 0x7f, 0);
+        music_play_slot(slot, 0x7f, 0);
     }
 }
 

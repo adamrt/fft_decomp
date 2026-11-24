@@ -215,4 +215,8 @@ void menu_update_panel_fade(void);
 /* A black semi-transparent 256x50 center tile with nine one-line tiles above and below for the graded edges. */
 void menu_init_panel_fade_tiles(void);
 
+/* Nonzero upper_half selects the buffer at y 0; zero selects y 240. */
+void menu_build_scaled_draw_area_pair_swapped(
+    scaled_draw_area_pair_t* packets, const RECT* geometry, s32 step, s32 upper_half);
+
 #endif

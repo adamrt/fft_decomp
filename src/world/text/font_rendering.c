@@ -46,7 +46,7 @@ void text_render_id_rows_to_vram(const u8* text_table, const s16* text_ids, cons
  * each); 0xFA is a 6-pixel space and 0xFE terminates. The buffer then serves
  * as the text table for text_render_id_rows_to_vram, with the
  * caller's text ids, destination and flags passed through unchanged. */
-void menu_screen_text_kern(const u8* text, const s16* text_ids, const RECT* destination, s32 flags) {
+void menu_screen_render_kerned_text(const u8* text, const s16* text_ids, const RECT* destination, s32 flags) {
     u8 buf[0x78];
     u8* out;
     s32 len;

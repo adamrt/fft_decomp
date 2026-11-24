@@ -176,4 +176,6 @@ typedef enum equipment_thread_slot {
 extern s16 g_equipment_text_message_thread_active;
 extern s32 g_equipment_item_numeric_thread_enabled;
 
+struct menu_icon_source* equipment_row_get_type_icon_source(s32 index);
+
 #endif

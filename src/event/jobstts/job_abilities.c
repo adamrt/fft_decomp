@@ -105,7 +105,7 @@ s32 job_list_build(u8 unit_id, s16* job_ids, s32 unused) {
     (void)unused;
 
     slot = &unit_table[unit_index];
-    bits_primary_init_reader((*slot)->career.unlocked_jobs);
+    bits_primary_init((*slot)->career.unlocked_jobs);
     job_ids[0] = get_base_job(unit_id);
     if ((job_is_special_monster((*slot)->job_id)) || ((*slot)->character_identity == CHARACTER_IDENTITY_MONSTER)) {
         job_ids[1] = -1;
@@ -189,7 +189,7 @@ s32 ability_list_build(
     if (job_find_first_for_skillset(i) == -1) {
         i = g_status_screen_unit_data[unit_index]->primary_skillset;
     }
-    abilities = (s16*)ability_build_skillset_list(i, SKILLSET_ABILITY_FILTER_ALL);
+    abilities = (s16*)skillset_build_ability_list(i, SKILLSET_ABILITY_FILTER_ALL);
 
     if (ability_category == MENU_ABILITY_CATEGORY_ACTION) {
         lo = 1;
@@ -222,7 +222,7 @@ s32 ability_list_build(
      * direct learned_abilities indexing reverses the final commutative addu. */
     byte_offset = generic_index * UNIT_LEARNED_ABILITY_BYTES_PER_JOB
         + offsetof(status_screen_unit_jobs_t, career.learned_abilities);
-    bits_primary_init_reader((u8*)(byte_offset + (s32)unit_data));
+    bits_primary_init((u8*)(byte_offset + (s32)unit_data));
     for (i = 0; i < SKILLSET_ABILITY_LIST_COUNT; i++) {
         if (job_is_special_monster(g_status_screen_unit_data[unit_index]->job_id)) {
             learned = 1;

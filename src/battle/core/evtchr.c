@@ -156,7 +156,7 @@ s32 sprite_evtchr_map_unit_load_attack_image(s32 map_unit_id, s32 slot) {
 
 /* Free a slot's page if it holds a unit's attack image. The EVTCHR (0xfe) and free (0xff)
  * markers carry the same 0x80 bit, so a saved EVTCHR page is freed too (QUIRKS.md). */
-s32 sprite_evtchr_release_reserved_slot(s32 slot_index) {
+s32 sprite_evtchr_clear_attack_image_slot(s32 slot_index) {
     if (g_sprite_evtchr_slots[slot_index].owner & SPRITE_EVTCHR_SLOT_OWNER_ATTACK_IMAGE) {
         g_sprite_evtchr_slots[slot_index].owner = SPRITE_EVTCHR_SLOT_OWNER_NONE;
         g_sprite_evtchr_slots[slot_index].evtchr_load_state = 0;

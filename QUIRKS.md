@@ -5,7 +5,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
 
 ## Retail bugs the source reproduces
 
-- `battle_unit_calculate_action_height`: the seven-byte result preserves an
+- `battle_unit_calculate_height_data`: the seven-byte result preserves an
   uninitialized elevation high bit; an unavailable unit leaves the other result
   fields unset. A non-Chocobo that shares its tile (a rider) takes its
   statuses, movement abilities and terrain from the other unit, so it is
@@ -15,7 +15,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
 - `sprintf`: unchecked precision and zero padding can overrun its 512-byte temporary segment buffer.
 - `FntPrint`: unsupported conversions leave the field length undefined; the count limit is checked after writing, and oversized hexadecimal widths can overrun the 512-byte temporary buffer.
 - `DecDCTvlc`: the pause path saves its Y predictor at `0x80073f34`, overwriting the first four bytes of the overlapping birthday month-length table. Nothing calls `DecDCTvlcSize`, so the limit keeps its initial 0xffffff halfwords and the pause path never runs.
-- EFFECT native renderers: `step_emitter` sets phase 3 when a callback's keyframe window has two frames left, even if init never ran; the destroy path then reads its latch through the null work slot (kernel RAM).
+- EFFECT native renderers: `advance_particle_track` sets phase 3 when a callback's keyframe window has two frames left, even if init never ran; the destroy path then reads its latch through the null work slot (kernel RAM).
 - `camera_store_state_to_script_variables`: all three zoom
   components are stored to 32-bit script variable `0x20`, so the first two are lost.
 - `math_mul_div_s64` increments the dividend's low word when negating a negative
@@ -24,7 +24,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   it returns 1065039 rather than signed division's 1064587. Its range flag
   only checks negative-result high words; `math_cross_product_q12` checks
   `high >> 12` for 0 or -1. Neither test covers every signed 32-bit overflow.
-- `script_focus_speed` accumulates into an uninitialized `$s6`: the event
+- `script_opcode_38_focus_speed` accumulates into an uninitialized `$s6`: the event
   dispatcher leaves `operand_3` there, while camera fusion leaves its key count.
   Those caller values affect the camera duration.
 - `script_opcode_37_flip_message_portrait` (BATTLE and
@@ -34,7 +34,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
 - `proposition_determine_success`: the preferred-job
   check resolves the party unit once, before its loop, from the scoring loop's
   leftover (past-the-end) index, so it tests that one unit every pass.
-- `map_calculate_slope_height`,
+- `map_calculate_surface_height`,
   `calculate_coords_height`: an off-map point
   (a unit staged outside the map, its world coordinates read unsigned) gets no
   tile, and the null tile is read from RAM address 0. The unit shadow, palette
@@ -48,7 +48,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   The first frame adds the fall speed to it, which puts the unit below the
   ground, and the next frame snaps it to the ground: an event fall ends on its
   second frame.
-- `map_light_dispatch_state_command`: several arms return an
+- `map_light_dispatch_command`: several arms return an
   uninitialized pointer.
 - `unit_view_attack_caster_stats_thread`: for an item the
   secondary-data pointer stays uninitialized, yet its `flags_3` is read before
@@ -76,7 +76,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
 - `build_monster_skill_mask`: the `-1` neighbor
   offsets are loaded unsigned (+255), so only `+x`/`+y` survive, and the level
   loop runs for level 0 only.
-- `build_origin_targetable_mask`: radii 8–15 index past
+- `build_range_diamond_mask`: radii 8–15 index past
   the 8-entry template table into the following status weights. Jump Level 8
   can reach this path with a non-arcing weapon.
 - `evaluate_self_target`: suspension during the
@@ -86,7 +86,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   skips the reflector pointer reload and depends on the caller's `$s2`.
 - `evaluate_math_targets`: the extra known-ability call
   in the special-ID loop discards its result.
-- `step_real_coords_toward_target`: in the positive
+- `step_unit_focus`: in the positive
   direction the Y (`vz`) step adds the vector component twice; X and Z add it
   once.
 - `menu_screen_open_entry_window` receives requested x/y origins but always
@@ -110,7 +110,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
 - `init_map_unit`: tints the new unit's palette
   before it clears `mount_state`, so a map unit slot last held by a rider looks up
   a mount that is gone and reads its world coordinates through NULL (kernel RAM).
-- `display_action_preview`: a skipped
+- `build_action_preview`: a skipped
   preview leaves `s_unit_view_preview_target_action` null, and its
   `attack_accuracy` is read (from kernel RAM) before the null test.
 - The Formation screen's `rebuild_lists` (`src/world/formation/screen.c`): the Soldier Office (shop
@@ -152,8 +152,8 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   `get_grid_stat` return `value` (`$a1`) for a stat
   mode outside 0-2; `start_walk` leaves `facing` (`$a2`, the
   destination tile its callers pass) unset for a direction outside 0-3;
-  `load_animation_record` returns `next` (`$a1`) for record
-  type 0; `update_slot_menu` indexes the entry ids with
+  `load_mesh_animation_record` returns `next` (`$a1`) for record
+  type 0; `update_set_menu` indexes the entry ids with
   `cursor` when the list is empty; `world_map_destination_list_thread` uses
   `selected` when no entry matches the current item; both copies of
   `helpmenu_battle_entrypoint` read `node`, `x` and `y` in the cursor loop when the
@@ -170,7 +170,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   `poll_card_info_until_stable` has the same empty-loop result for a
   nonpositive retry limit (its callers pass 3);
   `select_sound_id` returns `sound` (`$a2`) for a channel mode
-  above 4; `select_report_speaker` returns `selected` for
+  above 4; `select_reporter` returns `selected` for
   a speaker mode outside 1-4 when more than one unit went;
   `weather_stop_sfx` returns an unset `result` no caller reads.
 - `save_read_file` sets `result` to -1 when the last read was
@@ -217,7 +217,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   - WaitUnitReady waits on `map_unit_is_ready`, so it never waits.
   - Effect stores its x and y operands to two globals nothing reads.
   - DebugPause prints "PAUSE", yields one frame and sets a 16-bit value nothing reads
-    (`script_print_debug_message`); instruction 0xdc stores 13 to
+    (`script_opcode_72_debug_pause`); instruction 0xdc stores 13 to
     another. Neither changes the script's course.
   - In WORLD, WalkTo is an empty arm outside a block, Arrow resolves both
     units and never sets the trajectory, and ChangeMap calls an empty
@@ -323,7 +323,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   considered ability (whichever was loaded last), not the ability being
   added. The bare Jump entry for a unit with no level-jump ability is written
   without being counted, so the caller's next entry overwrites it.
-- `target_validate_for_weapon`: the weapon-range flag
+- `target_set_area_by_trajectory`: the weapon-range flag
   is read from `g_ability_range_data[(u8)ability_id]`, so abilities
   0x100 and up use the record of their id's low byte.
 - `apply_level_change`: a level-1 target of a level-down
@@ -355,7 +355,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   block at 0x1f800100, on over the spread state at 0x1f800180. Its flag-0x100
   test (a WalkTo with terrain costs disabled) compares the cost-table index,
   not the cost, with 0xff, so blocked surfaces cost 1 too.
-  `store_spread_unit_to_scratchpad` copies 64 and keeps 0xff.
+  `init_pathfind_work` copies 64 and keeps 0xff.
 - `formula_healing_staff` (formula 0x07, the Healing Staff) applies
   zodiac compatibility twice, once itself and once inside
   `formula_apply_physical_modifiers`, whose Defense
@@ -392,7 +392,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
 - `set_encounter_equipment`: the random body-armor roll tests
   `UNIT_SUPPORT_SET_1_EQUIP_SHIELD` before asking for `ITEM_TYPE_ARMOR`;
   Equip Armor is tested only for the helmet.
-- `clear_untargetable_panels` (ability ranges) visits
+- `clear_untargetable_lower_panels` (ability ranges) visits
   only the 256 lower-level panels, so an untargetable upper-level tile keeps
   its range; the weapon-range twin
   `clear_untargetable_tiles` visits all 512.
@@ -402,7 +402,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   (the first function finds its "mount" by the unit's own `unit_id`), so the
   partner's battle stats take no tile or facing here. The other two also write
   the partner record's facing with no null test.
-- `sprite_evtchr_release_reserved_slot` tests owner bit 0x80
+- `sprite_evtchr_clear_attack_image_slot` tests owner bit 0x80
   (`SPRITE_EVTCHR_SLOT_OWNER_ATTACK_IMAGE`), which the EVTCHR (0xfe) and free
   (0xff) markers also carry, so the event instruction releases a saved EVTCHR
   slot too.
@@ -425,7 +425,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   the round-to-nearest step of the sprite scale adds 1, not `ONE`, to the 4.12
   product before dividing, so it only rounds up a remainder of `ONE` - 1.
 - `battle_state_open_sp2_files_update` frees its 0x8000-byte buffer when
-  `sprite_open_sp2_file` returns 0, which means the read has started, and
+  `sprite_request_sp2_read` returns 0, which means the read has started, and
   keeps it on 1 (loader busy). The next frame allocates again and has its
   second request refused, so the file arrives in the kept block only because
   the heap hands the freed pages back.
@@ -435,8 +435,8 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   pushes never set it: it holds what the last level at that stack depth left.
 - `start_unit_secondary` (fall dust, splash, level up, trap,
   zodiac poof, death smoke, teleport) builds its init record in a local of
-  which `effect_secondary_build_init` sets five fields;
-  `effect_secondary_init` copies the rest of the two ten-byte blocks and
+  which `effect_secondary_build_self_context` sets five fields;
+  `effect_secondary_init_animation` copies the rest of the two ten-byte blocks and
   `used_weapon_id` as the stack left them.
 - `sprite_draw_shadow` sets bit 0 of `shadow_dirty` before testing it,
   so the shadow quad is recalculated on every call and the dirty bit the
@@ -447,10 +447,10 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   `formula_element_modify_weapon_damage`): the Holy element in the range data
   of the five Holy Sword abilities (0x9b-0x9f; 0x9e adds Lightning) is never
   applied.
-- Half of MP: `skillset_get_unit_ability_data` lists the halved
+- Half of MP: `skillset_build_ability_lists` lists the halved
   cost rounded up and `build_ability_list_rows` grays an ability with a nonzero
   listed CT whose listed cost exceeds the unit's MP, while
-  `check_and_consume_mp` and the AI (`ai_load_ability_entry`,
+  `check_action_and_spend_mp` and the AI (`ai_load_ability_entry`,
   `add_usable_abilities_from_skillset`) round down. A unit holding exactly the rounded-down half sees an odd-cost
   ability grayed out although it could pay for it.
 - `calendar_advance_days` (the scripted multi-day advance) disagrees
@@ -481,7 +481,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
 - `menu_screen_clamped_icon_list_thread`: Up steps the cursor up, but the Down
   test is inverted, so the cursor moves down on every frame Down is not held
   until it reaches `max_row_index`. Nothing refers to the thread.
-- `menu_build_and_upload_window_frame_image`: the banded upload (mode
+- `menu_build_window_frame_image`: the banded upload (mode
   `MENU_WINDOW_FRAME_UPLOAD`, an image of 0x3000 bytes or more) starts a band
   when `(i & 0x5f) == 0`, at rows 0x20, 0x80 and 0xa0 rather than every 0x60
   rows, and its last-band test `i - height >= 0x60` is never true. After the
@@ -513,12 +513,12 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   16 free sectors through `start_cd_read`, which reads with
   mode 0x1a0; the first read in `movie_start_stream` uses 0x1e0, so the
   restart drops `CdlModeRT` (XA-ADPCM playback).
-- `ability_build_skillset_list` bounds the support class with
+- `skillset_build_ability_list` bounds the support class with
   `<= ABILITY_ID_MOVEMENT_FIRST`, so Move+1 (486) is filed as a support ability;
   every caller asks for action abilities or for all four classes, so nothing
   sees the difference.
 - Tests that cannot succeed: `init_map_unit` runs
-  `run_weapon_seq` for the new unit's blocks only for a
+  `run_block_seq` for the new unit's blocks only for a
   sheet id below `SPRITE_SHEET_ID_VELIUS` (60) and at least
   `SPRITE_SHEET_ID_BOY` (74);
   `proposition_advance_day` caps waiting days above 32, and
@@ -538,7 +538,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   `direction` after masking it to 0-0xfff; selector 15 of
   `map_set_tile_value` retries `tile_selector_15_stub`,
   which returns 0 at once, up to 1000 times before load exception 0x80.
-  `run_unit_seq`, `run_weapon_seq` and
+  `run_unit_seq`, `run_block_seq` and
   `sprite_load_unit_frame` test sequence and frame pointers
   for -1, which the unpackers replace with the start of the data, and the last
   tests a three-bit part count plus one for `> 8`. The weapon interpreter's
@@ -552,7 +552,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   `menu_icon_selection_thread` clears both icon records' `bob_active` when
   one holds 0 and the other 2, but their only writer,
   `menu_build_window_sprites`, stores 0.
-- `queue_messages_for_unit` tests the 16-record
+- `queue_unit_post_effect_messages` tests the 16-record
   capacity of `s_post_effect_messages` once, before it walks the
   unit's 11 reportable outcomes: a unit reached with 15 records queued can
   append ten more past the array, over `s_sprite_compressed_nibble_phase`
@@ -562,9 +562,9 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   `ai_origin_is_allowed` (deep water, Geomancy terrain, an
   adjacent Monster Skill holder) on the unit's current tile in both passes, so
   the starting tile decides the move-then-act pass, which casts from the
-  destination; `ai_evaluate_move_origins` tests the destination there.
+  destination; `ai_evaluate_act_move_orders` tests the destination there.
 - `select_random_fire_tile` has no test for
-  an empty candidate list, and `calculate_action_tiles` calls
+  an empty candidate list, and `set_targeted_tiles` calls
   it for any result but -1, including 1 (no tile marked); it then targets the
   upper-level tile named by the stale `g_target_panels[0].mark`.
   Whether a retail action gets there is unknown.
@@ -602,7 +602,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   `command_resolve_selection`'s fallback for a menu outside its table, and
   whether that happens here is unknown.
 - `calculate_path` (WalkTo): the destination filter repeats the
-  water tests of `set_range_tile_flags`, but refuses lava only
+  water tests of `mark_move_destinations`, but refuses lava only
   when `move_type` is `MOVE_CLASS_FLY`, where that function refuses it unless
   `can_pass_lava` is set. The walker always uses `MOVE_CLASS_NORMAL`, so lava
   is never refused as a WalkTo destination.
@@ -755,10 +755,10 @@ written that way.
   `s32` result; the animation dispatcher ignores their results.
 - `thread_resolve_slot` and `thread_resolve_next_slot` fall
   off their end after `thread_current_exit()`, like the WORLD twins.
-- `ai_calculate_unit_death_delay` is defined
+- `ai_calculate_unit_death_counter_delay` is defined
   with three parameters and both callers pass one; the other two are scratch
   it assigns before reading.
-- `map_calculate_slope_height` masks its terrain layer to a byte; two callers
+- `map_calculate_surface_height` masks its terrain layer to a byte; two callers
   pass the 16-bit `action_command.target_position.vy` unmasked.
 - `start_next_post_move_event` passes x/layer/y to `ai_store_triggered_trap_coords`,
   whose byte stores expect x/y/layer. The argument-order disagreement is preserved.
@@ -770,7 +770,7 @@ written that way.
   `(u16*)` cast), so the id is that counter's low half.
 - `move_path_calculate_walk_to` has no return statement; its caller
   uses the path block pointer `calculate_path` left in `$v0`.
-- `map_load_gns_and_move_find` falls off its end for a map with no
+- `map_start_gns_load` falls off its end for a map with no
   GNS sector and returns what `bzero` left in `$v0`. `map_update_load`
   compares the result with the GNS table and, when it is not the table (also
   when the read could not start), returns 0 with its 0x20000-byte load buffer
@@ -879,7 +879,7 @@ written that way.
   `g_world_map_projection_view` is one 40-byte record in `world_map.h` but two
   statics (`s_world_map_projection_scale`, `s_world_map_projection_rotation`)
   plus the origin label in `src/wldcore/map/tiles.c`, rebuilt with a negative
-  `offsetof`; `build_origin_targetable_mask` reads
+  `offsetof`; `build_range_diamond_mask` reads
   `s_origin_range_row_masks[8..15]` on purpose into the following static
   `s_status_priority_weights` (`src/battle/ai/evaluation.c`);
   `g_system_work_buffer_0` is an unsized `u8[]` that OPEN views as `u32*`,
@@ -915,7 +915,7 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
 
 - `save_image_restore` skips a saved Unit List order if any of its first 11 keys is 11, and skips a saved Formation order if any of its first seven keys is 11. It preserves the live order, writes its final -1 terminator, and continues loading the save. Formation key 11 would read the fixed 100 CT maximum; the Order Unit menu exposes only keys 0, 1, 2, 4, 5, 7 and 9.
 - `weather_dispatch_command` selects precipitation from the raw script weather and snow flag. The rain and snow drawing paths do not test `MAP_WEATHER_FLAG_IGNORE_WEATHER`: that indoor flag suppresses elemental and movement weather rules through `weather_get_effective`, but does not itself suppress the particles.
-- `start_next_post_move_event` handles `MOVE_POST_EVENT_SOURCE_DISPLAY` (0x200), and `battle_state_post_move_events_update` clears it, but the normal producer chain through `move_get_post_events` and `move_get_ability_events` never sets it.
+- `start_next_post_move_event` handles `MOVE_POST_EVENT_SOURCE_DISPLAY` (0x200), and `battle_state_post_move_events_update` clears it, but the normal producer chain through `move_resolve_post_events` and `move_get_ability_events` never sets it.
 - `animation_set_status` retains two branches selecting animation 0x21 when bit 0 of `status_flags_1_4` is set. Normal status updates never set that bit. Crystal's mask 1 belongs to the separate `status_flags_5_6` word; this does not rule out animation requests from other paths.
 - `gfx_load_debug_font`: patches the low immediate byte of `FntLoad` at `0x80022f5c`, changing its font CLUT placement from `y + 128` to `y + 127`.
 - `StCdInterrupt`: tracks frame numbers through the header's low `u16`, while DMA completion and OPEN retain the full `u32` frame number.
@@ -985,16 +985,16 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
 - `EFFECT/E223.BIN` through `E225.BIN` contain effect data but have zero resident load sizes; requesting those file IDs loads Cure instead. The ability-effect mapping does not reference them.
 - `load_portraits`: the WLDFACE rectangles (`g_menu_screen_wldface_vram_rects`) use x = 1664–1856; the GPU masks VRAM transfer coordinates, so the pages land at x = 640–832.
 - `suzuki_sound_init`: `suzuki_sound_init_sfx_music` reaches `suzuki_smd_insert_music`, which disables and re-enables `g_suzuki_sound_root_counter_2_event` before the initializer opens that event: handle 0 at boot, the handle `suzuki_sound_quit` closed on a soft reset.
-- `effect_script_opcode_2e_invalid`: opcodes 2e–77 report an error without setting a handler result; `run_script_block` then tests the undefined return value.
+- `effect_script_opcode_2e_invalid`: opcodes 2e–77 report an error without setting a handler result; `run_script_instance` then tests the undefined return value.
 - EFFECT scripts never run seven state handlers: E000's script calls only `effect_noop` (opcode 07) and E314's names no file function, so native function ids 1 and 90 are bound by nothing; E134/E242 `effect_ring_stack_mesh_update`, E454/E455 `effect_set_map_3d_objects_state_2` and E456 `effect_freeze_map` sit in callback slots (script opcode 06) that no keyframe selector fires. E457.BIN, which has no code, binds native function 88 (0x801c2578, E259's `effect_dome_mesh_update`; data in its own image) to slot 0, and none of its keyframes names a slot.
-- `map_mesh_draw_weather`: when map command 0x96 (E458) ends, `weather_dispatch_command(0x8b)` restores a non-snow rain or storm mid-draw; the mode-0x55 block then re-links `ft3` drops the 0x96 block already linked at OT+2, an ordering-table cycle that holds `DrawSync` until its 240-VBlank timeout.
+- `map_draw`: when map command 0x96 (E458) ends, `weather_dispatch_command(0x8b)` restores a non-snow rain or storm mid-draw; the mode-0x55 block then re-links `ft3` drops the 0x96 block already linked at OT+2, an ordering-table cycle that holds `DrawSync` until its 240-VBlank timeout.
 - `save_run_screen`: its 0xCCD8-byte stack frame, containing packet pools and directory entries, reaches below 0x801ff000 into the top cells of MAIN's game heap (0x801df000-0x801ff000); it is safe only while those cells are free.
 - `tutorial_opcode_17_end`: two paths fall off the end of the s32 handler and return a stale nonzero `$v0` (the fade's result, or the 1 just stored), so the formation loop keeps running.
 - `unit_panel_draw_backdrops` in WORLD and BUNIT (the ATTACK, DEBUGCHR and REQUIRE
   copies, and EQUIP's `unit_panel_draw_backdrops`, have no caller): while a unit-status banner thread (8 or 7) is being
   stopped its first parameter is 0, and the panel check reads that display
   record at RAM address 0.
-- `ending_draw_text_records`: passes OT entries by value (`otag[15]`, `otag[8]`) to `AddPrim`; after `ClearOTagR` each holds the physical address of the entry below it, so the credits fade, bands and glyphs link into layers 14 and 7 through the KUSEG mirror.
+- `ending_draw_script`: passes OT entries by value (`otag[15]`, `otag[8]`) to `AddPrim`; after `ClearOTagR` each holds the physical address of the entry below it, so the credits fade, bands and glyphs link into layers 14 and 7 through the KUSEG mirror.
 - `update_picture_dissolve`: the step-0 call (start the dissolve) has no return value of its own; `$v0` keeps its clearing cursor, the address one byte below the band-progress table. Initialization callers ignore that result.
 - `menu_build_window_sprites`: for the Bar's send-unit list (header 0x10) the arrow x reads the "height" of the record at the panel's value pointer, `&g_window_panel_value` + 6, which is the upper half of `g_proposition_dispatch_days` (0).
 - `generate_treasure_item`: outside action execution (AI simulation, preview) it returns with no value, so `$v0` still holds `g_action_state` and the crystal pickup result names item 1 or 2 as the treasure.
@@ -1010,7 +1010,7 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
 - The ability names "Move in Water" (0x1f6) and "Walk on Water" (0x1f7) are
   the reverse of what the abilities do: 0x1f6 keeps the unit on the surface
   and 0x1f7 one level below it (`get_effective_height`,
-  `store_spread_unit_to_scratchpad`).
+  `init_pathfind_work`).
 - Ability 457, named "Equip Knife", sets the Equip Katana support bit
   (`UNIT_SUPPORT_SET_1_EQUIP_KATANA`): the unit can equip katanas, not
   knives.
@@ -1036,8 +1036,8 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
   never drawn.
 - `apply_level_change` stores the new level before
   calling `battle_unit_apply_level_growth`, so an ability level-up divides each
-  raw stat by growth + new level; an EXP level-up (`battle_unit_check_level_up`)
-  and the generated-unit replay in `calculate_initial_stats` divide
+  raw stat by growth + new level; an EXP level-up (`battle_unit_try_level_up`)
+  and the generated-unit replay in `calculate_base_stats` divide
   by growth + old level.
 - `reward_find_war_trophies_and_bonus_money` computes
   `level_bonus_money` ((highest enemy level - lowest party level) * 100, 0
@@ -1061,14 +1061,14 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
   MAP036.46, 0x01 in MAP045.7), and the terrain chunks of 37 maps arrive with
   mark bits already set in tile byte 5, which
   `map_copy_tile_data` copies as they are. Tile flag 0x80
-  (`cannot_stop`), which `set_range_tile_flags` tests, is set
+  (`cannot_stop`), which `mark_move_destinations` tests, is set
   in no terrain chunk, and tile byte 1 is 0 in all of them.
 - `g_map_directory_path` is the string `C:\FFTIMG\MAP\GNS\`; every map
   file load passes it as the first argument, which
   `map_start_file_load` ignores.
 - The Brave Story "Fact" row never appears:
   `EVENT_SCRIPT_VAR_FACTS_ENABLED` (0x92) gates it
-  (`build_story_rows`), no code sets it, and the one
+  (`build_menu_rows`), no code sets it, and the one
   event script that writes it, 0x075, stores 0 while setting facts
   0x1a4-0x1aa. The 24 fact names in WORLD.LZW are empty strings.
 - `g_treasure_sound_novel_ids` is 0 for every treasure but 31
@@ -1122,7 +1122,7 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
 - The effect interpreter indexes fixed tables with wider fields and no check:
   the opcode is masked to nine bits over the 120 entries of
   `g_effect_script_instructions` (0x2e-0x77 report an error without returning
-  a result: `run_script_block` narrows the leftover `$v0` to `s16`
+  a result: `run_script_instance` narrows the leftover `$v0` to `s16`
   and tests it while the script position stays unchanged);
   `g_effect_particle_render_handlers` has four entries for
   `(kind_flags >> 12) & 0xf`, so `EFFECT_WORK_KIND_HEAP_BLOCK` would call
@@ -1159,7 +1159,7 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
 - `wait_hardware_event` is OPEN's only caller of
   `poll_hardware_event`, and nothing calls the wait routine.
 - MAIN's Orbonne caption fades have no callers. `set_up_caption_display`
-  is called only by `new_game_fade_in_orbonne_caption`, so it is unreachable too.
+  is called only by `new_game_fade_in_caption`, so it is unreachable too.
 - `suzuki_sound_set_unread_value` stores a halfword in main RAM at `0x80032a28`;
   initialization and shutdown clear it. Original-code references identify only
   stores, and the traced SPU transfer paths do not send it to sound RAM. No reader
@@ -1180,7 +1180,7 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
   each suffix names the opposite direction.
 - `SpuQuit` closes the SPU DMA event before disabling it, so `DisableEvent`
   gets a closed descriptor.
-- `update_stage`: nothing stores playback phase 5 or
+- `update_playback_phase`: nothing stores playback phase 5 or
   `EFFECT_PLAYBACK_PHASE_RESTART_SCRIPT` (6), nor the two start pointers the
   restart arm rewinds to (`s_effect_frame_data_start`,
   `g_effect_animation_sequences_start`), so the restart path never runs;
@@ -1218,7 +1218,7 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
   `battle_state_change_turn_update` call `map_unit_get_source`;
   `battle_state_targeting_range_update` (twice),
   `map_unit_get_tile_center_height_by_battle_unit_id` and
-  `calculate_cursor_tile_vector_normal` (the other level's tile)
+  `aim_step_vector_at_cursor_tile` (the other level's tile)
   call `map_get_tile`; and
   `map_unit_facing_draw_wait_direction` runs a `RotTrans` of the unit's feet
   that the next `RotTrans` overwrites.

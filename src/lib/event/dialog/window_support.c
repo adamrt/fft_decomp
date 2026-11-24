@@ -55,7 +55,7 @@ s32 text_count_decimal_digits(s32 value) {
 
 /* For a negative direction, mirror the quad's texture: swap u0/u1 and u2/u3, or the matching v
  * values when the texture runs vertically (u0 == u1). */
-void gfx_flip_quad_negative_uv(POLY_FT4* primitive, s32 direction) {
+void gfx_flip_quad_uv_if_negative(POLY_FT4* primitive, s32 direction) {
     u8 swap;
 
     if (direction < 0) {

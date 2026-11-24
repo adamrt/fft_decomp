@@ -291,7 +291,7 @@ static void step_toward_target(map_unit_t* unit, s32 allow_height_change) {
                 tile_center.vz
                     = unit->battle_unit->action_command.target_position.vz * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
                 velocity.vy
-                    = (map_calculate_slope_height(&tile_center, unit->battle_unit->action_command.target_position.vy)
+                    = (map_calculate_surface_height(&tile_center, unit->battle_unit->action_command.target_position.vy)
                           - unit->world_coords.vy)
                     * ONE;
             }
@@ -340,7 +340,7 @@ static void step_to_own_tile(map_unit_t* unit, s32 allow_height_change) {
         velocity.vz = (unit->map_y * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2) - unit->world_coords.vz) * ONE;
         tile_center.vx = unit->map_x * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
         tile_center.vz = unit->map_y * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
-        velocity.vy = (map_calculate_slope_height(&tile_center, unit->map_layer) - unit->world_coords.vy) * ONE;
+        velocity.vy = (map_calculate_surface_height(&tile_center, unit->map_layer) - unit->world_coords.vy) * ONE;
         velocity.vx /= timer;
         velocity.vy /= timer;
         velocity.vz /= timer;
@@ -447,7 +447,7 @@ static s32 distortion_jump_to_target(map_unit_t* unit) {
             } else {
                 target.vx = unit->battle_unit->action_command.target_position.vx * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
                 target.vz = unit->battle_unit->action_command.target_position.vz * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
-                target.vy = map_calculate_slope_height(&target, unit->battle_unit->action_command.target_position.vy);
+                target.vy = map_calculate_surface_height(&target, unit->battle_unit->action_command.target_position.vy);
             }
             timer = calculate_jump_arc_velocity(&unit->world_coords, &target, &velocity);
             unit->distortion_phase++;
@@ -575,7 +575,7 @@ static s32 distortion_jump_takeoff(map_unit_t* unit) {
             unit->position_copies_active = 0;
             unit->shadow_graphic_trigger = 0;
             unit->distortion_animation_id = ANIMATION_DISTORTION_NONE;
-            animation_force_with_facing(ANIMATION_STAND, unit->facing, unit);
+            animation_request_forced(ANIMATION_STAND, unit->facing, unit);
         }
         timer--;
         break;

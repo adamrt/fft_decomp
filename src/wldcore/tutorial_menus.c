@@ -124,7 +124,7 @@ void tutorial_build_menu_panel(tutorial_menu_level_t* panel) {
     point.x = 8;
     point.y = 8;
     for (i = 0; i < panel->entry_count; i++) {
-        window_display_text_entry(
+        window_render_text_entry(
             index, panel->entries[i] + TEXT_ID_TUTORIAL_CATEGORY_ROW_FIRST, point, g_window_image_buffer);
         point.y += 0x10;
     }

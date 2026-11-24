@@ -41,7 +41,7 @@ enum {
 
 extern u16* const* g_help_active_text_id_tables;
 
-/* The help text file's section offsets, which text_relocate_pointer_table binds while a help window is open. */
+/* The help text file's section offsets, which text_bind_section_pointers binds while a help window is open. */
 extern text_bank_t g_help_text_bank;
 
 /* help cursor */

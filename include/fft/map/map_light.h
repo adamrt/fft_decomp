@@ -55,7 +55,7 @@ typedef enum map_light_command {
     MAP_LIGHT_COMMAND_GET_DARKNESS_COLOR = 0x65
 } map_light_command_e;
 
-void* map_light_dispatch_state_command(map_light_command_e command, void* data);
+void* map_light_dispatch_command(map_light_command_e command, void* data);
 void map_light_init_background(void);
 void map_light_init_ambient(void);
 void map_light_init_darkness(void);
@@ -81,8 +81,6 @@ typedef enum map_light_back_color_command {
 s32* map_light_dispatch_back_color_command(s32 command, s32 red, s32 green, s32 blue);
 
 /* script lighting */
-/* Interpolates the script light transform (g_script_light_* in script.h) each frame. */
-void map_light_thread(void);
 void map_light_reset_script_light(void);
 
 #endif

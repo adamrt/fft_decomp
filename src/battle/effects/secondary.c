@@ -121,7 +121,7 @@ static effect_emitter_values_t s_secondary_particle_configs[17] = {
  * base plus a byte offset -- and the 16-bit entries are read through a cast
  * at the use site. Declaring it `u16[]` and casting the symbol to `u8*` for
  * the address instead reserves an unused 8-byte frame in
- * init_slot_secondary_animation. */
+ * init_slot_particle_animation. */
 extern u8 g_effect_secondary_particle_animation_data[];
 
 /* Secondary handler work state. */
@@ -266,7 +266,7 @@ extern s16 g_effect_projectile_spin_passes;
 /* Start the selected secondary animation on the slot: reset its color and
  * script state and store the 16-bit CLUT value (callers pass CLUTs of
  * MAP_CLUT_ROW_WEAPONS) at 0x88. */
-static void init_slot_secondary_animation(s32 group, u16 clut, effect_slot_t* slot) {
+static void init_slot_particle_animation(s32 group, u16 clut, effect_slot_t* slot) {
     u32 offset;
 
     slot->clut = clut;
@@ -310,7 +310,7 @@ static void spawn_particle_group(s32 group, s32 clut_index) {
             }
             slot = &g_effect_slots[g_effect_secondary_current->slot_ids[i]];
             slot->life = effect_slot_init_motion(&s_secondary_particle_configs[group], &slot->motion);
-            init_slot_secondary_animation(group, clut_index + MAP_CLUT(MAP_CLUT_ROW_WEAPONS, 0), slot);
+            init_slot_particle_animation(group, clut_index + MAP_CLUT(MAP_CLUT_ROW_WEAPONS, 0), slot);
             g_effect_secondary_current->active_count++;
             if (g_effect_secondary_current->active_count == s_secondary_particle_configs[group].count) {
                 break;
@@ -412,11 +412,10 @@ s32 effect_secondary_arrow_arc_handler(void) {
         }
         break;
     case EFFECT_SECONDARY_PHASE_EXECUTING:
-        previous
-            = -projectile_arc_calculate_trajectory_term(g_effect_arrow_launch_slope_q12, g_effect_arrow_arc_distance);
+        previous = -projectile_arc_calculate_height(g_effect_arrow_launch_slope_q12, g_effect_arrow_arc_distance);
         g_effect_arrow_arc_distance += g_effect_arrow_arc_distance_step;
-        term = -projectile_arc_calculate_trajectory_term(g_effect_arrow_launch_slope_q12, g_effect_arrow_arc_distance);
-        next = -projectile_arc_calculate_trajectory_term(
+        term = -projectile_arc_calculate_height(g_effect_arrow_launch_slope_q12, g_effect_arrow_arc_distance);
+        next = -projectile_arc_calculate_height(
             g_effect_arrow_launch_slope_q12, g_effect_arrow_arc_distance + g_effect_arrow_arc_distance_step);
         setVector(
             &angles, 0, g_effect_arrow_arc_yaw, ratan2(next - previous, g_effect_arrow_arc_distance_step * 2) + 0x400);
@@ -557,7 +556,7 @@ s32 effect_secondary_weapon_hit_handler(void) {
                     slot = &g_effect_slots[state->ids_a[j]];
                     slot->life = effect_slot_init_motion(
                         &s_secondary_particle_configs[EFFECT_PARTICLE_GROUP_WEAPON_HIT_A], &slot->motion);
-                    init_slot_secondary_animation(EFFECT_PARTICLE_GROUP_WEAPON_HIT_A,
+                    init_slot_particle_animation(EFFECT_PARTICLE_GROUP_WEAPON_HIT_A,
                         g_effect_secondary_current->parameter + MAP_CLUT(MAP_CLUT_ROW_WEAPONS, 0), slot);
                     state->count_a++;
                     if (state->count_a == 8) {
@@ -579,7 +578,7 @@ s32 effect_secondary_weapon_hit_handler(void) {
                     }
                     slot = &g_effect_slots[state->ids_b[j]];
                     slot->life = effect_slot_init_motion(&s_secondary_particle_configs[group], &slot->motion);
-                    init_slot_secondary_animation(
+                    init_slot_particle_animation(
                         EFFECT_PARTICLE_GROUP_WEAPON_HIT_B, MAP_CLUT(MAP_CLUT_ROW_WEAPONS, 10), slot);
                     slot->color.r = slot->color.g = slot->color.b = 0xff;
                     state->count_b++;
@@ -861,7 +860,7 @@ s32 effect_secondary_spell_charge_handler(void) {
                 slot = &g_effect_slots[state->ids_b[j]];
                 slot->life = effect_slot_init_motion(
                     &s_secondary_particle_configs[EFFECT_PARTICLE_GROUP_SPELL_CHARGE], &slot->motion);
-                init_slot_secondary_animation(
+                init_slot_particle_animation(
                     EFFECT_PARTICLE_GROUP_SPELL_CHARGE, MAP_CLUT(MAP_CLUT_ROW_WEAPONS, 15), slot);
                 state->count.particles++;
                 if (state->count.particles == 14) {
@@ -999,7 +998,7 @@ s32 effect_secondary_spell_charge_handler(void) {
  * secondary animation that only steps its state so that a null animation can
  * finish cleanly.  Returns 1 to keep animating, 0 to stop.
  */
-s32 effect_secondary_null_handler(void) {
+s32 effect_secondary_ending_handler(void) {
     s32 result;
 
     /* Preserve the target's unsigned phase-dispatch comparison. */
@@ -1369,7 +1368,7 @@ s32 effect_secondary_death_poof_handler(void) {
                 slot = &g_effect_slots[state->ids[i]];
                 slot->life = effect_slot_init_motion(
                     &s_secondary_particle_configs[EFFECT_PARTICLE_GROUP_DEATH_POOF], &slot->motion);
-                init_slot_secondary_animation(EFFECT_PARTICLE_GROUP_DEATH_POOF, EFFECT_DEATH_POOF_CLUT, slot);
+                init_slot_particle_animation(EFFECT_PARTICLE_GROUP_DEATH_POOF, EFFECT_DEATH_POOF_CLUT, slot);
                 state->count++;
                 if (state->count == EFFECT_DEATH_POOF_SLOT_COUNT) {
                     break;
@@ -1474,7 +1473,7 @@ s32 effect_secondary_zodiac_poof_handler(void) {
                 slot = &g_effect_slots[state->ids[i]];
                 slot->life = effect_slot_init_motion(
                     &s_secondary_particle_configs[EFFECT_PARTICLE_GROUP_ZODIAC_POOF], &slot->motion);
-                init_slot_secondary_animation(
+                init_slot_particle_animation(
                     EFFECT_PARTICLE_GROUP_ZODIAC_POOF, clut_index + MAP_CLUT(MAP_CLUT_ROW_WEAPONS, 0), slot);
                 state->count++;
                 if (state->count == EFFECT_ZODIAC_POOF_SLOT_COUNT) {
@@ -1807,7 +1806,7 @@ s32 effect_secondary_linear_projectile_handler(void) {
         break;
     case EFFECT_SECONDARY_PHASE_EXECUTING:
         g_effect_projectile_progress += g_effect_projectile_speed;
-        projectile_calculate_trajectory_position(
+        projectile_direct_calculate_offset(
             &g_effect_projectile_delta, g_effect_projectile_length, g_effect_projectile_progress, &position);
         setVector(&position, g_projectile_origin.vx + position.vx, g_projectile_origin.vy + position.vy,
             g_projectile_origin.vz + position.vz);
@@ -1990,7 +1989,7 @@ s32 effect_secondary_summon_charge_handler(void) {
                 slot = &g_effect_slots[j];
                 slot->life = effect_slot_init_motion(
                     &s_secondary_particle_configs[EFFECT_PARTICLE_GROUP_SUMMON_CHARGE], &slot->motion);
-                init_slot_secondary_animation(EFFECT_PARTICLE_GROUP_SUMMON_CHARGE, EFFECT_RING_CLUT, slot);
+                init_slot_particle_animation(EFFECT_PARTICLE_GROUP_SUMMON_CHARGE, EFFECT_RING_CLUT, slot);
             }
         }
         g_effect_secondary_current->timer = 0;

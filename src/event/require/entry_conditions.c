@@ -47,7 +47,7 @@ void require_conditions_entrypoint(void) {
         thread_set_parameters(thread, 0, 0, 2);
         thread_wait_inactive(thread);
     } else if (condition == EVENT_DISPLAY_CONDITION_SHOW_READY_BUGGED) {
-        thread_start(thread, conditions_ready_bugged_thread);
+        thread_start(thread, conditions_hovered_stats_thread);
         thread_set_parameters(thread, 0, 0, 0);
         thread_wait_inactive(thread);
     } else if (condition == EVENT_DISPLAY_CONDITION_BATTLE_CONGRATULATIONS) {
@@ -90,7 +90,7 @@ void help_menu_after_battle_thread(void) {
     while (heap_reserve_at(g_heap_high_overlay_load_address, 0x10000) != g_heap_high_overlay_load_address) {
         thread_yield();
     }
-    overlay_companion_request(COMPANION_OVERLAY_HELPMENU);
+    overlay_companion_load(COMPANION_OVERLAY_HELPMENU);
     thread_id = thread_resolve_slot(THREAD_SLOT_FIRST_IDLE);
     thread_start(thread_id, helpmenu_after_battle_entrypoint);
     thread_wait_inactive(thread_id);

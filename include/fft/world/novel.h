@@ -178,4 +178,6 @@ void novel_update_quit_menu(menu_stack_record_t* level);
 void novel_update_history(menu_stack_record_t* level);
 void novel_update_reading_choice(menu_stack_record_t* level);
 
+void novel_draw_history_text(s32 window_index, s32 text_id);
+
 #endif

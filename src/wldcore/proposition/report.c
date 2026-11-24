@@ -42,8 +42,8 @@ enum {
 
 static void open_report(s32 argument);
 static void open_result(s32 proposition);
-static void prepare_report(s32 proposition_index);
-static s32 select_report_speaker(s32 index);
+static void resolve_outcome(s32 proposition_index);
+static s32 select_reporter(s32 index);
 static s32 update_report_message(proposition_report_level_t* state, s32 message);
 
 /* Open the job report list: accepted jobs that have returned to this town, under 'Good job. You
@@ -164,7 +164,7 @@ void proposition_update_returned_list_input(menu_stack_record_t* level) {
     if (buttons & PSX_PAD_CIRCLE) {
         sound_play_effect(SOUND_SFX_CONFIRM);
         proposition_suspend_returned_list(level);
-        prepare_report(level->panel.entries[g_window_panel_render_state.selected_index]);
+        resolve_outcome(level->panel.entries[g_window_panel_render_state.selected_index]);
         menu_stack_store_cursor(MENU_STACK_CURSOR_SLOT_RETURNED);
         g_text_substitution_values[0] = g_menu_stack_entry_values[g_window_panel_render_state.selected_index];
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_HEAR_ABOUT_JOB, 0);
@@ -653,13 +653,13 @@ static void open_result(s32 proposition) {
     window_build_render_record_image(index, bounds, 0, g_window_image_buffer);
     point.x = 8;
     point.y = text_rows * 0x10 + 8;
-    window_display_text_entry(index, TEXT_ID_JOB_RESULT_LABELS, point, g_window_image_buffer);
+    window_render_text_entry(index, TEXT_ID_JOB_RESULT_LABELS, point, g_window_image_buffer);
     point.x = 8;
     point.y = 8;
-    window_display_text_entry(index, TEXT_ID_JOB_CONTENTS_LABEL, point, g_window_image_buffer);
+    window_render_text_entry(index, TEXT_ID_JOB_CONTENTS_LABEL, point, g_window_image_buffer);
     point.x = 68;
     point.y = 8;
-    window_display_text_entry(
+    window_render_text_entry(
         index, *panel_text + (TEXT_ID_PROPOSITION_JOB_CONTENTS_BASE - 1), point, g_window_image_buffer);
     for (i = 0; i < count; i++) {
         s32 row = i + 2;
@@ -667,7 +667,7 @@ static void open_result(s32 proposition) {
 
         point.y = (text_rows + row) * 0x10 + 8;
         point.x = x;
-        window_display_text_entry(index,
+        window_render_text_entry(index,
             g_proposition_active[proposition].participant_indices[i] | TEXT_ID_UNIT_NAME_BASE, point,
             g_window_image_buffer);
     }
@@ -678,7 +678,7 @@ static void open_result(s32 proposition) {
         point.x = 160;
         point.y = (text_rows + row) * 0x10 + 8;
         g_text_substitution_values[0] = g_proposition_report.participant_jp[i];
-        window_display_text_entry(index, TEXT_ID_FOUR_DIGIT_VALUE, point, g_window_image_buffer);
+        window_render_text_entry(index, TEXT_ID_FOUR_DIGIT_VALUE, point, g_window_image_buffer);
     }
 
     window_load_render_record_image(index, g_window_image_buffer);
@@ -817,7 +817,7 @@ void proposition_update_result(menu_stack_record_t* level) {
     if (g_proposition_report.result == PROPOSITION_RESULT_SUCCESS) {
         date.day = day;
         date.month = month;
-        calendar_write_date(g_proposition_last_attempt_date_bits,
+        calendar_write_date_bits(g_proposition_last_attempt_date_bits,
             g_proposition_active[level->proposition_result.proposition].proposition_id, &date);
     }
 
@@ -825,14 +825,15 @@ void proposition_update_result(menu_stack_record_t* level) {
         script_variable_set(g_proposition_report.reward_index + EVENT_SCRIPT_VAR_TREASURE_FIRST, 1);
         date.day = day;
         date.month = month;
-        calendar_write_date(g_brave_story_treasure_acquisition_date_bits, g_proposition_report.reward_index, &date);
+        calendar_write_date_bits(
+            g_brave_story_treasure_acquisition_date_bits, g_proposition_report.reward_index, &date);
     }
 
     if (g_proposition_report.reward_type == PROPOSITION_REWARD_UNEXPLORED_LAND) {
         script_variable_set(g_proposition_report.reward_index + EVENT_SCRIPT_VAR_UNEXPLORED_LAND_FIRST, 1);
         date.day = day;
         date.month = month;
-        calendar_write_date(g_brave_story_land_discovery_date_bits, g_proposition_report.reward_index, &date);
+        calendar_write_date_bits(g_brave_story_land_discovery_date_bits, g_proposition_report.reward_index, &date);
     }
 
     for (i = 0; i < g_proposition_active[g_proposition_report.proposition_index].participant_count; i++) {
@@ -869,10 +870,10 @@ void proposition_update_result(menu_stack_record_t* level) {
 /* Resolve finished proposition `proposition_index` before its report: unpack its data
  * row, pick the unit who reports, decide the result and work out the JP and
  * gil, the bonus reward and the extra-days multiplier. */
-static void prepare_report(s32 proposition_index) {
+static void resolve_outcome(s32 proposition_index) {
     proposition_unpack_row(&g_proposition_selected_row, g_proposition_active[proposition_index].proposition_id);
     g_proposition_report.proposition_index = proposition_index;
-    g_proposition_report.reporter_party_index = select_report_speaker(proposition_index);
+    g_proposition_report.reporter_party_index = select_reporter(proposition_index);
     proposition_determine_success();
     proposition_calculate_jp_and_gil();
     proposition_roll_bonus_reward();
@@ -884,7 +885,7 @@ static void prepare_report(s32 proposition_index) {
  * speaker_mode says. A mode outside 1 to 4 would return `selected` unset. The
  * goto form for the shared Brave/Faith tails matches the target, which
  * reloads the stat after the compare. */
-static s32 select_report_speaker(s32 index) {
+static s32 select_reporter(s32 index) {
     party_unit_t* unit;
     s32 best;
     s32 i;

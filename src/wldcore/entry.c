@@ -43,7 +43,7 @@ static s32 handle_formation_return(void);
 static void init_map_screen(void);
 static void init_subsystems(void);
 static void init_map_state(void);
-static void restore_entry_level(void);
+static void open_entry_level(void);
 static void update_backdrop(void);
 
 /* Run world-map frames until a menu level stops the loop, then return why as a
@@ -76,7 +76,7 @@ world_map_result_e wldcore_entrypoint(void) {
             if (g_world_map_flags & WORLD_MAP_FLAG_DRAW_MAP) {
                 draw_map_frame();
             } else {
-                world_map_draw_frame();
+                world_map_draw_backdrop_frame();
             }
             if (g_world_map_flags & WORLD_MAP_FLAG_DISPLAY_OFF) {
                 SetDispMask(0);
@@ -130,7 +130,7 @@ static void update_backdrop(void) {
 
 /* Capture the map backdrop: draw the map tiles, routes, dots and auxiliary
  * records once, store the drawn image in g_world_map_scratch_buffer (which
- * world_map_draw_frame uploads behind each later frame), then draw
+ * world_map_draw_backdrop_frame uploads behind each later frame), then draw
  * the menu frame over it. */
 void world_map_capture_backdrop(void) {
     RECT rect;
@@ -156,7 +156,7 @@ void world_map_capture_backdrop(void) {
     GsSortClear(0, 0, 0, &g_world_map_aux_ordering_tables[g_gfx_active_buffer_index]);
     GsDrawOt(&g_world_map_aux_ordering_tables[g_gfx_active_buffer_index]);
     DrawSync(0);
-    world_map_set_display_rect(g_gfx_active_buffer_index, &rect);
+    world_map_get_display_rect(g_gfx_active_buffer_index, &rect);
     StoreImage(&rect, g_world_map_scratch_buffer);
     DrawSync(0);
     g_picture_background_loaded_set = -1;
@@ -177,7 +177,7 @@ void world_map_capture_backdrop(void) {
  * map dots and menus into the main one, then sorts the auxiliary table's
  * clear, draws both tables and clears WORLD_MAP_FLAG_DRAW_MAP. The map and
  * HUD passes run on the scratchpad stack. Sibling of
- * world_map_draw_frame. */
+ * world_map_draw_backdrop_frame. */
 static void draw_map_frame(void) {
     GsClearOt(0, 0, &g_world_map_aux_ordering_tables[g_gfx_active_buffer_index]);
     GsClearOt(0, 0, &g_world_map_ordering_tables[g_gfx_active_buffer_index]);
@@ -218,7 +218,7 @@ static void draw_map_frame(void) {
  * VSync and, unless WORLD_MAP_FLAG_NO_BACKGROUND_IMAGE is set, uploads the
  * captured map backdrop to the new draw buffer before drawing the ordering
  * table over it. */
-void world_map_draw_frame(void) {
+void world_map_draw_backdrop_frame(void) {
     RECT rect;
 
     GsClearOt(0, 0, &g_world_map_ordering_tables[g_gfx_active_buffer_index]);
@@ -238,7 +238,7 @@ void world_map_draw_frame(void) {
     VSync(0);
     GsSwapDispBuff();
     if (!(g_world_map_flags & WORLD_MAP_FLAG_NO_BACKGROUND_IMAGE)) {
-        world_map_set_display_rect(g_gfx_active_buffer_index == 0, &rect);
+        world_map_get_display_rect(g_gfx_active_buffer_index == 0, &rect);
         LoadImage(&rect, g_world_map_scratch_buffer);
     }
     GsDrawOt(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
@@ -254,13 +254,13 @@ static void init_subsystems(void) {
     init_map_graphics();
     display_object_init_pools();
     world_map_init_tile_atlas();
-    world_map_init_menu_state();
+    world_map_init_menu_resources();
     world_map_init_dots();
     world_map_stub_init();
     world_map_init_marker_and_camera();
     menu_stack_reset();
     init_map_screen();
-    restore_entry_level();
+    open_entry_level();
 }
 
 /* Clear the whole 256x480 frame buffer, then install the draw-clip rectangle
@@ -425,11 +425,11 @@ static void init_map_state(void) {
             date.day = 1;
             for (i = 0; i < EVENT_SCRIPT_VAR_TREASURE_COUNT; i++) {
                 script_variable_set(EVENT_SCRIPT_VAR_TREASURE_FIRST + i, 1);
-                calendar_write_date(g_brave_story_treasure_acquisition_date_bits, i, &date);
+                calendar_write_date_bits(g_brave_story_treasure_acquisition_date_bits, i, &date);
             }
             for (i = 0; i < EVENT_SCRIPT_VAR_UNEXPLORED_LAND_COUNT; i++) {
                 script_variable_set(EVENT_SCRIPT_VAR_UNEXPLORED_LAND_FIRST + i, 1);
-                calendar_write_date(g_brave_story_land_discovery_date_bits, i, &date);
+                calendar_write_date_bits(g_brave_story_land_discovery_date_bits, i, &date);
             }
             for (i = 0; i < EVENT_SCRIPT_VAR_PROPOSITION_COUNT; i++)
                 script_variable_set(EVENT_SCRIPT_VAR_PROPOSITION_FIRST + i, 4);
@@ -504,7 +504,7 @@ static void init_map_screen(void) {
  * list it was chosen from (the tutorial with its two music tracks queued). The
  * title's tutorial and Brave Story requests open those screens. These all go
  * through world_map_open_screen_transition. */
-static void restore_entry_level(void) {
+static void open_entry_level(void) {
     s32 flags = g_world_map_flags & ~WORLD_MAP_FLAG_RESTART;
 
     g_world_map_flags = flags;
@@ -545,7 +545,7 @@ static void restore_entry_level(void) {
 static s32 handle_formation_return(void) {
     if (script_variable_get(EVENT_SCRIPT_VAR_FORMATION_RETURN_EVENT) != 0) {
         g_world_map_flags &= ~WORLD_MAP_FLAG_RESTART;
-        formation_run_world_map_return();
+        formation_run_for_return_event();
         return 1;
     }
 

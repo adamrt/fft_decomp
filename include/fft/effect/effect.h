@@ -152,7 +152,7 @@ typedef struct effect_list_node {
     s16 x;                               /* 0x0c: from the owning work record's position */
     s16 y;                               /* 0x0e */
     s16 z;                               /* 0x10 */
-    s16 screen_rotation_angle;           /* 0x12: update_particle_sprite_state stores the velocity heading here */
+    s16 screen_rotation_angle;           /* 0x12: render_particle_sprite stores the velocity heading here */
     u8 depth_mode;                       /* 0x14: effect_sprite_depth_mode_e */
     u8 _padding_15;                      /* aligns frame_timer */
     s16 frame_timer;                     /* 0x16: counts down by 2; the next opcode runs at <= 0 */

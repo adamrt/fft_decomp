@@ -55,7 +55,7 @@ void conditions_congratulations_thread(void) {
         thread_yield();
         g_thread_call_target = (void (*)(void))music_poll_scenario_load;
     } while (thread_call_on_main_stack() != 0);
-    g_thread_call_target = (void (*)(void))music_switch_track;
+    g_thread_call_target = (void (*)(void))music_play_slot;
     thread_call_on_main_stack(1, 0x7f, 0);
 
     thread_a = thread_resolve_slot(THREAD_SLOT_FIRST_IDLE);
@@ -578,7 +578,7 @@ void after_battle_departures_thread(void) {
 
 /* Thread body of display condition "ready": runs the hovered-unit stats
  * display thread for 60 frames, or until Circle, then stops it. */
-void conditions_ready_bugged_thread(void) {
+void conditions_hovered_stats_thread(void) {
     s32 thread_id = thread_resolve_slot(THREAD_SLOT_FIRST_IDLE);
 
     thread_start(thread_id, unit_view_hovered_stats_thread);
@@ -625,7 +625,8 @@ void input_wait_skip(void) {
 }
 
 /*
- * Thread body that runs the JOBSTTS overlay from the REQUIRE screen.
+ * Thread body that runs the JOBSTTS overlay from the REQUIRE screen: REQUIRE's
+ * copy of BATTLE's status_screen_jobs_thread.
  *
  * Copies the selected unit's billboard in, waits until 0x1f000 bytes can be
  * reserved at the high overlay address, requests the overlay and hands the
@@ -648,7 +649,7 @@ static void jobs_thread(void) {
             FntPrint("WAIT FOR FILEALLOCATION\n");
         }
     }
-    overlay_companion_request(COMPANION_OVERLAY_JOBSTTS);
+    overlay_companion_load(COMPANION_OVERLAY_JOBSTTS);
     thread_wait_frames(2);
     g_overlay_companion_overlay_state = COMPANION_OVERLAY_STATE_JOBSTTS;
     do {
@@ -678,7 +679,7 @@ void status_screen_open_after_battle_thread(void) {
  * The suspended thread's record is copied aside first and copied back before
  * the thread is resumed.
  */
-void unit_panel_transition_thread(void) {
+void unit_panel_backdrop_thread(void) {
     s32 frame = 0;
     thread_t* saved;
 

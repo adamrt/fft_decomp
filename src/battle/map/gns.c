@@ -77,7 +77,7 @@ enum { GNS_INITIAL_LOAD_BYTES = 0x1000, GNS_BUFFER_CLEAR_BYTES = 0xbb8 };
  *
  * Returns the GNS table when the read started and 0 when it could not start. A
  * map without a GNS sector returns whatever bzero left in $v0. */
-map_gns_record_t* map_load_gns_and_move_find(s32 map_id) {
+map_gns_record_t* map_start_gns_load(s32 map_id) {
     u32 selected_map = map_id & 0xffff;
     map_gns_record_t* gns_records;
     u32 lba;

@@ -36,7 +36,7 @@ static void novel_opcode_08_branch_if_dialog_option_not_equal(void);
 static void novel_opcode_09_wait_frames(void);
 static void novel_opcode_0a_load_picture(void);
 static void novel_opcode_0b_hide_picture(void);
-static void novel_opcode_0c_set_parent_windows_visible(void);
+static void novel_opcode_0c_set_prompts_visible(void);
 static void novel_opcode_0d_start_text_thread(void);
 static void novel_opcode_0e_branch_to_random_section(void);
 static void novel_opcode_0f_branch_if_section_read(void);
@@ -58,12 +58,12 @@ static void novel_opcode_1e_apply_counter_delta(void);
 static void novel_opcode_1f_play_sound(void);
 static void novel_opcode_20_load_music(void);
 static void novel_opcode_21_set_sound_mode(void);
-static void novel_opcode_22_branch_if_equal(void);
-static void novel_opcode_23_branch_if_not_equal(void);
-static void novel_opcode_24_branch_if_less(void);
-static void novel_opcode_25_branch_if_greater(void);
+static void novel_opcode_22_branch_if_counter_equal(void);
+static void novel_opcode_23_branch_if_counter_not_equal(void);
+static void novel_opcode_24_branch_if_counter_less(void);
+static void novel_opcode_25_branch_if_counter_greater(void);
 static void novel_opcode_26_fade_out_music(void);
-static void novel_opcode_27_switch_music_track(void);
+static void novel_opcode_27_fade_in_music(void);
 static void novel_opcode_28_fade_screen_out(void);
 static void novel_opcode_29_fade_screen_in(void);
 static void novel_opcode_2a_set_white_screen_overlay(void);
@@ -344,7 +344,7 @@ u32 novel_find_section_instruction(s32 section, s32 opcode) {
 /* Clear a render record's text image, draw text `text_id` centered
  * horizontally in it (nothing for id 0) and upload it. Also clears the
  * three pending sound script variables. */
-void window_draw_centered_text(s32 window_index, s32 text_id) {
+void novel_draw_history_text(s32 window_index, s32 text_id) {
     point32_t point;
     s16 text_width;
     s16 text_height;
@@ -359,7 +359,7 @@ void window_draw_centered_text(s32 window_index, s32 text_id) {
         g_window_image_buffer[i] = 0;
     }
     if (text_id != 0) {
-        window_display_text_entry(window_index, text_id, point, g_window_image_buffer);
+        window_render_text_entry(window_index, text_id, point, g_window_image_buffer);
     }
     window_load_render_record_image(window_index, g_window_image_buffer);
     script_variable_set(EVENT_SCRIPT_VAR_PENDING_SOUND_EFFECT, 0);
@@ -394,7 +394,7 @@ static void play_pending_sounds(s32 sound_id, s32 weather_sound_id, s32 track) {
             if ((g_novel_reading.music_selection & 0xFF) != track) {
                 change_reading_music(track);
                 g_music_queue.music.flags |= MUSIC_QUEUE_PLAYING;
-                music_switch_track(g_novel_reading.music_selection >> 8, 0, 0);
+                music_play_slot(g_novel_reading.music_selection >> 8, 0, 0);
                 music_set_target_volume(g_music_queue.volume, 0x28);
             }
         }
@@ -645,7 +645,7 @@ static void novel_opcode_0b_hide_picture(void) {
 
 /* Sound-novel opcode: a nonzero byte 1 shows the novel level's two button
  * windows and records PARENT_WINDOWS_VISIBLE, zero hides them and clears it. */
-static void novel_opcode_0c_set_parent_windows_visible(void) {
+static void novel_opcode_0c_set_prompts_visible(void) {
     if ((u8)(g_novel_reading.instruction >> 8) != 0) {
         g_novel_reading.state_flags |= NOVEL_STATE_PARENT_WINDOWS_VISIBLE;
         g_display_object_animated_pool[g_menu_stack_records[g_menu_stack_depth - 1].novel.quit_prompt_window].flags
@@ -910,7 +910,7 @@ static void novel_opcode_21_set_sound_mode(void) {
 /* Sound-novel opcode: branch to section byte 3 when the counter plus its
  * pending delta, clamped to 0..0xffff, equals the 16-bit operand in bytes 1-2.
  * The double negation keeps the native counter/delta add operand order. */
-static void novel_opcode_22_branch_if_equal(void) {
+static void novel_opcode_22_branch_if_counter_equal(void) {
     s32 value = g_novel_reading.counter - (-g_novel_reading.counter_delta);
     s32 operand;
     u32 word;
@@ -931,8 +931,8 @@ static void novel_opcode_22_branch_if_equal(void) {
     }
 }
 
-/* As novel_opcode_22_branch_if_equal, branching when the values differ. */
-static void novel_opcode_23_branch_if_not_equal(void) {
+/* As novel_opcode_22_branch_if_counter_equal, branching when the values differ. */
+static void novel_opcode_23_branch_if_counter_not_equal(void) {
     s32 value = g_novel_reading.counter - (-g_novel_reading.counter_delta);
     s32 operand;
     u32 word;
@@ -953,9 +953,9 @@ static void novel_opcode_23_branch_if_not_equal(void) {
     }
 }
 
-/* As novel_opcode_22_branch_if_equal, branching when the counter is below the
+/* As novel_opcode_22_branch_if_counter_equal, branching when the counter is below the
  * operand. */
-static void novel_opcode_24_branch_if_less(void) {
+static void novel_opcode_24_branch_if_counter_less(void) {
     s32 value = g_novel_reading.counter - (-g_novel_reading.counter_delta);
     s32 operand;
     u32 word;
@@ -976,9 +976,9 @@ static void novel_opcode_24_branch_if_less(void) {
     }
 }
 
-/* As novel_opcode_22_branch_if_equal, branching when the counter is above the
+/* As novel_opcode_22_branch_if_counter_equal, branching when the counter is above the
  * operand. */
-static void novel_opcode_25_branch_if_greater(void) {
+static void novel_opcode_25_branch_if_counter_greater(void) {
     s32 value = g_novel_reading.counter - (-g_novel_reading.counter_delta);
     s32 operand;
     u32 word;
@@ -1013,14 +1013,14 @@ static void novel_opcode_26_fade_out_music(void) {
 
 /* Sound-novel opcode: when a track is selected, switch playback to its slot
  * at volume 0 and fade to the queue's volume over operand 0 * 3 steps. */
-static void novel_opcode_27_switch_music_track(void) {
+static void novel_opcode_27_fade_in_music(void) {
     s16 track = g_novel_reading.music_selection;
     s32 operand;
 
     if (track != 0) {
         g_music_queue.music.flags |= MUSIC_QUEUE_PLAYING;
         operand = (u8)(g_novel_reading.instruction >> 8);
-        music_switch_track(track >> 8, 0, 0);
+        music_play_slot(track >> 8, 0, 0);
         music_set_target_volume(g_music_queue.volume, operand * 3);
     }
     g_novel_reading.state_flags |= NOVEL_STATE_FETCH;
@@ -1251,7 +1251,7 @@ static void (*s_novel_opcode_handlers[54])(void) = {
     novel_opcode_09_wait_frames,
     novel_opcode_0a_load_picture,
     novel_opcode_0b_hide_picture,
-    novel_opcode_0c_set_parent_windows_visible,
+    novel_opcode_0c_set_prompts_visible,
     novel_opcode_0d_start_text_thread,
     novel_opcode_0e_branch_to_random_section,
     novel_opcode_0f_branch_if_section_read,
@@ -1273,12 +1273,12 @@ static void (*s_novel_opcode_handlers[54])(void) = {
     novel_opcode_1f_play_sound,
     novel_opcode_20_load_music,
     novel_opcode_21_set_sound_mode,
-    novel_opcode_22_branch_if_equal,
-    novel_opcode_23_branch_if_not_equal,
-    novel_opcode_24_branch_if_less,
-    novel_opcode_25_branch_if_greater,
+    novel_opcode_22_branch_if_counter_equal,
+    novel_opcode_23_branch_if_counter_not_equal,
+    novel_opcode_24_branch_if_counter_less,
+    novel_opcode_25_branch_if_counter_greater,
     novel_opcode_26_fade_out_music,
-    novel_opcode_27_switch_music_track,
+    novel_opcode_27_fade_in_music,
     novel_opcode_28_fade_screen_out,
     novel_opcode_29_fade_screen_in,
     novel_opcode_2a_set_white_screen_overlay,

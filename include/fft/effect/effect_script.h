@@ -8,7 +8,7 @@
 #include "psx/types.h"
 
 /* loading and playback */
-/* The stages of update_stage, kept in s_effect_playback_phase. */
+/* The stages of update_playback_phase, kept in s_effect_playback_phase. */
 typedef enum effect_playback_phase {
     EFFECT_PLAYBACK_PHASE_IDLE = 0,
     EFFECT_PLAYBACK_PHASE_REQUESTED = 1, /* waiting for effect_playback_start */
@@ -33,8 +33,8 @@ typedef union effect_start_target_data {
 typedef char effect_start_target_data_size_must_be_4[sizeof(effect_start_target_data_t) == 4 ? 1 : -1];
 
 void effect_init_system(void);
-void effect_reset_subsystems(void);
-u32 effect_ability_has_no_file(s32 ability_id);
+void effect_init_playback_pools(void);
+u32 effect_ability_has_no_effect(s32 ability_id);
 s32 effect_is_item_ability(s32 ability_id);
 void effect_playback_request(u32 packed, s32 ability, const effect_context_t* source);
 void effect_start_request(s32 ability_id, s32 target_mode, effect_start_target_data_t target);

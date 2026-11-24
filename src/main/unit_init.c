@@ -25,7 +25,7 @@ static u32 s_names_use_world_text = 0;
 static s32 choose_unlocked_job(const battle_unit_t* unit);
 static void finish_build(battle_unit_t* unit);
 static void set_encounter_abilities(battle_unit_t* unit, const entd_unit_t* entd);
-static void calculate_initial_stats(battle_unit_t* unit, s32 mode);
+static void calculate_base_stats(battle_unit_t* unit, s32 mode);
 static s32 set_encounter_data(battle_unit_t* unit, const entd_unit_t* entd);
 static void set_encounter_equipment(battle_unit_t* unit, const entd_unit_t* entd);
 static void set_encounter_jobs(battle_unit_t* unit, const entd_unit_t* entd);
@@ -59,8 +59,8 @@ s32 battle_unit_init_from_party_slot(battle_unit_t* unit, s32 slot, s32 use_worl
     copy_party_record(unit, party_unit);
     copy_job_data(unit);
     battle_unit_enable_rsm_flags(unit);
-    calculate_initial_stats(unit, 0);
-    battle_unit_set_equippable_items(unit);
+    calculate_base_stats(unit, 0);
+    battle_unit_add_equippable_types(unit);
     finish_build(unit);
     return 0;
 }
@@ -99,11 +99,11 @@ s32 battle_unit_init_from_encounter(battle_unit_t* unit, const entd_unit_t* entd
     if (unit->formation_index == UNIT_FORMATION_INDEX_NONE) {
         unit->formation_index = UNIT_FORMATION_INDEX_GENERATED_UNIT;
     }
-    calculate_initial_stats(unit, 0);
+    calculate_base_stats(unit, 0);
     if (unit->formation_index == UNIT_FORMATION_INDEX_GENERATED_UNIT) {
         unit->formation_index = UNIT_FORMATION_INDEX_NONE;
     }
-    battle_unit_set_equippable_items(unit);
+    battle_unit_add_equippable_types(unit);
     if (kind != UNIT_ENTD_INIT_TRANSFORM) {
         if (unit->formation_index >= PARTY_ROSTER_SLOT_COUNT) {
             set_encounter_equipment(unit, entd);
@@ -119,7 +119,7 @@ s32 battle_unit_init_from_encounter(battle_unit_t* unit, const entd_unit_t* entd
 static void finish_build(battle_unit_t* unit) {
     battle_unit_set_equipment_stats(unit);
     battle_unit_set_equipment_attributes(unit, 1);
-    battle_unit_calculate_move_and_jump(unit, 0);
+    battle_unit_apply_movement_bonuses(unit, 0);
     store_names(unit);
 }
 
@@ -587,7 +587,7 @@ static void set_rsm_flag(battle_unit_t* unit, u32 ability_id) {
  * Mode 0 also fills HP and MP and, for a generated unit, first replays the
  * growth of levels 2 to its level (raw += raw / (growth + level - 1) for
  * each). A mode with bit 0 set leaves Speed, PA and MA as they are. */
-static void calculate_initial_stats(battle_unit_t* unit, s32 mode) {
+static void calculate_base_stats(battle_unit_t* unit, s32 mode) {
     u32 value;
     u32 multiplier;
     s32 hp_mp_divisor = 100;
@@ -943,7 +943,7 @@ static void set_encounter_equipment(battle_unit_t* unit, const entd_unit_t* entd
 /* Add to the unit's equippable item types those its Equip support abilities grant
  * (Equip Armor covers helmets and armor), and the ribbon, bag and perfume types
  * for a female unit. */
-void battle_unit_set_equippable_items(battle_unit_t* unit) {
+void battle_unit_add_equippable_types(battle_unit_t* unit) {
     s32 support = unit->ability_flags.support[0];
 
     if (support & UNIT_SUPPORT_SET_1_EQUIP_ARMOR) {
@@ -1054,7 +1054,7 @@ void battle_unit_set_equipment_attributes(battle_unit_t* unit, s32 level_up_chec
 
     mem_zero(unit->equipment_attributes, sizeof(unit->equipment_attributes));
     cap = UNIT_HP_MP_MAX;
-    calculate_initial_stats(unit, level_up_check + 1);
+    calculate_base_stats(unit, level_up_check + 1);
     unit->equipped_flags = 0;
     if (!(unit->unit_flags & UNIT_FLAG_MONSTER)) {
         bonus = unit->equipment_attributes;
@@ -1148,7 +1148,7 @@ void battle_unit_set_equipment_attributes(battle_unit_t* unit, s32 level_up_chec
 /* Add the Move +1/+2/+3 and Jump +1/+2/+3 abilities to Move and Jump; Move is
  * capped at 0xFC and Jump at 7. With keep_hp_mp 0, HP and MP are refilled
  * first. */
-void battle_unit_calculate_move_and_jump(battle_unit_t* unit, s32 keep_hp_mp) {
+void battle_unit_apply_movement_bonuses(battle_unit_t* unit, s32 keep_hp_mp) {
     u16 move;
     u16 jump;
     u8 flags;

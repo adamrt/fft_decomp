@@ -47,7 +47,7 @@ s32 music_unload_scenario_slot(s32 slot);
 void music_unload_all(void);
 
 /* playback */
-struct suzuki_music* music_switch_track(s32 slot, s32 volume, s32 fade);
+struct suzuki_music* music_play_slot(s32 slot, s32 volume, s32 fade);
 void music_set_track(s32 music_id);
 
 /* set_volume fades temporarily; set_target_volume also remembers the volume

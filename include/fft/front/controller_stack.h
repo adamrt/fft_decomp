@@ -15,7 +15,7 @@
 typedef enum controller_handler {
     CONTROLLER_FFTST_MOVIE = 0,           /* update_logo_movie */
     CONTROLLER_FFTOP_MOVIE = 1,           /* update_opening_movie */
-    CONTROLLER_TITLE_MENU = 2,            /* update_main_menu */
+    CONTROLLER_TITLE_MENU = 2,            /* update_title_menu */
     CONTROLLER_SOUND_TYPE_MENU = 3,       /* update_sound_menu */
     CONTROLLER_NEW_GAME_START = 4,        /* update_new_game */
     CONTROLLER_BIRTHDAY_DATE = 5,         /* update_birthday_menu */

@@ -71,7 +71,7 @@ void option_choice_thread(void) {
         width += 2;
     }
     height = s_option_choice_counts[kind] * 16 + 16;
-    buffer = menu_build_and_upload_window_frame_image(width, height, &rect, MENU_WINDOW_FRAME_BUILD);
+    buffer = menu_build_window_frame_image(width, height, &rect, MENU_WINDOW_FRAME_BUILD);
     thread_wait_frames(1);
 
     g_menu_window_text_pen.stride = width;
@@ -115,7 +115,7 @@ void option_choice_thread(void) {
     cursor = g_option_values[kind];
     /* `width` is reused as the frame counter. */
     for (width = 0;; width++) {
-        menu_should_close_thread(input);
+        menu_poll_thread_close(input);
         record = &s_option_picker_icon_records[width & 1].base;
         if (menu_can_accept_input()) {
             if (*input & PSX_PAD_CROSS) {

@@ -17,7 +17,7 @@ static void build_usable_abilities(s32 unit_id);
 
 static s32 calculate_ratio_q2(s32 divisor, s32 dividend);
 
-static void store_weapon_attack_data(ai_weapon_data_t* out, s32 item_id, s32* flags_out);
+static void merge_weapon_attack_data(ai_weapon_data_t* out, s32 item_id, s32* flags_out);
 
 /*
  * Initialize AI workspace defaults and present-unit indexing.
@@ -48,7 +48,7 @@ void ai_init_workspace(void) {
         ai->unit_compact_indices[i] = 0xff;
         if (g_battle_units[i].active_battle_unit_id != UNIT_ACTIVE_BATTLE_UNIT_ID_NONE) {
             ai->unit_compact_indices[i] = present_count;
-            ai_init_unit_abilities(i);
+            ai_init_unit(i);
             present_count++;
             total_max_hp += g_battle_units[i].max_hp;
         }
@@ -82,9 +82,9 @@ void ai_init_workspace(void) {
  * target under TARGETED (another initial team) or RECOVERY (the same team).
  * A focus target not on the field clears the special behavior.
  */
-void ai_init_unit_abilities(s32 unit_id) {
+void ai_init_unit(s32 battle_unit_id) {
     ai_workspace_t* ai = &g_ai_workspace_storage;
-    battle_unit_t* unit = &g_battle_units[unit_id];
+    battle_unit_t* unit = &g_battle_units[battle_unit_id];
     ai_unit_decision_t* decision;
     ai_ability_entry_t* entry;
     s32 ability_count;
@@ -94,19 +94,19 @@ void ai_init_unit_abilities(s32 unit_id) {
     s32 i;
 
     if (unit->active_battle_unit_id == UNIT_ACTIVE_BATTLE_UNIT_ID_NONE
-        || ai->unit_compact_indices[unit_id] >= AI_COMPACT_UNIT_COUNT) {
+        || ai->unit_compact_indices[battle_unit_id] >= AI_COMPACT_UNIT_COUNT) {
         return;
     }
-    build_usable_abilities(unit_id);
+    build_usable_abilities(battle_unit_id);
     ability_count = 0;
     mp_count = 0;
     silence_count = 0;
     evade_count = 0;
-    decision = &ai->unit_decisions[unit_id];
+    decision = &ai->unit_decisions[battle_unit_id];
     decision->highest_mp_cost = 0;
     decision->lowest_mp_cost = 0xff;
     for (i = 0; i < AI_ABILITY_LIST_COUNT; i++) {
-        entry = &ai->ability_lists[ai->unit_compact_indices[unit_id]][i];
+        entry = &ai->ability_lists[ai->unit_compact_indices[battle_unit_id]][i];
         if (entry->skillset == SKILLSET_ID_NONE) {
             break;
         }
@@ -169,7 +169,7 @@ void ai_init_unit_abilities(s32 unit_id) {
         return;
     }
     if (decision->targeting_flags_2 & AI_TARGET_CONSERVE_CT) {
-        ai->unit_autobattle_modes[unit_id] = AI_AUTOBATTLE_RETREAT;
+        ai->unit_autobattle_modes[battle_unit_id] = AI_AUTOBATTLE_RETREAT;
         return;
     }
     if (!(decision->flags & AI_DECISION_FOCUS_TARGET)) {
@@ -186,9 +186,9 @@ void ai_init_unit_abilities(s32 unit_id) {
         }
         unit->auto_battle_target = i;
         if ((g_battle_units[i].initial_team_flags & UNIT_TEAM_MASK) != (unit->initial_team_flags & UNIT_TEAM_MASK)) {
-            ai->unit_autobattle_modes[unit_id] = AI_AUTOBATTLE_FIGHT_FOR_LIFE;
+            ai->unit_autobattle_modes[battle_unit_id] = AI_AUTOBATTLE_FIGHT_FOR_LIFE;
         } else {
-            ai->unit_autobattle_modes[unit_id] = AI_AUTOBATTLE_PROTECT_ALLIES;
+            ai->unit_autobattle_modes[battle_unit_id] = AI_AUTOBATTLE_PROTECT_ALLIES;
         }
         return;
     }
@@ -238,8 +238,8 @@ static void build_usable_abilities(s32 unit_id) {
         weapon->fields.flags_3 |= AI_ABILITY_FLAG_3_PHYSICAL_ATTACK;
         weapon_flags = AI_WEAPON_FORMULA_NONE;
         if (!(unit->unit_flags & UNIT_FLAG_MONSTER)) {
-            store_weapon_attack_data(weapon, unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON], &weapon_flags);
-            store_weapon_attack_data(weapon, unit->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON], &weapon_flags);
+            merge_weapon_attack_data(weapon, unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON], &weapon_flags);
+            merge_weapon_attack_data(weapon, unit->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON], &weapon_flags);
         }
         switch (weapon_flags) {
         case AI_WEAPON_FORMULA_NONE:
@@ -280,7 +280,7 @@ static void build_usable_abilities(s32 unit_id) {
  * Range and weapon ID are replaced; elements and trajectory/formula flags
  * accumulate. Calling for the left hand last gives its range precedence.
  */
-static void store_weapon_attack_data(ai_weapon_data_t* out, s32 item_id, s32* flags_out) {
+static void merge_weapon_attack_data(ai_weapon_data_t* out, s32 item_id, s32* flags_out) {
     weapon_data_t* weapon;
     s32 flags;
     s32 formula;
@@ -350,7 +350,7 @@ static s32 add_usable_abilities_from_skillset(s32 unit_id, s32 skillset, s32 cou
         return count;
     }
     jump_found = 0;
-    abilities = ability_build_skillset_list(skillset, SKILLSET_ABILITY_FILTER_ACTION);
+    abilities = skillset_build_ability_list(skillset, SKILLSET_ABILITY_FILTER_ACTION);
     menu = g_command_menu_types_by_skillset[skillset];
     list_id = ai->unit_compact_indices[unit_id];
     if (menu == ACTION_MENU_TYPE_WEAPON_INVENTORY) {

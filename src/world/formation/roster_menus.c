@@ -79,7 +79,7 @@ void formation_update_order_menu(void) {
         g_formation_order_open = 1;
     }
 
-    if (menu_managed_thread_start(MENU_SCREEN_THREAD_SLOT_UPPER_MENU, &g_formation_order_menu) == 0) {
+    if (menu_managed_thread_start_or_poll(MENU_SCREEN_THREAD_SLOT_UPPER_MENU, &g_formation_order_menu) == 0) {
         g_formation_order_open = 0;
         g_formation_current_menu = FORMATION_MENU_UNIT_GRID;
         g_formation_unit_browse_enabled = g_formation_order_saved_browse_enabled;
@@ -247,7 +247,7 @@ void formation_update_dismiss_menu(void) {
         return;
     }
 
-    running = menu_managed_thread_start(THREAD_SCREEN_SLOT_MENU, s_formation_dismiss_menu_data);
+    running = menu_managed_thread_start_or_poll(THREAD_SCREEN_SLOT_MENU, s_formation_dismiss_menu_data);
     step = g_formation_dismiss_step;
     g_formation_dismiss_prompt_running = running;
     if (step != FORMATION_DISMISS_REFUSED) {

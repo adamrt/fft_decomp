@@ -32,7 +32,7 @@ extern map_tile_t* g_move_step_destination_tile;
 
 extern map_unit_t* g_move_step_tile_occupant;
 
-/* Height scratch record that battle_unit_calculate_action_height fills in place. */
+/* Height scratch record that battle_unit_calculate_height_data fills in place. */
 extern unit_height_data_t g_move_step_tile_occupant_height;
 static s32 s_move_displacement_direction;
 
@@ -115,7 +115,7 @@ enum { MOVE_STEP_HALF_WIDTH = MAP_TILE_SIZE / 2, MOVE_STEP_NEAR_EDGE = -7, MOVE_
  * the remaining path while the steps keep the same direction and the clamped
  * ground height stays at the unit's current height, then normalize the delta
  * from the unit to the far edge of the run and scale it by the vsync interval.
- * set_final_height_velocity is the
+ * set_fly_to_center_velocity is the
  * same walk with the target tile's own surface height on the path's last step.
  *
  * The end point stops 7 world units short of the near edge of the run's last
@@ -125,7 +125,7 @@ enum { MOVE_STEP_HALF_WIDTH = MAP_TILE_SIZE / 2, MOVE_STEP_NEAR_EDGE = -7, MOVE_
  * The step code is copied to a 16-bit value before the switch: read through the
  * byte again, cse reuses the direction test's load and the reload is lost.
  */
-static void set_clamped_velocity(map_unit_t* unit, const move_path_t* path, const move_step_t* step) {
+static void set_fly_to_edge_velocity(map_unit_t* unit, const move_path_t* path, const move_step_t* step) {
     VECTOR direction;
     const move_step_t* current;
     s32 start_x;
@@ -194,14 +194,14 @@ static void set_clamped_velocity(map_unit_t* unit, const move_path_t* path, cons
 
 /*
  * Build the per-frame velocity for a run of identical movement steps, as
- * set_clamped_velocity does, but aiming at the
+ * set_fly_to_edge_velocity does, but aiming at the
  * far edge of the run's last tile, and on the path's last step at that tile's
  * own surface height instead of the clamped one.
  *
  * The step code is copied to a 16-bit value before the switch, as in the clamped
  * twin: read through the byte again, cse reuses the direction test's load.
  */
-static void set_final_height_velocity(map_unit_t* unit, const move_path_t* path, const move_step_t* step) {
+static void set_fly_to_center_velocity(map_unit_t* unit, const move_path_t* path, const move_step_t* step) {
     VECTOR direction;
     map_tile_t* tile;
     const move_step_t* current;
@@ -424,7 +424,7 @@ static void scale_velocity(map_unit_t* unit, s32 scale) {
  * or the unit's own tile when the teleport failed. */
 static void start_teleport_animation(map_unit_t* unit) {
     unit->step_phase = MOVE_STEP_PHASE_TELEPORT_ANIMATION;
-    animation_store_with_facing(ANIMATION_TELEPORT, unit->facing, unit);
+    animation_request(ANIMATION_TELEPORT, unit->facing, unit);
     if (unit->path.count == MOVE_PATH_TELEPORT) {
         unit->movement.destination_x = unit->path.data.teleport.x;
         unit->movement.destination_y = unit->path.data.teleport.y;
@@ -440,7 +440,7 @@ static void start_teleport_animation(map_unit_t* unit) {
 static void start_teleport(map_unit_t* unit) {
     effect_context_t data;
 
-    effect_secondary_build_init(unit, &data);
+    effect_secondary_build_self_context(unit, &data);
     unit->step_phase = MOVE_STEP_PHASE_TELEPORT_START;
 }
 
@@ -541,14 +541,14 @@ static void start_fly(
         break;
     }
 
-    animation_store_with_facing(ANIMATION_FLY, facing, unit);
+    animation_request(ANIMATION_FLY, facing, unit);
     if (unit->mount_state == UNIT_MOUNT_STATE_MOUNT) {
         rider = map_unit_get(unit->mount_partner_map_unit_id);
         if (rider != 0) {
-            animation_store_with_facing(ANIMATION_RIDING, unit->facing, rider);
+            animation_request(ANIMATION_RIDING, unit->facing, rider);
         }
     }
-    set_clamped_velocity(unit, &unit->path, step);
+    set_fly_to_edge_velocity(unit, &unit->path, step);
     scale_velocity(unit, unit->walk_speed);
     unit->movement.destination_layer = step->higher;
 }
@@ -628,25 +628,25 @@ static void start_climb(map_unit_t* unit, const map_tile_t* from, const map_tile
     switch (current_step.direction) {
     case MOVE_STEP_DIRECTION_EAST:
         unit->step_phase = MOVE_STEP_PHASE_CLIMB_TO_EDGE_EAST;
-        animation_store_with_facing(ANIMATION_CLIMB, UNIT_FACING_EAST, unit);
+        animation_request(ANIMATION_CLIMB, UNIT_FACING_EAST, unit);
         next = unit->map_x + 1;
         unit->movement.destination_x = next + unit->current_path_step.length;
         break;
     case MOVE_STEP_DIRECTION_WEST:
         unit->step_phase = MOVE_STEP_PHASE_CLIMB_TO_EDGE_WEST;
-        animation_store_with_facing(ANIMATION_CLIMB, UNIT_FACING_WEST, unit);
+        animation_request(ANIMATION_CLIMB, UNIT_FACING_WEST, unit);
         next = unit->map_x - 1;
         unit->movement.destination_x = next - unit->current_path_step.length;
         break;
     case MOVE_STEP_DIRECTION_SOUTH:
         unit->step_phase = MOVE_STEP_PHASE_CLIMB_TO_EDGE_SOUTH;
-        animation_store_with_facing(ANIMATION_CLIMB, UNIT_FACING_SOUTH, unit);
+        animation_request(ANIMATION_CLIMB, UNIT_FACING_SOUTH, unit);
         next = unit->map_y - 1;
         unit->movement.destination_y = next - unit->current_path_step.length;
         break;
     case MOVE_STEP_DIRECTION_NORTH:
         unit->step_phase = MOVE_STEP_PHASE_CLIMB_TO_EDGE_NORTH;
-        animation_store_with_facing(ANIMATION_CLIMB, UNIT_FACING_NORTH, unit);
+        animation_request(ANIMATION_CLIMB, UNIT_FACING_NORTH, unit);
         next = unit->map_y + 1;
         unit->movement.destination_y = next + unit->current_path_step.length;
         break;
@@ -654,7 +654,7 @@ static void start_climb(map_unit_t* unit, const map_tile_t* from, const map_tile
     if (unit->mount_state == UNIT_MOUNT_STATE_MOUNT) {
         rider = map_unit_get(unit->mount_partner_map_unit_id);
         if (rider != 0) {
-            animation_store_with_facing(ANIMATION_RIDING, unit->facing, rider);
+            animation_request(ANIMATION_RIDING, unit->facing, rider);
         }
     }
     set_center_edge_delta(unit, step, from, edge_height);
@@ -692,7 +692,7 @@ static void start_jump(map_unit_t* unit, const map_tile_t* unused_from, const ma
     if (current_step.length >= 2) {
         unit->step_phase = jump_phases[current_step.direction];
         current_step = unit->current_path_step;
-        animation_store_with_facing(ANIMATION_JUMP, facings[current_step.direction], unit);
+        animation_request(ANIMATION_JUMP, facings[current_step.direction], unit);
     } else {
         unit->step_phase = hop_phases[current_step.direction];
         map_unit_rider_dismount(unit);
@@ -700,7 +700,7 @@ static void start_jump(map_unit_t* unit, const map_tile_t* unused_from, const ma
         if (unit->movement.alternate_short_hop) {
             animation = ANIMATION_HOP_ALTERNATE;
         }
-        animation_store_with_facing(animation, unit->facing, unit);
+        animation_request(animation, unit->facing, unit);
         unit->movement.alternate_short_hop ^= 1;
     }
     switch (step->direction) {
@@ -736,7 +736,7 @@ static void start_jump(map_unit_t* unit, const map_tile_t* unused_from, const ma
  *
  * Heights are in half-steps of 6 world units. The landing height is the top of
  * the unit it lands on (standing_on_battle_unit_id_plus_one, set for a step onto a
- * unit; per battle_unit_calculate_action_height) or, when there is none or its
+ * unit; per battle_unit_calculate_height_data) or, when there is none or its
  * height is UNIT_HEIGHT_UNAVAILABLE, the destination tile's height plus
  * its slope scaled by destination_edge_scale, plus 2. The launch speed comes
  * from the rise over the unit's current height plus two half-steps of
@@ -745,7 +745,7 @@ static void start_jump(map_unit_t* unit, const map_tile_t* unused_from, const ma
  * The step byte's top two bits give the direction, as in
  * start_jump. `unused_10` reproduces an unreferenced
  * 16-byte frame slot below the height data. */
-static void start_climb_jump(map_unit_t* unit, const map_tile_t* from, const map_tile_t* to) {
+static void start_jump_up(map_unit_t* unit, const map_tile_t* from, const map_tile_t* to) {
     VECTOR unused_10;
     unit_height_data_t height_data;
     move_step_t* step = &unit->current_path_step;
@@ -755,7 +755,7 @@ static void start_climb_jump(map_unit_t* unit, const map_tile_t* from, const map
     u8 next;
 
     if (unit->standing_on_battle_unit_id_plus_one != 0
-        && (battle_unit_calculate_action_height(&height_data, unit->standing_on_battle_unit_id_plus_one - 1),
+        && (battle_unit_calculate_height_data(&height_data, unit->standing_on_battle_unit_id_plus_one - 1),
             (height_data.unit_flags & UNIT_HEIGHT_UNAVAILABLE) == 0)) {
         height = height_data.total_height;
     } else {
@@ -771,7 +771,7 @@ static void start_climb_jump(map_unit_t* unit, const map_tile_t* from, const map
     switch (step->direction) {
     case MOVE_STEP_DIRECTION_EAST:
         unit->step_phase = MOVE_STEP_PHASE_JUMP_START_EAST;
-        animation_store_with_facing(ANIMATION_JUMP, UNIT_FACING_EAST, unit);
+        animation_request(ANIMATION_JUMP, UNIT_FACING_EAST, unit);
         next = unit->map_x + 1;
         unit->movement.destination_x = next + step->length;
         unit->velocity.vx = (MAP_TILE_SIZE * ONE / 2) / time;
@@ -779,7 +779,7 @@ static void start_climb_jump(map_unit_t* unit, const map_tile_t* from, const map
         break;
     case MOVE_STEP_DIRECTION_WEST:
         unit->step_phase = MOVE_STEP_PHASE_JUMP_START_WEST;
-        animation_store_with_facing(ANIMATION_JUMP, UNIT_FACING_WEST, unit);
+        animation_request(ANIMATION_JUMP, UNIT_FACING_WEST, unit);
         next = unit->map_x - 1;
         unit->movement.destination_x = next - step->length;
         unit->velocity.vx = -(MAP_TILE_SIZE * ONE / 2) / time;
@@ -787,7 +787,7 @@ static void start_climb_jump(map_unit_t* unit, const map_tile_t* from, const map
         break;
     case MOVE_STEP_DIRECTION_SOUTH:
         unit->step_phase = MOVE_STEP_PHASE_JUMP_START_SOUTH;
-        animation_store_with_facing(ANIMATION_JUMP, UNIT_FACING_SOUTH, unit);
+        animation_request(ANIMATION_JUMP, UNIT_FACING_SOUTH, unit);
         next = unit->map_y - 1;
         unit->movement.destination_y = next - step->length;
         unit->velocity.vz = -(MAP_TILE_SIZE * ONE / 2) / time;
@@ -795,7 +795,7 @@ static void start_climb_jump(map_unit_t* unit, const map_tile_t* from, const map
         break;
     case MOVE_STEP_DIRECTION_NORTH:
         unit->step_phase = MOVE_STEP_PHASE_JUMP_START_NORTH;
-        animation_store_with_facing(ANIMATION_JUMP, UNIT_FACING_NORTH, unit);
+        animation_request(ANIMATION_JUMP, UNIT_FACING_NORTH, unit);
         next = unit->map_y + 1;
         unit->movement.destination_y = next + step->length;
         unit->velocity.vz = (MAP_TILE_SIZE * ONE / 2) / time;
@@ -814,7 +814,7 @@ static void start_climb_jump(map_unit_t* unit, const map_tile_t* from, const map
  *
  * Case bodies store the destination before clearing the other velocity axis;
  * that order gives the target's map_x/step load order. */
-static void start_climb_hop(map_unit_t* unit, const map_tile_t* from, const map_tile_t* to) {
+static void start_hop_up(map_unit_t* unit, const map_tile_t* from, const map_tile_t* to) {
     s32 unused[4];
     unit_height_data_t height_data;
     s32 rise;
@@ -827,7 +827,7 @@ static void start_climb_hop(map_unit_t* unit, const map_tile_t* from, const map_
 
     step = &unit->current_path_step;
     if (unit->standing_on_battle_unit_id_plus_one != 0
-        && (battle_unit_calculate_action_height(&height_data, unit->standing_on_battle_unit_id_plus_one - 1),
+        && (battle_unit_calculate_height_data(&height_data, unit->standing_on_battle_unit_id_plus_one - 1),
             (height_data.unit_flags & UNIT_HEIGHT_UNAVAILABLE) == 0)) {
         height = height_data.total_height;
     } else {
@@ -879,7 +879,7 @@ static void start_climb_hop(map_unit_t* unit, const map_tile_t* from, const map_
     if (unit->movement.alternate_short_hop) {
         animation = ANIMATION_HOP_ALTERNATE;
     }
-    animation_store_with_facing(animation, unit->facing, unit);
+    animation_request(animation, unit->facing, unit);
     unit->movement.alternate_short_hop ^= 1;
     unit->movement.destination_layer = step->higher;
 }
@@ -1057,7 +1057,7 @@ static void apply_velocity(map_unit_t* unit) {
             if (-unit->real.vy / ONE >= -ground_height + 0x2A) {
                 unit->step_phase = MOVE_STEP_PHASE_JUMP_ASCENT_NORTH;
                 if (g_battle_state != BATTLE_STATE_ACTION_EXECUTE) {
-                    animation_store_with_facing(ANIMATION_FALL, unit->facing, unit);
+                    animation_request(ANIMATION_FALL, unit->facing, unit);
                 }
             }
         }
@@ -1085,7 +1085,7 @@ static void apply_velocity(map_unit_t* unit) {
             if (-unit->real.vy / ONE >= -ground_height + 0x2A) {
                 unit->step_phase = MOVE_STEP_PHASE_JUMP_ASCENT_NORTH;
                 if (g_battle_state != BATTLE_STATE_ACTION_EXECUTE) {
-                    animation_store_with_facing(ANIMATION_FALL, unit->facing, unit);
+                    animation_request(ANIMATION_FALL, unit->facing, unit);
                 }
             }
         }
@@ -1111,7 +1111,7 @@ static void apply_velocity(map_unit_t* unit) {
             if (-unit->real.vy / ONE >= -destination_height + 0x2A) {
                 unit->step_phase = MOVE_STEP_PHASE_JUMP_DESCENT_NORTH;
                 if (g_battle_state != BATTLE_STATE_ACTION_EXECUTE) {
-                    animation_store_with_facing(ANIMATION_FALL, unit->facing, unit);
+                    animation_request(ANIMATION_FALL, unit->facing, unit);
                 }
             }
         }
@@ -1140,7 +1140,7 @@ static void apply_velocity(map_unit_t* unit) {
             if (-unit->real.vy / ONE >= -destination_height + 0x2A) {
                 unit->step_phase = MOVE_STEP_PHASE_JUMP_DESCENT_NORTH;
                 if (g_battle_state != BATTLE_STATE_ACTION_EXECUTE) {
-                    animation_store_with_facing(ANIMATION_FALL, unit->facing, unit);
+                    animation_request(ANIMATION_FALL, unit->facing, unit);
                 }
             }
         }
@@ -1215,7 +1215,7 @@ static void apply_velocity(map_unit_t* unit) {
         map_get_tile(tile.x, tile.y, layer);
         if (-unit->real.vy / ONE <= -ground_height) {
             unit->real.vy = ground_height * ONE;
-            set_clamped_velocity(unit, &unit->path, &unit->current_path_step);
+            set_fly_to_edge_velocity(unit, &unit->path, &unit->current_path_step);
             scale_velocity(unit, unit->walk_speed);
         }
         unit->shadow_dirty |= 1;
@@ -1229,7 +1229,7 @@ static void apply_velocity(map_unit_t* unit) {
         depth = -unit->real.vy;
         if (depth / ONE <= -ground_height) {
             unit->real.vy = ground_height * ONE;
-            set_final_height_velocity(unit, &unit->path, &unit->current_path_step);
+            set_fly_to_center_velocity(unit, &unit->path, &unit->current_path_step);
             scale_velocity(unit, unit->walk_speed);
         }
         unit->shadow_dirty |= 1;
@@ -1792,7 +1792,7 @@ static void update_jump_flight_phase(map_unit_t* unit) {
         unit->state_frame_counter = 2;
         unit->step_phase = s_jump_landing_phases[direction];
         if (g_battle_state != BATTLE_STATE_ACTION_EXECUTE) {
-            animation_store_with_facing(ANIMATION_LAND, unit->facing, unit);
+            animation_request(ANIMATION_LAND, unit->facing, unit);
         }
         if (g_move_step_value.mount) {
             map_unit_play_sfx(unit, SOUND_SFX_LAND_SOFT);
@@ -1806,7 +1806,7 @@ static void update_jump_flight_phase(map_unit_t* unit) {
     unit->state_frame_counter = 2;
     unit->step_phase = s_jump_landing_phases[direction];
     if (g_battle_state != BATTLE_STATE_ACTION_EXECUTE) {
-        animation_store_with_facing(ANIMATION_LAND, unit->facing, unit);
+        animation_request(ANIMATION_LAND, unit->facing, unit);
     }
     if (g_move_step_value.mount) {
         map_unit_play_sfx(unit, SOUND_SFX_LAND_SOFT);
@@ -1983,8 +1983,8 @@ static s32 has_reached_exit_edge(s32 direction, const map_unit_t* unit) {
  * lift; the destination one is the top of the unit on the destination tile for
  * a step onto a unit, or the tile edge height. A rise of at most one half-step
  * continues as a walk (WALK_TO_CENTER) or climb-speed step (CLIMB_TO_CENTER),
- * up to seven starts start_climb_hop, and anything higher
- * start_climb_jump. An occupant whose height is
+ * up to seven starts start_hop_up, and anything higher
+ * start_jump_up. An occupant whose height is
  * UNIT_HEIGHT_UNAVAILABLE counts as the bare tile. */
 static void update_walk_to_edge_phase(map_unit_t* unit) {
     s32 direction = get_step_direction(unit);
@@ -2001,7 +2001,7 @@ static void update_walk_to_edge_phase(map_unit_t* unit) {
     if (g_move_step_value.length == 0) {
         standing_on = unit->standing_on_battle_unit_id_plus_one;
         if (standing_on != 0) {
-            battle_unit_calculate_action_height(&g_move_step_tile_occupant_height, standing_on - 1);
+            battle_unit_calculate_height_data(&g_move_step_tile_occupant_height, standing_on - 1);
             if (g_move_step_tile_occupant_height.unit_flags & UNIT_HEIGHT_UNAVAILABLE) {
                 g_move_step_current_edge_height = g_move_step_current_tile->height * 2
                     + g_move_step_current_tile->depth_half_height.half_height * unit->current_edge_scale;
@@ -2018,7 +2018,7 @@ static void update_walk_to_edge_phase(map_unit_t* unit) {
             g_move_step_tile_occupant = map_unit_find_at_tile(
                 unit->movement.destination_x, unit->movement.destination_y, unit->movement.destination_layer);
             unit->standing_on_battle_unit_id_plus_one = g_move_step_tile_occupant->battle_unit->battle_unit_id + 1;
-            battle_unit_calculate_action_height(
+            battle_unit_calculate_height_data(
                 &g_move_step_tile_occupant_height, g_move_step_tile_occupant->battle_unit->battle_unit_id);
             if (g_move_step_tile_occupant_height.unit_flags & UNIT_HEIGHT_UNAVAILABLE) {
                 g_move_step_destination_edge_height = g_move_step_destination_tile->height * 2
@@ -2053,12 +2053,12 @@ static void update_walk_to_edge_phase(map_unit_t* unit) {
         if (g_move_step_current_edge_height + 7 >= g_move_step_destination_edge_height) {
             map_unit_rider_dismount(unit);
             unit->step_speed = 0x2000;
-            start_climb_hop(unit, g_move_step_current_tile, g_move_step_destination_tile);
+            start_hop_up(unit, g_move_step_current_tile, g_move_step_destination_tile);
             unit->standing_on_battle_unit_id_plus_one = 0;
             return;
         }
         unit->step_speed = 0x2000;
-        start_climb_jump(unit, g_move_step_current_tile, g_move_step_destination_tile);
+        start_jump_up(unit, g_move_step_current_tile, g_move_step_destination_tile);
         unit->standing_on_battle_unit_id_plus_one = 0;
     } else {
         unit->step_speed = 0x2000;
@@ -2172,7 +2172,7 @@ static void update_fly_to_edge_phase(map_unit_t* unit) {
         unit->standing_on_battle_unit_id_plus_one = 0;
         g_move_step_destination_edge_height = g_move_step_destination_tile->height * 2
             + g_move_step_destination_tile->depth_half_height.half_height * unit->destination_edge_scale;
-        set_final_height_velocity(unit, &unit->path, &unit->current_path_step);
+        set_fly_to_center_velocity(unit, &unit->path, &unit->current_path_step);
         scale_velocity(unit, unit->walk_speed);
         unit->step_phase = MOVE_STEP_PHASE_FLY_TO_CENTER_NORTH;
     }
@@ -2321,7 +2321,7 @@ void move_update_step(map_unit_t* unit) {
     case MOVE_STEP_PHASE_JUMP_START_WEST:
         if (unit->animation.wait == 0) {
             unit->step_phase++;
-            animation_store_with_facing(ANIMATION_FALL, unit->facing, unit);
+            animation_request(ANIMATION_FALL, unit->facing, unit);
             map_unit_play_sfx(unit, SOUND_SFX_JUMP);
             map_unit_rider_dismount(unit);
         }

@@ -193,7 +193,7 @@ void unit_panel_equipment_ability_thread(void) {
         SetDrawOffset(&screen->draw_offsets[1].packet, (u16*)&screen->draw_offsets[1].position);
 
         unit_panel_set_colors(&screen->frame, thread);
-        unit_panel_select_palette(&screen->numeric_frame, thread);
+        unit_panel_set_numeric_frame_colors(&screen->numeric_frame, thread);
 
         /* Primitives link in at the head of the ordering-table entry, so they draw in reverse:
          * each draw mode or offset added below applies to the sprites added above it. */

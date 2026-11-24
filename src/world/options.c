@@ -74,7 +74,7 @@ void option_entrypoint(s32 mode) {
     }
     if (mode == MENU_OPTION_TYPE_AT_LIST) {
         tutorial_pulse_wait_value(SCRIPT_TUTORIAL_WAIT_AT_LIST);
-        at_list_start_thread();
+        at_list_run();
     }
     if (mode == last_mode) {
         crystal_pickup_run_menus();
@@ -224,8 +224,8 @@ void option_game_options_thread(void) {
     menu_init_scaled_draw_area_packets(&page->list_area);
     menu_init_scaled_draw_area_packets(&page->setting_area);
     menu_init_sprt(&base->setting_panel);
-    text_configure_sprite_vram(&g_option_title_image_rect, entry->inner_width, 44, &base->setting_panel, 0);
-    image = menu_build_and_upload_window_frame_image(
+    text_alloc_image_rect(&g_option_title_image_rect, entry->inner_width, 44, &base->setting_panel, 0);
+    image = menu_build_window_frame_image(
         entry->inner_width, 44, &g_option_title_image_rect, MENU_WINDOW_FRAME_ALTERNATE_BUILD);
     base->setting_panel.x0 = entry->window.x;
     base->setting_panel.y0 = entry->window.y + entry->window.h + 1;
@@ -248,7 +248,7 @@ void option_game_options_thread(void) {
     thread_yield();
 
     menu_init_sprt(&base->setting_value);
-    text_configure_sprite_vram(&g_option_value_image_rect, 60, 16, &base->setting_value, 0);
+    text_alloc_image_rect(&g_option_value_image_rect, 60, 16, &base->setting_value, 0);
     base->setting_value.x0 = entry->window.x + 92;
     base->setting_value.y0 = entry->window.y + entry->window.h + 15;
     mem_zero_words(buffer, 480);
@@ -342,7 +342,7 @@ void option_game_options_thread(void) {
         }
 
         thread_yield();
-        if (menu_should_close_thread(input0)) {
+        if (menu_poll_thread_close(input0)) {
             break;
         }
 
@@ -417,8 +417,8 @@ void option_game_options_thread(void) {
             thread_set_parameters(g_thread_current_id + 1, (s32)&entry->window, 1, 0);
         }
 
-        gfx_build_scaled_draw_area_pair_swapped(&page->list_area, &entry->window, i, g_gfx_active_buffer_index);
-        gfx_build_scaled_draw_area_pair_swapped(&page->setting_area, &value_rect, i, g_gfx_active_buffer_index);
+        menu_build_scaled_draw_area_pair_swapped(&page->list_area, &entry->window, i, g_gfx_active_buffer_index);
+        menu_build_scaled_draw_area_pair_swapped(&page->setting_area, &value_rect, i, g_gfx_active_buffer_index);
         gfx_draw_or_append_gpu_primitive(&page->list_area.areas[1]);
         gfx_draw_or_append_gpu_primitive(&page->icon_mode);
         gfx_draw_or_append_gpu_primitive(list_text);

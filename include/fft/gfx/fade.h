@@ -53,8 +53,8 @@ void fade_menu_set_disabled(u8 disabled);
 /* OPEN overlay fade */
 /* fade_tile_t.flags. */
 typedef enum fade_tile_flag {
-    FADE_TILE_OUT = 0x01,   /* the overlay clears */
-    FADE_TILE_IN = 0x02,    /* the overlay darkens the screen */
+    FADE_TILE_IN = 0x01,    /* the screen appears as the overlay clears */
+    FADE_TILE_OUT = 0x02,   /* the overlay darkens the screen */
     FADE_TILE_ACTIVE = 0x04 /* the overlay is drawn; cleared when either fade ends */
 } fade_tile_flag_e;
 
@@ -74,8 +74,8 @@ typedef struct fade_tile {
 
 extern fade_tile_t g_fade_tile;
 
-void fade_tile_start_in(u32 duration);
 void fade_tile_start_out(u32 duration);
+void fade_tile_start_in(u32 duration);
 void fade_tile_update(u32* otag);
 
 /* color tint */

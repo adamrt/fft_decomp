@@ -451,7 +451,7 @@ typedef struct action_data {
     u16 last_received_attack;                    /* 0x26; reaction data, varies by ability */
     u8 exp_change;                               /* 0x28; Steal EXP */
     u8 jp_change;                                /* 0x29; Move-JP Up / JP stolen */
-    /* Written as a 16-bit value everywhere (formula_apply_status lhu/sh,
+    /* Written as a 16-bit value everywhere (formula_apply_status_keeping_hit lhu/sh,
      * try_arrow_guard, reaction_try_catch,
      * formula_force_attack_miss). */
     s16 attack_accuracy; /* 0x2a */
@@ -669,17 +669,17 @@ void battle_unit_refresh_stats(battle_unit_t* unit);
 void battle_unit_refresh_formation_stats(battle_unit_t* unit);
 void battle_unit_set_equipment_attributes(battle_unit_t* unit, s32 level_up_check);
 void battle_unit_set_equipment_stats(battle_unit_t* unit);
-void battle_unit_set_equippable_items(battle_unit_t* unit);
+void battle_unit_add_equippable_types(battle_unit_t* unit);
 s32 battle_unit_generate_random_equipment(
     const battle_unit_t* unit, u8 item_type_flag, u8 weapon_flag_mask, u8 required_item_type);
-void battle_unit_calculate_move_and_jump(battle_unit_t* unit, s32 keep_hp_mp);
+void battle_unit_apply_movement_bonuses(battle_unit_t* unit, s32 keep_hp_mp);
 u8 battle_unit_set_sprite_identity(battle_unit_t* unit, u8* palette);
 u16 battle_unit_select_rsm(const battle_unit_t* unit, u16 ability_id, s32 flags, const struct entd_unit* entd);
 void battle_unit_enable_rsm_flags(battle_unit_t* unit);
 void battle_unit_set_ability_ct(battle_unit_t* unit);
-s32 battle_unit_check_level_up(battle_unit_t* unit);
+s32 battle_unit_try_level_up(battle_unit_t* unit);
 void battle_unit_apply_level_growth(battle_unit_t* unit, s32 level_down);
-void battle_unit_count_casualties(const battle_unit_t* unit);
+void battle_unit_record_casualty(const battle_unit_t* unit);
 
 /* battle unit lookups */
 /* Results of battle_unit_find_id_by_character_identity that are not a battle unit id. */
@@ -713,7 +713,7 @@ typedef struct unit_height_data {
 typedef char unit_height_data_size_must_be_7[sizeof(unit_height_data_t) == 7 ? 1 : -1];
 
 /* unit_height_data_t.unit_flags: the unit id in the low bits and these flags, set by
- * battle_unit_calculate_action_height. */
+ * battle_unit_calculate_height_data. */
 typedef enum unit_height_flags {
     UNIT_HEIGHT_NON_CHOCOBO = 0x20,
     UNIT_HEIGHT_SHARED_TILE = 0x40,
@@ -733,7 +733,7 @@ typedef enum unit_tile_filter {
 
 s32 battle_unit_get_tile_index(const battle_unit_t* unit);
 s32 battle_unit_find_at_tile(s32 x, s32 y, u32 level, s32 filters);
-unit_height_data_t* battle_unit_calculate_action_height(unit_height_data_t* out, s32 unit_id);
+unit_height_data_t* battle_unit_calculate_height_data(unit_height_data_t* out, s32 unit_id);
 s32 battle_unit_set_tile_position(s32 battle_unit_id, u8 map_x, u8 map_y, u8 layer, u8 facing);
 s32 battle_unit_find_relocation_tile(s32 unit_index, struct map_tile_coordinates* destination);
 

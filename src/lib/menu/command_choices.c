@@ -104,7 +104,7 @@ void auto_battle_settings_thread(void) {
     for (i = 0, color = g_auto_battle_option_colors;; i++) {
         record = &records[i & 1];
         if (i == 0 || (g_script_event_input & PSX_PAD_CIRCLE)) {
-            buffer = menu_build_and_upload_window_frame_image(
+            buffer = menu_build_window_frame_image(
                 param->inner_width, param->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
             if (((g_script_event_input & PSX_PAD_CIRCLE) && !thread_is_previous_running()) || i == 0) {
                 selected = cursor;
@@ -140,7 +140,7 @@ void auto_battle_settings_thread(void) {
                 }
                 previous = cursor;
                 g_menu_thread_menu_data[MENU_COMMAND_ID_AUTO_BATTLE_TARGET].selected_index = 0;
-                menu_handle_action(param, previous);
+                menu_handle_confirm_input(param, previous);
             }
             for (j = 0; j < 5; j++) {
                 g_menu_text_palette_offset = color[j];
@@ -157,7 +157,7 @@ void auto_battle_settings_thread(void) {
             image_pending_free = 0;
         }
         param->selected_index = cursor;
-        if (menu_should_close_thread(&g_script_event_input)) {
+        if (menu_poll_thread_close(&g_script_event_input)) {
             break;
         }
         menu_update_row_cursor(param, &cursor);
@@ -188,8 +188,7 @@ void menu_icon_selection_thread(void) {
     }
     menu_build_window_sprites(&rect, param, record);
     mem_copy_bytes_nonempty(&records[1], record, sizeof(records[1]));
-    buffer = menu_build_and_upload_window_frame_image(
-        param->inner_width, param->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
+    buffer = menu_build_window_frame_image(param->inner_width, param->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
     g_menu_window_text_pen.stride = param->inner_width;
     menu_text_set_origin(8, 9);
     g_menu_text_palette_offset = 0;
@@ -209,10 +208,10 @@ void menu_icon_selection_thread(void) {
             records[0].bob_active = 0;
             records[1].bob_active = 0;
         }
-        if (menu_should_close_thread(&g_script_event_input)) {
+        if (menu_poll_thread_close(&g_script_event_input)) {
             break;
         }
-        menu_handle_action(param, cursor);
+        menu_handle_confirm_input(param, cursor);
         menu_update_row_cursor(param, &cursor);
         menu_handle_cancel_input(param);
         menu_submit_icon_primitives(&record->base);

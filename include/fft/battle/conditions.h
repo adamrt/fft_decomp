@@ -24,7 +24,7 @@ typedef enum conditions_banner {
     CONDITIONS_BANNER_JOIN_UP = 10
 } conditions_banner_e;
 
-void conditions_ready_bugged_thread(void);
+void conditions_hovered_stats_thread(void);
 void conditions_show_general_banner(s32 hold_frames);
 void conditions_special_thread(void);
 void conditions_congratulations_thread(void);

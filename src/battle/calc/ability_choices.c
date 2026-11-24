@@ -245,7 +245,7 @@ static s32 probe_abilities(s32 unit_id, u8 skillset, u8 menu) {
     }
     switch (menu) {
     case ACTION_MENU_TYPE_DEFAULT:
-        return skillset_get_unit_ability_data(
+        return skillset_build_ability_lists(
             unit_id, skillset, abilities, mp_costs, ability_ct, 0, ability_flags, turns);
     case ACTION_MENU_TYPE_ITEM_INVENTORY:
         return collect_item_abilities(unit_id, skillset, items);
@@ -326,7 +326,7 @@ u8 at_list_count_turns_to_resolve(s32 battle_unit_id, s32 ct, const at_entry_t* 
  *
  * The two flag bytes need separate locals: sharing one keeps the attribute
  * byte in a globally allocated register, which the target does not. */
-s32 skillset_get_unit_ability_data(
+s32 skillset_build_ability_lists(
     s32 unit_id, u8 skillset, s16* ability_ids, u8* mp_out, u8* ct_out, s32 unused, u8* flags_out, u8* turns_out) {
     at_entry_t at_list[AT_LIST_CAPACITY];
     battle_unit_t* unit;
@@ -486,7 +486,7 @@ static s32 collect_item_abilities(s32 unit_id, u8 skillset, u8* out_item_ids) {
         *out_item_ids = ITEM_ID_NONE;
         return 0;
     }
-    count = skillset_get_unit_ability_data(
+    count = skillset_build_ability_lists(
         unit_id, SKILLSET_ID_ITEM, (s16*)abilities, mp_costs, ability_ct, 0, ability_flags, turns);
     if (count == 0) {
         *out_item_ids = ITEM_ID_NONE;
@@ -508,7 +508,7 @@ static s32 collect_item_abilities(s32 unit_id, u8 skillset, u8* out_item_ids) {
 
 /* The number of items collect_throwable_items lists in out_item_ids:
  * its result without the 0x100 marker. */
-s32 skillset_load_throw_abilities(s32 unit_id, s32 skillset, u8* out_item_ids) {
+s32 skillset_load_throw_items(s32 unit_id, s32 skillset, u8* out_item_ids) {
     return collect_throwable_items(unit_id, skillset & 0xFF, out_item_ids) & 0xFF;
 }
 
@@ -545,7 +545,7 @@ static s32 collect_throwable_items(s32 unit_id, u8 skillset, u8* out) {
         return 0;
     }
     if (skillset != SKILLSET_ID_THROW
-        || (ability_count = skillset_get_unit_ability_data(
+        || (ability_count = skillset_build_ability_lists(
                 unit_id, SKILLSET_ID_THROW, (s16*)abilities, mp_costs, charge_times, 0, ability_flags, turn_counts))
             == 0) {
         *out = ITEM_ID_NONE;
@@ -619,7 +619,7 @@ static s32 collect_math_flagged_abilities(s32 unit_id, u8 skillset, s16* out, u8
         *out = -1;
         return 0;
     }
-    ability_count = skillset_get_unit_ability_data(
+    ability_count = skillset_build_ability_lists(
         unit_id, SKILLSET_ID_MATH_SKILL, (s16*)abilities, mp_costs, charge_times, 0, ability_flags, turn_counts);
     if (ability_count == 0) {
         return 0;
@@ -670,7 +670,7 @@ s32 skillset_collect_math_calculator_abilities(s32 unit_id, u8 skillset, s16* ou
         return 0;
     }
     for (i = 0; i < 4; i++) {
-        ability_count = skillset_get_unit_ability_data(
+        ability_count = skillset_build_ability_lists(
             unit_id, skillsets[i], abilities, mp_costs, charge_times, 1, ability_flags, turn_counts);
         if (ability_count != 0) {
             for (j = 0; j < ability_count; j++) {
@@ -707,7 +707,7 @@ static u16 get_elemental_ability(s32 unit_id, u8 skillset) {
     if (skillset != SKILLSET_ID_ELEMENTAL) {
         return 0;
     }
-    count = skillset_get_unit_ability_data(
+    count = skillset_build_ability_lists(
         unit_id, SKILLSET_ID_ELEMENTAL, abilities, mp_costs, ability_ct, 1, ability_flags, turns);
     if (count == 0) {
         return 0;
@@ -792,7 +792,7 @@ s32 skillset_count_monster_supporters(const battle_unit_t* unit) {
     if (unit->active_battle_unit_id == UNIT_ACTIVE_BATTLE_UNIT_ID_NONE) {
         return 0;
     }
-    battle_unit_calculate_action_height(&height_data, unit->battle_unit_id);
+    battle_unit_calculate_height_data(&height_data, unit->battle_unit_id);
     team = unit->team_flags;
     x = unit->x;
     y = unit->position.y;
@@ -828,7 +828,7 @@ static s32 monster_has_supporter_at_tile(s32 team_flags, s32 x, s32 y, s32 total
                 || ((unit->team_flags ^ unit_team_flags) & UNIT_TEAM_MASK)) {
                 continue;
             }
-            battle_unit_calculate_action_height(&height, unit->battle_unit_id);
+            battle_unit_calculate_height_data(&height, unit->battle_unit_id);
             if ((reference_height - height.total_height) >= -5 && (reference_height - height.total_height) <= 5) {
                 return 1;
             }
@@ -840,7 +840,7 @@ static s32 monster_has_supporter_at_tile(s32 team_flags, s32 x, s32 y, s32 total
 
 /* The number of katanas collect_draw_out_katanas lists in
  * out_item_ids: its result without the 0x100 marker. */
-s32 skillset_load_draw_out_abilities(s32 unit_id, s32 skillset, u8* out_item_ids) {
+s32 skillset_load_draw_out_katanas(s32 unit_id, s32 skillset, u8* out_item_ids) {
     return collect_draw_out_katanas(unit_id, skillset & 0xFF, out_item_ids) & 0xFF;
 }
 
@@ -868,7 +868,7 @@ static s32 collect_draw_out_katanas(s32 unit_id, u8 skillset, u8* out_item_ids) 
         *out_item_ids = ITEM_ID_NONE;
         return 0;
     }
-    ability_count = skillset_get_unit_ability_data(
+    ability_count = skillset_build_ability_lists(
         unit_id, SKILLSET_ID_DRAW_OUT, (s16*)abilities, mp_costs, ability_ct, 0, ability_flags, turns);
     if (ability_count == 0) {
         *out_item_ids = ITEM_ID_NONE;
@@ -902,5 +902,5 @@ s32 skillset_load_charge_abilities(s32 unit_id, s32 skillset, s16* abilities, u8
     u8 mp_costs[16];
     u8 ability_flags[16];
 
-    return skillset_get_unit_ability_data(unit_id, skillset, abilities, mp_costs, ability_ct, 0, ability_flags, turns);
+    return skillset_build_ability_lists(unit_id, skillset, abilities, mp_costs, ability_ct, 0, ability_flags, turns);
 }

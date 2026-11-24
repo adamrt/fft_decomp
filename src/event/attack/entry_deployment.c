@@ -229,7 +229,7 @@ s32 deploy_has_roster_unit_on_tiles(s32 roster_id) {
 
 /* Take roster unit `roster_id` off the 5x5 deployment grid by clearing the first tile
  * that holds it. */
-static void remove_roster_unit(s32 roster_id) {
+static void clear_roster_unit_tile(s32 roster_id) {
     s32 row;
     s32 column;
 
@@ -743,7 +743,7 @@ ramza_placed:
                                 if (deploy_has_roster_unit_on_tiles(g_deploy_selected_roster_index)) {
                                     s_deploy_active_cursor = 0;
                                     g_sound_pending_sfx_id = SOUND_SFX_CAMERA_ZOOM_OUT;
-                                    remove_roster_unit(g_deploy_selected_roster_index);
+                                    clear_roster_unit_tile(g_deploy_selected_roster_index);
                                     s_deploy_cursor_column[0] = s_deploy_cursor_column[1];
                                     s_deploy_cursor_row[0] = s_deploy_cursor_row[1];
                                     g_deploy_deployed_unit_count--;
@@ -1164,7 +1164,7 @@ void unit_panel_load_party_unit(s32 unused, s32 party_index) {
         editor->generic_monster = 1;
 
     if (editor->generic_monster != 0) {
-        abilities = ability_build_skillset_list(unit->primary_skillset, SKILLSET_ABILITY_FILTER_ACTION);
+        abilities = skillset_build_ability_list(unit->primary_skillset, SKILLSET_ABILITY_FILTER_ACTION);
         for (i = 0; i < 5; i++) {
             editor->ability_ids[i] = *abilities++;
         }
@@ -1916,7 +1916,7 @@ static void labels_draw_thread(void) {
 }
 
 /* Call deploy_prepare_sprites. */
-void deploy_build_sprites(void) {
+void deploy_load_sprites(void) {
     deploy_prepare_sprites();
 }
 

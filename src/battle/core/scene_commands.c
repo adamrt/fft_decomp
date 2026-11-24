@@ -285,7 +285,7 @@ void deploy_mark_finished(void) {
 
 /* Returns the hsync count battle_submit_frame measured for the last frame. No
  * code calls it. */
-s32 system_get_frame_measurement(void) {
+s32 system_get_battle_frame_hsync_count(void) {
     return g_system_battle_frame_hsync_count;
 }
 

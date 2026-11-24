@@ -39,7 +39,7 @@ s32 text_resolve_format_id(s32 format_code, s32 value) {
 /* Measure a text entry in characters, following substitutions and backreferences: the widest
  * line's column count goes to *columns and the line count to *rows. Spaces count one column
  * and numeric values their digit count (or the pending number width). */
-void text_measure(s16* columns, s16* rows, const u8* text) {
+void text_measure_columns(s16* columns, s16* rows, const u8* text) {
     const text_backref_t* backref;
     party_unit_t* party;
     const u8* cursor;
@@ -279,11 +279,11 @@ void text_measure_pixels(s16* width, s16* rows, const u8* text) {
 void message_render_record_image(text_dialog_record_t* record) {
     if (record->box_type != DIALOG_BOX_TYPE_CENTERED) {
         if (record->box_type == DIALOG_BOX_TYPE_PORTRAIT) {
-            record->buffer = menu_build_window_image(
+            record->buffer = menu_build_dialog_window_image(
                 record->width, record->height, &record->rect, record->dialog_type, record->tail_offset, 1);
         } else {
-            record->buffer = menu_build_and_upload_window_frame_image(
-                record->width, record->height, &record->rect, MENU_WINDOW_FRAME_BUILD);
+            record->buffer
+                = menu_build_window_frame_image(record->width, record->height, &record->rect, MENU_WINDOW_FRAME_BUILD);
         }
         g_menu_window_text_pen.rect.x = record->origin_x;
         g_menu_window_text_pen.rect.y = record->origin_y;

@@ -39,13 +39,13 @@ static RECT s_menu_portrait_palette_rect = { 320, 254, 64, 2 };
 #endif
 
 /* Thread body of the ShowGraphic event instruction: load the ETC overlay and show its graphic. */
-void script_graphic_show_thread(void) {
+void script_opcode_7d_show_graphic_thread(void) {
     thread_current_set_task(THREAD_TASK_SHOW_GRAPHIC);
-    overlay_companion_request(COMPANION_OVERLAY_ETC);
+    overlay_companion_load(COMPANION_OVERLAY_ETC);
     etc_entrypoint();
 }
 
-/* Empty in BATTLE and WORLD; in BATTLE it sits between script_graphic_show_thread and
+/* Empty in BATTLE and WORLD; in BATTLE it sits between script_opcode_7d_show_graphic_thread and
  * portrait_load_image. Nothing on the disc calls it or points at it; the
  * name is a neutral placeholder until a reference turns up. */
 void script_noop_3(void) {

@@ -248,7 +248,7 @@ extern s32 g_gfx_active_buffer_index;
 extern s32 g_gfx_screen_polarity;
 
 u32* gfx_get_battle_otag(void);
-void gfx_swap_battle_otag(void);
+void gfx_swap_render_buffers(void);
 void gfx_reset_display(int width, int height, int projection, u8 red, u8 green, u8 blue);
 void gfx_load_debug_font(void);
 
@@ -264,7 +264,7 @@ enum {
 };
 
 /* One of the two 60968-byte battle render buffers. The primitive pools are
- * pre-initialized once; gfx_swap_battle_otag reads the ordering table
+ * pre-initialized once; gfx_swap_render_buffers reads the ordering table
  * pointer at +0xe5b4. */
 typedef struct render_buffer {
     POLY_GT3 gt3[RENDER_TEXTURED_TRIANGLE_COUNT]; /* 0x00000 */
@@ -281,7 +281,7 @@ typedef char render_buffer_size_must_be_60968[(sizeof(render_buffer_t) == 60968)
 
 extern render_buffer_t g_render_buffers[2];
 
-/* The buffer being built this frame; gfx_swap_battle_otag alternates
+/* The buffer being built this frame; gfx_swap_render_buffers alternates
  * it between the two g_render_buffers entries. */
 extern render_buffer_t* g_render_current_buffer;
 

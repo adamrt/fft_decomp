@@ -11,7 +11,7 @@
 
 /* Load WORLD if needed, then prepare Ramza's roster or the empty Continue
  * roster. Remember the party mode so repeated calls do not rebuild it. */
-void title_prepare_new_game(s32 party_mode, s32 world_load_mode) {
+void title_prepare_party(s32 party_mode, s32 world_load_mode) {
     u32 flags;
     u32 party_mode_flag;
 

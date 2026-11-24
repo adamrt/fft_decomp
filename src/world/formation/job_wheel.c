@@ -53,7 +53,7 @@ extern textured_rect_source_t g_formation_job_wheel_sprite_quad;
 extern textured_rect_source_t g_formation_job_wheel_new_sprite_quad;
 
 /* job-change animation */
-/* Result of update_job_change, kept in
+/* Result of update_job_change_animation, kept in
  * g_formation_job_change_anim_state: the phase of the job-change dissolve. */
 typedef enum formation_job_change_anim {
     FORMATION_JOB_CHANGE_ANIM_DONE = 0,
@@ -88,11 +88,11 @@ static oriented_quad_t s_formation_job_wheel_mastered_icon_sprite
 static void build_wheel_choices(void);
 static void build_wheel_name(void);
 static void draw_wheel_sprites(s32 angle, s32 radius_x, s32 radius_y);
-static void prepare_wheel_sprite(void);
-static s32 update_job_change(s32 job);
+static void prepare_unit_sprite(void);
+static s32 update_job_change_animation(s32 job);
 static void update_wheel_close(void);
 static void update_wheel_open(void);
-static void refresh_wheel(void);
+static void restart_wheel(void);
 static void draw_mastered_star(s32 x, s32 y, s32 otag_index, s32 value);
 
 /* Job wheel menu-script callback 0: the selected unit's level in the job under the
@@ -140,7 +140,7 @@ static s32 get_job_text_index(s16 job_id) {
  *  - Left/Right start a spin of 36 progress units (2 a frame with fewer than
  *    four jobs, 3 otherwise) that moves the cursor one job and wraps;
  *  - Circle on an available job starts the job-change flash
- *    (update_job_change), after which the job is changed,
+ *    (update_job_change_animation), after which the job is changed,
  *    with replacement equipment chosen when Max Equip at Job Change is On
  *    (its option field reads 0), and the job list rebuilt; on an unavailable job other
  *    than the unit's own it shows that job's text with the error sound;
@@ -175,8 +175,8 @@ void formation_job_update_menu(void) {
 
     i = g_formation_current_menu;
     if (i == FORMATION_MENU_JOB_WHEEL_ENTER) {
-        if (formation_grid_update_transition(2) == 0) {
-            refresh_wheel();
+        if (formation_grid_update_slide_out(2) == 0) {
+            restart_wheel();
             build_wheel_name();
             g_formation_current_menu = FORMATION_MENU_JOB_WHEEL_OPENING;
             build_wheel_choices();
@@ -203,7 +203,7 @@ void formation_job_update_menu(void) {
     /* A job change in progress: step the flash, and apply the job once it reports done. */
     if (s_formation_job_change_anim_state != FORMATION_JOB_CHANGE_ANIM_DONE) {
         s_formation_job_change_anim_state
-            = update_job_change(g_formation_job_wheel_jobs[g_formation_job_wheel_cursor_index]);
+            = update_job_change_animation(g_formation_job_wheel_jobs[g_formation_job_wheel_cursor_index]);
         if (s_formation_job_change_anim_state == FORMATION_JOB_CHANGE_ANIM_DONE) {
             i = g_game_options.value & GAME_OPTIONS_MAX_EQUIP_AT_JOB_CHANGE_MASK;
             formation_job_change(
@@ -212,7 +212,7 @@ void formation_job_update_menu(void) {
             job_list_build(
                 g_unit_selected_index, g_formation_job_wheel_jobs, FORMATION_JOB_LIST_MODE_INCLUDE_OTHER_UNIT_UNLOCKS);
             g_formation_unit_banner_enabled = g_formation_saved_banner_enabled;
-            prepare_wheel_sprite();
+            prepare_unit_sprite();
             g_formation_current_menu = FORMATION_MENU_JOB_WHEEL;
         }
 
@@ -288,7 +288,7 @@ void formation_job_update_menu(void) {
 
         /* Rebuild the wheel when L1/R1 picked another unit on an earlier frame. */
         if (g_unit_selected_index != g_formation_job_wheel_unit_index) {
-            refresh_wheel();
+            restart_wheel();
         }
         if (g_formation_unit_banner_enabled == 0) {
             formation_cycle_selected_unit(g_menu_input_secondary_repeat);
@@ -307,7 +307,7 @@ void formation_job_update_menu(void) {
                     /* Rebuild the full record list and keep the selection on the same roster slot. */
                     i = g_formation_unit_pointers[g_unit_selected_index]->identity.roster_slot;
                     formation_build_record_list(0, g_formation_unit_pointers, FORMATION_RECORD_LIST_ALL);
-                    g_unit_selected_index = formation_unit_find_by_roster_slot(i);
+                    g_unit_selected_index = formation_unit_find_index_by_roster_slot(i);
                     g_sound_queued_effect_id = SOUND_SFX_CANCEL;
                     g_formation_job_wheel_job_selected = 1;
                     g_formation_current_menu = FORMATION_MENU_JOB_WHEEL_LEAVE;
@@ -485,7 +485,7 @@ static void draw_wheel_sprites(s32 angle, s32 radius_x, s32 radius_y) {
  * `i * k` with `k` holding the step: splitting any of them, or keeping a
  * separate phase accumulator, changes the target's register assignment.
  */
-static s32 update_job_change(s32 job) {
+static s32 update_job_change_animation(s32 job) {
     /* The phases reuse one stack slot. Separate locals, even in disjoint scopes,
      * enlarge the original 88-byte frame to 104 bytes with this compiler. */
     union {
@@ -688,7 +688,7 @@ static void update_wheel_open(void) {
  * opening; an opening wheel rebuilds its jobs for the new unit and adds the secondary repeat
  * period (divided by the event speed) to its remaining open frames, capped at 16. Lays the
  * portrait out again. */
-static void refresh_wheel(void) {
+static void restart_wheel(void) {
     s32 step;
     /* The target frame is 0x30 bytes; 0x18 of unreferenced locals. */
     s32 unused[6];
@@ -709,13 +709,13 @@ static void refresh_wheel(void) {
     } else {
         g_formation_current_menu = FORMATION_MENU_JOB_WHEEL_CLOSING;
     }
-    prepare_wheel_sprite();
+    prepare_unit_sprite();
 }
 
 /* Center the two job-wheel sprite quads on (0x80, 0x7b) for the selected
  * unit's formation graphic and queue a VRAM move of that graphic to
  * (0x240, 0x130), where g_formation_job_wheel_sprite_quad samples it. */
-static void prepare_wheel_sprite(void) {
+static void prepare_unit_sprite(void) {
     texture_source_t entry;
     RECT rect;
     s16 x;

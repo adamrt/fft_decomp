@@ -46,7 +46,7 @@ extern u8 g_shop_fur_waiting_message; /* waiting for message dismissal */
 extern s8 g_shop_fur_purchase_list_initialized;
 extern s8 g_shop_fur_equip_check_pending;
 extern s16 g_shop_fur_purchase_message_wait;
-extern u8 g_shop_fur_purchase_result; /* buy quantity menu thread (menu_managed_thread_start) */
+extern u8 g_shop_fur_purchase_result; /* buy quantity menu thread (menu_managed_thread_start_or_poll) */
 
 extern u16 g_shop_fur_purchase_item; /* item being bought */
 
@@ -105,7 +105,7 @@ void shop_fur_update_menu(void) {
             thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF830, 0);
             g_shop_fur_waiting_message = 0;
         }
-    } else if (menu_managed_thread_start(THREAD_SCREEN_SLOT_MENU, &g_shop_fur_menu_thread_data) == 0) {
+    } else if (menu_managed_thread_start_or_poll(THREAD_SCREEN_SLOT_MENU, &g_shop_fur_menu_thread_data) == 0) {
         menu_selection_clear_records();
         if (g_menu_screen_selection_results[0] == 0) {
             if (g_shop_fur_has_poached_stock) {
@@ -117,7 +117,7 @@ void shop_fur_update_menu(void) {
                 g_shop_fur_waiting_message = 1;
             }
         } else if (g_menu_screen_selection_results[0] == 1) {
-            if (formation_check_inventory(0)) {
+            if (formation_has_items(0)) {
                 g_shop_menu_step = SHOP_STEP_FUR_SELL_LIST;
                 g_shop_fur_opened = 0;
             } else {
@@ -156,7 +156,7 @@ void shop_fur_sell_update_list(void) {
     s32 message;
 
     if (!g_shop_fur_sell_list_initialized) {
-        message = formation_check_inventory(0) ? 0xF840 : 0xF845;
+        message = formation_has_items(0) ? 0xF840 : 0xF845;
 
         thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, message, 0);
         g_shop_item_category = menu_selection_set_value(MENU_SCREEN_CURSOR_SHOP_ITEM_TAB, 0);
@@ -166,7 +166,7 @@ void shop_fur_sell_update_list(void) {
         menu_scrollable_list_init_core(g_item_list_entries, 0, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
         g_menu_row_callbacks[0].value = equipment_row_get_equipped_count;
         g_menu_row_callbacks[1].value = equipment_row_get_item_count;
-        g_menu_row_callbacks[2].icon = item_list_build_type_icon_source;
+        g_menu_row_callbacks[2].icon = equipment_row_get_type_icon_source;
         g_menu_row_callbacks[3].icon = equipment_row_get_icon_source;
         g_menu_row_callbacks[4].value = shop_sell_get_price;
         g_menu_row_callbacks[5].value = equipment_row_get_equipped_count;
@@ -189,7 +189,7 @@ void shop_fur_sell_update_list(void) {
             g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
         }
     }
-    shop_switch_item_tab(g_menu_input_newly_pressed);
+    shop_update_item_tabs(g_menu_input_newly_pressed);
     menu_script_run_with_palette_mode(g_shop_sell_confirm_script, g_menu_input_primary_repeat, g_menu_input_lock_mode);
     shop_draw_gil();
 }
@@ -233,7 +233,7 @@ void shop_fur_sell_update_confirm(void) {
     if (result <= 0) {
         g_shop_fur_sale_message_wait = 1;
     }
-    shop_switch_item_tab(0);
+    shop_update_item_tabs(0);
     menu_script_run_with_palette_mode(g_shop_sell_confirm_script, 0, thread_is_running(THREAD_SCREEN_SLOT_TEXT));
     shop_draw_gil();
 }
@@ -257,7 +257,7 @@ static s32 update_sale_quantity(void) {
         g_sound_suppressed = 1;
     }
     g_shop_fur_quantity_menu_running
-        = menu_managed_thread_start(MENU_SCREEN_THREAD_SLOT_UPPER_MENU, g_shop_quantity_menu_data);
+        = menu_managed_thread_start_or_poll(MENU_SCREEN_THREAD_SLOT_UPPER_MENU, g_shop_quantity_menu_data);
     if (thread_is_running(MENU_SCREEN_THREAD_SLOT_UPPER_MENU_CHILD) && !g_shop_sell_total_shown) {
         g_text_substitution_values[0] = shop_get_item_half_price(g_shop_sell_quantity_item)
             * g_menu_screen_selection_results[MENU_SCREEN_SELECTION_SHOP_QUANTITY];
@@ -317,7 +317,7 @@ void shop_fur_buy_update_list(void) {
             g_item_list_entries, selected_index, scroll_base_index, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
         g_menu_row_callbacks[0].value = equipment_row_get_equipped_count;
         g_menu_row_callbacks[1].value = equipment_row_get_item_count;
-        g_menu_row_callbacks[2].icon = item_list_build_type_icon_source;
+        g_menu_row_callbacks[2].icon = equipment_row_get_type_icon_source;
         g_menu_row_callbacks[3].icon = equipment_row_get_icon_source;
         g_menu_row_callbacks[4].value = get_poached_price;
         g_menu_row_callbacks[5].value = shop_buy_get_equipped_count;
@@ -358,7 +358,7 @@ void shop_fur_buy_update_list(void) {
         }
     }
     disabled = 0;
-    shop_switch_item_tab(g_menu_input_secondary_repeat);
+    shop_update_item_tabs(g_menu_input_secondary_repeat);
     menu_script_run_with_palette_mode(
         g_shop_fur_purchase_menu_script, g_menu_input_primary_repeat, g_menu_input_lock_mode);
     if (menu_screen_check_busy() || g_menu_list_entry_count == 0 || g_shop_item_category == ITEM_MENU_TAB_OTHER) {
@@ -408,7 +408,7 @@ void shop_fur_buy_update_confirm(void) {
     if (result <= 0) {
         g_shop_fur_purchase_message_wait = 1;
     }
-    shop_switch_item_tab(0);
+    shop_update_item_tabs(0);
     menu_script_run_with_palette_mode(g_shop_fur_purchase_menu_script, 0, thread_is_running(THREAD_SCREEN_SLOT_TEXT));
     menu_draw_pressable_button(MENU_PRESSABLE_BUTTON_SHOP_LIST_TRIANGLE, 186, 76, 0, 1, SOUND_SFX_CONFIRM);
     shop_draw_gil();
@@ -454,7 +454,7 @@ static s32 update_purchase_quantity(void) {
         g_sound_suppressed = 1;
     }
     g_shop_fur_purchase_result
-        = menu_managed_thread_start(MENU_SCREEN_THREAD_SLOT_UPPER_MENU, g_shop_quantity_menu_data);
+        = menu_managed_thread_start_or_poll(MENU_SCREEN_THREAD_SLOT_UPPER_MENU, g_shop_quantity_menu_data);
     if (thread_is_running(MENU_SCREEN_THREAD_SLOT_UPPER_MENU_CHILD) && !g_shop_fur_purchase_confirm_shown) {
         g_text_substitution_values[0]
             = g_menu_screen_selection_results[MENU_SCREEN_SELECTION_SHOP_QUANTITY] * g_shop_fur_purchase_price;

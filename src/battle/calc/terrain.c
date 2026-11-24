@@ -12,7 +12,7 @@ static s32 tile_selector_15_stub(void);
 
 /* Give a unit back its move and its action by clearing both taken flags. No retail
  * code calls it. */
-void turn_activate_move_act(battle_unit_t* unit) {
+void turn_clear_move_and_act_taken(battle_unit_t* unit) {
     unit->movement_taken = 0;
     unit->action_taken = 0;
 }

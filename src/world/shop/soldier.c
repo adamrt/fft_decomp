@@ -94,7 +94,8 @@ void shop_soldier_update_menu(void) {
             g_shop_menu_step = SHOP_STEP_SOLDIER_REOPEN;
         }
     } else {
-        i = menu_managed_thread_start(MENU_SCREEN_THREAD_SLOT_UPPER_MENU, &g_shop_soldier_hire_menu_thread_data);
+        i = menu_managed_thread_start_or_poll(
+            MENU_SCREEN_THREAD_SLOT_UPPER_MENU, &g_shop_soldier_hire_menu_thread_data);
         if (i == 0) {
             if (g_menu_screen_selection_results[0] == 3 || g_menu_screen_selection_results[0] == -1) {
                 g_shop_soldier_hire_menu_initialized = 0;
@@ -199,7 +200,8 @@ void shop_soldier_hire_update_confirm(void) {
             g_shop_soldier_hire_confirm_message_wait = 0;
             g_shop_menu_step = SHOP_STEP_SOLDIER_HIRE_NAME_ENTRY;
         }
-    } else if (menu_managed_thread_start(MENU_SCREEN_THREAD_SLOT_UPPER_MENU, &g_shop_soldier_hire_confirm_menu) == 0) {
+    } else if (menu_managed_thread_start_or_poll(MENU_SCREEN_THREAD_SLOT_UPPER_MENU, &g_shop_soldier_hire_confirm_menu)
+        == 0) {
         selection = g_menu_screen_selection_results[2];
         if (selection == 1 || selection == -1) {
             thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF827, 0);
@@ -226,7 +228,7 @@ void shop_soldier_hire_update_name(void) {
         unit_panel_toggle_banner_thread(0);
         g_shop_soldier_hire_name_entry_initialized = 1;
     }
-    s_office_entered_name = name_entry_update_keyboard(g_formation_unit_pointers[g_unit_selected_index]->name, 0);
+    s_office_entered_name = name_entry_update(g_formation_unit_pointers[g_unit_selected_index]->name, 0);
     if (s_office_entered_name) {
         g_shop_soldier_hire_name_entry_initialized = 0;
         g_text_substitution_values[0] = s_office_fee;
@@ -251,7 +253,8 @@ void shop_soldier_hire_update_fee(void) {
             g_shop_menu_step = SHOP_STEP_SOLDIER_REOPEN;
             g_shop_soldier_hire_fee_message_wait = 0;
         }
-    } else if (menu_managed_thread_start(MENU_SCREEN_THREAD_SLOT_UPPER_MENU, &g_shop_soldier_hire_fee_confirm_menu)
+    } else if (menu_managed_thread_start_or_poll(
+                   MENU_SCREEN_THREAD_SLOT_UPPER_MENU, &g_shop_soldier_hire_fee_confirm_menu)
         == 0) {
         choice = g_menu_screen_selection_results[MENU_SCREEN_SELECTION_PROMPT_RESULT];
         if (choice == 0) {
@@ -313,7 +316,7 @@ void shop_soldier_rename_update_unit(void) {
         thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, -1, 0);
         g_shop_soldier_rename_error_shown = 0;
         g_shop_soldier_rename_prompt_initialized = 1;
-        formation_grid_init_cursor(0);
+        formation_grid_init(0);
         g_shop_background_visible = 0;
     }
     if (g_formation_unit_banner_enabled) {
@@ -373,7 +376,7 @@ void shop_soldier_rename_update_name(void) {
         g_shop_soldier_rename_name_entry_initialized = 1;
     }
     unit_grid_update(1, 0, 0, 0, g_menu_input_lock_mode, get_rename_unit_marker, 0);
-    s_office_entered_name = name_entry_update_keyboard(g_formation_unit_pointers[g_unit_selected_index]->name, 0);
+    s_office_entered_name = name_entry_update(g_formation_unit_pointers[g_unit_selected_index]->name, 0);
     if (s_office_entered_name) {
         g_shop_menu_step = SHOP_STEP_SOLDIER_REOPEN;
         formation_unit_set_name(g_unit_selected_index, s_office_entered_name);

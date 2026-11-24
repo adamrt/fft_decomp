@@ -6,7 +6,7 @@
 #include "fft/sys/thread.h"
 #include "psx/types.h"
 
-/* Whether the thread a screen manages is still running, as menu_thread_start_or_poll last saw it. */
+/* Whether the thread a screen manages is still running, as menu_managed_thread_replace_or_poll last saw it. */
 static s32 s_menu_managed_thread_state;
 
 /* Request stop, then clear this screen's managed-thread state. */
@@ -34,7 +34,7 @@ void menu_thread_stop_and_wait(s32 id) {
  * on the descriptor's thread function with the descriptor as parameter 1
  * (unless the slot is still busy) and returns 1; later calls return whether
  * the thread is still running, 0 once it has ended. */
-s32 menu_managed_thread_start(s32 thread_id, menu_entry_t* descriptor) {
+s32 menu_managed_thread_start_or_poll(s32 thread_id, menu_entry_t* descriptor) {
     if (s_menu_managed_thread_state == 0) {
         if (thread_is_running(thread_id)) {
             return 1;
@@ -51,13 +51,13 @@ s32 menu_managed_thread_start(s32 thread_id, menu_entry_t* descriptor) {
 
 #if defined(FFT_WORLD)
 /* WORLD retains an uncalled selected-index start between its two start helpers. */
-/* menu_managed_thread_start, first setting the entry's selected index when no menu thread is running.
+/* menu_managed_thread_start_or_poll, first setting the entry's selected index when no menu thread is running.
  * Never called. */
-s32 menu_managed_thread_start_at_selection(s32 thread_id, menu_entry_t* arg, s16 value) {
+s32 menu_managed_thread_start_or_poll_at_selection(s32 thread_id, menu_entry_t* arg, s16 value) {
     if (s_menu_managed_thread_state == 0) {
         arg->selected_index = value;
     }
-    return menu_managed_thread_start(thread_id, arg);
+    return menu_managed_thread_start_or_poll(thread_id, arg);
 }
 #endif
 
@@ -65,7 +65,7 @@ s32 menu_managed_thread_start_at_selection(s32 thread_id, menu_entry_t* arg, s16
 /* CARD and WORLD also pump menu frames while waiting or restarting. */
 /* Restart the menu thread with the given data, running 20 input-update
  * frames, or poll the running thread's status into s_menu_managed_thread_state. */
-void menu_thread_start_or_poll(s32 thread_id, menu_entry_t* descriptor) {
+void menu_managed_thread_replace_or_poll(s32 thread_id, menu_entry_t* descriptor) {
     u32 otag_storage[2];
     s32 i;
 

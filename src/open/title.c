@@ -40,7 +40,7 @@ extern u8 g_birthday_window_image[];
 
 static void update_logo_movie(controller_record_t* record);
 static void update_opening_movie(controller_record_t* record);
-static void update_main_menu(controller_record_t* record);
+static void update_title_menu(controller_record_t* record);
 static void update_sound_menu(controller_record_t* record);
 static void update_new_game(controller_record_t* record);
 static void update_birthday_menu(controller_record_t* record);
@@ -52,7 +52,7 @@ typedef void (*controller_handler_t)(controller_record_t* record);
 static controller_handler_t s_controller_handlers[13] = {
     update_logo_movie,
     update_opening_movie,
-    update_main_menu,
+    update_title_menu,
     update_sound_menu,
     update_new_game,
     update_birthday_menu,
@@ -69,7 +69,7 @@ static controller_handler_t s_controller_handlers[13] = {
  * Direct member stores shrink push_sound_menu's frame by eight bytes. */
 extern s32 g_controller_selected_options[];
 
-static void build_birthday_text(birthday_date_state_t* menu);
+static void build_birthday_window(birthday_date_state_t* menu);
 static void push_birthday_confirmation(void);
 static void push_birthday_menu(void);
 static void push_sound_menu(void);
@@ -240,7 +240,7 @@ void title_push_menu(s32 argument) {
     position->y = 0x58;
 
     if (g_system_runtime_flags & SYSTEM_RUNTIME_FLAG_DISPLAY_BLANKED) {
-        fade_tile_start_out(0x20);
+        fade_tile_start_in(0x20);
     }
 
     controller = g_controller_depth;
@@ -283,7 +283,7 @@ static void hide_menu_entries(title_menu_state_t* title) {
  * Sound opens the sound type menu without fading. Up and Down (and Select)
  * move the highlight between the four entries.
  */
-static void update_main_menu(controller_record_t* record) {
+static void update_title_menu(controller_record_t* record) {
     title_menu_state_t* state = &record->title;
     u8 loc[8];
     s32 status;
@@ -413,7 +413,7 @@ static void update_main_menu(controller_record_t* record) {
 
         case TITLE_MENU_CONTINUE:
             g_system_runtime_flags |= SYSTEM_RUNTIME_FLAG_DISPLAY_BLANKED;
-            title_prepare_new_game(PARTY_NEW_GAME_EMPTY, 1);
+            title_prepare_party(PARTY_NEW_GAME_EMPTY, 1);
             DrawSync(0);
             VSync(0);
             SetDispMask(1);
@@ -444,7 +444,7 @@ static void update_main_menu(controller_record_t* record) {
             return;
 
         case TITLE_MENU_TUTORIAL:
-            title_prepare_new_game(PARTY_NEW_GAME_RAMZA, 1);
+            title_prepare_party(PARTY_NEW_GAME_RAMZA, 1);
             g_title_result = TITLE_RESULT_TUTORIAL;
             g_display_object_animated_count -= 6;
             g_display_object_queue_count -= 6;
@@ -461,7 +461,7 @@ static void update_main_menu(controller_record_t* record) {
     if (!(flags & SYSTEM_RUNTIME_FLAG_CD_AUDIO_PLAYING) && state->idle_timer >= 0x259) {
         state->state = TITLE_STATE_DEMO_MOVIE;
         g_fade_tile.ot_index = 2;
-        fade_tile_start_in(0x20);
+        fade_tile_start_out(0x20);
         g_system_runtime_flags |= SYSTEM_RUNTIME_FLAG_INPUT_DISABLED;
         return;
     }
@@ -478,7 +478,7 @@ static void update_main_menu(controller_record_t* record) {
         case TITLE_MENU_CONTINUE:
         case TITLE_MENU_TUTORIAL:
             g_fade_tile.ot_index = 2;
-            fade_tile_start_in(0x20);
+            fade_tile_start_out(0x20);
             g_system_runtime_flags |= SYSTEM_RUNTIME_FLAG_INPUT_DISABLED;
             return;
         case TITLE_MENU_SOUND:
@@ -636,7 +636,7 @@ void prologue_start(void) {
     file_request_opnbk_image(1, g_file_destination);
     file_wait_pending();
     prologue_init_sequence(12, 3, g_prologue_entries);
-    fade_tile_start_out(0x20);
+    fade_tile_start_in(0x20);
 
     controller = g_controller_depth;
     g_controller_records[controller].new_game.step = 0;
@@ -672,7 +672,7 @@ static void update_new_game(controller_record_t* record) {
     }
 
     if (state->step == 4) {
-        title_prepare_new_game(PARTY_NEW_GAME_RAMZA, 0);
+        title_prepare_party(PARTY_NEW_GAME_RAMZA, 0);
         menu_screen_init_open_text();
 
         /* Copy the displayed buffer into the frame image, then into the draw buffer. */
@@ -770,7 +770,7 @@ static void push_birthday_menu(void) {
     g_display_object_gpu_image_pool[record].priority = 4;
     g_controller_records[g_controller_depth].birthday_date.month = 1;
     g_controller_records[g_controller_depth].birthday_date.day = 1;
-    build_birthday_text(&g_controller_records[g_controller_depth].birthday_date);
+    build_birthday_window(&g_controller_records[g_controller_depth].birthday_date);
 
     controller = g_controller_depth;
     g_display_object_gpu_image_pool[g_controller_records[controller].birthday_date.window_image].flags
@@ -790,7 +790,7 @@ static void push_birthday_menu(void) {
  *
  * The month label is centered from its measured width; both entries are drawn
  * into one scratch image before it is uploaded to VRAM. */
-static void build_birthday_text(birthday_date_state_t* menu) {
+static void build_birthday_window(birthday_date_state_t* menu) {
     RECT quad;
     point32_t position;
     s16 width;
@@ -816,12 +816,12 @@ static void build_birthday_text(birthday_date_state_t* menu) {
     position.y = 8;
     substitution = g_text_substitution_values;
     *substitution = text_id;
-    window_display_text_entry(index, 0xB801, position, g_birthday_window_image);
+    window_render_text_entry(index, 0xB801, position, g_birthday_window_image);
 
     position.x = 48;
     position.y = 8;
     *substitution = menu->day;
-    window_display_text_entry(index, 0xB802, position, g_birthday_window_image);
+    window_render_text_entry(index, 0xB802, position, g_birthday_window_image);
 
     window_load_render_record_image(index, (u32*)g_birthday_window_image);
 
@@ -935,7 +935,7 @@ static void update_birthday_menu(controller_record_t* record) {
         }
         g_display_object_queue_count -= 1;
         g_display_object_image_count -= 1;
-        build_birthday_text(menu);
+        build_birthday_window(menu);
         sound_play_sfx(SOUND_SFX_CURSOR_MOVE);
     } else if (input_update_repeat(PSX_PAD_DOWN)) {
         if (menu->selecting_month == 0) {
@@ -958,7 +958,7 @@ static void update_birthday_menu(controller_record_t* record) {
         }
         g_display_object_queue_count -= 1;
         g_display_object_image_count -= 1;
-        build_birthday_text(menu);
+        build_birthday_window(menu);
         sound_play_sfx(SOUND_SFX_CURSOR_MOVE);
     }
 
@@ -1078,7 +1078,7 @@ static void update_birthday_confirmation(controller_record_t* record) {
             member->zodiac
                 = ((value & (PARTY_BIRTHDAY_DAY_HIGH_BIT_MASK << 8)) >> 8) | ((month - 1) << PARTY_ZODIAC_SHIFT);
             music_set_target_volume(0, 0x60);
-            fade_tile_start_in(0x20);
+            fade_tile_start_out(0x20);
             g_system_runtime_flags |= SYSTEM_RUNTIME_FLAG_INPUT_DISABLED;
             return;
         }

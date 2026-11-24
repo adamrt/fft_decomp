@@ -103,7 +103,7 @@ void brave_story_open_propositions_level(void) {
     point.x = 8;
     point.y = 8;
     for (i = 0; i < g_menu_stack_records[g_menu_stack_depth].brave_story_propositions.entry_count; i++) {
-        window_display_text_entry(index,
+        window_render_text_entry(index,
             g_menu_stack_records[g_menu_stack_depth].brave_story_propositions.entries[i]
                 + TEXT_ID_PROPOSITION_CATEGORY_ROW_FIRST,
             point, g_window_image_buffer);
@@ -381,7 +381,7 @@ static void open_advancing_list(void) {
     point.x = 8;
     point.y = 8;
     while (i < g_menu_stack_records[g_menu_stack_depth].proposition_list.entry_count) {
-        window_display_text_entry(index,
+        window_render_text_entry(index,
             g_proposition_active[g_menu_stack_records[g_menu_stack_depth].proposition_list.entries[i]].proposition_id
                 | TEXT_ID_PROPOSITION_NAME_BASE,
             point, g_window_image_buffer);
@@ -395,7 +395,7 @@ static void open_advancing_list(void) {
         g_text_substitution_values[0]
             = g_proposition_active[g_menu_stack_records[g_menu_stack_depth].proposition_list.entries[i]]
                   .participant_count;
-        window_display_text_entry(index, TEXT_ID_VALUE, point, g_window_image_buffer);
+        window_render_text_entry(index, TEXT_ID_VALUE, point, g_window_image_buffer);
         point.y += 0x10;
     }
 
@@ -405,7 +405,7 @@ static void open_advancing_list(void) {
         s32 entry = g_menu_stack_records[g_menu_stack_depth].proposition_list.entries[i];
         g_text_substitution_values[0]
             = g_proposition_active[entry].assigned_days - g_proposition_active[entry].elapsed_days;
-        window_display_text_entry(index, TEXT_ID_TWO_DIGIT_VALUE, point, g_window_image_buffer);
+        window_render_text_entry(index, TEXT_ID_TWO_DIGIT_VALUE, point, g_window_image_buffer);
         point.y += 0x10;
     }
 
@@ -858,7 +858,7 @@ void unit_panel_prepare_party_unit(s32 party_index) {
 
     detail->generic_monster = unit->unit_flags & UNIT_FLAG_MONSTER;
     if (detail->generic_monster != 0) {
-        abilities = ability_build_skillset_list(unit->primary_skillset, SKILLSET_ABILITY_FILTER_ACTION);
+        abilities = skillset_build_ability_list(unit->primary_skillset, SKILLSET_ABILITY_FILTER_ACTION);
         for (i = 0; i < 5; i++) {
             detail->ability_ids[i] = *abilities++;
         }
@@ -1128,7 +1128,7 @@ static void open_work_history_entry(s32 value) {
 
     file_wait_pending();
     g_menu_stack_records[g_menu_stack_depth].work_history_entry = value;
-    calendar_read_date(g_proposition_last_attempt_date_bits, value, &date);
+    calendar_read_date_bits(g_proposition_last_attempt_date_bits, value, &date);
     g_text_window.text_id = value + TEXT_ID_WORLD_MESSAGE_BASE;
     switch (coordinate_mode) {
     case 0:

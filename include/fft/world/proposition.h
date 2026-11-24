@@ -239,7 +239,7 @@ typedef enum proposition_send_unit_mode {
 } proposition_send_unit_mode_e;
 
 /* Provisional: the PROPOSITION_SEND_UNIT level, where up to three units are chosen for a proposition.
- * update_participant_slots selects the slot and owns the portrait render records. */
+ * update_replace_mode selects the slot and owns the portrait render records. */
 typedef struct proposition_send_unit_level {
     window_render_pair_t list_frame; /* 0x00 */
     s32 frame_window_a;              /* 0x08 */

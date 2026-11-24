@@ -8,7 +8,7 @@ extern s32 g_bits_primary_write_index;
 extern s32 g_bits_secondary_read_index;
 
 /* Start the primary bit reader on a new data stream. */
-void bits_primary_init_reader(u8* data) {
+void bits_primary_init(u8* data) {
     g_bits_primary_reset = 1;
     g_bits_primary_cursor = data;
 }

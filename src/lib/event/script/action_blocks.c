@@ -25,7 +25,7 @@ static s16 s_script_debug_paused;
 
 /* DebugPause event instruction (0x72): print the pause message with the debug font, yield once and
  * set g_script_debug_paused, which nothing reads. */
-void script_print_debug_message(void) {
+void script_opcode_72_debug_pause(void) {
     FntPrint("\n\nPAUSE\n\n");
     thread_yield();
     s_script_debug_paused = 1;
@@ -116,10 +116,10 @@ void script_opcode_29_wait_walk(s32 unit_id) {
 void script_opcode_82_load_attack_graphics(void) {
     if (script_variable_get(EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS) == 0) {
         g_script_attack_entry_mode = SCRIPT_ATTACK_ENTRY_PRELOADED;
-        overlay_companion_request(COMPANION_OVERLAY_ATTACK);
+        overlay_companion_load(COMPANION_OVERLAY_ATTACK);
         thread_yield();
         scenario_load_setup();
-        deploy_build_sprites();
+        deploy_load_sprites();
         portrait_party_load();
     }
 }
@@ -174,7 +174,7 @@ void script_opcode_2a_block_start_thread(void) {
         } else if (script[0] == EVENT_OPCODE_WAIT_VALUE) {
             script_opcode_7e_wait_value((const event_wait_value_parameters_t*)parameters);
         } else if (script[0] == EVENT_OPCODE_DEBUG_PAUSE) {
-            script_print_debug_message();
+            script_opcode_72_debug_pause();
         } else if (script[0] == EVENT_OPCODE_WALK_TO) {
             g_thread_call_target = (void (*)(void))script_opcode_28_walk_to;
             thread_call_on_main_stack(parameters);
@@ -221,13 +221,13 @@ void script_opcode_2a_block_start_thread(void) {
         } else if (script[0] == EVENT_OPCODE_ROTATE_UNIT) {
             script_opcode_2d_rotate_unit((const event_rotate_unit_parameters_t*)(script + 1));
         } else if (script[0] == EVENT_OPCODE_FACE_UNIT) {
-            script_opcode_2c_face_unit((const event_face_unit_parameters_t*)(script + 1), 1);
+            script_opcode_2c_53_face_each_other((const event_face_unit_parameters_t*)(script + 1), 1);
         } else if (script[0] == EVENT_OPCODE_SPRITE_MOVE || script[0] == EVENT_OPCODE_SPRITE_MOVE_BETA) {
             thread_id = thread_resolve_next_slot(THREAD_SLOT_FIRST_IDLE);
             if (script[0] == EVENT_OPCODE_SPRITE_MOVE) {
-                thread_start(thread_id, script_sprite_move_thread);
+                thread_start(thread_id, script_opcode_3b_sprite_move_thread);
             } else {
-                thread_start(thread_id, script_sprite_move_beta_thread);
+                thread_start(thread_id, script_opcode_6e_sprite_move_beta_thread);
             }
             g_thread_contexts[thread_id].function_parameter_1 = (s32)(script + 1);
             g_thread_contexts[thread_id].task_id = THREAD_TASK_SPRITE_MOVE;
@@ -236,9 +236,9 @@ void script_opcode_2a_block_start_thread(void) {
         } else if (script[0] == EVENT_OPCODE_WAIT_SPRITE_MOVE) {
             script_opcode_6f_wait_sprite_move(first_halfword);
         } else if (script[0] == EVENT_OPCODE_WAIT_ROTATE_UNIT) {
-            script_opcode_65_wait_rotate_all(script[1]);
+            script_opcode_64_65_wait_rotate(script[1]);
         } else if (script[0] == EVENT_OPCODE_WAIT_ROTATE_ALL) {
-            script_opcode_65_wait_rotate_all(-1);
+            script_opcode_64_65_wait_rotate(-1);
         } else if (script[0] == EVENT_OPCODE_UNIT_ANIM_ROTATE) {
             script_opcode_8c_unit_anim_rotate((const event_unit_anim_rotate_parameters_t*)(script + 1));
         } else if (script[0] == EVENT_OPCODE_COLOR_UNIT) {
@@ -304,7 +304,7 @@ void script_opcode_49_add_unit_start_thread(void) {
                         map_unit_show(map_unit_id);
                     }
                     if (battle_unit_status_staging_save(slot) != 0) {
-                        g_thread_call_target = (void (*)(void))map_unit_update_graphics;
+                        g_thread_call_target = (void (*)(void))map_unit_update_display_for_script;
                         thread_call_on_main_stack(map_unit_id);
                     }
                 }

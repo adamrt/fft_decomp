@@ -8,7 +8,7 @@
 
 /* color modes */
 /* Map color-transition commands: the source color and treatment of RGB offsets.
- * map_palette_modify_from_other honors modes 5-7; every other value adds the
+ * map_palette_modify_from_source honors modes 5-7; every other value adds the
  * offsets to its supplied colors, including RESTORE. */
 typedef enum map_color_mode {
     MAP_COLOR_MODE_CURRENT = 0,           /* the color in transition plus the offsets */
@@ -119,9 +119,9 @@ extern map_palette_state_t g_map_palette_state;
 void map_palette_init_state(void);
 void map_palette_load_data(const palette_t* palettes, s32 clut_row, s32 clut_index, s32 load_all);
 void map_palette_set_colors(s32 mode, s32 clut_row, s32 clut_index, s32 update_all, const palette_t* colors);
-void map_palette_set_from_other(const rgba5551_t* source, s32 clut_row, s32 clut_index, s32 all_colors, s16 red,
+void map_palette_set_from_source(const rgba5551_t* source, s32 clut_row, s32 clut_index, s32 all_colors, s16 red,
     s16 green, s16 blue, s32 update_current_colors);
-void map_palette_modify_from_other(s32 mode, const rgba5551_t* source, s32 clut_row, s32 clut_index, s32 all_colors,
+void map_palette_modify_from_source(s32 mode, const rgba5551_t* source, s32 clut_row, s32 clut_index, s32 all_colors,
     s16 red, s16 green, s16 blue, s32 update_current_colors);
 void map_palette_store_modified_colors(s32 clut_row, s32 clut_index, s32 store_all);
 void map_palette_modify(

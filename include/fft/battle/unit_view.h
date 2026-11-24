@@ -9,7 +9,7 @@
 #include "psx/types.h"
 
 /* view modes */
-/* First argument of unit_view_start and value of g_unit_view_mode. Modes 1 through 5 include
+/* First argument of unit_view_request_mode and value of g_unit_view_mode. Modes 1 through 5 include
  * selected-tile information; the retained numeric/summary configuration does not. */
 typedef enum unit_view_mode {
     UNIT_VIEW_MODE_NONE = 0,           /* no panel */
@@ -25,7 +25,7 @@ typedef enum unit_view_mode {
 extern s32 g_unit_view_mode;
 
 /* Requests a view mode for the units unit_a and unit_b from the supervisor thread. */
-void unit_view_start(s32 mode, s32 unit_a, s32 unit_b);
+void unit_view_request_mode(s32 mode, s32 unit_a, s32 unit_b);
 
 /* Yields until the four panel threads (hovered and right unit stats, unit summary, tile info) have stopped. */
 void unit_view_wait_panels(void);

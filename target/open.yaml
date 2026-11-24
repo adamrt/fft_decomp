@@ -47,12 +47,12 @@ functions:
   - {addr: 0x80067bd0, size: 76, name: start_cd_read, hash: c64a5247a99178b8, unit: runtime}
   - {addr: 0x80067c1c, size: 360, name: present_frame, hash: 78623003303c6f16, unit: runtime}
   - {addr: 0x80067d84, size: 228, name: update_input_with_soft_reset, hash: f473a15292edf5e0, unit: runtime}
-  - {addr: 0x80067e68, size: 40, name: fade_tile_start_out, hash: a5ea42b5526a77a5, unit: overlay_fade}
-  - {addr: 0x80067e90, size: 40, name: fade_tile_start_in, hash: b9b1c837a334afc9, unit: overlay_fade}
+  - {addr: 0x80067e68, size: 40, name: fade_tile_start_in, hash: a5ea42b5526a77a5, unit: overlay_fade}
+  - {addr: 0x80067e90, size: 40, name: fade_tile_start_out, hash: b9b1c837a334afc9, unit: overlay_fade}
   - {addr: 0x80067eb8, size: 872, name: fade_tile_update, hash: d85fa9508eb94e58, unit: overlay_fade}
   - {addr: 0x80068220, size: 72, name: input_init_repeat, hash: e10b9650f2587d8a, unit: input_repeat}
   - {addr: 0x80068268, size: 284, name: input_update_repeat, hash: a82e23c2bd0cb926, unit: input_repeat}
-  - {addr: 0x80068384, size: 156, name: title_prepare_new_game, hash: 3b01ce90b00a6557, unit: new_game}
+  - {addr: 0x80068384, size: 156, name: title_prepare_party, hash: 3b01ce90b00a6557, unit: new_game}
   - {addr: 0x80068420, size: 300, name: calendar_date_to_zodiac, hash: 9aaa68be5ea32880, unit: new_game}
   - {addr: 0x8006854c, size: 160, name: music_test_update_menu_frame, hash: b27c035b144dee4f, unit: music_test_frame}
   - {addr: 0x800685ec, size: 76, name: calendar_date_to_day_index, hash: e796a8582427e794, source: src/lib/calendar.c}
@@ -88,13 +88,13 @@ functions:
   - {addr: 0x8006a174, size: 1028, name: title_push_menu, hash: 28b9116834e90955, unit: title}
   - {addr: 0x8006a578, size: 248, name: show_menu_entries, hash: 778fee05b7f00a4b, unit: title}
   - {addr: 0x8006a670, size: 248, name: hide_menu_entries, hash: d7c265230ad7b5f5, unit: title}
-  - {addr: 0x8006a768, size: 1936, name: update_main_menu, hash: 5c0ec430bc6c2047, unit: title}
+  - {addr: 0x8006a768, size: 1936, name: update_title_menu, hash: 5c0ec430bc6c2047, unit: title}
   - {addr: 0x8006aef8, size: 428, name: push_sound_menu, hash: 4cba2d76c26467a9, unit: title}
   - {addr: 0x8006b0a4, size: 692, name: update_sound_menu, hash: 0e5b70f17f26fa47, unit: title}
   - {addr: 0x8006b358, size: 200, name: prologue_start, hash: 7f1ea25f2f2e4ddc, unit: title}
   - {addr: 0x8006b420, size: 540, name: update_new_game, hash: 88dab4035996c1ea, unit: title}
   - {addr: 0x8006b63c, size: 852, name: push_birthday_menu, hash: 0e45678d3fb3cbd5, unit: title}
-  - {addr: 0x8006b990, size: 484, name: build_birthday_text, hash: acb5e3a1a8e68d6e, unit: title}
+  - {addr: 0x8006b990, size: 484, name: build_birthday_window, hash: acb5e3a1a8e68d6e, unit: title}
   - {addr: 0x8006bb74, size: 296, name: restore_birthday_menu, hash: 620158889f7f74a3, unit: title}
   - {addr: 0x8006bc9c, size: 324, name: dim_birthday_menu, hash: bb0bedfc73251381, unit: title}
   - {addr: 0x8006bde0, size: 752, name: update_birthday_menu, hash: 4fcabd119932ad53, unit: title}
@@ -102,7 +102,7 @@ functions:
   - {addr: 0x8006c464, size: 748, name: update_birthday_confirmation, hash: f574d10bdce9561d, unit: title}
   - {addr: 0x8006c750, size: 344, name: window_build_render_record_image, hash: 9fddadbd2cffc53b, unit: window_render}
   - {addr: 0x8006c8a8, size: 196, name: window_load_render_record_image, hash: bdab620f029fd3c1, unit: window_render}
-  - {addr: 0x8006c96c, size: 88, name: window_display_text_entry, hash: 5dccdaeb10297930, unit: window_render}
+  - {addr: 0x8006c96c, size: 88, name: window_render_text_entry, hash: 5dccdaeb10297930, unit: window_render}
   - {addr: 0x8006c9c4, size: 104, name: window_measure_text_image, hash: 1dee4681dccf0eb6, unit: window_render}
   - {addr: 0x8006ca2c, size: 212, name: window_init_text_record, hash: 5f2251260b376d41, unit: window_render}
   - {addr: 0x8006cb00, size: 248, name: display_object_init_image, hash: e55c249f3c899201, unit: window_render}
@@ -124,7 +124,7 @@ functions:
   - {addr: 0x8006e2f0, size: 1264, name: init_script, hash: c000e380ea2213d8, unit: ending}
   - {addr: 0x8006e7e0, size: 200, name: update_script_frame, hash: 06563bf022b02028, unit: ending}
   - {addr: 0x8006e8a8, size: 8, name: add_pointer_offset, hash: 6e3d0af1356c7afe, unit: ending}
-  - {addr: 0x8006e8b0, size: 748, name: ending_draw_text_records, hash: a86705083fc5f375, unit: ending}
+  - {addr: 0x8006e8b0, size: 748, name: ending_draw_script, hash: a86705083fc5f375, unit: ending}
   - {addr: 0x8006eb9c, size: 1432, name: build_text_record, hash: 54e7999ae4054929, unit: ending}
   - {addr: 0x8006f134, size: 244, name: update_text_scroll, hash: 096ef43fc404123c, unit: ending}
   - {addr: 0x8006f228, size: 880, name: update_xa_audio, hash: 599e7ab9df95ebf3, unit: ending, rodata: [{addr: 0x80067000, size: 68, hash: 91f5360ae3d8597d}]}
@@ -141,15 +141,15 @@ functions:
   - {addr: 0x8006fd64, size: 56, name: ending_opcode_02_set_scroll_speed, hash: 022baf84860eb042, unit: ending}
   - {addr: 0x8006fd9c, size: 68, name: ending_opcode_03_start_overlay_fade_out, hash: 8b4cecdc94072c05, unit: ending}
   - {addr: 0x8006fde0, size: 68, name: ending_opcode_04_start_overlay_fade_in, hash: 6c979a6c306bfedc, unit: ending}
-  - {addr: 0x8006fe24, size: 144, name: ending_opcode_05_wait_counted, hash: 8db29caed7e75f80, unit: ending}
+  - {addr: 0x8006fe24, size: 144, name: ending_opcode_05_wait_frames, hash: 8db29caed7e75f80, unit: ending}
   - {addr: 0x8006feb4, size: 128, name: ending_opcode_06_wait_for_scroll, hash: 970c9c390ea7fcc4, unit: ending}
   - {addr: 0x8006ff34, size: 176, name: ending_opcode_07_start_xa_audio, hash: aeffca5ff068f70b, unit: ending}
   - {addr: 0x8006ffe4, size: 60, name: ending_opcode_08_start_sound_fade_in, hash: 721878b86ef21ca2, unit: ending}
   - {addr: 0x80070020, size: 60, name: ending_opcode_09_start_sound_fade_out, hash: 814bce2be3c9e22d, unit: ending}
   - {addr: 0x8007005c, size: 164, name: ending_opcode_0a_stop_xa_audio, hash: 0c8b8bcfc224018a, unit: ending}
   - {addr: 0x80070100, size: 96, name: ending_opcode_0b_load_opntex_frame, hash: 5841d3ac770689b8, unit: ending}
-  - {addr: 0x80070160, size: 76, name: ending_opcode_0c_start_fade_intensity_increase, hash: f38fc77944fcfc9e, unit: ending}
-  - {addr: 0x800701ac, size: 80, name: ending_opcode_0d_start_fade_intensity_decrease, hash: 5eb2d91a96a89dc9, unit: ending}
+  - {addr: 0x80070160, size: 76, name: ending_opcode_0c_start_opntex_fade_in, hash: f38fc77944fcfc9e, unit: ending}
+  - {addr: 0x800701ac, size: 80, name: ending_opcode_0d_start_opntex_fade_out, hash: 5eb2d91a96a89dc9, unit: ending}
   - {addr: 0x800701fc, size: 68, name: ending_opcode_0e_wait_for_xa_audio_idle, hash: 62a970bd0a049ed2, unit: ending}
   - {addr: 0x80070240, size: 104, name: ending_opcode_0f_start_opntex_sequence, hash: d633de2c09194393, unit: ending}
   - {addr: 0x800702a8, size: 16, name: memcard_set_slot, hash: 1f22427930c61f2c, unit: memcard}
@@ -161,7 +161,7 @@ functions:
   - {addr: 0x80070500, size: 72, name: wait_hardware_event, hash: d2aebf9256a22720, unit: memcard}
   - {addr: 0x80070548, size: 88, name: clear_hardware_events, hash: 0ab881784cfa1d2d, unit: memcard}
   - {addr: 0x800705a0, size: 140, name: memcard_info_retry, hash: ba3559c7e03836a0, unit: card_checks}
-  - {addr: 0x8007062c, size: 188, name: memcard_poll_operation, hash: f6ce5450918332a3, unit: card_checks}
+  - {addr: 0x8007062c, size: 188, name: memcard_poll_info, hash: f6ce5450918332a3, unit: card_checks}
   - {addr: 0x800706e8, size: 148, name: poll_card_info_until_stable, hash: 7d39d6dc3dffb0b6, unit: card_checks}
   - {addr: 0x8007077c, size: 124, name: title_check_card_slots, hash: b46039f85ab0f00d, unit: card_checks}
   - {addr: 0x8007348c, size: 56, name: DecDCTReset, hash: da48c5dced171502, source: src/platform/psyq/libpress/DecDCTReset.c}

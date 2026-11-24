@@ -92,7 +92,7 @@ void world_map_set_backdrop_mode(s32 capture) {
     GsDrawOt(&g_world_map_aux_ordering_tables[g_gfx_active_buffer_index]);
     GsDrawOt(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
     DrawSync(0);
-    world_map_set_display_rect(g_gfx_active_buffer_index, &display_rect);
+    world_map_get_display_rect(g_gfx_active_buffer_index, &display_rect);
     StoreImage(&display_rect, g_world_map_scratch_buffer);
     DrawSync(0);
     g_picture_background_loaded_set = -1;
@@ -121,7 +121,7 @@ void world_map_set_backdrop_mode(s32 capture) {
 
 /* World-map tile atlas setup, run once from init_subsystems between
  * display_object_init_pools() and
- * world_map_init_menu_state(). Because the allocation counters were just
+ * world_map_init_menu_resources(). Because the allocation counters were just
  * reset, the two append calls here return records 0 and 1.
  *
  * Layout:
@@ -365,7 +365,7 @@ void world_map_apply_scroll(point32_t* amount, VECTOR* position) {
 }
 
 /* Apply a (negated) scroll amount to a position clamped to [-116, 128] (the
- * same x range clamp_coordinates clamps to) and leave the unapplied
+ * same x range compute_scroll_origin clamps to) and leave the unapplied
  * remainder in *amount. */
 void world_map_apply_horizontal_scroll(s32* amount, s32* position) {
     s32 delta = -*amount;
@@ -398,7 +398,7 @@ void world_map_apply_horizontal_scroll(s32* amount, s32* position) {
 
 /* Vertical counterpart of world_map_apply_horizontal_scroll: the
  * same shape applied to the vertical amount and projection origin,
- * clamped to [-64, 80], the y range clamp_coordinates uses. */
+ * clamped to [-64, 80], the y range compute_scroll_origin uses. */
 void world_map_apply_vertical_scroll(point32_t* amount, VECTOR* position) {
     s32 delta = -amount->y;
     s32 old_position;

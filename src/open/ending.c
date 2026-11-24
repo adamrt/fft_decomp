@@ -51,15 +51,15 @@ static void ending_opcode_01_create_positioned_text_record(s16* command);
 static void ending_opcode_02_set_scroll_speed(s16* command);
 static void ending_opcode_03_start_overlay_fade_out(s16* command);
 static void ending_opcode_04_start_overlay_fade_in(s16* command);
-static void ending_opcode_05_wait_counted(s16* entry);
+static void ending_opcode_05_wait_frames(s16* entry);
 static void ending_opcode_06_wait_for_scroll(s16* entry);
 static void ending_opcode_07_start_xa_audio(s16* command);
 static void ending_opcode_08_start_sound_fade_in(s16* command);
 static void ending_opcode_09_start_sound_fade_out(s16* command);
 static void ending_opcode_0a_stop_xa_audio(s16* unused_entry);
 static void ending_opcode_0b_load_opntex_frame(s16* command);
-static void ending_opcode_0c_start_fade_intensity_increase(s16* command);
-static void ending_opcode_0d_start_fade_intensity_decrease(s16* command);
+static void ending_opcode_0c_start_opntex_fade_in(s16* command);
+static void ending_opcode_0d_start_opntex_fade_out(s16* command);
 static void ending_opcode_0e_wait_for_xa_audio_idle(s16* unused_entry);
 static void ending_opcode_0f_start_opntex_sequence(s16* command);
 
@@ -81,15 +81,15 @@ static ending_opcode_handler_t s_ending_opcode_handlers[16] = {
     ending_opcode_02_set_scroll_speed,
     ending_opcode_03_start_overlay_fade_out,
     ending_opcode_04_start_overlay_fade_in,
-    ending_opcode_05_wait_counted,
+    ending_opcode_05_wait_frames,
     ending_opcode_06_wait_for_scroll,
     ending_opcode_07_start_xa_audio,
     ending_opcode_08_start_sound_fade_in,
     ending_opcode_09_start_sound_fade_out,
     ending_opcode_0a_stop_xa_audio,
     ending_opcode_0b_load_opntex_frame,
-    ending_opcode_0c_start_fade_intensity_increase,
-    ending_opcode_0d_start_fade_intensity_decrease,
+    ending_opcode_0c_start_opntex_fade_in,
+    ending_opcode_0d_start_opntex_fade_out,
     ending_opcode_0e_wait_for_xa_audio_idle,
     ending_opcode_0f_start_opntex_sequence,
 };
@@ -240,7 +240,7 @@ static u8* add_pointer_offset(u8* base, s32 byte_offset) {
  * shifts the top edge of each glyph. The AddPrim calls pass the contents of
  * otag[15] and otag[8], not their addresses: after ClearOTagR those are the
  * addresses of entries 14 and 7, which is where the primitives are linked. */
-void ending_draw_text_records(u32* otag, s32 graphics_buffer_index) {
+void ending_draw_script(u32* otag, s32 graphics_buffer_index) {
     s32 i;
     s32 j;
     s32 prim_index;
@@ -509,7 +509,7 @@ static void update_xa_audio(void) {
 
             /* The frame counter was cleared when the seek was issued. */
             if (g_system_wait_frames >= 0x79 && g_ending_script_state.control_state == 5) {
-                file_reset_cd_subsystems();
+                file_cd_reset();
                 g_ending_script_state.control_state = 0;
             }
             break;
@@ -861,7 +861,7 @@ static void ending_opcode_02_set_scroll_speed(s16* command) {
 static void ending_opcode_03_start_overlay_fade_out(s16* command) {
     command++;
     g_fade_tile.ot_index = 2;
-    fade_tile_start_out(*command);
+    fade_tile_start_in(*command);
     g_ending_script_state.dispatch.cursor.byte_offset += 4;
 }
 
@@ -870,13 +870,13 @@ static void ending_opcode_03_start_overlay_fade_out(s16* command) {
 static void ending_opcode_04_start_overlay_fade_in(s16* command) {
     command++;
     g_fade_tile.ot_index = 2;
-    fade_tile_start_in(*command);
+    fade_tile_start_out(*command);
     g_ending_script_state.dispatch.cursor.byte_offset += 4;
 }
 
 /* Opcode 5: wait command[1] frames. The first call arms the wait and each later
  * call counts one frame, yielding until the count is reached. Four bytes. */
-static void ending_opcode_05_wait_counted(s16* entry) {
+static void ending_opcode_05_wait_frames(s16* entry) {
     u32 flags;
     s32 counter;
     ending_script_dispatch_state_t* state = &g_ending_script_state.dispatch;
@@ -1008,7 +1008,7 @@ static void ending_opcode_0b_load_opntex_frame(s16* command) {
 
 /* Opcode 12: fade the OPNTEX picture in over command[1] frames (intensity 0 to
  * 0x80). Four bytes. */
-static void ending_opcode_0c_start_fade_intensity_increase(s16* command) {
+static void ending_opcode_0c_start_opntex_fade_in(s16* command) {
     s32 value = command[1];
 
     g_ending_script_state.dispatch.flags |= ENDING_SCRIPT_DISPATCH_INCREASE_FADE_INTENSITY;
@@ -1020,7 +1020,7 @@ static void ending_opcode_0c_start_fade_intensity_increase(s16* command) {
 
 /* Opcode 13: fade the OPNTEX picture out over command[1] frames (intensity 0x80
  * to 0). Four bytes. */
-static void ending_opcode_0d_start_fade_intensity_decrease(s16* command) {
+static void ending_opcode_0d_start_opntex_fade_out(s16* command) {
     s32 value = command[1];
 
     g_ending_script_state.dispatch.flags |= ENDING_SCRIPT_DISPATCH_DECREASE_FADE_INTENSITY;

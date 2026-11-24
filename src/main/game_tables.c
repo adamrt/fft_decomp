@@ -25,7 +25,7 @@ typedef char ability_monster_skillset_size_must_be_5[sizeof(ability_monster_skil
 extern ability_human_skillset_t g_ability_human_skillset_abilities[SKILLSET_ID_MONSTER_FIRST];
 extern ability_monster_skillset_t g_ability_monster_skillset_abilities[SKILLSET_ID_END - SKILLSET_ID_MONSTER_FIRST];
 
-/* Scratch list filled by ability_build_skillset_list. */
+/* Scratch list filled by skillset_build_ability_list. */
 static u16 s_skillset_abilities[SKILLSET_ABILITY_LIST_COUNT] = { 0 };
 
 /* Return the ability id in one slot of a skillset, or 0 for a slot or skillset
@@ -77,7 +77,7 @@ s32 skillset_get_ability_id(s32 skillset_id, s32 ability_index) {
 /* Fill g_skillset_abilities with the skillset's 24 ability ids and return
  * it. An id whose class (skillset_ability_filter_e) is not selected in filters
  * is written as 0. Skillset ids from 0x100 up read skillset 0. */
-u16* ability_build_skillset_list(s32 skillset_id, s32 filters) {
+u16* skillset_build_ability_list(s32 skillset_id, s32 filters) {
     s32 output_count;
     s32 ability_index;
     u16 ability_id;

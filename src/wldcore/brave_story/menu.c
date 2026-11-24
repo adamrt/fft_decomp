@@ -101,7 +101,7 @@ extern u16* g_brave_story_event_ids;
 
 static void open_person_list(void);
 static void open_event_list(void);
-static void build_story_rows(void);
+static void build_menu_rows(void);
 static void open_person_detail(s32 value);
 
 /* Pushes the Brave Story menu (MENU_STACK_LEVEL_BRAVE_STORY).
@@ -155,7 +155,7 @@ void brave_story_open_menu(void) {
     g_display_object_animated_pool[index].anim_counter = 0;
     g_display_object_animated_pool[index].frame_index = 0;
 
-    build_story_rows();
+    build_menu_rows();
 
     index = display_object_append_image(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].brave_story.rows_image = index;
@@ -175,7 +175,7 @@ void brave_story_open_menu(void) {
     point.x = 8;
     point.y = 8;
     for (i = 0; i < g_menu_stack_records[g_menu_stack_depth].brave_story.entry_count; i++) {
-        window_display_text_entry(index,
+        window_render_text_entry(index,
             g_menu_stack_records[g_menu_stack_depth].brave_story.entries[i] + TEXT_ID_BRAVE_STORY_ROW_FIRST, point,
             g_window_image_buffer);
         point.y += 0x10;
@@ -225,7 +225,7 @@ void brave_story_open_menu(void) {
     g_menu_stack_records[depth].brave_story.mode = MENU_STACK_WINDOW_MODE_BROWSE;
 
     /* Place the windows on the list record: the cursor 16 pixels per saved row, and the two
-     * stars by adding the row offsets build_story_rows stored in their y. */
+     * stars by adding the row offsets build_menu_rows stored in their y. */
     index = g_menu_stack_records[depth].brave_story.rows_image;
     g_display_object_animated_pool[g_menu_stack_records[depth].brave_story.cursor_window].position.x
         = g_display_object_gs_image_pool[index].position.x + 6;
@@ -261,7 +261,7 @@ void brave_story_open_menu(void) {
  * show (DISPLAY_OBJECT_BLANK cleared) once all 16 lands or
  * the first 31 treasures are found.
  */
-static void build_story_rows(void) {
+static void build_menu_rows(void) {
     s32 count;
     s32 i;
 

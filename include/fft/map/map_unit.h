@@ -64,7 +64,7 @@ struct map_unit {
     SVECTOR world_coords; /* 0x040; integer world coordinates: x, height, map depth */
     u8 _unused_048[8];
     /* The sprite is drawn at world_coords + event_offset + seq_offset
-     * (map_unit_copy_draw_coords); both offsets are in the units
+     * (map_unit_get_draw_coords); both offsets are in the units
      * of world_coords (vx = x, vy = height, vz = map depth). */
     SVECTOR seq_offset; /* 0x050; the shift of the running sequence's move commands; cleared when one starts */
     /* Added to the projected sprite position, in pixels, by
@@ -134,10 +134,10 @@ struct map_unit {
     u32 statuses_to_remove_1_4;            /* 0x150 */
     u32 statuses_to_remove_5_6;            /* 0x154 */
     unit_command_state_t command_state;    /* 0x158..0x16f */
-    s32 sp2_ability_id;                    /* 0x170: ability whose SP2 file sprite_open_sp2_file loads */
+    s32 sp2_ability_id;                    /* 0x170: ability whose SP2 file sprite_request_sp2_read loads */
     target_panels_e ability_preview_phase; /* 0x174 */
     /* 0x178; target_set_area_for_action result stored by
-     * select_target_tile: 0/1 preview, 2 stop, -1 back to the menu. */
+     * enter_ability_preview: 0/1 preview, 2 stop, -1 back to the menu. */
     s32 target_select_result;
     action_preparation_e attack_phase_state; /* 0x17c */
     s32 pending_attack_result;               /* 0x180: attack result code; -1 signals death */
@@ -320,7 +320,7 @@ map_unit_t* map_unit_find_overlapping_at_tile(map_unit_t* self, s32 x, s32 y, s3
 map_unit_t* map_unit_find_at_tile(s32 map_x, s32 map_y, s32 layer);
 map_unit_t* map_unit_find_selectable_at_tile(s32 map_x, s32 map_y, s32 layer);
 map_unit_t* map_unit_find_other_chocobo_at_tile(s32 map_x, s32 map_y, s32 layer);
-s32 map_unit_calculate_height_from_battle_tile(struct map_unit* unit);
+s32 map_unit_calculate_height_from_battle_unit_tile(struct map_unit* unit);
 s32 map_unit_calculate_height_from_tile(struct map_unit* unit);
 s32 map_unit_calculate_height_from_move_destination(struct map_unit* unit);
 s32 map_unit_calculate_height_with_caller_coords(struct map_unit* unit, const SVECTOR* coords);
@@ -361,24 +361,24 @@ enum {
 
 void map_unit_facing_turn_to_target(map_unit_t* unit, map_unit_t* target);
 s16 map_unit_get_facing_quadrant(u32 map_unit_id);
-s16 map_unit_get_camera_facing_by_battle_unit_id(u32 battle_unit_id);
+s16 map_unit_get_camera_facing_quadrant_by_battle_unit_id(u32 battle_unit_id);
 s32 map_unit_get_facing_sixteenth(u32 map_unit_id);
 s32 map_unit_set_facing_sixteenth(u32 map_unit_id, s32 facing_nibble);
 void map_unit_facing_snap_to_quadrants(void);
 void map_unit_facing_draw_wait_arrows(SVECTOR* vector, u32* ot);
 void map_unit_facing_draw_wait_direction(void);
 void map_unit_set_event_facing(s32 map_unit_id, s32 facing);
-s32 map_unit_check_camera_facing_by_event_unit_id(s32 event_unit_id);
+s32 map_unit_is_facing_away_from_camera_by_event_unit_id(s32 event_unit_id);
 
 /* animation and display */
 void map_unit_update_animations(void);
 void map_unit_update_target_displays(map_unit_t* unit);
 void map_unit_update_display(s32 map_unit_id);
-void map_unit_update_graphics(u32 map_unit_id);
+void map_unit_update_display_for_script(u32 map_unit_id);
 s32 map_unit_get_sprite_height_by_battle_unit_id(u32 battle_unit_id);
 s32 map_unit_get_sprite_sheet_slot_by_battle_unit_id(u32 battle_unit_id);
 void map_unit_update_float_height(map_unit_t* unit);
-void map_unit_update_float_and_status_bubble(map_unit_t* unit);
+void map_unit_update_float_height_and_status_bubble(map_unit_t* unit);
 void map_unit_play_sfx(struct map_unit* unit, s32 sound_id);
 
 /* Set and clear the unit_motion_flags_e that suppress a unit's facing, movement-effect and
@@ -399,7 +399,7 @@ void map_unit_set_world_coords_from_real_coords(struct map_unit* unit);
 void map_unit_set_move_and_world_coords(map_unit_t* unit);
 s32 map_unit_get_map_coords(u32 map_unit_id, SVECTOR* coords);
 s32 map_unit_get_tile_center_height_by_battle_unit_id(u32 battle_unit_id, SVECTOR* coords);
-void map_unit_copy_draw_coords(SVECTOR* destination, const map_unit_t* map_unit);
+void map_unit_get_draw_coords(SVECTOR* destination, const map_unit_t* map_unit);
 const SVECTOR* map_unit_get_event_offset(u32 map_unit_id);
 s32 map_unit_add_event_offset(u32 map_unit_id, const SVECTOR* amount);
 void map_unit_copy_world_coords(u32 map_unit_id, SVECTOR* world_coords);
@@ -424,7 +424,7 @@ typedef enum unit_rotate_mode {
 } unit_rotate_mode_e;
 
 /* Per-unit facing/animation state written by the event interpreters and
- * advanced every frame by map_unit_update_pending_animations.
+ * advanced every frame by map_unit_update_animation_states.
  * Seven bytes per unit, 21 units. */
 typedef struct unit_animation_state {
     u8 target_facing;
@@ -445,7 +445,7 @@ extern unit_animation_state_t g_unit_animation_states[]; /* event-script rotatio
 extern u16 g_unit_pending_animation_ids[];
 extern u16 g_unit_was_moving_latch[]; /* a unit with a pending animation was moving on the last update */
 
-void map_unit_update_pending_animations(void);
+void map_unit_update_animation_states(void);
 void map_unit_reset_animation_states(void);
 void map_unit_set_event_animation(s32 map_unit_id, u32 animation);
 

@@ -113,7 +113,7 @@ extern u8 g_formation_unit_count;
 s16 formation_build_record_list(s32 item_id, formation_unit_t** unused_list, formation_record_list_mode_e mode);
 void formation_unit_build_record(
     const struct battle_unit* unit, struct formation_unit* record, const struct party_unit* party);
-s32 formation_unit_find_by_roster_slot(s16 roster_slot);
+s32 formation_unit_find_index_by_roster_slot(s16 roster_slot);
 void formation_unit_copy_to_preview(s16 index, s32 unused_slot);
 void formation_save_records(void);
 void formation_roster_sort(s32 index);
@@ -122,7 +122,7 @@ s32 formation_unit_generate(s16 unit_type);
 void formation_unit_set_name(s16 formation_index, const u8* name);
 void formation_roster_build_names(void);
 void formation_remove_invalid_loadout(s16 unit_id);
-s32 formation_check_inventory(s32 mode);
+s32 formation_has_items(s32 mode);
 
 /* formation screen */
 /* The formation screen's state: the index of its handler in
@@ -172,7 +172,7 @@ void formation_run_screen(s32 tutorial, s32 unused);
 void formation_run_tutorial(s32 tutorial_index);
 void formation_init_menu_state(void);
 void formation_init_display(void);
-void formation_run_world_map_return(void);
+void formation_run_for_return_event(void);
 
 /* unit grid */
 extern u8 g_formation_cursor_ot_override;
@@ -185,9 +185,9 @@ extern rgb24_t g_formation_dimmed_sprite_color;
 
 /* get_mode and get_shade take the unit slot index; NULL selects the default. */
 void formation_cycle_selected_unit(s16 pad_buttons);
-void formation_grid_init_cursor(s32 formation_index);
-void formation_init_selection_cursor(s16 formation_index);
-s32 formation_grid_update_transition(s32 mode);
+void formation_grid_init(s32 formation_index);
+void formation_grid_select_unit(s16 formation_index);
+s32 formation_grid_update_slide_out(s32 mode);
 s32 formation_grid_update_return(s32 mode);
 void formation_stage_selected_unit(void);
 
@@ -215,7 +215,7 @@ extern u8 g_formation_banner_active;
 extern u8 g_formation_unit_banner_at_bottom;
 extern u8 g_formation_unit_banner_at_bottom_latch;
 
-s32 formation_banner_countdown(s32 message_id, s32 frames);
+s32 formation_update_banner(s32 message_id, s32 frames);
 
 /* unit panels */
 /* The status panels of the selected unit and of the unit it is compared with, and the stat preview panel. */
@@ -228,12 +228,11 @@ extern s32 g_formation_preview_stats_window_active;
 extern unit_panel_thread_t g_formation_change_banner_thread_params;
 extern unit_panel_thread_t g_formation_equipment_panel_thread_params;
 
-void formation_update_selection_stage(void);
 void formation_refresh_selected_stats(void);
 s32 formation_get_selected_unit_name_id(void);
 void formation_toggle_preview_equipment_panel(s32 enable);
 void formation_toggle_ability_panel(s32 enable);
-void formation_open_equipment_panel(s32 enabled);
+void formation_open_equipment_ability_panel(s32 enabled);
 
 /* dismissal */
 extern s16 g_formation_dismiss_anim_timer;

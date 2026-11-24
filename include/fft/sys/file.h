@@ -115,8 +115,8 @@ s32 file_request_read_quiet(file_load_descriptor_t* header, s32 sector, s32 sect
 s32 file_request_read_bytes(s32 sector, u32 size, void* destination);
 void file_poll_load(file_load_descriptor_t* state);
 int file_get_load_state(void);
-void file_cd_reset_and_pause(file_load_descriptor_t* state);
-void file_reset_cd_subsystems(void);
+void file_cd_pause(file_load_descriptor_t* state);
+void file_cd_reset(void);
 void file_cd_read_callback(u8 event, u8* result);
 void file_cd_ready_callback(u8 event, u8* result);
 

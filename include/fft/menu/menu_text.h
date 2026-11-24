@@ -78,4 +78,7 @@ void menu_text_entry_wait_thread(void);
 /* Applies scroll input, rebuilds the entry's text image and uploads the rows that changed. */
 u8* menu_text_update_page_scroll(struct menu_entry* menu, s32* first_row, s32* render_pending, s32* unused_cursor);
 
+/* Builds and runs the AT list screen; OPTION and WORLD each build their own body. */
+void menu_text_list_thread(void);
+
 #endif

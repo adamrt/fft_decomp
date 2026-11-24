@@ -54,7 +54,7 @@ extern s32 g_overlay_companion_overlay_primitives;
 extern s32 g_overlay_companion_executable_request_index;
 
 /* Publishes an executable request and waits for it to clear. */
-void overlay_companion_request(s32 request_index);
+void overlay_companion_load(s32 request_index);
 
 /* The per-frame drivers of the executable and data file requests: they start the disc read on the main stack,
  * poll until it finishes and clear the request. */

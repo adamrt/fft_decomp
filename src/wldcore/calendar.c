@@ -14,7 +14,7 @@
 /* Twelve {month, day} pairs, Aries first. */
 extern calendar_date_t g_calendar_zodiac_start_dates[ZODIAC_SIGN_ORDINARY_COUNT];
 
-static void advance_birthdays(void);
+static void advance_birthday_ages(void);
 
 /*
  * Advance the calendar by 1 day and run the daily updates.
@@ -45,7 +45,7 @@ void calendar_advance_day(void) {
         script_variable_set(EVENT_SCRIPT_VAR_UNKNOWN_67, value);
     }
     proposition_advance_day();
-    advance_birthdays();
+    advance_birthday_ages();
     breeding_update(1);
 }
 
@@ -104,7 +104,7 @@ void calendar_date_to_zodiac(s32* month_ptr, s32* day_ptr) {
  * loop's base materializes as g_brave_story_character_ages + 1; entry 0
  * is the only absolute access to the array.
  */
-static void advance_birthdays(void) {
+static void advance_birthday_ages(void) {
     const calendar_date_t* birthdays = g_brave_story_birthdays;
     s32 day = script_variable_get(EVENT_SCRIPT_VAR_DAY);
     s32 month = script_variable_get(EVENT_SCRIPT_VAR_MONTH);
@@ -136,7 +136,7 @@ party_unit_t* party_get_roster_unit(s32 party_index) {
 
 /* Writes one nine-bit record: bits 0-4 from source->day, bits 5-8 from
  * source->month. Records are packed nine bits apart in the bit array. */
-void calendar_write_date(u32* bits, s32 record, calendar_date_t* source) {
+void calendar_write_date_bits(u32* bits, s32 record, calendar_date_t* source) {
     s32 base = record * 9;
     s32 mask;
     s32 i;
@@ -159,9 +159,9 @@ void calendar_write_date(u32* bits, s32 record, calendar_date_t* source) {
 
 /* Reads one nine-bit record: bits 0-4 into dest->day, bits 5-8 into dest->month.
  * Records are packed nine bits apart in the bit array, matching
- * calendar_write_date. A field that decodes to zero or beyond its
+ * calendar_write_date_bits. A field that decodes to zero or beyond its
  * range falls back to 1. */
-void calendar_read_date(u32* bits, s32 record, calendar_date_t* dest) {
+void calendar_read_date_bits(u32* bits, s32 record, calendar_date_t* dest) {
     s32 base = record * 9;
     s32 mask;
     s32 i;

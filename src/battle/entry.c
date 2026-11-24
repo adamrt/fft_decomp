@@ -81,7 +81,7 @@ static void run_map_load(void) {
     if (script_variable_get(EVENT_SCRIPT_VAR_SAVE_IN_PROGRESS)) {
         show_banner = 0;
     }
-    g_deploy_skipped = deploy_open();
+    g_deploy_skipped = deploy_start();
     loading_message_build_offset(g_deploy_skipped);
     map_id = g_map_id = script_variable_get(EVENT_SCRIPT_VAR_CURRENT_MAP);
     g_map_init_step = 0;
@@ -114,7 +114,7 @@ static void run_map_load(void) {
     fade = 0xf8;
     if (show_banner) {
         do {
-            gfx_swap_battle_otag();
+            gfx_swap_render_buffers();
             /* Pointer arithmetic, not indexing, in all three loops: indexing compiles larger. */
             (g_fade_battle_polygons + g_gfx_screen_polarity)->r0 = fade;
             (g_fade_battle_polygons + g_gfx_screen_polarity)->g0 = fade;
@@ -131,14 +131,14 @@ static void run_map_load(void) {
     banner_p = banner;
     fade = 0xff;
     while (deploy_update_input() != -1) {
-        gfx_swap_battle_otag();
+        gfx_swap_render_buffers();
         if (show_banner) {
             AddPrim(gfx_get_battle_otag(), &banner_p[g_gfx_screen_polarity]);
         } else {
             loading_message_append_to_otag(gfx_get_battle_otag());
         }
         g_map_init_step = map_update_deployment_init_sequence(
-            map_id, g_map_init_step, deploy_update_frame(gfx_get_battle_otag(), g_input_current_buttons));
+            map_id, g_map_init_step, deploy_update_event(gfx_get_battle_otag(), g_input_current_buttons));
         if (g_map_init_step == 0xd) {
             load_fixed_cluts();
             battle_state_battle_start_event_enter();
@@ -167,7 +167,7 @@ done:
             if (fade >= 0xf8) {
                 fade = 0xff;
             }
-            gfx_swap_battle_otag();
+            gfx_swap_render_buffers();
             (g_fade_battle_polygons + g_gfx_screen_polarity)->r0 = fade;
             (g_fade_battle_polygons + g_gfx_screen_polarity)->g0 = fade;
             (g_fade_battle_polygons + g_gfx_screen_polarity)->b0 = fade;
@@ -221,8 +221,8 @@ void battle_entrypoint(void) {
             battle_update_input();
             sprite_init_render_frame();
             SetGeomScreen(0x200);
-            gfx_swap_battle_otag();
-            camera_update_scene_focus();
+            gfx_swap_render_buffers();
+            camera_update_focus();
 
             /* Negate the Q12 camera position into whole units; the x conversion spells out the
              * round-toward-zero that / ONE does for y and z. */
@@ -236,7 +236,7 @@ void battle_entrypoint(void) {
             camera_integer->vz = -camera_fixed->vz / ONE;
 
             camera_update_matrices(&g_camera_matrix, &g_camera_render_state, &g_camera_screen_offset, &g_camera_zoom);
-            map_mesh_draw_weather(&g_camera_matrix);
+            map_draw(&g_camera_matrix);
             /* The SEQ wait commands read this: 2 while an effect is updating, 0 otherwise. */
             if (effect_playback_update()) {
                 g_battle_animation_wait_state = 2;

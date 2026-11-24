@@ -194,7 +194,7 @@ u8* text_find_entry(u32 text_id);
 const u8* text_skip_to_entry(const u8* text, s32 entry_index);
 
 /* Bind writable sections of a text bank beginning with its offset table. */
-void text_relocate_pointer_table(text_bank_t* bank);
+void text_bind_section_pointers(text_bank_t* bank);
 
 /* battle name text */
 /* SMALL.OUT's entrypoint: bind its battle name text and clear the deployment unit limit. */
@@ -218,7 +218,7 @@ void text_build_unit_name_list(void);
 
 /* measuring */
 /* Width and line count returned by text measurement. Width is in pixels for
- * text_measure_pixels and character columns for text_measure. */
+ * text_measure_pixels and character columns for text_measure_columns. */
 typedef struct text_dimensions {
     s16 width;
     s16 rows;
@@ -228,7 +228,7 @@ typedef char text_dimensions_size_must_be_4[sizeof(text_dimensions_t) == 4 ? 1 :
 /* Pixel width of each line from the last text_measure_pixels call. */
 extern s32 g_text_line_widths[];
 
-void text_measure(s16* columns, s16* rows, const u8* text);
+void text_measure_columns(s16* columns, s16* rows, const u8* text);
 void text_measure_pixels(s16* width, s16* rows, const u8* text);
 
 /* text images */
@@ -278,7 +278,7 @@ void text_render_id_rows_to_vram(const u8* text_table, const s16* text_ids, cons
 void text_concatenate_entries(const u8* text_table, u8* out, const s16* text_ids, s32 separate);
 
 /* Allocates text image VRAM for the sprite or quad and gives it the normal menu CLUT plus clut_offset rows. */
-void text_configure_sprite_vram(RECT* rect, s32 width, s32 height, void* packet, s32 clut_offset);
+void text_alloc_image_rect(RECT* rect, s32 width, s32 height, void* packet, s32 clut_offset);
 
 /* numbers */
 /* Sign flags read by the decimal formatter and large-glyph renderer. */
@@ -384,7 +384,7 @@ enum {
 };
 
 /* The DIALOG_TYPE_OPTIONS_MASK field of a portrait box, as
- * menu_build_window_image and the text thread read it. 0x0c is tested with
+ * menu_build_dialog_window_image and the text thread read it. 0x0c is tested with
  * the Help box only and has no name here. */
 typedef enum dialog_options {
     DIALOG_OPTIONS_TAIL = 0x00,           /* a tail pointing at the speaker */

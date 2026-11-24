@@ -17,20 +17,20 @@ extern menu_entry_t* g_menu_thread_menu_data;
 
 /* Starts thread_id on the entry's thread and returns 1 on the first call; later calls return whether the
  * thread still runs. */
-s32 menu_managed_thread_start(s32 thread_id, menu_entry_t* descriptor);
+s32 menu_managed_thread_start_or_poll(s32 thread_id, menu_entry_t* descriptor);
 void menu_thread_request_stop(s32 thread_id);
 void menu_managed_thread_stop(s32 thread_id);
 
 /* Requests a stop and runs input-update frames until the thread has ended. */
 void menu_thread_stop_and_wait(s32 thread_id);
-void menu_thread_start_or_poll(s32 thread_id, menu_entry_t* descriptor);
+void menu_managed_thread_replace_or_poll(s32 thread_id, menu_entry_t* descriptor);
 
 /* The menu callers' running-flag accessor. WORLD links this separately from thread_is_running. */
 s32 menu_thread_is_running(s32 thread_id);
 
 /* Acts on Circle for a row: starts the row's entry one thread slot below, clears the selection, or (for a
  * negative action -n) closes n menu threads; stores the row as the entry's result. */
-void menu_handle_action(menu_entry_t* entry, s32 row_index);
+void menu_handle_confirm_input(menu_entry_t* entry, s32 row_index);
 void menu_handle_cancel_input(menu_entry_t* context);
 void menu_update_row_cursor(menu_entry_t* bounds, s32* cursor);
 
@@ -44,7 +44,7 @@ void menu_input_thread(void);
 void menu_icon_list_thread(void);
 
 /* A window without a cursor whose text image is rebuilt every seventh frame. */
-void menu_icon_strip_thread(void);
+void menu_icon_message_thread(void);
 
 /* One text entry shown until input arrives or g_message_duration_frames runs out. */
 void menu_icon_timed_thread(void);

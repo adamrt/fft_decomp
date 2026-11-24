@@ -23,7 +23,7 @@ s32 calendar_date_to_day_index(s32 month, s32 day);
 void calendar_day_index_to_date(s32 day_of_year, s32* output_month, s32* output_day);
 void calendar_advance_day(void);
 void calendar_advance_days(s32 days);
-void calendar_advance_year(void);
+void calendar_request_year_advance(void);
 
 /* zodiac signs */
 void calendar_date_to_zodiac(s32* month, s32* day);
@@ -31,8 +31,8 @@ void calendar_date_to_zodiac(s32* month, s32* day);
 /* date bitmaps */
 /* Dates kept as nine-bit records in a bit array (day in bits 0-4, month in bits 5-8), as the save's acquisition and
  * discovery date bitmaps hold them. */
-void calendar_write_date(u32* bits, s32 record, calendar_date_t* source);
-void calendar_read_date(u32* bits, s32 record, calendar_date_t* dest);
+void calendar_write_date_bits(u32* bits, s32 record, calendar_date_t* source);
+void calendar_read_date_bits(u32* bits, s32 record, calendar_date_t* dest);
 
 /* date display */
 /* Screen position of the date calendar_draw_date draws. */

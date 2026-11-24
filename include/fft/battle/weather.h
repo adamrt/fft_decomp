@@ -71,7 +71,7 @@ void weather_dispatch_command(u8 command);
 extern s32 g_weather_timed_transform_frame;
 extern s32 g_weather_timed_transform_duration;
 
-void weather_set_transform_duration(s32 id, s32 value);
+void weather_start_timed_transform(s32 id, s32 value);
 
 /* sound */
 /* Sound IDs remembered for weather_stop_sfx; zero means no ID is stored.
@@ -83,5 +83,8 @@ extern u8 g_weather_sfx_enabled;
 
 void weather_start_sfx(void);
 s32 weather_stop_sfx(void); /* the result is indeterminate; no caller reads it */
+
+/* The raw weather script variable, before indoor and snow flags apply. */
+s32 weather_get_raw(void);
 
 #endif

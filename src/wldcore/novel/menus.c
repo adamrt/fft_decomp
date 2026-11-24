@@ -653,7 +653,7 @@ static void open_history(void) {
     position->y = -0x64;
     g_display_object_gs_image_pool[index].clut.x = 960;
     g_display_object_gs_image_pool[index].clut.y = 498;
-    window_draw_centered_text(index, *newest + TEXT_ID_WORLD_MESSAGE_BASE);
+    novel_draw_history_text(index, *newest + TEXT_ID_WORLD_MESSAGE_BASE);
 
     g_display_object_animated_pool[g_menu_stack_records[g_menu_stack_depth - 1].novel.quit_prompt_window].palette = 0xA;
     /* Direct record.color access changes the column base and instruction scheduling. */
@@ -837,6 +837,6 @@ static void draw_history_entry(novel_history_level_t* level, s32 index) {
     s32 text_id = ((s32*)level)[index + level->scroll];
 
     if (text_id != -1) {
-        window_draw_centered_text(level->render_index, text_id + TEXT_ID_WORLD_MESSAGE_BASE);
+        novel_draw_history_text(level->render_index, text_id + TEXT_ID_WORLD_MESSAGE_BASE);
     }
 }

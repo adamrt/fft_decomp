@@ -70,7 +70,7 @@ void option_entrypoint(s32 menu_type) {
     }
     if (menu_type == MENU_OPTION_TYPE_AT_LIST) {
         tutorial_pulse_wait_value(SCRIPT_TUTORIAL_WAIT_AT_LIST);
-        at_list_start_thread();
+        at_list_run();
     }
     if (menu_type == MENU_OPTION_TYPE_CRYSTAL_PICKUP) {
         crystal_pickup_run_menus();

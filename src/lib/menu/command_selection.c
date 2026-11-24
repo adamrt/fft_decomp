@@ -276,7 +276,7 @@ static void build_ability_list_rows(s32 mode) {
 
     if (type == ACTION_MENU_TYPE_DEFAULT) {
         list = &g_event_work->ability_list;
-        skillset_get_unit_ability_data(
+        skillset_build_ability_lists(
             unit_index, skillset, (s16*)list->ids, list->mp_costs, list->ct, 0, list->flags, list->turns);
         mem_copy_bytes_nonempty(g_event_work->ability_list.skill_ct, g_event_work->ability_list.ct, 0x50);
     }
@@ -284,7 +284,7 @@ static void build_ability_list_rows(s32 mode) {
         skillset_load_item_abilities(unit_index, skillset, g_event_work->ability_list.mp_costs);
     }
     if (type == ACTION_MENU_TYPE_WEAPON_INVENTORY) {
-        skillset_load_throw_abilities(unit_index, skillset, g_event_work->ability_list.mp_costs);
+        skillset_load_throw_items(unit_index, skillset, g_event_work->ability_list.mp_costs);
     }
     if (type == ACTION_MENU_TYPE_MATH_SKILL) {
         if (mode == MENU_MATH_SKILL_LIST_ATTRIBUTES) {
@@ -302,7 +302,7 @@ static void build_ability_list_rows(s32 mode) {
             unit_index, skillset, g_event_work->ability_list.ids, 0, g_event_work->ability_list.flags);
     }
     if (type == ACTION_MENU_TYPE_KATANA_INVENTORY) {
-        skillset_load_draw_out_abilities(unit_index, skillset, g_event_work->ability_list.mp_costs);
+        skillset_load_draw_out_katanas(unit_index, skillset, g_event_work->ability_list.mp_costs);
     }
     if (type == ACTION_MENU_TYPE_CHARGE) {
         skillset_load_charge_abilities(unit_index, skillset, g_event_work->ability_list.ids,
@@ -604,7 +604,7 @@ void command_act_menu_thread(void) {
     s32 param_value;
     menu_unit_selection_record_t* row;
 
-    command_check_restrictions();
+    command_check_act_restrictions();
     g_thread_call_target = build_act_menu;
     thread_call_on_main_stack();
     param_value = 1;

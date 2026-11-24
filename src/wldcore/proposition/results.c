@@ -869,20 +869,20 @@ void proposition_build_detail_panel(proposition_detail_panel_t* panel, s32 propo
     window_build_render_record_image(index, bounds, coordinate_mode, &g_window_image_buffer[0x200]);
     point.x = 8;
     point.y = text_rows * 0x10 + 8;
-    window_display_text_entry(index, TEXT_ID_JOB_CONDITION_LABELS, point, &g_window_image_buffer[0x200]);
+    window_render_text_entry(index, TEXT_ID_JOB_CONDITION_LABELS, point, &g_window_image_buffer[0x200]);
     point.x = 8;
     point.y = 8;
-    window_display_text_entry(index, TEXT_ID_JOB_CONTENTS_LABEL, point, &g_window_image_buffer[0x200]);
+    window_render_text_entry(index, TEXT_ID_JOB_CONTENTS_LABEL, point, &g_window_image_buffer[0x200]);
     point.x = 68;
     point.y = 8;
-    window_display_text_entry(index, g_proposition_selected_row.name_text + (TEXT_ID_PROPOSITION_JOB_CONTENTS_BASE - 1),
+    window_render_text_entry(index, g_proposition_selected_row.name_text + (TEXT_ID_PROPOSITION_JOB_CONTENTS_BASE - 1),
         point, &g_window_image_buffer[0x200]);
     for (i = 0; i < g_proposition_active[proposition].participant_count; i++) {
         s32 row = i + 2;
 
         point.x = 60;
         point.y = (text_rows + row) * 0x10 + 8;
-        window_display_text_entry(index,
+        window_render_text_entry(index,
             g_proposition_active[proposition].participant_indices[i] | TEXT_ID_UNIT_NAME_BASE, point,
             &g_window_image_buffer[0x200]);
     }

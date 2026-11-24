@@ -164,8 +164,10 @@ preserving every original byte.
   state before its role (`battle_state_free_cursor_update`).
 - A bytecode machine's handler is `<machine>_opcode_<nn>_<instruction>` with
   the opcode in two hex digits (`script_opcode_28_walk_to`); a handler shared
-  by several opcodes takes the lowest. "Opcode" is only for an instruction
-  stream a dispatcher decodes; request codes and single records are commands.
+  by several opcodes names them all, or the first and last of a run
+  (`script_opcode_64_65_wait_rotate`, `script_opcode_a0_a5_compare`).
+  "Opcode" is only for an instruction stream a dispatcher decodes; request
+  codes and single records are commands.
 - Program entrypoints are `<program>_entrypoint` or
   `<program>_<role>_entrypoint` for independent entrances to one overlay
   (`open_title_entrypoint`). Identify them from the callers that enter the

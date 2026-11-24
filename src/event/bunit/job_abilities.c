@@ -86,7 +86,7 @@ s32 job_list_build(s32 unit_id, s16* job_ids, s32 unused_2) {
     slot = &unit_table[unit_index];
     unit = *slot;
     job_ids_output = job_ids;
-    bits_primary_init_reader(unit->unlocked_jobs);
+    bits_primary_init(unit->unlocked_jobs);
     job_ids_output[0] = get_base_job(saved_unit_id & 0xff);
     job_count = 1;
     if (job_is_special_monster((*slot)->job_id) || (*slot)->uses_monster_skillset != 0) {
@@ -153,7 +153,7 @@ s32 ability_list_build(s16 unit_index, s16 job_id, menu_ability_category_e abili
     if (job_find_first_for_skillset(skillset) == -1) {
         skillset = g_unit_list_pointers[unit_index]->abilities[0];
     }
-    abilities = (s16*)ability_build_skillset_list(skillset, SKILLSET_ABILITY_FILTER_ALL);
+    abilities = (s16*)skillset_build_ability_list(skillset, SKILLSET_ABILITY_FILTER_ALL);
 
     if (ability_category == MENU_ABILITY_CATEGORY_ACTION) {
         lo = 1;
@@ -184,7 +184,7 @@ s32 ability_list_build(s16 unit_index, s16 job_id, menu_ability_category_e abili
     /* The job's learned-ability bits, one per skillset slot. Integer address arithmetic
      * preserves the final ADDU operand order. */
     byte_offset = generic_index * UNIT_LEARNED_ABILITY_BYTES_PER_JOB + offsetof(unit_list_record_t, learned_abilities);
-    bits_primary_init_reader((const u8*)(byte_offset + (s32)unit));
+    bits_primary_init((const u8*)(byte_offset + (s32)unit));
     for (i = 0; i < SKILLSET_ABILITY_LIST_COUNT; i++) {
         if (job_is_special_monster(g_unit_list_pointers[unit_index]->job_id)) {
             learned = 1;

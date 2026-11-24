@@ -114,7 +114,7 @@ void system_run_game_loop(void) {
             script_variable_set(EVENT_SCRIPT_VAR_CURRENT_EVENT, EVENT_ID_THE_LYING_HEART);
             overlay_run_ending();
             load_battle_overlay();
-            zodiac_load_frame();
+            gfx_load_zodiac_and_frame_textures();
             battle_entrypoint();
             stop_display_and_audio();
         }

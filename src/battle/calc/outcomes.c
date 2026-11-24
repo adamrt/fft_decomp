@@ -267,7 +267,7 @@ void reward_apply_exp_change(battle_unit_t* unit, u8 amount) {
             capped = 0xFF;
         }
         unit->experience = capped;
-        if (battle_unit_check_level_up(unit) != 0) {
+        if (battle_unit_try_level_up(unit) != 0) {
             if (unit->battle_unit_id == g_action_actor_id) {
                 g_action_work.level_gained_flag = 1;
             }
@@ -340,7 +340,7 @@ void action_remove_ability_target(s32 target_battle_unit_id) {
 }
 
 /* Copy 16 target ids into the current ability's target list. */
-void action_store_target_ids(u8* src) {
+void action_store_ability_targets(u8* src) {
     s32 i;
 
     for (i = 0; i < MAP_UNIT_SLOT_COUNT; i++) {
@@ -440,7 +440,7 @@ void action_mimic_record(battle_unit_t* unit) {
  * assignments retain the target's evaluation order. The tile index and saved
  * action state share a temporary because their lifetimes do not overlap.
  */
-s32 action_mimic_set_ability(battle_unit_t* unit) {
+s32 action_mimic_prepare(battle_unit_t* unit) {
     action_command_t action;
     action_command_t* current;
     s32 x;
@@ -633,6 +633,6 @@ s32 target_resolve_rotated_offset_layer(
 }
 
 /* Return the saved action's ability. Nothing in the game calls it. */
-s16 ability_get_last_used(void) {
+s16 action_get_saved_ability(void) {
     return g_action_saved_command.ability_id;
 }

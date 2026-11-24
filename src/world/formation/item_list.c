@@ -134,7 +134,7 @@ s32 item_list_update_browse_state(void) {
             g_item_list_entries, selected, scroll, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
         g_menu_row_callbacks[0].value = equipment_row_get_equipped_count;
         g_menu_row_callbacks[1].value = equipment_row_get_item_count;
-        g_menu_row_callbacks[2].icon = item_list_build_type_icon_source;
+        g_menu_row_callbacks[2].icon = equipment_row_get_type_icon_source;
         g_menu_row_callbacks[3].icon = equipment_row_get_icon_source;
         g_menu_row_callbacks[4].value = equipment_preview_get_hp_bonus_display;
         g_menu_row_callbacks[5].value = equipment_preview_get_mp_bonus_display;

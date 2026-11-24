@@ -341,11 +341,11 @@ s32 map_update_deployment_init_sequence(s32 map_id, s32 step, s32 deployment_run
             step = 7;
         } else {
             step++;
-            sprite_reset_load_state();
+            sprite_reset_unit_graphics();
         }
         break;
     case 6:
-        if (sprite_update_shp_seq_load() == 8) {
+        if (sprite_update_shared_load() == 8) {
             s_sprite_unit_graphics_load_complete = 1;
             sprite_clear_load_state(map_id);
             step++;
@@ -366,7 +366,7 @@ s32 map_update_deployment_init_sequence(s32 map_id, s32 step, s32 deployment_run
     case 8:
         if (g_deploy_finished) {
             step++;
-            deploy_init_sprite_load();
+            deploy_init_placed_units();
             g_deploy_skipped = 0;
         }
         break;

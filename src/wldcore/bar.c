@@ -128,7 +128,7 @@ void bar_build_rows(bar_menu_level_t* level) {
     point.x = 8;
     point.y = 8;
     for (i = 0; i < level->entry_count; i++) {
-        window_display_text_entry(index, level->entries[i] + TEXT_ID_WORLD_MENU_BASE, point, g_window_image_buffer);
+        window_render_text_entry(index, level->entries[i] + TEXT_ID_WORLD_MENU_BASE, point, g_window_image_buffer);
         point.y += 0x10;
     }
 

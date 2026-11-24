@@ -61,7 +61,7 @@ void window_load_render_record_image(s32 record_index, u32* image) {
 /* Draw a text entry into the window image, using its record's width as the stride.
  * `point` is passed by value: GCC spills the two 32-bit register values to their
  * home slots before narrowing them into the origin record. */
-void window_display_text_entry(s32 record_index, s32 text_id, point32_t point, u32* buffer) {
+void window_render_text_entry(s32 record_index, s32 text_id, point32_t point, u32* buffer) {
     glyph_blit_t origin;
 
     origin.rect.x = point.x;
@@ -75,7 +75,7 @@ void window_measure_text_image(s32 text_id, size32_t* output) {
     s16 measured_width;
     s16 rows;
 
-    text_measure(&measured_width, &rows, text_find_entry(text_id));
+    text_measure_columns(&measured_width, &rows, text_find_entry(text_id));
     output->width = (measured_width * 10 + 24) & 0xfffc;
     output->height = rows * 16 + 16;
 }
@@ -91,7 +91,7 @@ void window_init_text_record(s32 record_index, RECT bounds, s32 image_page_offse
     text_origin.x = 8;
     text_origin.y = 8;
     if (text_id != 0) {
-        window_display_text_entry(record_index, text_id, text_origin, image);
+        window_render_text_entry(record_index, text_id, text_origin, image);
     }
     window_load_render_record_image(record_index, image);
     g_display_object_gpu_image_pool[record_index].flags |= DISPLAY_OBJECT_POP_IN;

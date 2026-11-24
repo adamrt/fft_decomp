@@ -18,7 +18,7 @@ typedef struct target_panel {
     /* Move spreading stores the compact movement-record index 0..15 (0 is valid).
      * Relocation search reuses this byte as 0 free, 1 occupied or reserved. */
     u8 unit_record_index;
-    /* Remaining range after landing on a rideable unit (check_spread_occupied_tile_standing_height);
+    /* Remaining range after landing on a rideable unit (raise_ride_remaining_range);
      * cleared on the acting tile by ai_propagate_move_from_target; pathing reuses it on 512+
      * panels as the step number. */
     u8 ride_remaining_range;
@@ -54,7 +54,7 @@ typedef enum target_panels {
     TARGET_PANELS_NONE = 3          /* the panel routine marked no tile */
 } target_panels_e;
 
-/* Directions of calculate_linear_attack_tiles. */
+/* Directions of mark_line_panels. */
 typedef enum target_line_direction {
     TARGET_LINE_EAST = 0,  /* +x */
     TARGET_LINE_WEST = 2,  /* -x */
@@ -72,6 +72,6 @@ extern s32 g_target_sort_nearest_first;
 
 s32 target_find_unit_at_tile(s32 x, s32 y, s32 level);
 s32 target_is_unit_untargetable_and_store_tile(s32 unit_id, s32* tile_index);
-s32 target_validate_for_weapon(const action_command_t* source);
+s32 target_set_area_by_trajectory(const action_command_t* source);
 
 #endif

@@ -34,7 +34,7 @@
  * The dead-store conditional on `layout` retains the target's lone unused
  * reload at +0x4d4. This reconstruction does not establish the original
  * conditional or local declarations. */
-void at_list_run(void) {
+void menu_text_list_thread(void) {
     image_layout_t image_parameters;
     RECT image_rect;
     RECT clear;
@@ -275,12 +275,12 @@ void at_list_run(void) {
 
         entry->selected_index = cursor + row_offset;
         entry->select_text_table = row_offset;
-        if (menu_should_close_thread(input) != 0) {
+        if (menu_poll_thread_close(input) != 0) {
             break;
         }
 
         if (delta == 0) {
-            menu_handle_action(entry, cursor);
+            menu_handle_confirm_input(entry, cursor);
         }
         menu_handle_cancel_input(entry);
 
@@ -333,7 +333,7 @@ void at_list_run(void) {
             gfx_draw_or_append_gpu_primitive(&page->thumb);
         }
 
-        gfx_build_scaled_draw_area_pair_swapped(&page->draw_areas, &entry->window, i, g_gfx_active_buffer_index);
+        menu_build_scaled_draw_area_pair_swapped(&page->draw_areas, &entry->window, i, g_gfx_active_buffer_index);
         menu_select_icon_sprite_clut(page->icons.icons[0]);
         if (entry->header_id >= 5) {
             gfx_draw_or_append_gpu_primitive(page->icons.icons[0]);

@@ -43,11 +43,11 @@ static u8 s_message_box_slot_prev_width[3] = { 0 };
 static void render_box_text_image(text_dialog_record_t* record) {
     if (record->box_type != DIALOG_BOX_TYPE_CENTERED) {
         if (record->box_type == DIALOG_BOX_TYPE_PORTRAIT) {
-            record->buffer = menu_build_window_image(
+            record->buffer = menu_build_dialog_window_image(
                 record->width, record->height, &record->rect, record->dialog_type, record->tail_offset, 1);
         } else {
-            record->buffer = menu_build_and_upload_window_frame_image(
-                record->width, record->height, &record->rect, MENU_WINDOW_FRAME_BUILD);
+            record->buffer
+                = menu_build_window_frame_image(record->width, record->height, &record->rect, MENU_WINDOW_FRAME_BUILD);
         }
         g_menu_window_text_pen.stride = record->rect.w * 4;
         g_menu_window_text_pen.rect.x = 8;
@@ -523,9 +523,9 @@ void message_box_thread(void) {
     rec.rect.h = rec.height;
     gfx_alloc_texture_rect(&rec.rect, win->quads, (u32*)-1);
     if (rec.box_type == DIALOG_BOX_TYPE_PORTRAIT) {
-        menu_build_and_upload_window_image(rec.width, rec.height, &rec.rect, rec.dialog_type, rec.tail_offset);
+        menu_upload_dialog_window_image(rec.width, rec.height, &rec.rect, rec.dialog_type, rec.tail_offset);
     } else {
-        menu_build_and_upload_window_frame_image(rec.width, rec.height, &rec.rect, MENU_WINDOW_FRAME_UPLOAD);
+        menu_build_window_frame_image(rec.width, rec.height, &rec.rect, MENU_WINDOW_FRAME_UPLOAD);
     }
 
     /* The formation screen shifts its boxes by (-256, -120). */
@@ -604,9 +604,9 @@ void message_box_thread(void) {
             }
             text = text_find_entry(message);
             if (rec.box_type == DIALOG_BOX_TYPE_PORTRAIT) {
-                menu_build_and_upload_window_image(rec.width, rec.height, &rec.rect, rec.dialog_type, rec.tail_offset);
+                menu_upload_dialog_window_image(rec.width, rec.height, &rec.rect, rec.dialog_type, rec.tail_offset);
             } else {
-                menu_build_and_upload_window_frame_image(rec.width, rec.height, &rec.rect, MENU_WINDOW_FRAME_UPLOAD);
+                menu_build_window_frame_image(rec.width, rec.height, &rec.rect, MENU_WINDOW_FRAME_UPLOAD);
             }
 
             delay = 1;
@@ -736,11 +736,9 @@ void message_box_thread(void) {
 
                 /* The box is full: start a fresh page; cursor_y lands on its first line after the += below. */
                 if (rec.box_type == DIALOG_BOX_TYPE_PORTRAIT) {
-                    menu_build_and_upload_window_image(
-                        rec.width, rec.height, &rec.rect, rec.dialog_type, rec.tail_offset);
+                    menu_upload_dialog_window_image(rec.width, rec.height, &rec.rect, rec.dialog_type, rec.tail_offset);
                 } else {
-                    menu_build_and_upload_window_frame_image(
-                        rec.width, rec.height, &rec.rect, MENU_WINDOW_FRAME_UPLOAD);
+                    menu_build_window_frame_image(rec.width, rec.height, &rec.rect, MENU_WINDOW_FRAME_UPLOAD);
                 }
                 cursor_y = y - 16;
                 thread_yield();

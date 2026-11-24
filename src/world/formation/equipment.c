@@ -409,7 +409,7 @@ s32 equipment_check_item_compatibility(s16 unit_index, s16 item_id) {
     if (item_list_get_category(id) == ITEM_MENU_CATEGORY_OTHER) {
         return -1;
     }
-    bits_primary_init_reader(g_formation_unit_pointers[unit_index]->equippable_item_types);
+    bits_primary_init(g_formation_unit_pointers[unit_index]->equippable_item_types);
     bits_primary_read(item_get_type(id));
     if (bits_primary_read(1) == 0) {
         result = -1;
@@ -535,7 +535,7 @@ s32 formation_job_change(s16 unit_id, s16 job_id, s32 update_equipment) {
             item_adjust_inventory_count(equipment[i], -1);
         }
         formation_save_records();
-        formation_banner_countdown(0xD811, 30);
+        formation_update_banner(0xD811, 30);
     }
     return 1;
 }

@@ -454,7 +454,7 @@ void world_map_update_texture_stream(file_load_descriptor_t* stream) {
             stream->error_count++;
         }
         if (stream->wait_frames > 0x40000 || (CdStatus() & 1)) {
-            file_reset_cd_subsystems();
+            file_cd_reset();
             CdIntToPos(stream->lba + stream->sector_index, &stream->position);
             stream->state = FILE_LOAD_STATE_SET_DOUBLE_SPEED;
             stream->error_count++;
@@ -571,7 +571,7 @@ void world_map_seek_event_battle_bin(void) {
 
 /* Fill the rectangle with the 256x238 display area of frame
  * buffer 0 (y 0) or 1 (y 0xF0). */
-void world_map_set_display_rect(s32 buffer_index, RECT* rect) {
+void world_map_get_display_rect(s32 buffer_index, RECT* rect) {
     rect->w = 0x100;
     rect->x = 0;
     rect->h = 0xEE;

@@ -14,7 +14,7 @@
 #include "psx/libc.h"
 #include "psx/types.h"
 
-/* weather_set_transform_duration stores 0x95; nothing reads it. */
+/* weather_start_timed_transform stores 0x95; nothing reads it. */
 extern s32 g_weather_timed_transform_unread;
 
 /* g_map_resource_load_state; these are not the loader's normal return values. */
@@ -120,11 +120,11 @@ s32 map_update_load(s32 map_id, map_load_command_e command) {
                 system_report_error(2, 0x3c2);
             }
 
-            map_load_gns_and_move_find(map_id & 0xffff);
+            map_start_gns_load(map_id & 0xffff);
             s_map_resource_load_state = MAP_LOAD_STATE_GNS_FILE;
             g_map_loaded_id = map_id;
             s_map_gns_load_phase = MAP_GNS_LOAD_PHASE_START;
-            map_mesh_reset_render_state();
+            map_reset_render_state();
             break;
         case MAP_LOAD_COMMAND_START_HELD:
             g_map_gns_dispatch_held = 1;
@@ -148,13 +148,13 @@ s32 map_update_load(s32 map_id, map_load_command_e command) {
             g_map_lighting_pending = 0;
 
             if (map_id != g_map_loaded_id) {
-                if (map_load_gns_and_move_find(map_id & 0xffff) != g_map_gns_records) {
+                if (map_start_gns_load(map_id & 0xffff) != g_map_gns_records) {
                     return 0;
                 }
                 s_map_resource_load_state = MAP_LOAD_STATE_GNS_FILE;
                 g_map_loaded_id = map_id;
                 s_map_gns_load_phase = MAP_GNS_LOAD_PHASE_START;
-                map_mesh_reset_render_state();
+                map_reset_render_state();
             } else {
                 s_map_resource_load_state = MAP_LOAD_STATE_IDLE;
                 s_map_gns_load_phase = MAP_GNS_LOAD_PHASE_START;
@@ -799,7 +799,7 @@ void weather_start_sfx(void) {
 /* Start map weather effect mode 0x96 for `value` frames, from frame 0; effect
  * E458 passes the frames left of its timeline. An id other than 0x96 does
  * nothing. g_weather_timed_transform_unread receives 0x95 and no code reads it. */
-void weather_set_transform_duration(s32 id, s32 value) {
+void weather_start_timed_transform(s32 id, s32 value) {
     if (id == MAP_WEATHER_EFFECT_TIMED_PARTICLE_TRANSFORM) {
         g_weather_timed_transform_unread = 0x95;
         g_weather_timed_transform_duration = value;

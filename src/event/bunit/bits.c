@@ -9,7 +9,7 @@ extern s32 g_unit_list_bits_index;
 extern u8 g_unit_list_bits_reader_reset;
 
 /* Start the bit reader on a new data stream. */
-void bits_primary_init_reader(u8* data) {
+void bits_primary_init(u8* data) {
     g_unit_list_bits_reader_reset = 1;
     s_unit_list_bits_cursor = data;
 }

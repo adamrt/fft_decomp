@@ -187,7 +187,7 @@ void sprite_display_set_part(
 void sprite_display_set_part_semi_transparent(sprite_display_t* display, s32 part_index, s32 enabled);
 
 /* item display */
-void sprite_item_display_set(struct map_unit* unit, u32 item_id);
+void sprite_item_display_set_icon(struct map_unit* unit, u32 item_id);
 void sprite_item_display_draw(struct map_unit* unit);
 
 /* status bubbles */
@@ -206,7 +206,7 @@ typedef enum sprite_graphic_type {
  * 0x268: block 0 plays the weapon sheet's sequences, blocks 1 and 2 the
  * effect sheet's. It shares the first 0x1c bytes of animation_state_t,
  * which has their meanings, but keeps its display pointer at 0x24
- * (run_weapon_seq, draw_layers,
+ * (run_block_seq, draw_layers,
  * init_map_unit). Its SEQ table has no header: seq[sequence_id]
  * is the sequence. */
 typedef struct sprite_block {
@@ -251,7 +251,7 @@ void sprite_map_unit_set_horizontal_flip(u32 map_unit_id);
 void sprite_map_unit_clear_horizontal_flip(u32 map_unit_id);
 void sprite_update_transparency(struct map_unit* unit);
 void sprite_project_units(void);
-void sprite_update_units_display(void);
+void sprite_draw_units(void);
 
 /* afterimages */
 void sprite_afterimage_init(struct map_unit* unit);

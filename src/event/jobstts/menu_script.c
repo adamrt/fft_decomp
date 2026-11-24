@@ -13,8 +13,8 @@ menu_opcode_handler_t g_menu_opcode_handlers[STATUS_SCREEN_SCRIPT_END] = {
     menu_opcode_01_if_group,                      /* 0x01 */
     menu_opcode_02_if_else_group,                 /* 0x02 */
     0,                                            /* 0x03 */
-    menu_opcode_04_draw_textured_quad,            /* 0x04 */
-    menu_opcode_04_draw_textured_quad,            /* 0x05 */
+    menu_opcode_04_05_draw_textured_quad,         /* 0x04 */
+    menu_opcode_04_05_draw_textured_quad,         /* 0x05 */
     0,                                            /* 0x06 */
     0,                                            /* 0x07 */
     0,                                            /* 0x08 */
@@ -25,7 +25,7 @@ menu_opcode_handler_t g_menu_opcode_handlers[STATUS_SCREEN_SCRIPT_END] = {
     menu_opcode_0d_draw_formatted_number,         /* 0x0d */
     menu_opcode_0e_set_semi_trans,                /* 0x0e */
     menu_opcode_0f_set_draw_priority_if_unlocked, /* 0x0f */
-    menu_opcode_10_draw_scrollable_list,          /* 0x10 */
+    menu_opcode_10_update_scrollable_list,        /* 0x10 */
     menu_opcode_11_draw_background_tiles,         /* 0x11 */
     menu_opcode_12_draw_opening_window_frame,     /* 0x12 */
     menu_opcode_13_clear_temporary_draw_area,     /* 0x13 */

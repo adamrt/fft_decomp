@@ -726,8 +726,6 @@ typedef enum rsm_ability_filter {
     RSM_ABILITY_FILTER_MOVEMENT = 0x08
 } rsm_ability_filter_e;
 
-u16* ability_build_skillset_list(s32 skillset, s32 flags);
-
 /* The Elemental ability that the surface type of the unit's tile selects. */
 s32 ability_get_elemental_id(const battle_unit_t* unit);
 

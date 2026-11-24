@@ -35,18 +35,18 @@ extern s32 g_deploy_skipped;
 extern s32 g_deploy_finished;
 extern unit_deployment_coordinates_t g_deploy_deployed_unit_map_coordinates[6];
 
-s32 deploy_update_frame(u32* ot, u32 buttons);
+s32 deploy_update_event(u32* ot, u32 buttons);
 s32 deploy_submit_frame(u32* ordering_table);
 s32 deploy_update_input(void);
 void deploy_mark_finished(void);
-void deploy_init_sprite_load(void);
+void deploy_init_placed_units(void);
 s32 deploy_init_units(unit_deployment_coordinates_t* formation, s32 unused_1);
 void deploy_init_debug_red_team_units(unit_deployment_coordinates_t* formation, s32 unused_1);
 
 /* Loads ATTACK.OUT with its scenario conditions and graphics and starts the deployment screen (returns 0), or
  * starts the thread that releases the deployment gate when skipped (returns 1).
  * The battle loop drives map loading in either case. */
-s32 deploy_open(void);
+s32 deploy_start(void);
 
 /* Thread body: marks the deployment finished, for a battle that skips the deployment screen. */
 void deploy_skip_thread(void);
@@ -86,7 +86,7 @@ extern s32 g_deploy_selected_roster_index;
 
 /* Run ATTACK's deployment screen on the calling thread. */
 void attack_deployment_entrypoint(void);
-void deploy_find_fieldable_units(void);
+void deploy_init_roster(void);
 void deploy_find_deployable_units(void);
 s32 deploy_is_roster_unit_deployed(s32 roster_id);
 s32 deploy_has_roster_unit_on_tiles(s32 roster_id);
@@ -96,7 +96,7 @@ unit_deployment_coordinates_t* deploy_get_coordinate_slots(void);
 extern u8 g_formation_sprite_tall_cell[];
 
 void deploy_prepare_sprites(void);
-void deploy_build_sprites(void);
+void deploy_load_sprites(void);
 
 /* deployment help */
 void deploy_help_cursor_thread(void);

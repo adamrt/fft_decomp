@@ -37,7 +37,7 @@ static u8 s_unit_list_triangle_menu_open;
 extern menu_entry_t g_unit_list_triangle_menu;
 
 static s32 update_unit_grid_menu(void);
-static void update_unit_grid_selection(void);
+static void update_selected_unit_panels(void);
 static void stage_selected_unit(void);
 
 /*
@@ -205,11 +205,11 @@ s32 bunit_entrypoint(s32 unused_unit, void* unused_otag) {
         0, 0, 0, 0, tiles, 0, 0, 0, 0, 0, 0, draw_moves, draw_areas, draw_modes);
     running = 1;
     init_graphics();
-    unit_list_init(g_unit_selected_index);
+    unit_grid_init(g_unit_selected_index);
     do {
         menu_gfx_present_frame(0, 0);
         previous_mode = g_menu_input_lock_mode;
-        menu_input_update_message_state();
+        menu_input_update();
         update_input_lock();
         fade_menu_update_in();
         if (g_menu_input_newly_pressed & PSX_PAD_SELECT) {
@@ -232,7 +232,7 @@ s32 bunit_entrypoint(s32 unused_unit, void* unused_otag) {
                 g_unit_list_help_screen_id == MENU_GRID_HELP_NONE ? g_unit_list_input_secondary_repeat : 0,
                 unit_list_is_busy());
         }
-        update_unit_grid_selection();
+        update_selected_unit_panels();
 
         /* Window frames, event input, then this frame's sound: a cursor or cancel sound is kept
          * as the queued effect, and the error message sound takes a free channel. */
@@ -300,7 +300,7 @@ static s32 update_unit_grid_menu(void) {
         if (s_unit_list_initialized == 0) {
             g_unit_list_status_banner_enabled = g_unit_list_saved_status_banner_enabled;
             g_unit_list_browse_enabled = g_unit_list_saved_unit_browse_enabled;
-            unit_list_init(g_unit_selected_index);
+            unit_grid_init(g_unit_selected_index);
             g_unit_list_visible_count = unit_list_build_records(-1, g_unit_list_pointers, 1);
             g_unit_list_reorderable_count = unit_list_build_grid_cells();
             unit_list_build_index_map();
@@ -321,7 +321,7 @@ static s32 update_unit_grid_menu(void) {
             /* Help for the highlighted row, from HELP_TEXT_SECTION_MENU_COMMANDS (0x1000). */
             g_text_selection_id = g_unit_list_triangle_menu.selected_index != 0 ? 0x1001 : 0x1000;
             if ((s_unit_list_triangle_menu_open
-                    = menu_managed_thread_start(UNIT_LIST_THREAD_SLOT_MENU, &g_unit_list_triangle_menu))
+                    = menu_managed_thread_start_or_poll(UNIT_LIST_THREAD_SLOT_MENU, &g_unit_list_triangle_menu))
                 == 0) {
                 if (g_unit_list_primary_result == 0) {
                     banner_enabled = g_unit_list_status_banner_enabled;
@@ -387,7 +387,7 @@ static s32 update_unit_grid_menu(void) {
  * record, restarts the slide animation, and reports the scroll direction in
  * g_unit_panel_status_display_thread_params.redraw_request; otherwise it advances the
  * g_unit_list_status_banner_slide_step slide and stops the comparison banner thread once the slide completes. */
-static void update_unit_grid_selection(void) {
+static void update_selected_unit_panels(void) {
     s32 index;
     s32 enable;
     s8 slide;

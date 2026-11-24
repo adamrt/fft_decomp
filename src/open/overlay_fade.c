@@ -7,22 +7,22 @@
 #include "psx/types.h"
 
 /* Reveal the screen over `duration` frames: the subtractive overlay fades out. */
-void fade_tile_start_out(u32 duration) {
-    u32 flags = g_fade_tile.flags;
-
-    g_fade_tile.duration = duration;
-    g_fade_tile.frame = 0;
-    g_fade_tile.flags = flags | (FADE_TILE_OUT | FADE_TILE_ACTIVE);
-}
-
-/* Fade the screen to black over `duration` frames: the subtractive overlay fades
- * in. */
 void fade_tile_start_in(u32 duration) {
     u32 flags = g_fade_tile.flags;
 
     g_fade_tile.duration = duration;
     g_fade_tile.frame = 0;
     g_fade_tile.flags = flags | (FADE_TILE_IN | FADE_TILE_ACTIVE);
+}
+
+/* Fade the screen to black over `duration` frames: the subtractive overlay fades
+ * in. */
+void fade_tile_start_out(u32 duration) {
+    u32 flags = g_fade_tile.flags;
+
+    g_fade_tile.duration = duration;
+    g_fade_tile.frame = 0;
+    g_fade_tile.flags = flags | (FADE_TILE_OUT | FADE_TILE_ACTIVE);
 }
 
 /* Advance the screen overlay fade and queue its full-screen tile.
@@ -37,7 +37,7 @@ void fade_tile_start_in(u32 duration) {
  * 16-bit copies exactly as the target does.  Per-block locals give block 2 its
  * own a2/a1/a0/v1 registers. */
 void fade_tile_update(u32* ot) {
-    if (g_fade_tile.flags & FADE_TILE_OUT) {
+    if (g_fade_tile.flags & FADE_TILE_IN) {
         s32 duration = g_fade_tile.duration;
         s32 frame = g_fade_tile.frame;
         g_fade_tile.level = 0xff - (0x100 / duration) * frame;
@@ -49,11 +49,11 @@ void fade_tile_update(u32* ot) {
         }
         g_fade_tile.frame = frame + 1;
         if (duration < frame + 1) {
-            g_fade_tile.flags &= ~(FADE_TILE_OUT | FADE_TILE_ACTIVE);
+            g_fade_tile.flags &= ~(FADE_TILE_IN | FADE_TILE_ACTIVE);
         }
     }
 
-    if (g_fade_tile.flags & FADE_TILE_IN) {
+    if (g_fade_tile.flags & FADE_TILE_OUT) {
         s32 duration = g_fade_tile.duration;
         s32 frame = g_fade_tile.frame;
         g_fade_tile.level = (0x100 / duration) * frame;
@@ -65,7 +65,7 @@ void fade_tile_update(u32* ot) {
         }
         g_fade_tile.frame = frame + 1;
         if (duration < frame + 1) {
-            g_fade_tile.flags &= ~(FADE_TILE_IN | FADE_TILE_ACTIVE);
+            g_fade_tile.flags &= ~(FADE_TILE_OUT | FADE_TILE_ACTIVE);
         }
     }
 

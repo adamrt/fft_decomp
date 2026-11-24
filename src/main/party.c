@@ -24,7 +24,7 @@ typedef char unit_generation_base_data_size_must_be_12[(sizeof(unit_generation_b
 
 extern unit_generation_base_data_t g_unit_generation_base_data[UNIT_TYPE_COUNT];
 extern u8 g_unit_generation_raw_stat_variance[UNIT_TYPE_COUNT][UNIT_RAW_STAT_COUNT];
-static void generate_base_stats(unit_raw_stat_t raw_stats[UNIT_RAW_STAT_COUNT], unit_generation_type_e unit_type);
+static void generate_raw_stats(unit_raw_stat_t raw_stats[UNIT_RAW_STAT_COUNT], unit_generation_type_e unit_type);
 static void generate_record(party_unit_t* party, unit_generation_type_e unit_type);
 static void generate_record_raw_stats(party_unit_t* party, unit_generation_type_e unit_type);
 
@@ -397,7 +397,7 @@ static void generate_record(party_unit_t* party, unit_generation_type_e unit_typ
 
 /* The target leaves a1 intact while advancing a0 to the raw-stat field. */
 static void generate_record_raw_stats(party_unit_t* party, unit_generation_type_e unit_type) {
-    generate_base_stats(party->raw_stats, unit_type);
+    generate_raw_stats(party->raw_stats, unit_type);
 }
 
 /* Roll the unit's raw stats by its sex flags; a unit with neither flag is rolled
@@ -412,11 +412,11 @@ void battle_unit_generate_raw_stats(battle_unit_t* unit) {
     } else {
         unit_type = UNIT_TYPE_MONSTER;
     }
-    generate_base_stats(unit->raw_stats, unit_type);
+    generate_raw_stats(unit->raw_stats, unit_type);
 }
 
 /* Roll the five little-endian 24-bit raw stats for the selected unit type. */
-static void generate_base_stats(unit_raw_stat_t raw_stats[UNIT_RAW_STAT_COUNT], unit_generation_type_e unit_type) {
+static void generate_raw_stats(unit_raw_stat_t raw_stats[UNIT_RAW_STAT_COUNT], unit_generation_type_e unit_type) {
     /* Without the pin, type_index, index and base rotate among $s2/$s3/$s4. */
     register s32 type_index __asm__("$20") = unit_type;
     s32 index = 0;

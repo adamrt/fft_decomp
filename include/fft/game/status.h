@@ -222,11 +222,11 @@ void status_set_action_state(struct battle_unit* unit, u8 action_state);
 void status_clear_action_state(struct battle_unit* unit);
 s32 status_inflict_defending(s32 unit_id);
 s32 status_find_action_priority(const struct action_data* action);
-s32 status_modify_inflictions(s32 removal_only);
+s32 status_filter_action_changes(s32 removal_only);
 s32 status_resolve_unit_changes(s32 unit_id, s32 removal_only);
 void status_apply_unit_action_removal(struct battle_unit* unit);
 s32 status_prepare_transparent_removal(struct battle_unit* unit);
-void status_remove_transparent_if_jump_used(struct battle_unit* unit);
+void status_prepare_jump_transparent_removal(struct battle_unit* unit);
 void status_clear_all(struct battle_unit* unit);
 
 /* per-turn upkeep */

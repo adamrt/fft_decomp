@@ -163,7 +163,7 @@ extern menu_numeric_frame_slot_t g_unit_view_summary_numeric_frames[];
 extern image_layout_t g_unit_view_summary_sprite_image_params[7];
 extern image_layout_t g_unit_view_summary_portrait_image_params;
 
-static s32 display_action_preview(POLY_FT4* unused_primitive, const point16_t* unused_base_load,
+static s32 build_action_preview(POLY_FT4* unused_primitive, const point16_t* unused_base_load,
     const RECT* unused_base_screen, image_layout_t* unused_parameters);
 
 extern point16_t g_gfx_item_icon_image_location;
@@ -316,7 +316,7 @@ static u16 s_status_screen_sprite_clut_pairs[19][2]
 /* Allocate text image VRAM for the sprite or textured quad and give it the normal menu CLUT, GetClut(0x3c0, 0x1f0),
  * plus clut_offset sixteens of the 16-bit CLUT value (4 is one VRAM line down). Callers pass 0 or 2; 2 carries out
  * of the x field: 16-bit CLUT value 0x7c5c is GetClut(0x1c0, 0x1f1). */
-void text_configure_sprite_vram(RECT* rect, s32 width, s32 height, void* packet, s32 clut_offset) {
+void text_alloc_image_rect(RECT* rect, s32 width, s32 height, void* packet, s32 clut_offset) {
     texture_primitive_t* primitive = packet;
 
     rect->w = width;
@@ -326,7 +326,7 @@ void text_configure_sprite_vram(RECT* rect, s32 width, s32 height, void* packet,
 }
 
 /* Empty in BATTLE and WORLD; in BATTLE it sits between
- * text_configure_sprite_vram and unit_view_tile_info_thread.
+ * text_alloc_image_rect and unit_view_tile_info_thread.
  * Nothing on the disc calls it or points at it; the name is a neutral
  * placeholder until a reference turns up. */
 void menu_noop_1(void) {
@@ -360,7 +360,7 @@ void unit_view_tile_info_thread(void) {
         gfx_set_image_primitive_layout(&page->sprites[i], &g_menu_texture_origin, &g_unit_view_tile_info_image_location,
             &g_unit_view_tile_info_image_params[i]);
     }
-    text_configure_sprite_vram(&rect, 0x18, 0x10, &page->sprites[0], 0);
+    text_alloc_image_rect(&rect, 0x18, 0x10, &page->sprites[0], 0);
     mem_copy_bytes_nonempty(
         &g_unit_view_height_display_pages[1], &g_unit_view_height_display_pages[0], sizeof(menu_quad_page_t));
 
@@ -439,7 +439,7 @@ static s32 build_height_pieces(s32 group, POLY_GT4* poly) {
  * packets (texture window per sprite) followed by five sprites placed from
  * the parameter table, then submit them all in reverse order.
  */
-static void build_sprite_page(s32 page_index, RECT* base_screen) {
+static void draw_sprite_page(s32 page_index, RECT* base_screen) {
     s32 i;
     menu_sprite_page_t* page = &g_menu_scratch_buffer.sprite_pages[page_index & 1];
     SPRT* sprite;
@@ -457,8 +457,8 @@ static void build_sprite_page(s32 page_index, RECT* base_screen) {
     }
 }
 
-/* Empty in BATTLE and WORLD; in BATTLE it sits between build_sprite_page
- * and display_action_preview. Nothing on the disc calls it or
+/* Empty in BATTLE and WORLD; in BATTLE it sits between draw_sprite_page
+ * and build_action_preview. Nothing on the disc calls it or
  * points at it; the name is a neutral placeholder until a reference turns up. */
 void menu_noop_2(void) {
 }
@@ -474,7 +474,7 @@ void menu_noop_2(void) {
  * constant load, so they use a bare `return;`. The caller discards the result.
  * WORLD has no action previews: its copy is empty and leaves $v0 unset.
  */
-static s32 display_action_preview(
+static s32 build_action_preview(
     POLY_FT4* prim, const point16_t* base_load, const RECT* base_screen, image_layout_t* params) {
 #ifdef FFT_BATTLE
     menu_number_entry_t* panel;
@@ -831,8 +831,8 @@ static void stats_panel_thread(
         menu_init_default_poly_ft4(&page->quads[frame]);
     }
     menu_init_default_poly_ft4(&page->portrait);
-    text_configure_sprite_vram(&rects[0], 0x28, 0x28, &page->quads[0], 2);
-    text_configure_sprite_vram(&rects[1], 0x60, 0x10, &page->quads[1], 2);
+    text_alloc_image_rect(&rects[0], 0x28, 0x28, &page->quads[0], 2);
+    text_alloc_image_rect(&rects[1], 0x60, 0x10, &page->quads[1], 2);
     params = g_unit_view_stats_quad_image_params_by_mode[mode];
     if (mode == UNIT_STATS_PANEL_ATTACK_CASTER) {
         gfx_set_image_primitive_layout(&page->quads[4], &g_menu_texture_origin, frame_rect, &params[4]);
@@ -840,7 +840,7 @@ static void stats_panel_thread(
             gfx_set_image_primitive_layout(&page->quads[frame], &g_menu_texture_origin, frame_rect, params);
             page->quads[frame].clut = 0x7CBC;
         }
-        display_action_preview(&page->quads[frame], &g_menu_texture_origin, frame_rect, params);
+        build_action_preview(&page->quads[frame], &g_menu_texture_origin, frame_rect, params);
     } else if (mode == UNIT_STATS_PANEL_ATTACK_TARGET) {
         for (frame = 0; frame < 2; frame++, params++) {
             gfx_set_image_primitive_layout(&page->quads[frame], &g_menu_texture_origin, frame_rect, params);
@@ -1045,7 +1045,7 @@ static void stats_panel_thread(
         if (mode != UNIT_STATS_PANEL_ATTACK_TARGET) {
             gfx_draw_or_append_gpu_primitive(&page->quads[3]);
         } else if (text_id != 0) {
-            build_sprite_page(frame, frame_rect);
+            draw_sprite_page(frame, frame_rect);
         }
         for (i = 0; i < 7; i++) {
             page->sprites[i].clut = g_unit_view_stats_sprite_clut_pairs[i][running & 1];
@@ -1183,10 +1183,10 @@ void unit_view_summary_thread(void) {
     gfx_set_draw_mode_for_texture_page(&frames[0].draw_mode_1, MENU_TEXTURE_PAGE_ALLOCATED_IMAGES);
     menu_init_sprite_array(sprite, 7, MENU_CLUT_NORMAL);
     menu_init_default_poly_ft4(&frames[0].portrait);
-    text_configure_sprite_vram(&rects[0], 0x58, 0x20, &frames[0].sprites[0], 0);
-    text_configure_sprite_vram(&rects[1], 0x10, 0xA, &frames[0].sprites[1], 0);
-    text_configure_sprite_vram(&rects[2], 0x10, 0xA, &frames[0].sprites[2], 0);
-    text_configure_sprite_vram(&rects[3], 0x10, 0xA, &frames[0].sprites[3], 0);
+    text_alloc_image_rect(&rects[0], 0x58, 0x20, &frames[0].sprites[0], 0);
+    text_alloc_image_rect(&rects[1], 0x10, 0xA, &frames[0].sprites[1], 0);
+    text_alloc_image_rect(&rects[2], 0x10, 0xA, &frames[0].sprites[2], 0);
+    text_alloc_image_rect(&rects[3], 0x10, 0xA, &frames[0].sprites[3], 0);
     for (frame = 0; frame < 7; frame++) {
         gfx_set_image_primitive_layout(&frames[0].sprites[frame], &g_menu_texture_origin,
             &g_unit_view_summary_panel_rect, &g_unit_view_summary_sprite_image_params[frame]);
@@ -1507,7 +1507,7 @@ void status_screen_numbers_thread(void) {
     for (frame = 0;; frame++) {
         thread_yield();
         record = &records[frame & 1];
-        gfx_build_scaled_draw_area_pair_swapped(
+        menu_build_scaled_draw_area_pair_swapped(
             &record->draw_areas, &g_status_screen_numbers_panel_texture_window, frame, g_gfx_screen_polarity);
         if (thread_current_get_parameter_3() != 0) {
             break;
@@ -1573,12 +1573,12 @@ void status_screen_thread(void) {
     thread_set_parameters(THREAD_SLOT_TILE_INFO_PANEL, 0, 0, 1);
     thread_set_parameters(THREAD_SLOT_MENU, 0, 0, 1);
     command_record_unit_selection();
-    menu_open_modal();
+    menu_mark_modal_open();
     /* The hovered-unit stats thread counts its frames; wait until it has drawn two. */
     do {
         thread_yield();
     } while (g_unit_view_hovered_stats_frame_count < 2);
-    menu_close_modal();
+    menu_mark_modal_closed();
 
     frame_record = g_status_screen_frames;
     records = frame_record;
@@ -1730,7 +1730,7 @@ void status_screen_thread(void) {
     for (;;) {
         thread_yield();
         frame_record = &records[frame & 1];
-        gfx_build_scaled_draw_area_pair_swapped(
+        menu_build_scaled_draw_area_pair_swapped(
             &frame_record->draw_areas, &s_status_screen_draw_area_rect, frame, g_gfx_screen_polarity);
         if (g_menu_input_lock_mode == 0 && g_help_open == 0 && thread_current_get_parameter_3() != 0) {
             break;

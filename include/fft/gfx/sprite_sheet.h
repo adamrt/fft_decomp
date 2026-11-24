@@ -330,7 +330,7 @@ typedef struct sprite_evtchr_shp {
  * The two EVTCHR slots: each owns a 256x200 texture page (image_rect) for the
  * pictures that do not fit a unit's spritesheet slot, and a buffer to build
  * them in. A page shows a unit's attack image (decompressed on demand by
- * load_unit_evtchr), a unit's SP2 file, or the image of
+ * load_attack_image), a unit's SP2 file, or the image of
  * an EVTCHR.BIN block: the event instruction LoadEVTCHR unpacks a block into
  * seq, shp, cluts and image_data and SaveEVTCHR uploads the image. Every
  * target access uses a 0x7564-byte stride.
@@ -377,7 +377,7 @@ s32 sprite_evtchr_unpack_to_slot(s32 index, const evtchr_file_record_t* file);
 s32 sprite_evtchr_save_slot(s32 slot_index);
 s32 sprite_evtchr_clear_loaded_slot(s32 slot_index);
 s32 sprite_evtchr_clear_saved_slot(s32 slot_index);
-s32 sprite_evtchr_release_reserved_slot(s32 slot_index);
+s32 sprite_evtchr_clear_attack_image_slot(s32 slot_index);
 void sprite_evtchr_invalidate_sp2(struct map_unit* unit);
 
 /* loading */
@@ -393,7 +393,7 @@ typedef enum sprite_load_phase {
 
 /* g_sprite_load_state.file_kind, the file kind, counts through one of two lists:
  * sprite_update_queued_load loads three files per queued unit and
- * sprite_update_shp_seq_load the shared sprite, weapon and effect files. */
+ * sprite_update_shared_load the shared sprite, weapon and effect files. */
 typedef enum sprite_load_queued_kind {
     SPRITE_LOAD_QUEUED_SHP = 0,
     SPRITE_LOAD_QUEUED_SEQ = 1,
@@ -427,7 +427,7 @@ typedef char sprite_load_state_size_must_be_16[sizeof(sprite_load_state_t) == 16
 extern sprite_load_state_t g_sprite_load_state;
 extern u32* g_sprite_sp2_data;
 
-void sprite_reset_load_state(void);
+void sprite_reset_unit_graphics(void);
 void sprite_clear_load_state(s32 unused_map_id);
 void sprite_queue_unit_graphics_load(s32 map_x, s32 map_y, s32 map_level, s16 facing, s16 spritesheet_id,
     s16 palette_id, s16 map_unit_id, struct battle_unit* unit, u32 flags);
@@ -436,11 +436,11 @@ s32 sprite_start_unit_graphics_load(s32, s32);
 /* Drains the immediate loader steps (2); returns 0 when finished or 1 while work remains pending
  * (including an allocation retry). */
 s32 sprite_poll_unit_graphics_load(void);
-s32 sprite_update_shp_seq_load(void);
+s32 sprite_update_shared_load(void);
 
 /* 0 finished, 1 pending or deferred, 2 immediate progress. */
 s32 sprite_update_queued_load(void);
-s32 sprite_open_sp2_file(struct map_unit* unit, u32* destination);
+s32 sprite_request_sp2_read(struct map_unit* unit, u32* destination);
 void sprite_decompress_attack_image(const u8* source, u8* destination);
 s32 sprite_evtchr_map_unit_load_attack_image(s32 map_unit_id, s32 slot);
 

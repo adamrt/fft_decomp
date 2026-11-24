@@ -87,7 +87,7 @@ void script_route_event_input(void) {
     if (g_thread_current_id != MENU_SCREEN_THREAD_SLOT_TUTORIAL_TEXT) {
         return;
     }
-    input = tutorial_get_buttons();
+    input = tutorial_get_pad_buttons();
     if (input == 0) {
         s_script_initial_repeat_counter = 0;
         s_script_repeat_counter = 0;
@@ -341,7 +341,7 @@ s32 script_update_event_frame(u32* ot, u32 buttons) {
 
 /* Feed `input` to the event input state, make `entry` the current ordering-table entry
  * and draw the active menu windows. No retail code calls it. */
-void script_set_current_otag_entry_and_update_input(u32* entry, s32 input) {
+void script_begin_event_frame(u32* entry, s32 input) {
     script_update_event_input(input);
     g_gfx_current_otag_entry = entry;
     menu_draw_active_window_frames();
@@ -369,6 +369,6 @@ void camera_store_state_to_script_variables(void) {
 
 /* The raw weather script variable. weather_get_effective applies the
  * map's indoor and snow flags to it. */
-s32 map_get_weather(void) {
+s32 weather_get_raw(void) {
     return g_script_variables[EVENT_SCRIPT_VAR_WEATHER];
 }

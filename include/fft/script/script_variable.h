@@ -221,7 +221,7 @@ enum { EVENT_SCRIPT_VAR_DEEP_DUNGEON_SELECTION = 0x5c };
 
 /* Script variable caps: script_variable_set and each program that adds to
  * EVENT_SCRIPT_VAR_WAR_FUNDS stop the war funds at 99,999,999, and
- * battle_unit_count_casualties stops EVENT_SCRIPT_VAR_CASUALTIES and
+ * battle_unit_record_casualty stops EVENT_SCRIPT_VAR_CASUALTIES and
  * EVENT_SCRIPT_VAR_INJURED at 9999. */
 enum { EVENT_WAR_FUNDS_MAX = 99999999, EVENT_CASUALTY_COUNT_MAX = 9999 };
 
@@ -247,7 +247,7 @@ extern s32* g_script_variables;
 extern s32 g_script_variable_storage[0x100];
 
 void script_variable_set(s32 variable_id, s32 value);
-void script_run_condition(event_opcode_e opcode);
+void script_opcode_a0_a5_compare(event_opcode_e opcode);
 
 /* Read through the resident scene's variable commands, preserving the comparison
  * result. Reading weather/time first rebuilds it from the separate variables. */

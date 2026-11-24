@@ -85,7 +85,7 @@ static s32 s_effect_inertia_threshold;
 static vec3s32_t s_effect_saved_gravity;
 static s32 s_effect_saved_inertia_threshold;
 
-static s32 update_particle_sprite_state(effect_record_t* unused_record, effect_work_record_t* work);
+static s32 render_particle_sprite(effect_record_t* unused_record, effect_work_record_t* work);
 
 static void add_mixed_vector(const SVECTOR* first, const VECTOR* second, VECTOR* out);
 
@@ -101,8 +101,7 @@ static void draw_particle_sprite(effect_list_node_t* particle, s32 red, s32 gree
 
 /* The four sprite work kinds share one updater; heap-block work has no entry. */
 s32 (*g_effect_particle_render_handlers[4])(effect_record_t* record, effect_work_record_t* work)
-    = { update_particle_sprite_state, update_particle_sprite_state, update_particle_sprite_state,
-          update_particle_sprite_state };
+    = { render_particle_sprite, render_particle_sprite, render_particle_sprite, render_particle_sprite };
 
 static void init_render_state(void);
 
@@ -112,9 +111,9 @@ static void free_sprite_block(effect_sprite_block_t* block);
 
 static void submit_sprite_block(effect_sprite_block_t* set, DVECTOR* position, s16 angle, VECTOR* zoom, u32* ot);
 
-static void draw_billboard_sprite(effect_slot_t* slot);
+static void draw_slot_sprite(effect_slot_t* slot);
 
-static void init_particle_chain(void);
+static void init_particle_free_list(void);
 
 static s16 get_random_s16(s16 minimum, s16 maximum);
 
@@ -307,7 +306,7 @@ static void submit_sprite_block(effect_sprite_block_t* set, DVECTOR* position, s
  * slot angle, transforms the frame's four corners into the slot's
  * double-buffered POLY_FT4, and adds that quad between the slot's two draw-mode
  * primitives. */
-static void draw_billboard_sprite(effect_slot_t* slot) {
+static void draw_slot_sprite(effect_slot_t* slot) {
     SVECTOR local;
     VECTOR position;
     s32 sxy;
@@ -391,7 +390,7 @@ static void draw_billboard_sprite(effect_slot_t* slot) {
 
 /* Allocate the 256 effect work records and chain them all into the free list.
  * Also clears the translation of the particle heading and emitter matrices. */
-static void init_particle_chain(void) {
+static void init_particle_free_list(void) {
     s32 index;
     effect_work_record_t* records;
 
@@ -500,7 +499,7 @@ void effect_particle_free_record(s16 record_index, effect_work_record_t* work) {
  * screen heading stored on the node. Color-curve records take each channel
  * from its animation curve at the record's curve frame; others use neutral
  * 0x80. */
-static s32 update_particle_sprite_state(effect_record_t* unused_record, effect_work_record_t* work) {
+static s32 render_particle_sprite(effect_record_t* unused_record, effect_work_record_t* work) {
     SVECTOR direction;
     VECTOR rotated;
 
@@ -1270,21 +1269,20 @@ static void interpolate_vector_q13(const VECTOR* from, const VECTOR* to, s32 t, 
 /* Eased interpolation of three 32-bit components: the factor follows half a cosine wave over
  * duration, so the value leaves from slowly, and arrives at to slowly when
  * current reaches duration. */
-void effect_vector_interpolate_cos_q13(const VECTOR* from, const VECTOR* to, s32 duration, s32 current, VECTOR* out) {
+void effect_vector_interpolate_cos(const VECTOR* from, const VECTOR* to, s32 duration, s32 current, VECTOR* out) {
     interpolate_vector_q13(from, to, ONE - rcos((current << 11) / duration), out);
 }
 
 /* Out-and-back interpolation of three 32-bit components: the factor follows a whole cosine
  * wave over duration, so the value reaches to at half the duration and is back at
  * from when current reaches duration. */
-void effect_vector_interpolate_cos_out_back_q13(
+void effect_vector_interpolate_cos_out_back(
     const VECTOR* from, const VECTOR* to, s32 duration, s32 current, VECTOR* out) {
     interpolate_vector_q13(from, to, ONE - rcos((current * ONE) / duration), out);
 }
 
-/* Linear counterpart of effect_vector_interpolate_cos_q13: t = current/duration in q13. */
-void effect_vector_interpolate_linear_q13(
-    const VECTOR* from, const VECTOR* to, s32 duration, s32 current, VECTOR* out) {
+/* Linear counterpart of effect_vector_interpolate_cos: t = current/duration in q13. */
+void effect_vector_interpolate_linear(const VECTOR* from, const VECTOR* to, s32 duration, s32 current, VECTOR* out) {
     interpolate_vector_q13(from, to, (current << 13) / duration, out);
 }
 
@@ -1527,22 +1525,22 @@ void effect_vector_load_svector(const vec3s16_t* src, SVECTOR* dst) {
 }
 
 /* Convert 20.12 fixed-point components to whole units, rounding down; the inverse of
- * effect_vector_scale_q12. */
-void effect_vector_shift_right_12(const VECTOR* src, VECTOR* dst) {
+ * effect_vector_to_q12. */
+void effect_vector_from_q12(const VECTOR* src, VECTOR* dst) {
     dst->vx = src->vx >> 12;
     dst->vy = src->vy >> 12;
     dst->vz = src->vz >> 12;
 }
 
 /* Convert integral vector components to 20.12 fixed point. */
-void effect_vector_scale_q12(const VECTOR* src, VECTOR* dst) {
+void effect_vector_to_q12(const VECTOR* src, VECTOR* dst) {
     dst->vx = src->vx * ONE;
     dst->vy = src->vy * ONE;
     dst->vz = src->vz * ONE;
 }
 
 /* Wrap each angle to one turn (0-0xfff). */
-void effect_vector_mask_low_12_bits(const SVECTOR* src, SVECTOR* dst) {
+void effect_vector_wrap_rotations(const SVECTOR* src, SVECTOR* dst) {
     dst->vx = src->vx & 0xFFF;
     dst->vy = src->vy & 0xFFF;
     dst->vz = src->vz & 0xFFF;
@@ -2136,7 +2134,7 @@ s32 effect_slot_update(s32 id) {
             slot->step_index = 0;
         }
     }
-    draw_billboard_sprite(slot);
+    draw_slot_sprite(slot);
     result = 1;
     if (slot->life < 0) {
         result = wrapped == 0;
@@ -2147,10 +2145,10 @@ s32 effect_slot_update(s32 id) {
 }
 
 /* Initialize fresh render, script, work-record and sprite-node pools at setup/restart. */
-void effect_reset_subsystems(void) {
+void effect_init_playback_pools(void) {
     init_render_state();
     effect_script_init_instances();
-    init_particle_chain();
+    init_particle_free_list();
     init_sprite_free_list();
 }
 

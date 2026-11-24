@@ -181,7 +181,7 @@ static location_record_t s_location_record_data[LOCATION_COUNT] = {
 static world_map_route_header_t** s_world_map_routes = g_world_map_route_table;
 static u16** s_world_map_route_polylines = g_world_map_route_polyline_table;
 
-static void clamp_coordinates(const SVECTOR* input, VECTOR* output);
+static void compute_scroll_origin(const SVECTOR* input, VECTOR* output);
 static s32 roll_encounter(s32 location, s32 route);
 static void apply_edge_scroll(point32_t* delta);
 
@@ -826,7 +826,7 @@ static void find_path(s32 from, s32 to) {
             file_poll_load(&g_file_cd_state);
             music_queue_update();
             world_map_pulse_dots();
-            world_map_draw_frame();
+            world_map_draw_backdrop_frame();
             buffer_index = GsGetActiveBuff();
             g_gfx_active_buffer_index = buffer_index;
             GsSetWorkBase(g_world_map_primitive_buffers + buffer_index * 0xE000);
@@ -1077,7 +1077,7 @@ s32 world_map_start_pan(const point32_t* point, const SVECTOR* coordinates) {
         return 0;
     }
 
-    clamp_coordinates(coordinates, &g_world_map_pan.target);
+    compute_scroll_origin(coordinates, &g_world_map_pan.target);
     g_world_map_pan.flags |= WORLD_MAP_PAN_ACTIVE;
     g_world_map_pan.origin = g_world_map_projection_view.origin;
 
@@ -1104,7 +1104,7 @@ s32 world_map_point_needs_pan(const point32_t* point) {
 }
 
 /* Negate and clamp a signed coordinate pair to the world-scroll limits. */
-static void clamp_coordinates(const SVECTOR* input, VECTOR* output) {
+static void compute_scroll_origin(const SVECTOR* input, VECTOR* output) {
     s32 x = -input->vx;
     s32 y = -input->vy;
 
@@ -1311,7 +1311,7 @@ void world_map_init_marker_and_camera(void) {
         g_world_map_marker_state.marker.render.palette = 3;
     }
     marker->position = g_world_map_dots[marker->location_id].position;
-    clamp_coordinates(&g_world_map_marker_state.marker.position, &g_world_map_projection_view.origin);
+    compute_scroll_origin(&g_world_map_marker_state.marker.position, &g_world_map_projection_view.origin);
     world_map_project_tiles();
     world_map_update_marker();
 }

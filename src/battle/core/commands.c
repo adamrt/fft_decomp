@@ -18,7 +18,7 @@
 
 /* map_unit_update_display as a g_thread_call_target: event threads run it on the
  * main stack. */
-void map_unit_update_graphics(u32 map_unit_id) {
+void map_unit_update_display_for_script(u32 map_unit_id) {
     map_unit_update_display(map_unit_id);
 }
 
@@ -40,18 +40,18 @@ void animation_map_unit_set_status(u32 map_unit_id) {
 }
 
 /* Request `animation` for a unit by map unit id, keeping its facing. */
-void animation_map_unit_set_sequence(u32 map_unit_id, u32 animation) {
+void animation_map_unit_request(u32 map_unit_id, u32 animation) {
     map_unit_t* unit = map_unit_get(map_unit_id);
     if (unit != 0)
-        animation_store_with_facing(animation, unit->facing, unit);
+        animation_request(animation, unit->facing, unit);
 }
 
 /* Request `animation` on every unit, keeping its camera-facing quadrant. */
-void animation_store_all_with_camera_facing(u32 animation) {
+void animation_set_all_units_sequence(u32 animation) {
     map_unit_t* unit = g_map_unit_list_head;
 
     while (unit != 0) {
-        animation_store_with_facing(animation, unit->camera_facing_quadrant, unit);
+        animation_request(animation, unit->camera_facing_quadrant, unit);
         unit = unit->previous;
     }
 }
@@ -88,7 +88,7 @@ s32 map_unit_set_facing_quadrant(u32 map_unit_id, s32 facing_quadrant) {
         if (animation < ANIMATION_IDLE) {
             animation = ANIMATION_STAND;
         }
-        animation_force_with_facing(animation, facing, unit);
+        animation_request_forced(animation, facing, unit);
         return map_unit_id;
     }
     return -1;
@@ -96,7 +96,7 @@ s32 map_unit_set_facing_quadrant(u32 map_unit_id, s32 facing_quadrant) {
 
 /* The unit's camera_facing_quadrant modulo 4, or -1 when no record has the runtime
  * id. No retail code calls it. */
-s16 map_unit_get_camera_facing(u32 map_unit_id) {
+s16 map_unit_get_camera_facing_quadrant(u32 map_unit_id) {
     map_unit_t* unit = map_unit_get(map_unit_id);
 
     if (unit != 0) {
@@ -107,7 +107,7 @@ s16 map_unit_get_camera_facing(u32 map_unit_id) {
 
 /* The unit's camera_facing_quadrant modulo 4, or -1 when no map unit record has the
  * battle unit id. */
-s16 map_unit_get_camera_facing_by_battle_unit_id(u32 battle_unit_id) {
+s16 map_unit_get_camera_facing_quadrant_by_battle_unit_id(u32 battle_unit_id) {
     map_unit_t* unit = map_unit_get_by_battle_unit_id(battle_unit_id);
 
     if (unit != 0) {
@@ -142,7 +142,7 @@ s32 map_unit_set_facing_sixteenth(u32 map_unit_id, s32 facing_nibble) {
         if (animation < ANIMATION_IDLE) {
             animation = ANIMATION_STAND;
         }
-        animation_force_with_facing(animation, facing, unit);
+        animation_request_forced(animation, facing, unit);
         return map_unit_id;
     }
     return -1;
@@ -287,7 +287,7 @@ s32 map_unit_get_tile_center_height_by_battle_unit_id(u32 battle_unit_id, SVECTO
         map_get_tile(unit->battle_unit->x, unit->battle_unit->position.y, unit->battle_unit->position.higher_elevation);
         coords->vx = unit->battle_unit->x * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
         coords->vz = unit->battle_unit->position.y * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
-        coords->vy = map_unit_calculate_height_from_battle_tile(unit);
+        coords->vy = map_unit_calculate_height_from_battle_unit_tile(unit);
         return 1;
     }
     return 0;
@@ -468,7 +468,7 @@ s32 map_unit_place_in_new_location(u32 map_unit_id, const map_tile_coordinates_t
         unit->facing = facing << 10;
         unit->world_coords.vx = tile->x * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
         unit->world_coords.vz = tile->y * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
-        unit->world_coords.vy = map_calculate_slope_height(&unit->world_coords, unit->map_layer);
+        unit->world_coords.vy = map_calculate_surface_height(&unit->world_coords, unit->map_layer);
         unit->real.vx = unit->world_coords.vx * ONE;
         unit->real.vz = unit->world_coords.vz * ONE;
         unit->real.vy = unit->world_coords.vy * ONE;

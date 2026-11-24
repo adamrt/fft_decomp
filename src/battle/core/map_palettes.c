@@ -666,7 +666,7 @@ static void transition_background(s32 frame_duration, const map_background_gradi
         current.colors[MAP_BACKGROUND_GRADIENT_BOTTOM].r = base[1].red / 0x10000;
         current.colors[MAP_BACKGROUND_GRADIENT_BOTTOM].g = base[1].green / 0x10000;
         current.colors[MAP_BACKGROUND_GRADIENT_BOTTOM].b = base[1].blue / 0x10000;
-        map_light_dispatch_state_command(MAP_LIGHT_COMMAND_SET_BACKGROUND_GRADIENT, &current);
+        map_light_dispatch_command(MAP_LIGHT_COMMAND_SET_BACKGROUND_GRADIENT, &current);
     }
 }
 
@@ -816,7 +816,7 @@ static void blend_background_color(s32 mode, s32 frame_duration, s32 red, s32 gr
         current.colors[MAP_BACKGROUND_GRADIENT_BOTTOM].r = channels[1].red / 0x10000;
         current.colors[MAP_BACKGROUND_GRADIENT_BOTTOM].g = channels[1].green / 0x10000;
         current.colors[MAP_BACKGROUND_GRADIENT_BOTTOM].b = channels[1].blue / 0x10000;
-        map_light_dispatch_state_command(MAP_LIGHT_COMMAND_SET_BACKGROUND_GRADIENT, &current);
+        map_light_dispatch_command(MAP_LIGHT_COMMAND_SET_BACKGROUND_GRADIENT, &current);
     }
 }
 
@@ -860,7 +860,7 @@ static void transition_ambient(s32 frame_duration, const CVECTOR* color) {
         current.r = channels->red / 0x10000;
         current.g = channels->green / 0x10000;
         current.b = channels->blue / 0x10000;
-        map_light_dispatch_state_command(MAP_LIGHT_COMMAND_SET_AMBIENT_COLOR, &current);
+        map_light_dispatch_command(MAP_LIGHT_COMMAND_SET_AMBIENT_COLOR, &current);
     }
 }
 
@@ -995,7 +995,7 @@ static void blend_ambient_color(s32 mode, s32 frame_duration, s32 red, s32 green
         current.r = channels->red / 0x10000;
         current.g = channels->green / 0x10000;
         current.b = channels->blue / 0x10000;
-        map_light_dispatch_state_command(MAP_LIGHT_COMMAND_SET_AMBIENT_COLOR, &current);
+        map_light_dispatch_command(MAP_LIGHT_COMMAND_SET_AMBIENT_COLOR, &current);
     }
 }
 
@@ -1039,7 +1039,7 @@ static void transition_darkness(s32 frame_duration, const CVECTOR* color) {
         current.r = channels->red / 0x10000;
         current.g = channels->green / 0x10000;
         current.b = channels->blue / 0x10000;
-        map_light_dispatch_state_command(MAP_LIGHT_COMMAND_SET_DARKNESS_COLOR, &current);
+        map_light_dispatch_command(MAP_LIGHT_COMMAND_SET_DARKNESS_COLOR, &current);
     }
 }
 
@@ -1174,7 +1174,7 @@ static void blend_darkness_color(s32 mode, s32 frame_duration, s32 red, s32 gree
         current.r = channels->red / 0x10000;
         current.g = channels->green / 0x10000;
         current.b = channels->blue / 0x10000;
-        map_light_dispatch_state_command(MAP_LIGHT_COMMAND_SET_DARKNESS_COLOR, &current);
+        map_light_dispatch_command(MAP_LIGHT_COMMAND_SET_DARKNESS_COLOR, &current);
     }
 }
 
@@ -1306,7 +1306,7 @@ void map_palette_update_color_animations(void) {
         gradient.colors[MAP_BACKGROUND_GRADIENT_BOTTOM].r = channels[1].red / 0x10000;
         gradient.colors[MAP_BACKGROUND_GRADIENT_BOTTOM].g = channels[1].green / 0x10000;
         gradient.colors[MAP_BACKGROUND_GRADIENT_BOTTOM].b = channels[1].blue / 0x10000;
-        map_light_dispatch_state_command(MAP_LIGHT_COMMAND_SET_BACKGROUND_GRADIENT, &gradient);
+        map_light_dispatch_command(MAP_LIGHT_COMMAND_SET_BACKGROUND_GRADIENT, &gradient);
 
         /* A period of 4 or more advances 32 phases, one every period / 4 frames; a shorter one
          * counts period * 8 single frames. The ambient and darkness fades below work the same way. */
@@ -1355,7 +1355,7 @@ void map_palette_update_color_animations(void) {
         gradient.colors[MAP_BACKGROUND_GRADIENT_TOP].r = red_level / 0x10000;
         gradient.colors[MAP_BACKGROUND_GRADIENT_TOP].g = s_map_ambient_transition.channels.green / 0x10000;
         gradient.colors[MAP_BACKGROUND_GRADIENT_TOP].b = s_map_ambient_transition.channels.blue / 0x10000;
-        map_light_dispatch_state_command(MAP_LIGHT_COMMAND_SET_AMBIENT_COLOR, &gradient);
+        map_light_dispatch_command(MAP_LIGHT_COMMAND_SET_AMBIENT_COLOR, &gradient);
 
         if (s_map_ambient_transition.period >= 4) {
             if (++s_map_ambient_transition.tick >= s_map_ambient_transition.period >> 2) {
@@ -1401,7 +1401,7 @@ void map_palette_update_color_animations(void) {
         gradient.colors[MAP_BACKGROUND_GRADIENT_TOP].r = red_level / 0x10000;
         gradient.colors[MAP_BACKGROUND_GRADIENT_TOP].g = s_map_darkness_transition.channels.green / 0x10000;
         gradient.colors[MAP_BACKGROUND_GRADIENT_TOP].b = s_map_darkness_transition.channels.blue / 0x10000;
-        map_light_dispatch_state_command(MAP_LIGHT_COMMAND_SET_DARKNESS_COLOR, &gradient);
+        map_light_dispatch_command(MAP_LIGHT_COMMAND_SET_DARKNESS_COLOR, &gradient);
 
         if (s_map_darkness_transition.period >= 4) {
             if (++s_map_darkness_transition.tick >= s_map_darkness_transition.period >> 2) {
@@ -1720,7 +1720,7 @@ void map_palette_load_data(const palette_t* palettes, s32 clut_row, s32 clut_ind
  * Each nonzero color takes the offsets added to itself, its half or its gray (mode), clamped to
  * 0..31 and kept from becoming transparent black. The results become the row's base colors;
  * update_current_colors also stages them for upload and sets the components of CLUTs that are not blending. */
-void map_palette_modify_from_other(s32 mode, const rgba5551_t* source, s32 clut_row, s32 clut_index, s32 all_colors,
+void map_palette_modify_from_source(s32 mode, const rgba5551_t* source, s32 clut_row, s32 clut_index, s32 all_colors,
     s16 red, s16 green, s16 blue, s32 update_current_colors) {
     s32 i;
     s32 index;
@@ -1906,11 +1906,11 @@ void map_palette_modify_from_other(s32 mode, const rgba5551_t* source, s32 clut_
 
 /* Write one CLUT of a row (the whole row when all_colors is 1; retail callers pass 0)
  * from the colors at `source` with the red, green and blue offsets added:
- * map_palette_modify_from_other in MAP_COLOR_MODE_RESTORE, a mode in which it
+ * map_palette_modify_from_source in MAP_COLOR_MODE_RESTORE, a mode in which it
  * neither halves nor grays the colors. */
-void map_palette_set_from_other(const rgba5551_t* source, s32 clut_row, s32 clut_index, s32 all_colors, s16 red,
+void map_palette_set_from_source(const rgba5551_t* source, s32 clut_row, s32 clut_index, s32 all_colors, s16 red,
     s16 green, s16 blue, s32 update_current_colors) {
-    map_palette_modify_from_other(
+    map_palette_modify_from_source(
         MAP_COLOR_MODE_RESTORE, source, clut_row, clut_index, all_colors, red, green, blue, update_current_colors);
 }
 
@@ -1918,7 +1918,7 @@ void map_palette_set_from_other(const rgba5551_t* source, s32 clut_row, s32 clut
 void map_light_init_background(void) {
     map_background_gradient_colors_t* colors;
 
-    colors = map_light_dispatch_state_command(MAP_LIGHT_COMMAND_GET_BACKGROUND_GRADIENT, colors);
+    colors = map_light_dispatch_command(MAP_LIGHT_COMMAND_GET_BACKGROUND_GRADIENT, colors);
     s_map_background_transition.colors[0] = colors->colors[MAP_BACKGROUND_GRADIENT_TOP];
     s_map_background_transition.colors[1] = colors->colors[MAP_BACKGROUND_GRADIENT_BOTTOM];
     s_map_background_transition.channels[0].red = colors->colors[MAP_BACKGROUND_GRADIENT_TOP].r << 16;
@@ -1937,7 +1937,7 @@ void map_light_init_background(void) {
 void map_light_init_ambient(void) {
     CVECTOR* color;
 
-    color = map_light_dispatch_state_command(MAP_LIGHT_COMMAND_GET_AMBIENT_COLOR, color);
+    color = map_light_dispatch_command(MAP_LIGHT_COMMAND_GET_AMBIENT_COLOR, color);
     s_map_ambient_base_color = *color;
     s_map_ambient_transition.channels.red = color->r << 16;
     s_map_ambient_transition.channels.green = color->g << 16;
@@ -1952,7 +1952,7 @@ void map_light_init_ambient(void) {
 void map_light_init_darkness(void) {
     CVECTOR* color;
 
-    color = map_light_dispatch_state_command(MAP_LIGHT_COMMAND_GET_DARKNESS_COLOR, color);
+    color = map_light_dispatch_command(MAP_LIGHT_COMMAND_GET_DARKNESS_COLOR, color);
     s_map_darkness_base_color = *color;
     s_map_darkness_transition.channels.red = color->r << 16;
     s_map_darkness_transition.channels.green = color->g << 16;
@@ -2057,7 +2057,7 @@ static void apply_unit_palette_modulation(s32 mode, s32 amount, s32 map_unit_id,
         return;
     }
 
-    map_unit_copy_draw_coords(&world_coordinates, unit);
+    map_unit_get_draw_coords(&world_coordinates, unit);
     tile = map_get_tile(world_coordinates.vx / MAP_TILE_SIZE, world_coordinates.vz / MAP_TILE_SIZE, unit->map_layer);
 
     map_palette_modify(mode, amount, MAP_CLUT_ROW_UNITS, map_unit_id, 0, red, green, blue);

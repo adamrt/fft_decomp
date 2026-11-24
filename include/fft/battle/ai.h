@@ -209,7 +209,7 @@ typedef struct ai_ability_entry {
 } ai_ability_entry_t;
 typedef char ai_ability_entry_size_must_be_4[sizeof(ai_ability_entry_t) == 4 ? 1 : -1];
 
-void ai_init_unit_abilities(s32 unit_id);
+void ai_init_unit(s32 battle_unit_id);
 void ai_load_ability_entry(const struct ai_ability_entry* entry);
 s32 ai_ability_is_known(s32 unit_id, s32 skillset_id, s32 bit);
 
@@ -301,7 +301,7 @@ typedef struct ai_unit_decision {
     u8 flags;                   /* 0x04; ai_decision_flags_e */
     u8 main_target_id;          /* 0x05 */
     u8 targeting_flags_1;       /* 0x06; ai_targeting_flags_1_e. MOSTLY_SUPPORT is cleared again for the
-                                   nonenemy with the lowest share (set_ability_considerations) */
+                                   nonenemy with the lowest share (mark_usable_abilities) */
     u8 targeting_flags_2;       /* 0x07; ai_targeting_flags_2_e */
     u8 enemy_flag;              /* 0x08 */
     u8 highest_mp_cost;         /* 0x09 */
@@ -324,7 +324,7 @@ typedef enum ai_target_setting_flags {
 
 /* ai_workspace_t.targetability, +0x0c78..0x0cb7. The 21-byte save of unit_targetable at +0xca2
  * overlaps the low three bytes of target_setting_flags at +0xcb4; the save and restore loops in
- * ai_evaluate_ability_outcome establish the span. The CONSUME_EVALUATED_AIM_TILES flag lies
+ * ai_evaluate_considered_ability establish the span. The CONSUME_EVALUATED_AIM_TILES flag lies
  * in the fourth byte, outside the saved array. Preserve both views and 32-bit alignment; this is
  * not a 16-byte backup. */
 typedef union ai_targetability {
@@ -400,7 +400,7 @@ typedef struct ai_workspace {
     u8 terrain_depth;                                     /* 0x0e3b */
     u16 team_golem[UNIT_TEAM_COUNT];                      /* 0x0e3c; scored as 16-bit values by the action simulation */
     u8 status_to_cancel[STATUS_BYTE_COUNT]; /* 0x0e44; the statuses the actor's usable abilities cancel, built by
-                                                      set_ability_considerations */
+                                                      mark_usable_abilities */
     /* Resumable reflected-origin search (evaluate_reflected_origins).
      * Candidate x/y = 2 * reflector position - intended target position. */
     u8 reflector_unit_index;                                         /* 0x0e49 */
@@ -455,7 +455,7 @@ typedef struct ai_workspace {
     u8 autobattle_setting;                            /* 0x19b6 */
     u8 resume_pending;                                /* 0x19b7; an AI routine suspended on its frame budget */
     u8 random_use_threshold;                          /* 0x19b8; floor(128 * random-use entries / eligible
-                                                       * entries), from set_ability_considerations.
+                                                       * entries), from mark_usable_abilities.
                                                        * A zero denominator leaves the prior byte unchanged. */
     u8 water_penalty;                                 /* 0x19b9 */
     u8 valuable_target_hit;                           /* 0x19ba; set by simulate_strikes for a
@@ -573,7 +573,7 @@ typedef enum ai_ability_effect {
     AI_ABILITY_EFFECT_ADVERSE = 2
 } ai_ability_effect_e;
 
-ai_ability_effect_e ai_classify_target_ability_effect(s32 unit_id, s32 check_reflect);
+ai_ability_effect_e ai_classify_target_ability_effect(s32 unit_id, s32 try_reflect);
 s32 ai_find_nearest_target(ai_nearest_target_mode_e mode);
 s32 ai_find_unit_at_tile(const ai_coords_t* coords);
 s32 ai_target_is_untargetable(s32 unit_id);
@@ -584,7 +584,7 @@ s32 ai_status_is_active_through_delay(s32 delay, const battle_unit_t* unit, s32 
 
 /* Declared without parameters: callers pass only the unit, and the definition takes two more
  * that it overwrites before use. */
-s32 ai_calculate_unit_death_delay();
+s32 ai_calculate_unit_death_counter_delay();
 
 /* movement */
 typedef enum ai_movement_stage { AI_MOVEMENT_TARGET_DISTANCE = 0, AI_MOVEMENT_SCORE_TILES = 1 } ai_movement_stage_e;
@@ -636,8 +636,8 @@ typedef enum ai_charging_stage {
     AI_CHARGING_WITHOUT_CHARGE = 2
 } ai_charging_stage_e;
 
-s32 ai_evaluate_ability_outcome(void);
-s32 ai_evaluate_move_origins(void);
+s32 ai_evaluate_considered_ability(void);
+s32 ai_evaluate_act_move_orders(void);
 s32 ai_evaluate_action(void);
 
 /* math skill */

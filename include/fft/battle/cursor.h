@@ -49,7 +49,7 @@ void cursor_project_tile(VECTOR* projected, SVECTOR* position, SVECTOR* raised);
 /* drawing */
 extern palette_t g_cursor_tile_glow_palettes[2];
 
-void cursor_draw_tile_glow(void);
+void cursor_draw(void);
 s32 cursor_calculate_tile_polygon(const SVECTOR* coords, u8 layer, SVECTOR* quad);
 void cursor_build_tile_glow(s32 palette, s32 shape, SVECTOR* v0, SVECTOR* v1, SVECTOR* v2, SVECTOR* v3, u32* ot);
 void cursor_draw_map_selection(SVECTOR* base, u32* ot);

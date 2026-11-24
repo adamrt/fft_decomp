@@ -34,7 +34,7 @@ typedef struct zodiac_draw_context {
 } zodiac_draw_context_t;
 typedef char zodiac_draw_context_size_must_be_36[sizeof(zodiac_draw_context_t) == 36 ? 1 : -1];
 
-void zodiac_load_frame(void);
+void gfx_load_zodiac_and_frame_textures(void);
 
 /* The scaled zodiac sprites and their backdrop. */
 void zodiac_build_primitives(zodiac_draw_context_t* context, POLY_FT4* poly);

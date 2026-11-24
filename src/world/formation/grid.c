@@ -160,7 +160,7 @@ void formation_toggle_ability_panel(s32 enable) {
 
 /* With enabled set, open the equipment/ability panel (unless the status panel is sliding or a
  * panel thread already runs) and the numeric panel; enabled 0 does nothing. */
-void formation_open_equipment_panel(s32 enabled) {
+void formation_open_equipment_ability_panel(s32 enabled) {
     if (enabled == 0) {
         return;
     }
@@ -436,7 +436,7 @@ void menu_draw_pressable_button(s16 index, s32 x, s16 y, s16 pressed, s16 disabl
  * The page scroll runs until it has rested for 10 steps, so the grid opens on
  * the page that holds the unit, before the cursor is placed on its slot.
  */
-void formation_init_selection_cursor(s16 formation_index) {
+void formation_grid_select_unit(s16 formation_index) {
     s32 count;
 
     menu_scrollable_list_init_core(0, 0, 0);
@@ -468,8 +468,8 @@ void formation_init_selection_cursor(s16 formation_index) {
 
 /* Place the grid cursor on a formation slot, show HP under the units, and enable the unit banner
  * at the top or bottom where it last was. */
-void formation_grid_init_cursor(s32 formation_index) {
-    formation_init_selection_cursor(formation_index);
+void formation_grid_init(s32 formation_index) {
+    formation_grid_select_unit(formation_index);
     g_formation_stat_display_mode = MENU_UNIT_READOUT_HP;
     g_formation_unit_banner_at_bottom_latch = g_formation_unit_banner_at_bottom;
     if (g_formation_unit_banner_at_bottom != 0) {
@@ -962,7 +962,7 @@ static void draw_unit_slots(point16_t* positions, s32 shade) {
  * other units drift sideways by frame^2/2 (alternating direction per row)
  * while the backdrop shade fades. Returns the frame counter, which wraps to
  * 0 and clears g_formation_unit_banner_at_bottom when the transition ends. Compiled at -O1. */
-s32 formation_grid_update_transition(s32 mode) {
+s32 formation_grid_update_slide_out(s32 mode) {
     point16_t positions[20];
     u8 frame;
     s32 spread;
@@ -1022,7 +1022,7 @@ s32 formation_grid_update_transition(s32 mode) {
 /*
  * Step the 24-frame return of the selected sprite to the unit grid.
  *
- * This reverses formation_grid_update_transition: the frame counter runs
+ * This reverses formation_grid_update_slide_out: the frame counter runs
  * down from 24, sliding the selected unit from its rest point back to its
  * grid cell while the other rows close in. Returns 1 while animating and 0 on
  * the call after the last frame. The unused array reproduces the
@@ -1047,7 +1047,7 @@ s32 formation_grid_update_return(s32 mode) {
         return 0;
     }
     if (g_formation_grid_return_frame == 0) {
-        formation_init_selection_cursor(g_unit_selected_index);
+        formation_grid_select_unit(g_unit_selected_index);
         g_formation_grid_return_done = 0;
         g_formation_grid_return_frame = 24;
     }

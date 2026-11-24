@@ -167,7 +167,7 @@ void formula_element_apply(void) {
         g_action_work.xa = g_action_work.xa * 2;
         g_action_target_data->status_changes.removal[STATUS_BYTE_INDEX(STATUS_ID_OIL)]
             |= STATUS_BYTE_MASK(STATUS_ID_OIL);
-        if (status_modify_inflictions(0)) {
+        if (status_filter_action_changes(0)) {
             g_action_target_data->attack_type = ACTION_TYPE_STATUS_CHANGE;
         }
     }
@@ -270,7 +270,7 @@ void formula_apply_hp_absorption(void) {
 /* Healing step: the stored HP damage becomes healing. An undead target takes
  * it as damage instead, and the ability no longer counts as canceling the
  * statuses of the first status byte (Dead among them). */
-void formula_apply_undead_reversal(void) {
+void formula_convert_hp_damage_to_healing(void) {
     action_data_t* action;
     action_data_t* action_again;
     u16 hp_damage;
@@ -368,14 +368,14 @@ void formula_use_hp_damage_as_action_hit_percent(void) {
         return;
     }
     if (random_roll_pass_fail(100, percent) != 0) {
-        formula_cause_action_miss();
+        formula_cause_accuracy_miss();
         g_action_target_data->hp_damage = 0;
     }
 }
 
 /* Miss unless the target's monster graphic is 0x0F or 0x10 (one unsigned
  * compare tests both): the dragon and hydra jobs and the Holy Dragon. */
-void formula_check_dragon(void) {
+void formula_force_non_dragon_target_miss(void) {
     if ((g_action_target->monster_graphic - 0xF) >= 2U) {
         formula_force_attack_miss();
     }
@@ -399,7 +399,7 @@ void formula_apply_maintenance(void) {
 
 /* When executing, a roll of 0..99 below FORMULA_ADDED_EFFECT_CHANCE (19)
  * sets ACTION_SPECIAL_EFFECT_ADDED_EFFECT. */
-static void roll_conditional_status_proc_inner(void) {
+static void roll_added_effect(void) {
     if (g_action_state == ACTION_STATE_EXECUTE && random_roll_pass_fail(100, FORMULA_ADDED_EFFECT_CHANCE) == 0) {
         g_action_target_data->special_effect |= ACTION_SPECIAL_EFFECT_ADDED_EFFECT;
     }
@@ -407,7 +407,7 @@ static void roll_conditional_status_proc_inner(void) {
 
 /* Queue the weapon's proc ability (proc_id) to strike the current target after
  * the action, in place of a status, and cancel any pending knockback. */
-void formula_queue_weapon_spell(void) {
+void formula_queue_weapon_proc(void) {
     g_action_work.weapon_proc_pending = 1;
     g_action_work.reaction_id = g_action_work.proc_id;
     g_action_work.post_action_target_id = g_action_work.target_id;
@@ -467,7 +467,7 @@ void formula_apply_quick_effect(void) {
 
 /* Lower PA (Power Break, Power Ruin), MA (Mind Break, Mind Ruin) or Speed
  * (Speed Break, Speed Ruin) by X; other abilities change nothing. */
-void formula_determine_reduced_stat(void) {
+void formula_set_stat_reduction(void) {
     u16 ability = g_action_work.ability_id;
 
     if (ability == ABILITY_ID_BATTLE_SKILL_POWER_BREAK || ability == ABILITY_ID_DESTROY_SWORD_POWER_RUIN) {
@@ -626,7 +626,7 @@ void formula_apply_poach_and_train(void) {
         && (g_action_attacker->ability_flags.support[2] & UNIT_SUPPORT_SET_3_TRAIN)) {
         g_action_target_data->status_changes.infliction[STATUS_BYTE_INDEX(STATUS_ID_INVITE)]
             |= STATUS_BYTE_MASK(STATUS_ID_INVITE);
-        if (status_modify_inflictions(0) != 0) {
+        if (status_filter_action_changes(0) != 0) {
             g_action_target_data->special_effect |= ACTION_SPECIAL_EFFECT_TEAM_CHANGE;
             g_action_target_data->attack_type |= ACTION_TYPE_STATUS_CHANGE;
             g_action_work.post_action_message = ACTION_POST_MESSAGE_TRAINED;
@@ -636,7 +636,7 @@ void formula_apply_poach_and_train(void) {
 
 /* Add the ability's status as a side effect of a hit: the hit flag, accuracy
  * and miss type are kept when the status does not apply. */
-void formula_apply_status(void) {
+void formula_apply_status_keeping_hit(void) {
     u8 hit;
     u8 miss_type;
     u16 accuracy;
@@ -722,7 +722,7 @@ void formula_apply_status_to_action(void) {
             | g_action_target_data->status_changes.removal[status];
     }
 
-    if (any == 0 || status_modify_inflictions(0) == 0) {
+    if (any == 0 || status_filter_action_changes(0) == 0) {
         formula_force_attack_miss();
         return;
     }
@@ -744,7 +744,7 @@ void formula_ether(void) {
 }
 
 /* Store max HP as HP damage and max MP as MP healing. Both callers then run
- * formula_apply_undead_reversal, which turns the HP part into healing
+ * formula_convert_hp_damage_to_healing, which turns the HP part into healing
  * (damage for an undead target). */
 void formula_apply_full_hp_mp_heal(void) {
     battle_unit_t* unit = g_action_target;
@@ -824,10 +824,10 @@ void reaction_try_catch(void) {
     action->last_received_attack = weapon_id;
 }
 
-/* Roll the evades (formula_evade_calculate_final_hit_percent). Returns 1 when
+/* Roll the evades (formula_evade_roll_sources). Returns 1 when
  * the attack was evaded. */
 static s32 roll_evade(void) {
-    formula_evade_calculate_final_hit_percent();
+    formula_evade_roll_sources();
     return g_action_target_data->hit == 0;
 }
 
@@ -836,7 +836,7 @@ static s32 roll_evade(void) {
  * FORMULA_ADDED_EFFECT_CHANCE (19); a preview always shows it; the AI
  * simulation never counts it. */
 s32 formula_roll_conditional_status_proc(void) {
-    roll_conditional_status_proc_inner();
+    roll_added_effect();
     if (g_action_state == ACTION_STATE_PREVIEW) {
         return 0;
     }
@@ -852,7 +852,7 @@ s32 formula_roll_conditional_status_proc(void) {
 s32 formula_evade_calculate_physical(void) {
     formula_evade_store_physical();
     formula_evade_calculate_concentrate();
-    formula_evade_calculate_dark_confuse();
+    formula_evade_apply_attacker_statuses();
     formula_evade_calculate_abandon();
     formula_evade_apply_target_statuses();
     formula_evade_apply_weather_on_bows();
@@ -864,7 +864,7 @@ s32 formula_evade_calculate_physical(void) {
 s32 formula_evade_calculate_physical_without_weather(void) {
     formula_evade_store_physical();
     formula_evade_calculate_concentrate();
-    formula_evade_calculate_dark_confuse();
+    formula_evade_apply_attacker_statuses();
     formula_evade_calculate_abandon();
     formula_evade_apply_target_statuses();
     formula_evade_calculate_facing();
@@ -899,7 +899,7 @@ void formula_apply_physical_modifiers(void) {
  * effect applies (formula_roll_conditional_status_proc), 1 when it does
  * not or the element canceled the attack. */
 s32 formula_calculate_weapon_damage(void) {
-    formula_calculate_base_xa();
+    formula_store_weapon_xa_ya();
     formula_apply_charge();
     formula_element_apply_weapon_strengthen();
     formula_calculate_physical_damage();
@@ -929,7 +929,7 @@ s32 formula_accuracy_calculate_physical(void) {
 
 /* Absorption, then the added-effect roll. Returns the roll's result: 0 when
  * the caller should apply the status. */
-s32 formula_element_apply_absorption_and_status_proc(void) {
+s32 formula_element_apply_absorption_and_roll_status(void) {
     formula_element_apply_absorption();
     return formula_roll_conditional_status_proc();
 }
@@ -960,7 +960,7 @@ s32 formula_element_apply_absorption_and_status(void) {
     formula_element_apply_absorption();
     result = formula_roll_conditional_status_proc();
     if (result == 0) {
-        formula_apply_status();
+        formula_apply_status_keeping_hit();
         return 0;
     }
     return result;

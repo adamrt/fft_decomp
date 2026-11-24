@@ -10,7 +10,7 @@
 /* Report whether the party has any items: mode 0 asks for inventory or equipped items, mode 1
  * for inventory only, other modes for equipped items only.
  */
-s32 formation_check_inventory(s32 mode) {
+s32 formation_has_items(s32 mode) {
     s32 has_inventory = 0;
     s32 has_equipment = 0;
     s32 i;

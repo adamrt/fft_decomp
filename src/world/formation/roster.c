@@ -68,7 +68,7 @@ s32 formation_unit_generate(s16 unit_type) {
     party->movement_ability.low = 0;
     party->movement_ability.high = 0;
     formation_build_record_list(0, g_formation_unit_pointers, FORMATION_RECORD_LIST_ALL);
-    return formation_unit_find_by_roster_slot(roster_slot);
+    return formation_unit_find_index_by_roster_slot(roster_slot);
 }
 
 /*

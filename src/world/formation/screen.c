@@ -174,7 +174,7 @@ static void rebuild_lists(void) {
     item_list_rebuild_category(2);
     item_list_rebuild_category(3);
     item_list_rebuild_category(4);
-    formation_grid_init_cursor(0);
+    formation_grid_init(0);
     g_formation_screen_running = 1;
 }
 
@@ -332,7 +332,7 @@ void formation_run_screen(s32 tutorial, s32 unused) {
     if (tutorial == 0) {
         g_menu_screen_music_slot = music_load_into_free_slot(MUSIC_FORMATION);
         while (music_is_loading() != 0) { }
-        music_switch_track(g_menu_screen_music_slot, 0x7F, 0);
+        music_play_slot(g_menu_screen_music_slot, 0x7F, 0);
     }
 
     while (g_formation_screen_running != 0) {
@@ -340,9 +340,9 @@ void formation_run_screen(s32 tutorial, s32 unused) {
         if (tutorial_update() == 0) {
             break;
         }
-        menu_input_update_message_state();
+        menu_input_update();
         if (g_formation_banner_active != 0) {
-            formation_banner_countdown(0, 0);
+            formation_update_banner(0, 0);
             menu_input_clear_state();
         }
         menu_screen_update_input_lockout();
@@ -351,7 +351,7 @@ void formation_run_screen(s32 tutorial, s32 unused) {
             help_start_text(DIALOG_POSITION_CENTER);
         }
         if (g_menu_screen_grid_id != MENU_GRID_HELP_NONE) {
-            menu_screen_update_grid_cursor(
+            menu_screen_update_help_grid(
                 g_formation_unit_pointers[g_unit_selected_index]->detail.uses_monster_skillset);
         }
         menu_palette_set_mode(g_menu_input_lock_mode);
@@ -426,7 +426,7 @@ void formation_run_screen(s32 tutorial, s32 unused) {
             menu_screen_reset_selection_results();
             last_menu = g_formation_current_menu;
         }
-        menu_screen_update_sound_effect();
+        menu_screen_play_sound_effect();
         music_update_tunes();
     }
 
@@ -462,7 +462,7 @@ void formation_run_screen(s32 tutorial, s32 unused) {
  * in g_sound_queued_effect_id, plays on the sound_play_sfx channels
  * and both queues are cleared. Cancel and Cursor Move are copied to the menu
  * queue before the mute test, so they still play while muted. */
-void menu_screen_update_sound_effect(void) {
+void menu_screen_play_sound_effect(void) {
     s32 sound_id;
 
     if (g_menu_screen_sound_release_held_loop != 0) {
@@ -582,7 +582,7 @@ void update_unit_grid_menu(void) {
             }
             menu_screen_reset_selection_results();
             g_formation_unit_cycle_mode = 0;
-            formation_init_selection_cursor(g_unit_selected_index);
+            formation_grid_select_unit(g_unit_selected_index);
             if (g_formation_unit_pointers[g_unit_selected_index]->gender_flags & UNIT_FLAG_EGG) {
                 g_formation_unit_browse_enabled = 0;
                 g_unit_panel_numeric_panel_params.style = 0;
@@ -607,7 +607,7 @@ void update_unit_grid_menu(void) {
             /* An egg gets its own triangle menu, whose first option dismisses it. */
             if (g_formation_unit_pointers[g_unit_selected_index]->gender_flags & UNIT_FLAG_EGG) {
                 if ((g_formation_triangle_menu_running
-                        = menu_managed_thread_start(THREAD_SCREEN_SLOT_MENU, &g_formation_egg_triangle_menu))
+                        = menu_managed_thread_start_or_poll(THREAD_SCREEN_SLOT_MENU, &g_formation_egg_triangle_menu))
                     == 0) {
                     if (g_menu_screen_selection_results[0] == 0) {
                         formation_dismiss(g_unit_selected_index);
@@ -622,7 +622,7 @@ void update_unit_grid_menu(void) {
                 }
             } else {
                 if ((g_formation_triangle_menu_running
-                        = menu_managed_thread_start(THREAD_SCREEN_SLOT_MENU, &g_formation_triangle_menu))
+                        = menu_managed_thread_start_or_poll(THREAD_SCREEN_SLOT_MENU, &g_formation_triangle_menu))
                     == 0) {
                     if (g_menu_screen_selection_results[0] == 0) {
                         g_formation_current_menu = FORMATION_MENU_ITEM_ENTER;
@@ -782,7 +782,7 @@ void unit_grid_update_selection(void) {
     if (g_formation_current_menu != FORMATION_MENU_ABILITY_LEAVE
         && g_formation_current_menu != FORMATION_MENU_ITEM_LEAVE
         && g_formation_current_menu != FORMATION_MENU_JOB_WHEEL_LEAVE) {
-        formation_open_equipment_panel(g_formation_unit_browse_enabled);
+        formation_open_equipment_ability_panel(g_formation_unit_browse_enabled);
     }
     if (g_formation_current_menu == FORMATION_MENU_ITEM || g_formation_current_menu == FORMATION_MENU_ITEM_EQUIP
         || g_formation_current_menu == FORMATION_MENU_ITEM_BEST_FIT) {
@@ -859,7 +859,7 @@ void formation_stage_selected_unit(void) {
  * g_unit_panel_status_display_thread_params.position.y/g_unit_panel_comparison_display_thread_params.position.y.
  * Compiled at -O1; the flag update goes through a pointer so each branch materializes the address like the target.
  */
-void formation_update_selection_stage(void) {
+void shop_update_unit_selection(void) {
     s32 previous;
     s32* flags;
 
@@ -921,7 +921,7 @@ void formation_update_selection_stage(void) {
         }
     }
     if (g_shop_menu_step >= SHOP_STEP_SOLDIER_MENU) {
-        formation_open_equipment_panel(g_formation_unit_browse_enabled);
+        formation_open_equipment_ability_panel(g_formation_unit_browse_enabled);
     } else {
         unit_panel_toggle_equipment_threads(g_formation_unit_browse_enabled);
     }

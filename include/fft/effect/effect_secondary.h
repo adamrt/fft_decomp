@@ -76,7 +76,7 @@ extern struct effect_secondary_data* g_effect_secondary_current;
 extern u32* g_effect_polygon_depth_data;
 extern s32 g_effect_buffer_index;
 
-s32 effect_secondary_init(s32 animation_id, s32 parameter, const struct effect_context* source);
+s32 effect_secondary_init_animation(s32 animation_id, s32 parameter, const struct effect_context* source);
 s32 effect_secondary_update(void);
 effect_secondary_phase_e effect_secondary_get_phase(u8 secondary_id);
 void effect_secondary_finalize(u8 secondary_id);
@@ -205,7 +205,7 @@ typedef char effect_anim_script_size_must_be_2[sizeof(effect_anim_script_t) == 2
 /* 0xcc-byte effect slots of g_effect_slots, chained through the leading next/prev
  * byte pair; slot 0 is the null sentinel. g_effect_slot_active_head heads the active chain
  * and g_effect_slot_free_head the free chain. RGB and the frame byte
- * are copied together by the billboard renderer; init_slot_secondary_animation resets
+ * are copied together by the billboard renderer; init_slot_particle_animation resets
  * the color and writes the 16-bit values at 0x88 and 0x8e. */
 typedef struct effect_slot {
     u8 next;                            /* 0x00 */
@@ -236,7 +236,7 @@ s32 effect_slot_alloc(void);
 /* starting secondary effects */
 s32 effect_secondary_init_projectile(s32 animation, const struct effect_context* source);
 s32 effect_secondary_init_weapon_hit(s32 elements, const effect_context_t* source, s32 unused_is_bow);
-void effect_secondary_build_init(struct map_unit* unit, struct effect_context* effect);
+void effect_secondary_build_self_context(struct map_unit* unit, struct effect_context* effect);
 void effect_secondary_start_weapon_hit(struct map_unit* unit, s32 is_bow);
 void effect_secondary_start_projectile(map_unit_t* unit);
 void effect_secondary_start_zodiac_poof(map_unit_t* unit);

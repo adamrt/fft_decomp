@@ -61,7 +61,7 @@ void overlay_companion_poll_file(void) {
     }
 }
 
-/* Per-frame driver of overlay_companion_request: start the
+/* Per-frame driver of overlay_companion_load: start the
  * disc read of the requested overlay on the main stack, at its offset from the
  * companion overlay load address, then poll until the read finishes and clear the
  * request. */

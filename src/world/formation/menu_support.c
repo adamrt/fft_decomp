@@ -45,8 +45,7 @@ void menu_screen_icon_list_thread(void) {
     SetShadeTex(&record->sprites[2], 0);
     SetShadeTex(&record->sprites[3], 0);
     mem_copy_bytes_nonempty(&records[1], &records[0], sizeof(records[1]));
-    buffer = menu_build_and_upload_window_frame_image(
-        param->inner_width, param->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
+    buffer = menu_build_window_frame_image(param->inner_width, param->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
     g_menu_window_text_pen.stride = param->inner_width;
     menu_text_set_origin(8, 9);
     g_menu_text_palette_offset = 0;
@@ -65,12 +64,12 @@ void menu_screen_icon_list_thread(void) {
         param->selected_index = cursor;
         menu_select_icon_cluts(record);
         menu_update_icon_cursor_sprites(param, record, i, cursor);
-        if (menu_should_close_thread((u32*)&g_menu_screen_new_buttons)) {
+        if (menu_poll_thread_close((u32*)&g_menu_screen_new_buttons)) {
             break;
         }
         if (!thread_is_previous_running()) {
             menu_update_row_cursor(param, &cursor);
-            menu_handle_action(param, cursor);
+            menu_handle_confirm_input(param, cursor);
             menu_handle_cancel_input(param);
         }
         setRGB0(&record->sprites[0], g_menu_screen_brightness_red, g_menu_screen_brightness_green,

@@ -355,7 +355,7 @@ extern map_tile_t g_map_tile_data[MAP_TILE_COUNT];
 map_tile_t* map_get_tile(s32 x, s32 y, u32 layer);
 s32 map_get_tile_value(map_tile_data_selector_e field, s32 x, s32 y, s32 layer);
 s32 map_set_tile_value(map_tile_data_selector_e field, s32 x, s32 y, s32 layer, s32 value);
-s32 map_calculate_slope_height(const SVECTOR* coords, s32 layer);
+s32 map_calculate_surface_height(const SVECTOR* coords, s32 layer);
 void map_store_dimensions(SVECTOR* destination);
 
 /* A typed terrain parameter loses the first retail byte-cursor increment. */
@@ -369,7 +369,7 @@ enum {
 };
 
 /* Rows of g_terrain_movement_cost_tables, chosen from the unit's movement
- * abilities by store_spread_unit_to_scratchpad; each has one
+ * abilities by init_pathfind_work; each has one
  * cost per map_surface_type_e. */
 typedef enum terrain_cost_table {
     TERRAIN_COST_TABLE_DEFAULT = 0,
@@ -410,7 +410,7 @@ void map_store_selected_tile(SVECTOR* destination);
 /* tile marks */
 /* map_set_tile_mark_colors modes and the g_map_tile_mark_modes states:
  * one layer per map tile mark (move destination, ability range, targeted). A SHOW or HIDE
- * request recolors the current render buffer; map_mesh_draw_weather then does the
+ * request recolors the current render buffer; map_draw then does the
  * other buffer and leaves the layer SHOWN or NONE. */
 typedef enum map_tile_mark_mode {
     MAP_TILE_MARK_NONE = 0, /* as a mode: restore every polygon and request the three HIDEs */
@@ -475,8 +475,5 @@ extern s16 g_map_destruction_wait_state;
 extern u16 g_map_refresh_pending;
 
 void map_wait_refresh(void);
-
-/* The raw weather script variable, before indoor and snow flags apply. */
-s32 map_get_weather(void);
 
 #endif

@@ -195,7 +195,7 @@ static void build_record(const battle_unit_t* unit, unit_list_record_t* record, 
     record->magical_accessory_evade = unit->equipment_stats[UNIT_EQUIPMENT_STAT_ACCESSORY_MAGIC_EVADE];
 
     if (record->uses_monster_skillset != 0) {
-        abilities = (s16*)ability_build_skillset_list(unit->primary_skillset, SKILLSET_ABILITY_FILTER_ACTION);
+        abilities = (s16*)skillset_build_ability_list(unit->primary_skillset, SKILLSET_ABILITY_FILTER_ACTION);
         count = 0;
         for (i = 0; i < 4; i++) {
             found = 0;

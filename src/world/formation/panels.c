@@ -166,7 +166,7 @@ void unit_panel_equipment_thread(void) {
         menu_build_scaled_draw_area_packets(
             &screen->portrait, &s_formation_equipment_panel_draw_area, frame, g_menu_framebuffer_y, &thread->position);
         unit_panel_set_colors(&screen->frame, thread);
-        unit_panel_select_palette(&screen->numeric_frame, thread);
+        unit_panel_set_numeric_frame_colors(&screen->numeric_frame, thread);
 
         gfx_draw_or_append_gpu_primitive(&screen->portrait.areas[1]);
         gfx_draw_or_append_gpu_primitive(&screen->draw_offsets[1]);
@@ -337,7 +337,7 @@ void unit_panel_ability_thread(void) {
         menu_build_scaled_draw_area_packets(
             &screen->portrait, &s_formation_ability_panel_draw_area, frame, g_menu_framebuffer_y, &offset);
         unit_panel_set_colors(&screen->frame, thread);
-        unit_panel_select_palette(&screen->numeric_frame, thread);
+        unit_panel_set_numeric_frame_colors(&screen->numeric_frame, thread);
 
         gfx_draw_or_append_gpu_primitive(&screen->portrait.areas[1]);
         gfx_draw_or_append_gpu_primitive(&screen->draw_offsets[1]);

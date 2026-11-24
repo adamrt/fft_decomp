@@ -107,7 +107,7 @@ void message_dialog_thread(void) {
      * faces away from the camera. */
     if ((param & 0x70) == 0x70) {
         rec.dialog_type = (param & 0x1C) | 0x10;
-        rec.dialog_type |= map_unit_check_camera_facing_by_event_unit_id(thread_current_get_parameter_3()) + 1;
+        rec.dialog_type |= map_unit_is_facing_away_from_camera_by_event_unit_id(thread_current_get_parameter_3()) + 1;
     }
 
     rec._unread_2a = 0;
@@ -281,7 +281,7 @@ void message_dialog_thread(void) {
             win->portrait_code = rec.portrait;
         }
         value = map_unit_get_battle_unit_id(script_resolve_map_unit_id(thread_current_get_parameter_3()));
-        menu_build_and_upload_window_image(rec.width, rec.height, &rec.rect, rec.dialog_type, rec.tail_offset);
+        menu_upload_dialog_window_image(rec.width, rec.height, &rec.rect, rec.dialog_type, rec.tail_offset);
         win->portrait_battle_unit_id = value;
     } else if (rec.box_type == DIALOG_BOX_TYPE_CENTERED) {
         win[0].quads[0].clut = 0x7CBC;
@@ -607,8 +607,7 @@ void message_dialog_thread(void) {
                     }
                     text = text_find_entry(rec.text);
                     no_wait = 0;
-                    menu_build_and_upload_window_image(
-                        rec.width, rec.height, &rec.rect, rec.dialog_type, rec.tail_offset);
+                    menu_upload_dialog_window_image(rec.width, rec.height, &rec.rect, rec.dialog_type, rec.tail_offset);
                     delay = 1;
                     column = 0;
                     cursor_x = rec.x;
@@ -633,8 +632,7 @@ void message_dialog_thread(void) {
                 }
 
                 if (rec.box_type == DIALOG_BOX_TYPE_PORTRAIT) {
-                    menu_build_and_upload_window_image(
-                        rec.width, rec.height, &rec.rect, rec.dialog_type, rec.tail_offset);
+                    menu_upload_dialog_window_image(rec.width, rec.height, &rec.rect, rec.dialog_type, rec.tail_offset);
                 } else if (rec.box_type == DIALOG_BOX_TYPE_CENTERED) {
                     ClearImage(&rec.rect, 0, 0, 0);
                     thread_yield();
@@ -749,7 +747,7 @@ void message_dialog_thread(void) {
                 }
                 text = text_find_entry(rec.text);
                 no_wait = 0;
-                menu_build_and_upload_window_image(rec.width, rec.height, &rec.rect, rec.dialog_type, rec.tail_offset);
+                menu_upload_dialog_window_image(rec.width, rec.height, &rec.rect, rec.dialog_type, rec.tail_offset);
                 delay = 1;
                 column = 0;
                 width_override = no_value;

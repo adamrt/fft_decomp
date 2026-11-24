@@ -28,7 +28,7 @@ typedef enum menu_screen_thread_slot {
     MENU_SCREEN_THREAD_SLOT_TUTORIAL_TEXT = 16        /* tutorial script text: the slot past the sixteen reset ones */
 } menu_screen_thread_slot_e;
 
-/* at_list_run runs its window frame thread in the upper menu's slot. */
+/* menu_text_list_thread runs its window frame thread in the upper menu's slot. */
 enum { MENU_SCREEN_THREAD_SLOT_AT_LIST_FRAME = 15 };
 
 void menu_screen_thread_request_redraw(s32 thread_id);
@@ -180,7 +180,7 @@ void menu_screen_update_dialog_input(void);
 /* grid menus */
 extern s32 g_menu_screen_grid_id; /* help_grid_id_e */
 
-void menu_screen_update_grid_cursor(s16 alternate);
+void menu_screen_update_help_grid(s16 alternate);
 
 /* entry threads */
 /* Value range of a numeric menu entry (menu_screen_number_entry_thread and
@@ -233,16 +233,16 @@ const u8* menu_screen_text_advance_chars(const u8* text, s32 count);
 s16 menu_screen_text_get_char_at(const u8* table, s16 index, s32 position);
 
 /* text images */
-void menu_screen_text_kern(const u8* text, const s16* text_ids, const RECT* destination, s32 flags);
+void menu_screen_render_kerned_text(const u8* text, const s16* text_ids, const RECT* destination, s32 flags);
 s32 menu_screen_text_measure_width(const u8* entry);
 
 /* text printing */
-s32 menu_screen_text_check_printing(s32 thread_id);
+s32 menu_screen_text_is_printing(s32 thread_id);
 void menu_screen_text_resume_printing(s32 thread_id);
 
 /* music and sound effects */
 extern u8 g_menu_screen_sound_release_held_loop;
 
-void menu_screen_update_sound_effect(void);
+void menu_screen_play_sound_effect(void);
 
 #endif

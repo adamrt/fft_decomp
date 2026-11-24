@@ -21,7 +21,7 @@ static s16 s_save_menu_window_right_x = 0;
 
 /* Draw the command's textured quad at its literal position, in the current sprite color or, for
  * MENU_SCRIPT_OP_UNCOLORED_QUAD, unshaded. CARD's copy has no list rows. Returns the next command. */
-menu_instruction_t* menu_opcode_04_draw_textured_quad(menu_instruction_t* command) {
+menu_instruction_t* menu_opcode_04_05_draw_textured_quad(menu_instruction_t* command) {
     RECT rect;
     const rgb24_t* color;
     s32 x = command->sprite.sprite.x;
@@ -293,7 +293,7 @@ menu_instruction_t* menu_opcode_0f_set_draw_priority(menu_instruction_t* data) {
 /* Draw the command's literal value as `width` zero-padded digit glyphs from (x, y),
  * `spacing` pixels apart, tinted with the menu text color. A style of 2 or more draws
  * nothing. Returns the next command. */
-menu_draw_number_command_t* menu_opcode_0d_draw_decimal_number(menu_draw_number_command_t* command) {
+menu_draw_number_command_t* menu_opcode_0d_draw_formatted_number(menu_draw_number_command_t* command) {
     s8 text[16];
     menu_digit_glyph_t glyph;
     RECT unused_minus_rect; /* Preserves the original frame size. */

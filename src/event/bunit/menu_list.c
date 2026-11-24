@@ -24,8 +24,8 @@ menu_opcode_handler_t g_menu_opcode_handlers[UNIT_LIST_SCRIPT_END] = {
     menu_opcode_01_if_group,                  /* 0x01 */
     menu_opcode_02_if_else_group,             /* 0x02 */
     0,                                        /* 0x03 */
-    menu_opcode_04_draw_textured_quad,        /* 0x04 */
-    menu_opcode_04_draw_textured_quad,        /* 0x05 */
+    menu_opcode_04_05_draw_textured_quad,     /* 0x04 */
+    menu_opcode_04_05_draw_textured_quad,     /* 0x05 */
     menu_opcode_06_draw_callback_quad,        /* 0x06 */
     0,                                        /* 0x07 */
     0,                                        /* 0x08 */
@@ -36,7 +36,7 @@ menu_opcode_handler_t g_menu_opcode_handlers[UNIT_LIST_SCRIPT_END] = {
     menu_opcode_0d_draw_formatted_number,     /* 0x0d */
     menu_opcode_0e_set_semi_trans,            /* 0x0e */
     menu_opcode_0f_set_draw_priority,         /* 0x0f */
-    menu_opcode_10_draw_scrollable_list,      /* 0x10 */
+    menu_opcode_10_update_scrollable_list,    /* 0x10 */
     menu_opcode_11_draw_background_tiles,     /* 0x11 */
     menu_opcode_12_draw_opening_window_frame, /* 0x12 */
     menu_opcode_13_clear_temporary_draw_area, /* 0x13 */
@@ -63,7 +63,8 @@ menu_opcode_handler_t g_menu_opcode_handlers[UNIT_LIST_SCRIPT_END] = {
  * an s8 (the promoted subreg gives the target's `move v0,s7` copy before the
  * test) and is cleared after the minus-glyph call, and the if/else spellings
  * of `color` and `value` set the live lengths that put `color` in s6 ahead of
- * `negative` in s7. */
+ * `negative` in s7. The handler table also runs it for opcodes 0x19 through
+ * 0x1b. */
 menu_instruction_t* menu_opcode_0d_draw_formatted_number(menu_instruction_t* command) {
     s8 text[16];
     RECT rect;
@@ -502,8 +503,7 @@ void menu_scrollable_list_refresh(const menu_instruction_t* script) {
 }
 
 /* Set up a scrollable list without a scroll base and draw it with the given menu script. */
-void menu_init_and_draw_scrollable_list_simple(
-    s16* entries, s32 selected_index, u8* text_table, const menu_instruction_t* script) {
+void menu_scrollable_list_open(s16* entries, s32 selected_index, u8* text_table, const menu_instruction_t* script) {
     menu_scrollable_list_init_core(entries, selected_index, text_table);
     menu_scrollable_list_refresh(script);
 }
@@ -526,7 +526,7 @@ void menu_scrollable_list_open_at_scroll_base(
  * Uses the event speed and a sliding cursor. The padding arrays retain the
  * original stack frame.
  */
-menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* command) {
+menu_instruction_t* menu_opcode_10_update_scrollable_list(menu_instruction_t* command) {
     RECT rect;
     u8 pad0[0x10];
     point16_t marker;

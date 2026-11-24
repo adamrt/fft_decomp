@@ -139,7 +139,7 @@ void menu_thin_window_frame_thread(void) {
     frame = 0;
     while (thread_current_get_parameter_3() == 0) {
         prim = &g_menu_scratch_buffer.panel_frames[frame & 1];
-        gfx_build_scaled_draw_area_pair_swapped(&prim->draw_areas, (const RECT*)menu, frame, g_gfx_screen_polarity);
+        menu_build_scaled_draw_area_pair_swapped(&prim->draw_areas, (const RECT*)menu, frame, g_gfx_screen_polarity);
 
         /* texture_u is reused for this frame's border CLUT; a separate local changes the registers. */
         texture_u = MENU_CLUT_DIMMED;

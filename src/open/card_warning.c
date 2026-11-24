@@ -49,7 +49,7 @@ void title_start_new_game(void) {
         destination++;
     }
 
-    fade_tile_start_out(0x10);
+    fade_tile_start_in(0x10);
     record = display_object_append_animated(g_display_object_queue, &g_display_object_queue_count);
     g_display_object_animated_pool[record].sequence = 0x12;
     g_display_object_animated_pool[record].anim_counter = 0;
@@ -105,11 +105,11 @@ void title_update_card_warning(controller_record_t* record) {
     buttons = g_input_new_button_presses;
     if (buttons & PSX_PAD_CROSS) {
         sound_play_sfx(SOUND_SFX_CANCEL);
-        fade_tile_start_in(0x20);
+        fade_tile_start_out(0x20);
         record->card_warning.state = TITLE_CARD_WARNING_CANCEL;
     } else if (buttons & (PSX_PAD_CIRCLE | PSX_PAD_START)) {
         sound_play_sfx(SOUND_SFX_CONFIRM);
-        fade_tile_start_in(0x20);
+        fade_tile_start_out(0x20);
         record->card_warning.state = TITLE_CARD_WARNING_CONFIRM;
     }
 }

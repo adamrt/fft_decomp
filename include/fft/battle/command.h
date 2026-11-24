@@ -177,7 +177,7 @@ extern s16 g_command_action_slot_row_actions[6];
 void command_ability_list_thread(void);
 
 /* Shows the warning that applies when the unit cannot act from this menu. */
-void command_check_restrictions(void);
+void command_check_act_restrictions(void);
 
 /* Checks a chosen row before it opens: deep water, Frog or the menu's own restriction shows its message and ends
  * the thread. */
@@ -314,7 +314,7 @@ extern s32 g_menu_status_requested;
 extern s32 g_menu_status_screen_selected;
 extern s32 g_menu_status_open;
 
-void command_open_status_menu(void);
+void command_mark_status_menu_open(void);
 void command_clear_status_menu(void);
 
 #endif

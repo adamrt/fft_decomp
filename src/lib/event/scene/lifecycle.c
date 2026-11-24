@@ -72,7 +72,7 @@ void menu_subsystems_reset(void) {
 }
 
 /* Put the map light transform of the event scripts back to the map's own light: no rotation, unit
- * scale, and the current light direction and color matrices as the base map_light_thread
+ * scale, and the current light direction and color matrices as the base script_opcode_1b_map_light_thread
  * interpolates from. WORLD has no map light, so its copy is empty. */
 void map_light_reset_script_light(void) {
 #ifdef FFT_BATTLE
@@ -115,7 +115,7 @@ void map_unit_reset_animation_states(void) {
  * whichever way is nearer; the other two modes always increment or decrement.
  * Nothing calls it in WORLD, where its caller process_pending_requests
  * is empty. */
-void map_unit_update_pending_animations(void) {
+void map_unit_update_animation_states(void) {
     s32 i;
     s32 facing;
     s32 current;
@@ -219,7 +219,7 @@ void script_reset_event_state(void) {
 
 /* Run one event frame, then return whether the deployment thread (borrowed slot
  * 6) is still running. */
-s32 deploy_update_frame(u32* ot, u32 buttons) {
+s32 deploy_update_event(u32* ot, u32 buttons) {
     script_update_event_frame(ot, buttons);
     return thread_is_running(THREAD_BORROWED_SLOT_DEPLOYMENT);
 }

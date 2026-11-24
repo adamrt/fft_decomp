@@ -26,7 +26,7 @@ extern s8 g_equipment_remove_mode_initialized;
 
 /* EQUIP's 0x3c-byte menu records: the main commands, the item actions and
  * (in item_list_update_sort_menu) the item-type order menus. Each is
- * started through menu_managed_thread_start, which makes it the current
+ * started through menu_managed_thread_start_or_poll, which makes it the current
  * g_menu_thread_menu_data. */
 extern menu_entry_t g_equipment_command_menu;
 static u16 s_equipment_clear_all_prompt_frame;
@@ -191,7 +191,7 @@ static s32 update_equip_menu(void) {
                 g_item_list_entries, selected, scroll, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
             g_menu_row_callbacks[0].value = equipment_row_get_equipped_count;
             g_menu_row_callbacks[1].value = equipment_row_get_item_count;
-            g_menu_row_callbacks[2].icon = item_list_build_type_icon_source;
+            g_menu_row_callbacks[2].icon = equipment_row_get_type_icon_source;
             g_menu_row_callbacks[3].icon = equipment_row_get_icon_source;
             g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
             g_equipment_item_previewed_cursor = -1;

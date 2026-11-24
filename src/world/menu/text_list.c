@@ -85,7 +85,7 @@ static u8* update_text_page_scroll(menu_entry_t* entry, s32* row_offset, s32* ri
  * Scrolling three-column text list thread (an older sibling of
  * ability_list_scrolling_thread with a fixed page pair, g_text_list_pages, and
  * menu_screen_window_frame_thread in the frame thread slot). The menu-screen library's
- * variant of at_list_run: the formation screens, the world map menus and the title's music
+ * variant of menu_text_list_thread: the formation screens, the world map menus and the title's music
  * test run it.
  *
  * Draws the visible rows into a text image, then runs the input loop on two
@@ -339,12 +339,12 @@ void menu_screen_text_list_thread(void) {
 
         entry->selected_index = cursor + row_offset;
         entry->select_text_table = row_offset;
-        if (menu_should_close_thread(input0) != 0) {
+        if (menu_poll_thread_close(input0) != 0) {
             break;
         }
 
         if (delta == 0) {
-            menu_handle_action(entry, cursor);
+            menu_handle_confirm_input(entry, cursor);
         }
         menu_handle_cancel_input(entry);
 
@@ -398,7 +398,7 @@ void menu_screen_text_list_thread(void) {
             gfx_draw_or_append_gpu_primitive(&page->thumb);
         }
 
-        gfx_build_scaled_draw_area_pair_swapped(&page->draw_areas, &entry->window, i, g_gfx_active_buffer_index);
+        menu_build_scaled_draw_area_pair_swapped(&page->draw_areas, &entry->window, i, g_gfx_active_buffer_index);
         menu_select_icon_sprite_clut(page->icons.icons[0]);
         if (entry->header_id >= 5) {
             gfx_draw_or_append_gpu_primitive(page->icons.icons[0]);

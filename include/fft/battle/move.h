@@ -104,7 +104,7 @@ enum {
 enum { MOVE_PENDING_MOUNT_ID_MASK = 0x7f, MOVE_PENDING_MOUNT_SET = 0x80 };
 
 /* movement classes and terrain */
-/* Ordered class selection in store_spread_unit_to_scratchpad, not movement ability
+/* Ordered class selection in init_pathfind_work, not movement ability
  * flags or the separate cost-table selector. Water names describe standing
  * height. The UNIT_MOVEMENT_SET_3 bits carry the retail ability names, which
  * are the other way round: "Move in Water" (0x1f6) stands on the surface and
@@ -355,7 +355,7 @@ typedef enum move_post_event_flags {
     MOVE_POST_EVENT_MOUNT_STATUS_CHANGE = 0x0400
 } move_post_event_flags_e;
 
-u32 move_get_post_events(battle_unit_t* unit);
+u32 move_resolve_post_events(battle_unit_t* unit);
 s32 move_prepare_ability_benefit(battle_unit_t* unit);
 
 #endif

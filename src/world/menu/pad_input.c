@@ -21,7 +21,7 @@ static s32 read_pad_buttons(s32 unused) {
 
 /*
  * Publish newly pressed buttons and two repeat rates for WORLD menus, reading
- * pad 0 (update_tutorial_controller is the tutorial twin).
+ * pad 0 (update_controller is the tutorial twin).
  *
  * Triangle reports one press and nothing while held. Otherwise one button is
  * reported at a time: of several, the lowest button bit is latched and

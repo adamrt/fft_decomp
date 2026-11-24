@@ -74,7 +74,7 @@ void party_join_event_units(void) {
 
 /* CallFunction 2 and 7: stage a 365-day advance in the date-advance variable. The
  * calendar itself moves when that variable is consumed. */
-void calendar_advance_year(void) {
+void calendar_request_year_advance(void) {
     script_variable_set(EVENT_SCRIPT_VAR_DATE_ADVANCE, 365);
 }
 

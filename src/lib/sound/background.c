@@ -6,7 +6,7 @@
 #include "fft/sys/thread.h"
 #include "psx/types.h"
 
-/* Thread task 0x35, started by the event script's background-sound instruction:
+/* Thread task 0x35, started by the event script's BgSound instruction (opcode 0x6b):
  * restart an environment sound (sound resource ENV), on a free SFX channel pair
  * when find_channel is set and as the remembered background sound otherwise, and
  * set its volume (0 becomes 1).
@@ -47,8 +47,8 @@ void sound_background_thread(void) {
  * thread.
  *
  * A step's volume is never 0, which would stop the sound: a negative level is
- * negated and 0 becomes 1. The event script's edit-background-sound instruction
- * starts it as a thread, and sound_background_thread continues in it. */
+ * negated and 0 becomes 1. The event script's EditBgSound instruction (opcode
+ * 0x6a) starts it as a thread, and sound_background_thread continues in it. */
 void sound_background_fade_thread(void) {
     event_background_sound_parameters_t* request;
     s32 sound_id;

@@ -87,7 +87,7 @@ void unit_list_update_sort_menu(void) {
         s_unit_list_reorder_list_initialized = 1;
     }
 
-    if (menu_managed_thread_start(UNIT_LIST_THREAD_SLOT_REORDER_MENU, &g_unit_list_reorder_list_desc) == 0) {
+    if (menu_managed_thread_start_or_poll(UNIT_LIST_THREAD_SLOT_REORDER_MENU, &g_unit_list_reorder_list_desc) == 0) {
         s_unit_list_reorder_list_initialized = 0;
         g_unit_list_current_menu = UNIT_LIST_MENU_UNIT_LIST;
     }

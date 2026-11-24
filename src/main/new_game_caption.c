@@ -57,8 +57,8 @@ static int present_caption_frame(u32* otag) {
  * The strip is the texture at VRAM (896, 256) with its CLUT at (896, 287), drawn
  * at y 116. A full-screen subtractive quad steps from 248 to 0 in 32 frames, each
  * presented with present_caption_frame. No function in the tree calls this
- * routine or new_game_fade_out_orbonne_caption. */
-void new_game_fade_in_orbonne_caption(void) {
+ * routine or new_game_fade_out_caption. */
+void new_game_fade_in_caption(void) {
     POLY_F4 fade_polygons[2];
     DR_MODE draw_modes[2];
     POLY_FT4 title_polygons[2];
@@ -112,10 +112,10 @@ void new_game_fade_in_orbonne_caption(void) {
     DrawSync(0);
 }
 
-/* Fade out the caption strip new_game_fade_in_orbonne_caption shows: the
+/* Fade out the caption strip new_game_fade_in_caption shows: the
  * subtractive quad steps from 0 to 255 in 32 frames over the same strip, then
  * both display buffers are cleared. */
-void new_game_fade_out_orbonne_caption(void) {
+void new_game_fade_out_caption(void) {
     POLY_F4 fade_polygons[2];
     DR_MODE draw_modes[2];
     POLY_FT4 title_polygons[2];

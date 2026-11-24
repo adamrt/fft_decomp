@@ -93,7 +93,7 @@ static void update_keyboard_cursor(void);
  * later calls apply L1/R1 (cursor) and Square (delete), run the current entry state's handler
  * and draw the name, its cursor, the shoulder buttons and the keyboard. Returns 0 while
  * editing and the encoded name once the state reaches NAME_ENTRY_STATE_FINISHED. */
-u8* name_entry_update_keyboard(const u8* list, s32 unused_1) {
+u8* name_entry_update(const u8* list, s32 unused_1) {
     point16_t cursor;
     s32 busy;
 
@@ -200,7 +200,7 @@ u8* name_entry_run_screen(const u8* list, u32* image) {
     init_keyboard(list);
     g_name_entry_last_state = -1;
     fade_menu_set_disabled(1);
-    menu_input_update_message_state();
+    menu_input_update();
     while (g_name_entry_state != NAME_ENTRY_STATE_FINISHED) {
         fade_menu_update_in();
         system_frame_stub();
@@ -246,7 +246,7 @@ u8* name_entry_run_screen(const u8* list, u32* image) {
         gfx_load_image_and_wait(&g_name_entry_screen_image_rect, image);
         DrawOTag(otag);
         ClearOTag(g_menu_gfx_context->otag, g_menu_screen_ot_length);
-        menu_input_update_message_state();
+        menu_input_update();
         busy = menu_screen_check_busy();
         if (!busy) {
             if (g_menu_input_primary_repeat & PSX_PAD_L1) {
@@ -500,7 +500,7 @@ static void apply_key(s16 key) {
     /* Empty input also reads the byte before the buffer; retain the native backward scan. */
     for (i--; s_name_entry_text[i] == TEXT_SPACE; i--) { }
     s_name_entry_text[i + 1] = TEXT_END_WAIT_FOR_CONFIRM;
-    menu_screen_text_kern(s_name_entry_text, g_name_entry_text_row_ids, &g_name_entry_text_vram_rect, 0);
+    menu_screen_render_kerned_text(s_name_entry_text, g_name_entry_text_row_ids, &g_name_entry_text_vram_rect, 0);
 }
 
 /*
@@ -550,7 +550,7 @@ void name_entry_update_confirm(void) {
             g_name_entry_state = NAME_ENTRY_STATE_FINISHED;
             g_menu_screen_prompt_active = 0;
         }
-    } else if (menu_managed_thread_start(MENU_SCREEN_THREAD_SLOT_UPPER_MENU, &g_name_entry_confirm_menu) == 0) {
+    } else if (menu_managed_thread_start_or_poll(MENU_SCREEN_THREAD_SLOT_UPPER_MENU, &g_name_entry_confirm_menu) == 0) {
         if (g_name_entry_confirm_result == 0) {
             s_name_entry_confirm_finished = 1;
             thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x21, -1, 0);

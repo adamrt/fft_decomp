@@ -32,7 +32,7 @@ void fade_tint_clear(void) {
 
 /* Saves the screen color modulation for
  * fade_tint_restore. No retail code calls either. */
-void fade_tint_copy(void) {
+void fade_tint_save(void) {
     g_fade_tint_backup.r = s_fade_tint.r;
     g_fade_tint_backup.g = s_fade_tint.g;
     g_fade_tint_backup.b = s_fade_tint.b;

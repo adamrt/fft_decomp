@@ -290,7 +290,7 @@ void menu_zoom_sprite(const void* unused_source, SPRT* sprite, s32 step) {
  * to the right-hand page (x + 0x80, y + 0x78); others are moved left.
  * Nonzero upper_half selects the buffer at y 0; zero selects y 240.
  */
-void gfx_build_scaled_draw_area_pair_swapped(
+void menu_build_scaled_draw_area_pair_swapped(
     scaled_draw_area_pair_t* packets, const RECT* geometry, s32 step, s32 upper_half) {
     s32 percent;
     s16 width;

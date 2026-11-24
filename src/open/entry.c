@@ -144,7 +144,7 @@ void open_ending_entrypoint(void) {
             graphics_buffer_index = g_gfx_active_buffer_index;
             /* index * 64 + base: the retail addu sums the offset first. */
             current_otag = (u32*)(graphics_buffer_index * CONTROLLER_OTAG_BUFFER_BYTES + (u32)otag_0);
-            ending_draw_text_records(current_otag, graphics_buffer_index);
+            ending_draw_script(current_otag, graphics_buffer_index);
             controller_stack_dispatch_current();
             DrawSync(0);
             update_input_with_soft_reset();
@@ -183,7 +183,7 @@ void movie_start_stream(s32 sector, s32 end_frame, s32 video_end_frame, s32 cd_m
         if (decode_next_frame(&g_movie_mdec_stream_state) != 0) {
             break;
         }
-        file_reset_cd_subsystems();
+        file_cd_reset();
     }
 
     sound_set_cd_mix_and_volume(cd_mix_level, 0x20);

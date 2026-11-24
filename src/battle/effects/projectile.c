@@ -28,7 +28,7 @@ typedef struct arc_delta {
     s32 distance;
 } arc_delta_t;
 
-/* Query read by calculate_arc_trajectory: the offset to the target and both endpoints. */
+/* Query read by calculate_arc_launch_slopes: the offset to the target and both endpoints. */
 typedef struct arc_query {
     arc_delta_t delta;
     arc_endpoint_t source;
@@ -66,7 +66,7 @@ extern s32 g_projectile_tile_flags;
 /* Quadratic height term used by the projectile trajectory calculation;
  * this is not the complete trajectory.
  * distance is the attacker-to-target distance scaled by ONE. */
-static s32 calculate_arc_height_term(s32 distance) {
+static s32 calculate_arc_reach_height(s32 distance) {
     s32 gravity;
 
     distance >>= 6;
@@ -80,7 +80,7 @@ static s32 calculate_arc_height_term(s32 distance) {
  * sprite height until both the arc apex and the target tile floor clear it,
  * storing the chosen height back into the target endpoint. Returns 0 when the
  * target is at zero distance or no height clears. */
-static s32 calculate_arc_trajectory(arc_query_t* query, s32* arc_a, s32* arc_b) {
+static s32 calculate_arc_launch_slopes(arc_query_t* query, s32* arc_a, s32* arc_b) {
     map_tile_t* tile;
     s32 tile_height;
     s32 floor;
@@ -96,7 +96,7 @@ static s32 calculate_arc_trajectory(arc_query_t* query, s32* arc_a, s32* arc_b) 
     tile_height = tile->height + tile->depth_half_height.depth;
     /* The tile surface, tile_height * MAP_HEIGHT_STEP, in 20.12. */
     floor = (tile_height * 3) << 14;
-    peak = calculate_arc_height_term(query->delta.distance);
+    peak = calculate_arc_reach_height(query->delta.distance);
     if (query->delta.distance != 0) {
         height = query->target.height / 2;
         limit = (height + query->delta.y) * ONE;
@@ -137,7 +137,7 @@ static s32 calculate_arc_trajectory(arc_query_t* query, s32* arc_a, s32* arc_b) 
  * s_gravity_modifier is the trajectory gravity modifier
  * (0xa8000).
  */
-s32 projectile_arc_calculate_trajectory_term(s32 launch_slope_q12, s32 progress) {
+s32 projectile_arc_calculate_height(s32 launch_slope_q12, s32 progress) {
     s32 divisor = (s_gravity_modifier * 2) >> 12;
     s32 slope_sq;
     s32 progress_sq;
@@ -172,7 +172,7 @@ s32 projectile_arc_calculate_trajectory_term(s32 launch_slope_q12, s32 progress)
 
 /* Offset of a point current along a straight path of length total: dst is src,
  * the whole path's delta, scaled by current / total (a Q12 fraction). */
-void projectile_calculate_trajectory_position(const VECTOR* src, s32 total, s32 current, VECTOR* dst) {
+void projectile_direct_calculate_offset(const VECTOR* src, s32 total, s32 current, VECTOR* dst) {
     s32 progress = (current << 8) / (total >> 4);
 
     dst->vx = (progress * src->vx) >> 12;
@@ -329,7 +329,7 @@ static s32 trace_arc_path(const SVECTOR* origin, const s32* launch_slope_q12, co
     for (i = 0; i < steps; i++) {
         previous = position;
         progress += advance;
-        term = projectile_arc_calculate_trajectory_term(*launch_slope_q12, progress);
+        term = projectile_arc_calculate_height(*launch_slope_q12, progress);
         step.vx = progress >> 12;
         step.vy = -term >> 12;
         RotTrans(&step, &position, &position.pad);
@@ -352,7 +352,7 @@ static s32 trace_arc_path(const SVECTOR* origin, const s32* launch_slope_q12, co
 /* Test whether either arcing projectile path reaches the target unit.
  *
  * The arc counterpart of projectile_direct_check_between_units: the
- * source is raised by two thirds of its sprite height, calculate_arc_trajectory yields
+ * source is raised by two thirds of its sprite height, calculate_arc_launch_slopes yields
  * the two candidate arcs for the offset, and each is traced against the
  * other units' positions. Returns 1 when an arc is clear. */
 s32 projectile_arc_check_between_units(u8 source_id, u8 target_id) {
@@ -375,7 +375,7 @@ s32 projectile_arc_check_between_units(u8 source_id, u8 target_id) {
     query.delta.y = query.source.position.vy - query.target.position.vy;
     query.delta.distance = SquareRoot12((query.delta.x * query.delta.x + query.delta.z * query.delta.z) * ONE);
     rotation.vy = ratan2(-query.delta.z, query.delta.x);
-    if (calculate_arc_trajectory(&query, &arc_a, &arc_b) != 0
+    if (calculate_arc_launch_slopes(&query, &arc_a, &arc_b) != 0
         && (trace_arc_path(&query.source.position, &arc_a, &query.delta.distance, &rotation, obstacles) != 0
             || trace_arc_path(&query.source.position, &arc_b, &query.delta.distance, &rotation, obstacles) != 0)) {
         return 1;
@@ -445,7 +445,7 @@ s32 projectile_arc_set_and_validate(s32 source_id, const SVECTOR* tile_position,
     query.delta.y = g_projectile_origin.vy - g_projectile_destination.vy;
     query.delta.distance = SquareRoot12((query.delta.x * query.delta.x + query.delta.z * query.delta.z) * ONE);
     arc.vy = ratan2(-query.delta.z, query.delta.x);
-    if (calculate_arc_trajectory(&query, &arc_a, &arc_b) == 0) {
+    if (calculate_arc_launch_slopes(&query, &arc_a, &arc_b) == 0) {
         arc_b = ONE;
         arc_a = ONE;
     }
@@ -565,7 +565,7 @@ static s32 trace_direct_path(
     for (i = 0; i < steps; i++) {
         previous = position;
         progress += step;
-        projectile_calculate_trajectory_position(delta, *distance, progress, &position);
+        projectile_direct_calculate_offset(delta, *distance, progress, &position);
         position.vx += origin->vx;
         position.vy += origin->vy;
         position.vz += origin->vz;

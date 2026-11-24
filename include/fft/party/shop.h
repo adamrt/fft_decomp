@@ -49,7 +49,7 @@ extern s16 g_shop_menu_step; /* shop_step_e */
 void shop_run_screen(s32 shop_type);
 u32* shop_load_background(s32 index);
 void shop_draw_gil(void);
-void shop_switch_item_tab(s32 input);
+void shop_update_item_tabs(s32 input);
 
 /* buying and selling */
 s32 shop_buy_get_owned_count(s32 unused_row);
@@ -104,5 +104,7 @@ void shop_soldier_rename_update_unit(void);
 void shop_soldier_rename_update_name(void);
 void shop_soldier_draw_fee(void);
 void shop_soldier_draw_unit_count(void);
+
+void shop_update_unit_selection(void);
 
 #endif

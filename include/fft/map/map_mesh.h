@@ -76,7 +76,7 @@ enum {
     MAP_POLYGON_FLAG_LIT = 0x8000
 };
 
-/* Commands of dispatch_polygon_flags. */
+/* Commands of dispatch_polygon_flag_command. */
 typedef enum map_polygon_flag_command {
     MAP_POLYGON_FLAG_COMMAND_RESET_ACTIVE = 0x46,   /* copy LIT into LIT_ACTIVE on every polygon */
     MAP_POLYGON_FLAG_COMMAND_CLEAR_ACTIVE = 0x47,   /* clear LIT_ACTIVE everywhere */
@@ -247,15 +247,15 @@ extern s32 g_map_untextured_triangle_count;
 void map_mesh_append_geometry(const map_mesh_geometry_t* geometry_data, map_mesh_part_t* metadata);
 
 /* rendering */
-/* Commands of map_set_effect_data_state: the ordering-table
+/* Commands of map_set_untextured_ot_mode: the ordering-table
  * handling of untextured map polygons while an effect draws. */
 typedef enum map_effect_data_command {
     MAP_EFFECT_DATA_END = 0x87,
     MAP_EFFECT_DATA_BEGIN = 0x88
 } map_effect_data_command_e;
 
-void map_mesh_reset_render_state(void);
-void map_mesh_draw_weather(MATRIX* camera_matrix);
-s32 map_set_effect_data_state(map_effect_data_command_e command);
+void map_reset_render_state(void);
+void map_draw(MATRIX* camera_matrix);
+s32 map_set_untextured_ot_mode(map_effect_data_command_e command);
 
 #endif

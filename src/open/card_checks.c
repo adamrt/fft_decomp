@@ -29,7 +29,7 @@ memcard_result_e memcard_info_retry(s32 port, s32 retry_limit) {
  * request is issued again when card status bit 0 is set with no event. A result
  * other than complete is checked again with two blocking attempts, and error is
  * reported as timeout. */
-memcard_result_e memcard_poll_operation(void) {
+memcard_result_e memcard_poll_info(void) {
     s32 status;
     memcard_result_e result;
 
@@ -65,7 +65,7 @@ static memcard_result_e poll_card_info_until_stable(s32 retry_limit) {
 
     while (attempts < retry_limit) {
         do {
-            result = memcard_poll_operation();
+            result = memcard_poll_info();
         } while (result == MEMCARD_RESULT_PENDING);
 
         if (result == MEMCARD_RESULT_COMPLETE) {

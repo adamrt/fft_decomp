@@ -59,7 +59,7 @@ static s32 get_base_job(s16 unit_id) {
 
 /* Returns 1 when no formation unit (special monsters aside) has generic job
  * `job_id` unlocked. */
-static s32 no_unit_has_unlocked(s16 job_id) {
+static s32 no_unit_has_unlocked_job(s16 job_id) {
     s32 i;
 
     for (i = 0; i < g_formation_unit_count; i++) {
@@ -100,7 +100,7 @@ s32 job_list_build(u8 unit_index, s16* jobs, s32 mode) {
     s32 i;
     s32 unlocked;
 
-    bits_primary_init_reader(g_formation_unit_pointers[unit_index]->unlocked_jobs);
+    bits_primary_init(g_formation_unit_pointers[unit_index]->unlocked_jobs);
     /* get_base_job is declared s32: the target uses its result without the
      * re-extension an s16 return would make GCC emit (the callee already extends). */
     job = get_base_job(unit_index);
@@ -127,7 +127,7 @@ s32 job_list_build(u8 unit_index, s16* jobs, s32 mode) {
                 jobs[count++] = job | FORMATION_JOB_LIST_ENTRY_UNAVAILABLE;
             } else if (unlocked != 0) {
                 jobs[count++] = job;
-            } else if (mode == FORMATION_JOB_LIST_MODE_INCLUDE_OTHER_UNIT_UNLOCKS && !no_unit_has_unlocked(job)) {
+            } else if (mode == FORMATION_JOB_LIST_MODE_INCLUDE_OTHER_UNIT_UNLOCKS && !no_unit_has_unlocked_job(job)) {
                 jobs[count++] = job + FORMATION_JOB_LIST_ENTRY_UNAVAILABLE;
             }
         }
@@ -220,7 +220,7 @@ s32 ability_list_build(s16 unit_index, s16 job, menu_ability_category_e ability_
     if (job_find_first_for_skillset(skillset) == -1) {
         skillset = g_formation_unit_pointers[unit_index]->detail.abilities[FORMATION_ABILITY_SLOT_PRIMARY_SKILLSET];
     }
-    abilities = (s16*)ability_build_skillset_list(skillset, SKILLSET_ABILITY_FILTER_ALL);
+    abilities = (s16*)skillset_build_ability_list(skillset, SKILLSET_ABILITY_FILTER_ALL);
     if (ability_category == MENU_ABILITY_CATEGORY_ACTION) {
         lo = 1;
         hi = ABILITY_ID_REACTION_FIRST - 1;
@@ -244,7 +244,7 @@ s32 ability_list_build(s16 unit_index, s16 job, menu_ability_category_e ability_
     }
     count = 0;
     jp = g_formation_unit_pointers[unit_index]->job_points.current.values[generic];
-    bits_primary_init_reader(g_formation_unit_pointers[unit_index]->learned_abilities[generic]);
+    bits_primary_init(g_formation_unit_pointers[unit_index]->learned_abilities[generic]);
     for (i = 0; i < SKILLSET_ABILITY_LIST_COUNT; i++) {
         if (job_is_special_monster(g_formation_unit_pointers[unit_index]->identity.job_id)) {
             learned = 1;

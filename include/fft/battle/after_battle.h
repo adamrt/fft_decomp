@@ -54,7 +54,7 @@ extern u8 g_party_message_identity_groups[PARTY_MESSAGE_IDENTITY_GROUP_COUNT][PA
 typedef enum after_battle_thread_slot {
     AFTER_BATTLE_THREAD_SLOT_MENU = 5,       /* selection menus, prompts and the special-case display */
     AFTER_BATTLE_THREAD_SLOT_MESSAGE = 7,    /* the icon strip, message text or menu shown with them */
-    AFTER_BATTLE_THREAD_SLOT_TRANSITION = 10 /* unit_panel_transition_thread */
+    AFTER_BATTLE_THREAD_SLOT_TRANSITION = 10 /* unit_panel_backdrop_thread */
 } after_battle_thread_slot_e;
 
 extern s32 g_after_battle_thread_suspended_id;

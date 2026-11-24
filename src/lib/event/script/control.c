@@ -189,7 +189,7 @@ s32 script_find_instruction_offset(s32 offset, s32 opcode) {
  * variable 0) with the truth value of comparing it against the operand variable (variable
  * 1), using <=, >=, ==, !=, < and > in opcode order. Any other opcode changes
  * nothing. */
-void script_run_condition(event_opcode_e opcode) {
+void script_opcode_a0_a5_compare(event_opcode_e opcode) {
     if (opcode == EVENT_OPCODE_COMPARE_LESS_EQUAL) {
         g_script_variables[EVENT_SCRIPT_VAR_COMPARISON_RESULT] = g_script_variables[EVENT_SCRIPT_VAR_COMPARISON_RESULT]
             <= g_script_variables[EVENT_SCRIPT_VAR_COMPARISON_OPERAND];

@@ -113,7 +113,7 @@ void brave_story_update_fact_list_input(menu_stack_record_t* level) {
 }
 
 /* Pushes MENU_STACK_LEVEL_BRAVE_STORY_FACT, the text of one fact, which
- * brave_story_update_fact_window closes: records the entry on the new
+ * brave_story_update_fact_detail closes: records the entry on the new
  * level, sets up g_text_window on its text
  * (TEXT_ID_WORLD_MESSAGE_BASE + entry) with no substitutions, hides the Brave
  * Story menu's four windows and frame, and says
@@ -170,7 +170,7 @@ static void open_fact_detail(s32 value) {
 /* Steps a fact's text window until window_update_paged_text reports it
  * closed, then pops the level, shows the Brave Story menu's windows and
  * frame again and reopens the Facts list (brave_story_open_fact_list). */
-void brave_story_update_fact_window(menu_stack_record_t* unused_level) {
+void brave_story_update_fact_detail(menu_stack_record_t* unused_level) {
     s32 depth;
 
     if (!(g_display_object_gs_image_pool[g_text_window.render_record_index].flags & DISPLAY_OBJECT_POP_IN)

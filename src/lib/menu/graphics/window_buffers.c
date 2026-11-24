@@ -261,7 +261,7 @@ void menu_draw_active_window_frames(void) {
         else {
             portrait_build_unit_poly(&window->quads[1], window->portrait_battle_unit_id);
         }
-        gfx_flip_quad_negative_uv(&window->quads[1], -window->portrait_flipped);
+        gfx_flip_quad_uv_if_negative(&window->quads[1], -window->portrait_flipped);
 #endif
         gfx_draw_or_append_gpu_primitive(&window->quads[1]);
         gfx_draw_or_append_gpu_primitive(&window->quads[0]);

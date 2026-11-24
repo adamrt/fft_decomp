@@ -29,14 +29,14 @@ static void init_memory_and_cd(void) {
     SetMem(2);
     CdInit();
     CdSetDebug(0);
-    file_cd_reset_and_pause(&g_file_cd_state);
+    file_cd_pause(&g_file_cd_state);
     g_file_cd_state.state = FILE_LOAD_STATE_IDLE;
 }
 
 /* BATTLE/ZODIAC.BIN is a headerless image, not an executable overlay.
  * Sector 0xec61 supplies 0x10000 bytes: 128 * 256 16-bit VRAM transfer
  * values at (640, 0), subsequently rendered as 8-bit indexed texture data. */
-void zodiac_load_frame(void) {
+void gfx_load_zodiac_and_frame_textures(void) {
     RECT destination = { 640, 0, 128, 256 };
     u32* image = file_load_into_heap_checked(DISC_SECTOR_BATTLE_ZODIAC_BIN, 0x10000);
 
@@ -76,7 +76,7 @@ void boot_run_startup(void) {
     boot_fade_in_squaresoft_logo();
     memcard_init_events();
     sound_init();
-    zodiac_load_frame();
+    gfx_load_zodiac_and_frame_textures();
     srand(1);
     boot_fade_out_squaresoft_logo();
     s_session_initialized = 0;
@@ -109,7 +109,7 @@ void boot_reset_session(void) {
         gfx_reset_display(256, 240, 512, 0, 0, 0);
         boot_fade_in_squaresoft_logo();
         sound_init();
-        zodiac_load_frame();
+        gfx_load_zodiac_and_frame_textures();
     }
 
     save_init_state();

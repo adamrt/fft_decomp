@@ -122,7 +122,7 @@ void camera_get_biased_tile_depth_point(const SVECTOR* world, SVECTOR* destinati
 
 /* The unit's draw position: its world coordinates plus its event and SEQ offsets, with the float
  * bob added to y. */
-void map_unit_copy_draw_coords(SVECTOR* destination, const map_unit_t* unit) {
+void map_unit_get_draw_coords(SVECTOR* destination, const map_unit_t* unit) {
     /* float_bob_offset is read signed (lh) here. */
     vector_set_short(destination, unit->world_coords.vx + unit->event_offset.vx + unit->seq_offset.vx,
         unit->world_coords.vy + unit->event_offset.vy + unit->seq_offset.vy + (s16)unit->float_bob_offset,
@@ -160,7 +160,7 @@ void sprite_build_shadow_quad(map_unit_t* unit) {
     s32 rhs;
     s32 rise;
 
-    map_unit_copy_draw_coords(&coords, unit);
+    map_unit_get_draw_coords(&coords, unit);
     tile = map_get_tile(coords.vx / MAP_TILE_SIZE, coords.vz / MAP_TILE_SIZE, layer);
     depth = tile->depth_half_height;
     height = tile->height + depth.depth;
@@ -435,7 +435,7 @@ s32 cursor_calculate_tile_polygon(const SVECTOR* coords, u8 layer, SVECTOR* quad
  * along X, Z, or whichever of the two the corner type selects. x and z are
  * the offsets of the point inside its 28-unit tile.
  */
-s32 map_calculate_slope_height(const SVECTOR* coords, s32 layer) {
+s32 map_calculate_surface_height(const SVECTOR* coords, s32 layer) {
     s16 tile_pos[2];
     map_tile_t* tile;
     s32 half;
@@ -614,15 +614,15 @@ static s32 calculate_coords_height(map_unit_t* unit, const SVECTOR* coords) {
     s16 raised;
 
     if (unit->standing_on_battle_unit_id_plus_one != 0) {
-        battle_unit_calculate_action_height(&height, unit->standing_on_battle_unit_id_plus_one - 1);
+        battle_unit_calculate_height_data(&height, unit->standing_on_battle_unit_id_plus_one - 1);
         if (height.unit_flags & UNIT_HEIGHT_UNAVAILABLE) {
-            world_height = map_calculate_slope_height(coords, coords->vy & 0xff);
+            world_height = map_calculate_surface_height(coords, coords->vy & 0xff);
         } else {
             /* total_height counts half levels. */
             world_height = -height.total_height / 2 * MAP_HEIGHT_STEP;
         }
     } else {
-        world_height = map_calculate_slope_height(coords, coords->vy & 0xff);
+        world_height = map_calculate_surface_height(coords, coords->vy & 0xff);
     }
     if (unit->battle_unit != 0) {
         tile = map_get_tile(coords->vx / MAP_TILE_SIZE, coords->vz / MAP_TILE_SIZE, coords->vy);
@@ -734,7 +734,7 @@ s32 map_unit_calculate_height_from_tile(map_unit_t* unit) {
  * recorded in the battle stats of the unit, or of its mount for a rider, on the
  * mount's map layer. A rider's result is moved by -10 plus the mount's float bob
  * offset. */
-s32 map_unit_calculate_height_from_battle_tile(map_unit_t* unit) {
+s32 map_unit_calculate_height_from_battle_unit_tile(map_unit_t* unit) {
     SVECTOR coord;
     battle_unit_t* battle_unit;
     map_unit_t* mount = get_mount(unit);

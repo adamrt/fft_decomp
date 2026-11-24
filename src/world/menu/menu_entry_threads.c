@@ -100,8 +100,7 @@ void menu_screen_clamped_icon_list_thread(void) {
     }
     menu_build_window_sprites(&rect, param, record);
     mem_copy_bytes_nonempty(&records[1], record, sizeof(records[1]));
-    buffer = menu_build_and_upload_window_frame_image(
-        param->inner_width, param->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
+    buffer = menu_build_window_frame_image(param->inner_width, param->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
     g_menu_window_text_pen.stride = param->inner_width;
     menu_text_set_origin(8, 9);
     g_menu_text_palette_offset = 0;
@@ -114,7 +113,7 @@ void menu_screen_clamped_icon_list_thread(void) {
             menu_free_memory(buffer);
         }
         param->selected_index = cursor;
-        if (menu_should_close_thread(s_screen_list_controller_input) != 0) {
+        if (menu_poll_thread_close(s_screen_list_controller_input) != 0) {
             break;
         }
         if (thread_is_previous_running() == 0) {
@@ -124,7 +123,7 @@ void menu_screen_clamped_icon_list_thread(void) {
             if (!(*s_screen_list_controller_input & PSX_PAD_DOWN) && cursor != param->max_row_index) {
                 cursor++;
             }
-            menu_handle_action(param, cursor);
+            menu_handle_confirm_input(param, cursor);
             menu_handle_cancel_input(param);
         }
         sprites = &record->base;
@@ -264,8 +263,7 @@ void menu_screen_number_entry_thread(void) {
     /* Draw the first value; redraw = 1 frees this image after the first wait. The (8, 9) origin goes
      * unused here; the labeled twin draws its label there. */
     digit = 0;
-    buffer = menu_build_and_upload_window_frame_image(
-        param->inner_width, param->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
+    buffer = menu_build_window_frame_image(param->inner_width, param->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
     *stride = param->inner_width;
     menu_text_set_origin(8, 9);
     menu_text_set_origin(param->inner_width - digits * 6 - 16, 9);
@@ -285,7 +283,7 @@ void menu_screen_number_entry_thread(void) {
             redraw = 0;
             menu_free_memory(buffer);
         }
-        if (menu_should_close_thread(s_screen_list_controller_input) != 0) {
+        if (menu_poll_thread_close(s_screen_list_controller_input) != 0) {
             break;
         }
 
@@ -293,7 +291,7 @@ void menu_screen_number_entry_thread(void) {
          * A cancel leaves -1 in the result, which restores the original value. */
         input = *s_screen_list_controller_input;
         menu_handle_cancel_input(param);
-        menu_handle_action(param, 0);
+        menu_handle_confirm_input(param, 0);
         if (input != *s_screen_list_controller_input) {
             s16* result = param->value;
             if (*result == -1) {
@@ -336,7 +334,7 @@ void menu_screen_number_entry_thread(void) {
         }
 
         if (redraw == 1) {
-            buffer = menu_build_and_upload_window_frame_image(
+            buffer = menu_build_window_frame_image(
                 param->inner_width, param->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
             *stride = param->inner_width;
             menu_text_set_origin(param->inner_width - digits * 6 - 16, 9);
@@ -450,8 +448,7 @@ void menu_screen_labeled_number_entry_thread(void) {
     /* Draw the label and the first value; redraw = 1 frees this image after the first wait. The
      * origin after the label is overridden at once by the right-aligned number's. */
     digit = 0;
-    buffer = menu_build_and_upload_window_frame_image(
-        param->inner_width, param->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
+    buffer = menu_build_window_frame_image(param->inner_width, param->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
     g_menu_window_text_pen.stride = param->inner_width;
     text_measure_pixels(&label_size.width, &label_size.rows, text_find_entry(param->text_id));
     menu_text_set_origin(8, 9);
@@ -473,7 +470,7 @@ void menu_screen_labeled_number_entry_thread(void) {
             menu_free_memory(buffer);
             redraw = 0;
         }
-        if (menu_should_close_thread(s_screen_list_controller_input) != 0) {
+        if (menu_poll_thread_close(s_screen_list_controller_input) != 0) {
             break;
         }
 
@@ -481,7 +478,7 @@ void menu_screen_labeled_number_entry_thread(void) {
          * A cancel leaves -1 in the result, which restores the original value. */
         input = *s_screen_list_controller_input;
         menu_handle_cancel_input(param);
-        menu_handle_action(param, 0);
+        menu_handle_confirm_input(param, 0);
         if (input != *s_screen_list_controller_input) {
             s16* result = param->value;
             if (*result == -1) {
@@ -525,10 +522,10 @@ void menu_screen_labeled_number_entry_thread(void) {
 
         /* A redraw measures the label in character columns (times 6), the setup above in pixels. */
         if (redraw == 1) {
-            buffer = menu_build_and_upload_window_frame_image(
+            buffer = menu_build_window_frame_image(
                 param->inner_width, param->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
             g_menu_window_text_pen.stride = param->inner_width;
-            text_measure(&label_size.width, &label_size.rows, text_find_entry(param->text_id));
+            text_measure_columns(&label_size.width, &label_size.rows, text_find_entry(param->text_id));
             menu_text_set_origin(8, 9);
             text_render_entry_to_image(param->text_id, buffer, &g_menu_window_text_pen);
             menu_text_set_origin((u16)label_size.width * 6 + 8, 9);
@@ -635,8 +632,8 @@ void menu_screen_text_entry_thread(void) {
     thread_wait_inactive(text_thread);
     *s_screen_list_controller_input = PSX_PAD_CIRCLE;
     while (1) {
-        menu_handle_action(entry, 0);
-        if (menu_should_close_thread(s_screen_list_controller_input) != 0) {
+        menu_handle_confirm_input(entry, 0);
+        if (menu_poll_thread_close(s_screen_list_controller_input) != 0) {
             break;
         }
         if (thread[-1].function_parameter_3 != 0) {

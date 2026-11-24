@@ -350,7 +350,7 @@ static void draw_button(s16 slot, s16 x, s16 y, s16 pressed, s16 busy, u16 sound
  * current and maximum stats, level, experience, Brave and Faith, and the
  * status banner's position (at the bottom, y 0x90, while the selected unit
  * is in the upper rows). The argument is not read. */
-void unit_list_init(s32 unused_selected_index) {
+void unit_grid_init(s32 unused_selected_index) {
     s32 ret;
 
     menu_scrollable_list_init_core(0, 0, 0);
@@ -957,7 +957,7 @@ static void draw_unit_sprite(s16 unit, s32 x, s32 y) {
         size = (cells[i].attributes >> 10) & (SPRITE_SHP_PART_SIZE_MASK >> 10);
         quad.uw = quad.w = s_unit_list_sprite_cell_sizes[size].width;
         quad.vh = quad.h = s_unit_list_sprite_cell_sizes[size].height;
-        value = map_unit_get_camera_facing_by_battle_unit_id(g_unit_list_pointers[unit]->battle_unit_id);
+        value = map_unit_get_camera_facing_quadrant_by_battle_unit_id(g_unit_list_pointers[unit]->battle_unit_id);
         dx = cells[i].x_shift;
         orientation = TEXTURE_UV_FLIP_NONE;
         if (value >= 2) {

@@ -49,7 +49,7 @@ s32 equipment_row_get_equipped_count(s32 row) {
 }
 
 /* Build the item-type icon source for one menu row. */
-menu_icon_source_t* item_list_build_type_icon_source(s32 index) {
+menu_icon_source_t* equipment_row_get_type_icon_source(s32 index) {
     item_list_build_type_icon(item_get_type(g_item_list_entries[index]), &s_menu_item_type_icon_source);
     s_menu_item_type_icon_source.clut = g_menu_palette_clut;
     s_menu_item_type_icon_source.tpage = g_menu_cursor_texture_page;

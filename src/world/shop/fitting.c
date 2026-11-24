@@ -115,7 +115,7 @@ void shop_fitting_update_menu(void) {
             shop_draw_gil();
             return;
         }
-        formation_grid_init_cursor(0);
+        formation_grid_init(0);
         memset(g_shop_fitting_items, 0, sizeof(g_shop_fitting_items));
         /* Subtract the running cost from itself: back to 0. */
         add_fitting_cost(-add_fitting_cost(0));
@@ -156,7 +156,7 @@ void shop_fitting_update_menu(void) {
     } else {
         g_shop_background_visible = 1;
         g_help_message_text_id = 0;
-        if (menu_managed_thread_start(THREAD_SCREEN_SLOT_MENU, g_shop_fitting_menu_thread_data) == 0) {
+        if (menu_managed_thread_start_or_poll(THREAD_SCREEN_SLOT_MENU, g_shop_fitting_menu_thread_data) == 0) {
             if (g_menu_screen_selection_results[1] == 0) {
                 g_shop_menu_step = SHOP_STEP_FITTING_ROOM_EQUIP;
             } else if (g_menu_screen_selection_results[1] == 1) {
@@ -171,7 +171,7 @@ void shop_fitting_update_menu(void) {
                 }
             } else {
                 g_shop_fitting_unit_chosen = 0;
-                formation_init_selection_cursor(g_unit_selected_index);
+                formation_grid_select_unit(g_unit_selected_index);
                 g_formation_unit_cycle_mode = 0;
                 g_formation_unit_browse_enabled = 0;
                 g_shop_fitting_cost_visible = 0;
@@ -262,7 +262,7 @@ void shop_fitting_update_equipment_menu(void) {
                 g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
             g_menu_row_callbacks[0].value = equipment_row_get_equipped_count;
             g_menu_row_callbacks[1].value = equipment_row_get_item_count;
-            g_menu_row_callbacks[2].icon = item_list_build_type_icon_source;
+            g_menu_row_callbacks[2].icon = equipment_row_get_type_icon_source;
             g_menu_row_callbacks[3].icon = equipment_row_get_icon_source;
             g_menu_row_callbacks[4].value = shop_buy_get_price;
             menu_set_event_speed(2);
@@ -383,7 +383,7 @@ static void draw_fitting_cost(void) {
  * against the unit's own item held in the fitting room.
  *
  * The prologue's $a0 is not an argument register here. The callee,
- * formation_update_selection_stage, takes no arguments; $a0 simply holds the copy of the selected-unit index that
+ * shop_update_unit_selection, takes no arguments; $a0 simply holds the copy of the selected-unit index that
  * the store to g_shop_fitting_remove_previewed_unit_index consumes, while the compare keeps the load in $v1. A
  * one-argument prototype would pull the load pseudo into $a0 and push the copy into $v1; pins and launders cannot
  * compensate, because the target's copy sits in the beq's delay slot and a tied asm is never a delay-slot candidate. */
@@ -401,7 +401,7 @@ void shop_fitting_update_remove_menu(void) {
         unit = g_unit_selected_index;
         g_shop_fitting_remove_previewed_unit_index = unit;
         g_shop_fitting_remove_preview_initialized = 0;
-        formation_update_selection_stage();
+        shop_update_unit_selection();
         menu_input_clear_state();
     }
     if (g_shop_fitting_remove_preview_initialized == 0) {
@@ -532,8 +532,8 @@ static s32 update_checkout_prompt(void) {
         g_shop_fitting_checkout_prompt_active = 1;
     }
     if (g_shop_fitting_checkout_prompt_active != 0) {
-        g_shop_fitting_checkout_prompt_active
-            = menu_managed_thread_start(MENU_SCREEN_THREAD_SLOT_UPPER_MENU, g_shop_fitting_checkout_prompt_menu);
+        g_shop_fitting_checkout_prompt_active = menu_managed_thread_start_or_poll(
+            MENU_SCREEN_THREAD_SLOT_UPPER_MENU, g_shop_fitting_checkout_prompt_menu);
         if (g_shop_fitting_checkout_prompt_active != 0) {
             return SHOP_FITTING_CHECKOUT_PROMPT_OPEN;
         }
@@ -570,7 +570,8 @@ static s32 update_checkout_prompt(void) {
         g_shop_fitting_checkout_prompt_initialized = 0;
         return SHOP_FITTING_CHECKOUT_CANCELED;
     }
-    if (menu_managed_thread_start(MENU_SCREEN_THREAD_SLOT_UPPER_MENU, &g_shop_fitting_checkout_short_gil_menu) != 0) {
+    if (menu_managed_thread_start_or_poll(MENU_SCREEN_THREAD_SLOT_UPPER_MENU, &g_shop_fitting_checkout_short_gil_menu)
+        != 0) {
         return SHOP_FITTING_CHECKOUT_PROMPT_OPEN;
     }
     g_shop_fitting_checkout_prompt_initialized = 0;
@@ -634,7 +635,7 @@ static void undo_fitting(void) {
  * (`.frame vars=88, regs=6/0, args=16`); a single `unused[18]` pushes it to
  * sp+88.
  *
- * The target has `move s1,v0` after menu_managed_thread_start and no
+ * The target has `move s1,v0` after menu_managed_thread_start_or_poll and no
  * initialization of s1 at loop 2's head: loop 2's counter is the run_thread
  * result's allocno, so the source assigns the result to `i` and the loop is
  * written `for (; i < MENU_EQUIPMENT_SLOT_ACCESSORY; i++)`. A fresh block-local takes a call-clobbered
@@ -707,7 +708,7 @@ void shop_fitting_update_best_fit(void) {
         g_formation_unit_cycle_mode = 1;
         g_sound_suppressed = 1;
     }
-    i = menu_managed_thread_start(THREAD_SCREEN_SLOT_MENU, &g_shop_fitting_best_fit_menu);
+    i = menu_managed_thread_start_or_poll(THREAD_SCREEN_SLOT_MENU, &g_shop_fitting_best_fit_menu);
     if (i == 0) {
         if (g_menu_screen_selection_results[5] == 0) {
             g_sound_queued_effect_id = SOUND_SFX_EQUIP;
@@ -818,7 +819,7 @@ void shop_fitting_update_equipped_sale(void) {
         } else {
             g_help_message_text_id = 0;
             g_sound_suppressed = g_shop_fitting_sell_equipped_prompt_active
-                = menu_managed_thread_start(THREAD_SCREEN_SLOT_MENU, &g_shop_fitting_sell_equipped_menu);
+                = menu_managed_thread_start_or_poll(THREAD_SCREEN_SLOT_MENU, &g_shop_fitting_sell_equipped_menu);
             if (g_shop_fitting_sell_equipped_prompt_active == 0) {
                 if (g_menu_screen_selection_results[MENU_SCREEN_SELECTION_PROMPT_RESULT] == 0) {
                     thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xf811, 0);

@@ -50,7 +50,7 @@ void camera_save_real_coords(void);
 void camera_restore_real_coords(void);
 void camera_update_real_coords_move(void);
 void camera_update_cursor_focus(void);
-void camera_update_scene_focus(void);
+void camera_update_focus(void);
 
 /* screen offset */
 extern VECTOR g_camera_screen_offset;
@@ -128,13 +128,12 @@ extern s32 g_camera_wrap_yaw_pending;
 /* The CameraSpeedCurve operand, unpacked with the EVENT_CAMERA_SPEED_CURVE_* masks. */
 extern s32 g_camera_speed_curve;
 
-void camera_thread(void);
 void camera_wait_idle(void);
 void camera_settle_tilt_zoom(void);
 void camera_clear_zoom_flag(void);
 void camera_normalize_yaw(void);
 void camera_store_yaw_band(s32 value);
-s32 camera_wrap_yaw(void);
+s32 camera_get_nonnegative_yaw(void);
 void camera_store_state_to_script_variables(void);
 
 /* fusion tracks */

@@ -148,7 +148,7 @@ void ability_list_scrolling_thread(void) {
     page->arrow_marks[1].x0 = page->arrows[1].x0;
     page->arrow_marks[1].y0 = page->arrows[1].y0 + 14;
 
-    menu_build_and_upload_window_frame_image(
+    menu_build_window_frame_image(
         entry->inner_width, entry->inner_height, &image_rect, MENU_WINDOW_FRAME_ALTERNATE_UPLOAD);
     buffer = menu_alloc_memory(entry->inner_width * entry->inner_height / 2);
     mem_zero_words(buffer, window.source.w * window.source.h / 2);
@@ -315,7 +315,7 @@ void ability_list_scrolling_thread(void) {
         }
         entry->selected_index = cursor + row_offset;
         layout->row_offset = row_offset;
-        if (menu_should_close_thread(&g_script_event_input) != 0) {
+        if (menu_poll_thread_close(&g_script_event_input) != 0) {
             break;
         }
 
@@ -349,7 +349,7 @@ void ability_list_scrolling_thread(void) {
             gfx_draw_or_append_gpu_primitive(&page->thumb);
         }
         if (g_menu_screen_scrolling_list_depth < 2 && scroll_delta == 0) {
-            menu_handle_action(entry, cursor);
+            menu_handle_confirm_input(entry, cursor);
         }
         menu_handle_cancel_input(entry);
 

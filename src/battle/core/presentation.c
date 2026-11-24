@@ -32,7 +32,7 @@ extern const u32 g_status_mask_by_handler_index[STATUS_COUNT + 1];
 /* Fill an init record for a secondary effect that one unit both casts and
  * receives: the caster and the single target are the unit. Every other field of
  * the record is left as the caller's stack held it. */
-void effect_secondary_build_init(map_unit_t* unit, effect_context_t* effect) {
+void effect_secondary_build_self_context(map_unit_t* unit, effect_context_t* effect) {
     effect->targets[EFFECT_CASTER_ENTRY].target_type = EFFECT_TARGET_TYPE_UNIT;
     effect->targets[EFFECT_CASTER_ENTRY].data.unit.map_unit_id = unit->map_unit_id;
     effect->target_count = 1;
@@ -137,15 +137,15 @@ void effect_secondary_start_projectile(map_unit_t* unit) {
  * unit's sprite palette as the effect's parameter. A unit without battle data
  * starts nothing.
  *
- * The init record is a stack local of which effect_secondary_build_init
- * sets five fields; effect_secondary_init copies the rest of its caster
+ * The init record is a stack local of which effect_secondary_build_self_context
+ * sets five fields; effect_secondary_init_animation copies the rest of its caster
  * and target blocks and its used_weapon_id as the stack left them. */
 static void start_unit_secondary(map_unit_t* unit, s32 effect_type) {
     effect_context_t data;
 
-    effect_secondary_build_init(unit, &data);
+    effect_secondary_build_self_context(unit, &data);
     if (unit->battle_unit != 0) {
-        effect_secondary_init(effect_type, unit->battle_unit->sprite_palette, &data);
+        effect_secondary_init_animation(effect_type, unit->battle_unit->sprite_palette, &data);
     }
 }
 
@@ -317,7 +317,7 @@ s32 status_queue_display_flag_change(s32 handler_index, s32 change_type, s32 bat
         case STATUS_HANDLER_INDEX(STATUS_ID_FROG):
             unit->statuses_to_remove_5_6 |= UNIT_STATUS_FROG;
             unit->statuses_to_add_5_6 &= ~UNIT_STATUS_FROG;
-            ai_init_unit_abilities(battle_unit_id);
+            ai_init_unit(battle_unit_id);
             return 1;
         case STATUS_HANDLER_INDEX(STATUS_ID_JUMP):
         case STATUS_HANDLER_INDEX(STATUS_ID_FLOAT):
@@ -349,7 +349,7 @@ s32 status_queue_display_flag_change(s32 handler_index, s32 change_type, s32 bat
         case STATUS_HANDLER_INDEX(STATUS_ID_FROG):
             unit->statuses_to_add_5_6 |= UNIT_STATUS_FROG;
             unit->statuses_to_remove_5_6 &= ~UNIT_STATUS_FROG;
-            ai_init_unit_abilities(battle_unit_id);
+            ai_init_unit(battle_unit_id);
             return 1;
         case STATUS_HANDLER_INDEX(STATUS_ID_TREASURE):
             unit->statuses_to_add_5_6 |= UNIT_STATUS_TREASURE;

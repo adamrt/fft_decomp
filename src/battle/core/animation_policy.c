@@ -95,7 +95,7 @@ void action_play_weapon_sfx(map_unit_t* unit, s32 hit) {
 /* The depth of water the unit stands in, which picks its animations: 0 on the surface (ON_WATER
  * movement, Float, a crystal), 1 for a chicken, frog or treasure and for IN_WATER movement,
  * otherwise the depth of its tile. */
-static u8 get_water_mode(map_unit_t* unit) {
+static u8 get_water_depth(map_unit_t* unit) {
     map_tile_t* tile;
     s32 movement;
     u32 statuses;
@@ -142,13 +142,12 @@ void animation_select_weapon_attack(map_unit_t* attacker, map_unit_t* target) {
     }
     if (target != 0) {
         if (attacker->spritesheet_id >= SPRITE_SHEET_ID_CRYSTAL) {
-            animation_force_with_facing(g_animation_weapon_attacks[0][1], attacker->facing, attacker);
+            animation_request_forced(g_animation_weapon_attacks[0][1], attacker->facing, attacker);
             return;
         }
         if (attacker->equipped_weapon_type == ITEM_TYPE_BOW) {
-            animation_force_with_facing(
-                g_animation_weapon_attacks[ITEM_TYPE_BOW][projectile_get_bow_animation_column()], attacker->facing,
-                attacker);
+            animation_request_forced(g_animation_weapon_attacks[ITEM_TYPE_BOW][projectile_get_bow_animation_column()],
+                attacker->facing, attacker);
             return;
         }
         miss_type = target->battle_unit->action.miss_type;
@@ -156,7 +155,7 @@ void animation_select_weapon_attack(map_unit_t* attacker, map_unit_t* target) {
             if (miss_type >= ACTION_MISS_TYPE_REFLECTED) {
                 if (miss_type < ACTION_MISS_TYPE_BUGGED_REFLECTION) {
                     if (miss_type >= ACTION_MISS_TYPE_GOLEM_GUARD) {
-                        animation_force_with_facing(
+                        animation_request_forced(
                             g_animation_weapon_attacks[attacker->equipped_weapon_type][0], attacker->facing, attacker);
                         return;
                     }
@@ -168,18 +167,17 @@ void animation_select_weapon_attack(map_unit_t* attacker, map_unit_t* target) {
         target_center = sprite_sheet_map_unit_get_height(target->map_unit_id) / 2 - target->world_coords.vy;
         difference = attacker_center - target_center;
         if (difference < -11) {
-            animation_force_with_facing(
+            animation_request_forced(
                 g_animation_weapon_attacks[attacker->equipped_weapon_type][0], attacker->facing, attacker);
             return;
         }
         if (difference >= 12) {
-            animation_force_with_facing(
+            animation_request_forced(
                 g_animation_weapon_attacks[attacker->equipped_weapon_type][2], attacker->facing, attacker);
             return;
         }
     }
-    animation_force_with_facing(
-        g_animation_weapon_attacks[attacker->equipped_weapon_type][1], attacker->facing, attacker);
+    animation_request_forced(g_animation_weapon_attacks[attacker->equipped_weapon_type][1], attacker->facing, attacker);
 }
 
 /* Start the animation of an item ability: the item held up for a target on
@@ -188,7 +186,7 @@ static void set_item_ability_animation(map_unit_t* unit, map_unit_t* target) {
     s32 dx;
     s32 dy;
 
-    sprite_item_display_set(unit, unit->used_item_or_weapon_id);
+    sprite_item_display_set_icon(unit, unit->used_item_or_weapon_id);
     if (target != 0) {
         dx = target->map_x - unit->map_x;
         dy = target->map_y - unit->map_y;
@@ -204,10 +202,10 @@ static void set_item_ability_animation(map_unit_t* unit, map_unit_t* target) {
     }
     /* facing is read signed (lh). */
     if ((dx <= 0 && dy <= 0) || (dx < 2 && dy == 0) || (dx == 0 && dy < 2)) {
-        animation_store_with_facing(ANIMATION_HOLD_ITEM, unit->facing, unit);
+        animation_request(ANIMATION_HOLD_ITEM, unit->facing, unit);
     } else {
         unit->item_display_active = 0;
-        animation_force_with_facing(ANIMATION_THROW_ITEM, unit->facing, unit);
+        animation_request_forced(ANIMATION_THROW_ITEM, unit->facing, unit);
     }
 }
 
@@ -217,7 +215,7 @@ void animation_start_ability_charge(map_unit_t* unit) {
     u8 animation = s_animation_ability_charge_sets[set_id][0];
 
     if (animation != 0) {
-        animation_store_with_facing(animation, unit->facing, unit);
+        animation_request(animation, unit->facing, unit);
     }
 }
 
@@ -230,12 +228,12 @@ void animation_start_ability_charge_hold(map_unit_t* unit) {
     s32 selected_animation;
 
     if (animation != 0) {
-        water_depth = get_water_mode(unit);
+        water_depth = get_water_depth(unit);
         selected_animation = ANIMATION_SUBMERGED_IDLE;
         if (water_depth < 2) {
             selected_animation = animation;
         }
-        animation_store_with_facing(selected_animation, unit->facing, unit);
+        animation_request(selected_animation, unit->facing, unit);
     }
 }
 
@@ -248,7 +246,7 @@ void animation_select_ability_attack(map_unit_t* attacker, map_unit_t* target) {
 
     if (seq_type <= SPRITE_SEQ_KANZEN) {
         if (seq_type >= SPRITE_SEQ_RUKA) {
-            animation_store_with_facing(ANIMATION_CAST, attacker->facing, attacker);
+            animation_request(ANIMATION_CAST, attacker->facing, attacker);
             return;
         }
     }
@@ -262,25 +260,25 @@ void animation_select_ability_attack(map_unit_t* attacker, map_unit_t* target) {
         set_item_ability_animation(attacker, target);
         return;
     }
-    animation_store_with_facing(animation, attacker->facing, attacker);
+    animation_request(animation, attacker->facing, attacker);
 }
 
 /* Start a unit's level-up animation: the jump on dry land, the hops for a
  * rider and in water one deep, the submerged idle in water two deep. */
 void animation_set_level_up(map_unit_t* unit) {
     if (unit->mount_state == UNIT_MOUNT_STATE_RIDER) {
-        animation_store_with_facing(ANIMATION_LEVEL_UP_HOP, unit->facing, unit);
+        animation_request(ANIMATION_LEVEL_UP_HOP, unit->facing, unit);
         return;
     }
-    switch (get_water_mode(unit)) {
+    switch (get_water_depth(unit)) {
     case 0:
-        animation_store_with_facing(ANIMATION_LEVEL_UP, unit->facing, unit);
+        animation_request(ANIMATION_LEVEL_UP, unit->facing, unit);
         break;
     case 1:
-        animation_store_with_facing(ANIMATION_LEVEL_UP_HOP, unit->facing, unit);
+        animation_request(ANIMATION_LEVEL_UP_HOP, unit->facing, unit);
         break;
     case 2:
-        animation_store_with_facing(ANIMATION_SUBMERGED_IDLE, unit->facing, unit);
+        animation_request(ANIMATION_SUBMERGED_IDLE, unit->facing, unit);
         break;
     }
 }
@@ -296,7 +294,7 @@ void animation_set_stand(map_unit_t* unit) {
     map_unit_t* other;
 
     if (unit->mount_state != UNIT_MOUNT_STATE_RIDER) {
-        water_depth = get_water_mode(unit);
+        water_depth = get_water_depth(unit);
         if (water_depth < 0) {
             selected = ANIMATION_SUBMERGED_IDLE;
         } else if (water_depth < 2) {
@@ -304,7 +302,7 @@ void animation_set_stand(map_unit_t* unit) {
             if (unit->mount_state == UNIT_MOUNT_STATE_MOUNT) {
                 other = map_unit_get(unit->mount_partner_map_unit_id);
                 if (other != 0) {
-                    animation_store_with_facing(ANIMATION_RIDING, unit->facing, other);
+                    animation_request(ANIMATION_RIDING, unit->facing, other);
                 }
             }
         } else {
@@ -315,7 +313,7 @@ void animation_set_stand(map_unit_t* unit) {
         }
         anim = selected;
     }
-    animation_store_with_facing(anim, unit->facing, unit);
+    animation_request(anim, unit->facing, unit);
 }
 
 /*
@@ -330,10 +328,10 @@ void animation_set_walk(map_unit_t* unit) {
     map_unit_t* rider;
 
     if (unit->mount_state == UNIT_MOUNT_STATE_RIDER) {
-        animation_store_with_facing(ANIMATION_RIDING, unit->facing, unit);
+        animation_request(ANIMATION_RIDING, unit->facing, unit);
         return;
     }
-    switch (get_water_mode(unit)) {
+    switch (get_water_depth(unit)) {
     case 0:
     case 1:
         walk_speed = unit->walk_speed;
@@ -348,7 +346,7 @@ void animation_set_walk(map_unit_t* unit) {
         if (unit->mount_state == UNIT_MOUNT_STATE_MOUNT) {
             rider = map_unit_get(unit->mount_partner_map_unit_id);
             if (rider != 0) {
-                animation_store_with_facing(ANIMATION_RIDING, unit->facing, rider);
+                animation_request(ANIMATION_RIDING, unit->facing, rider);
             }
         }
         break;
@@ -366,7 +364,7 @@ void animation_set_walk(map_unit_t* unit) {
         break;
     }
     if (anim != 0) {
-        animation_store_with_facing(anim, unit->facing, unit);
+        animation_request(anim, unit->facing, unit);
     }
 }
 
@@ -388,7 +386,7 @@ void animation_set_walk(map_unit_t* unit) {
  */
 void animation_set_status(map_unit_t* unit) {
     s32 animation;
-    u8 water_depth = get_water_mode(unit);
+    u8 water_depth = get_water_depth(unit);
     u8 spritesheet_id;
 
     animation = 0;
@@ -519,7 +517,7 @@ void animation_set_status(map_unit_t* unit) {
         break;
     }
     if (animation != 0) {
-        animation_store_with_facing(animation, unit->facing, unit);
+        animation_request(animation, unit->facing, unit);
     }
 }
 
@@ -540,12 +538,12 @@ void animation_update_status_changes(map_unit_t* unit) {
     battle_unit_t* battle_unit;
 
     if (unit->statuses_to_add_5_6 & UNIT_STATUS_CHICKEN) {
-        animation_force_with_facing(ANIMATION_IDLE, unit->facing, unit);
+        animation_request_forced(ANIMATION_IDLE, unit->facing, unit);
     } else if (unit->statuses_to_remove_5_6 & UNIT_STATUS_CHICKEN) {
         animation_set_status(unit);
     }
     if (unit->statuses_to_add_5_6 & UNIT_STATUS_FROG) {
-        animation_force_with_facing(ANIMATION_IDLE, unit->facing, unit);
+        animation_request_forced(ANIMATION_IDLE, unit->facing, unit);
     } else if (unit->statuses_to_remove_5_6 & UNIT_STATUS_FROG) {
         animation_set_status(unit);
     }
@@ -572,34 +570,34 @@ void animation_update_status_changes(map_unit_t* unit) {
     }
     if (g_battle_state == BATTLE_STATE_EVENT) {
         if (unit->statuses_to_add_5_6 & UNIT_STATUS_JUMP) {
-            animation_force_with_facing(ANIMATION_JUMP_DEPART, unit->facing, unit);
+            animation_request_forced(ANIMATION_JUMP_DEPART, unit->facing, unit);
         } else if (unit->statuses_to_remove_5_6 & UNIT_STATUS_JUMP) {
             map_unit_show(unit->map_unit_id);
-            animation_force_with_facing(ANIMATION_JUMP_LAND, unit->facing, unit);
+            animation_request_forced(ANIMATION_JUMP_LAND, unit->facing, unit);
         }
-        if (get_water_mode(unit) >= 2) {
+        if (get_water_depth(unit) >= 2) {
             if (unit->statuses_to_add_1_4 & UNIT_STATUS_DEAD) {
-                animation_force_with_facing(ANIMATION_DEAD, unit->facing, unit);
+                animation_request_forced(ANIMATION_DEAD, unit->facing, unit);
                 unit->animation.sequence_id = ANIMATION_DEAD << 1;
                 unit->animation.wait = 0;
             } else if (unit->statuses_to_remove_1_4 & UNIT_STATUS_DEAD) {
-                animation_force_with_facing(ANIMATION_SUBMERGED_IDLE, unit->facing, unit);
+                animation_request_forced(ANIMATION_SUBMERGED_IDLE, unit->facing, unit);
                 unit->animation.sequence_id = ANIMATION_SUBMERGED_IDLE << 1;
                 unit->animation.wait = 0;
             }
         }
-    } else if (get_water_mode(unit) < 2) {
+    } else if (get_water_depth(unit) < 2) {
         if (unit->statuses_to_add_1_4 & UNIT_STATUS_DEAD) {
-            animation_store_with_facing(ANIMATION_DEATH, unit->facing, unit);
+            animation_request(ANIMATION_DEATH, unit->facing, unit);
         } else if (unit->statuses_to_remove_1_4 & UNIT_STATUS_DEAD) {
-            animation_store_with_facing(ANIMATION_REVIVE, unit->facing, unit);
+            animation_request(ANIMATION_REVIVE, unit->facing, unit);
         }
     } else if (unit->statuses_to_add_1_4 & UNIT_STATUS_DEAD) {
-        animation_force_with_facing(ANIMATION_DEAD, unit->facing, unit);
+        animation_request_forced(ANIMATION_DEAD, unit->facing, unit);
         unit->animation.sequence_id = ANIMATION_DEAD << 1;
         unit->animation.wait = 0;
     } else if (unit->statuses_to_remove_1_4 & UNIT_STATUS_DEAD) {
-        animation_force_with_facing(ANIMATION_SUBMERGED_IDLE, unit->facing, unit);
+        animation_request_forced(ANIMATION_SUBMERGED_IDLE, unit->facing, unit);
         unit->animation.sequence_id = ANIMATION_SUBMERGED_IDLE << 1;
         unit->animation.wait = 0;
     }
@@ -638,9 +636,9 @@ void map_unit_apply_poach_or_morbol(map_unit_t* unit) {
     unit->tpage = unit->spritesheet_vram_slot + SPRITE_TPAGE_SPRITESHEET_SLOT_0;
     tile = map_get_tile(unit->map_x, unit->map_y, unit->map_layer);
     sprite_palette_update(unit, tile->flags.shading, 1);
-    animation_force_with_facing(ANIMATION_IDLE, unit->facing, unit);
+    animation_request_forced(ANIMATION_IDLE, unit->facing, unit);
     battle_unit_transform_into_morbol(unit->battle_unit);
-    ai_init_unit_abilities(unit->battle_unit->battle_unit_id);
+    ai_init_unit(unit->battle_unit->battle_unit_id);
 }
 
 /* Swap the unit's sheet for its first transformation status (Crystal, Treasure, Chicken, Frog),
@@ -657,13 +655,13 @@ void sprite_sheet_apply_status_change(map_unit_t* unit, s32 tile_effect_level) {
             unit->special_graphic_y_offset = 0x60;
             unit->status_flags_5_6 = UNIT_STATUS_CRYSTAL;
             unit->status_flags_1_4 = 0;
-            animation_store_with_facing(ANIMATION_SUBMERGED_IDLE, unit->facing, unit);
+            animation_request(ANIMATION_SUBMERGED_IDLE, unit->facing, unit);
         } else if (flags & UNIT_STATUS_TREASURE) {
             spritesheet_id = SPRITE_SHEET_ID_TREASURE;
             unit->special_graphic_y_offset = 0;
             unit->status_flags_5_6 = UNIT_STATUS_TREASURE;
             unit->status_flags_1_4 = 0;
-            animation_store_with_facing(ANIMATION_TREASURE, unit->facing, unit);
+            animation_request(ANIMATION_TREASURE, unit->facing, unit);
         } else if (flags & UNIT_STATUS_CHICKEN) {
             spritesheet_id = SPRITE_SHEET_ID_CHICKEN;
             unit->special_graphic_y_offset = 0;
@@ -782,7 +780,7 @@ void animation_set_shield_block_attacker(map_unit_t* attacker, map_unit_t* targe
         }
     }
     if (anim != 0) {
-        animation_force_with_facing(anim, attacker->facing, attacker);
+        animation_request_forced(anim, attacker->facing, attacker);
     }
 }
 
@@ -818,7 +816,7 @@ void action_start_target_response(map_unit_t* attacker, map_unit_t* target) {
     if ((target->animation.sequence_id >> 1) == ANIMATION_DEATH) {
         return;
     }
-    water_depth = get_water_mode(target);
+    water_depth = get_water_depth(target);
     animation = ANIMATION_SUBMERGED_IDLE;
     if (water_depth < 2) {
         battle_unit = target->battle_unit;
@@ -875,9 +873,9 @@ void action_start_target_response(map_unit_t* attacker, map_unit_t* target) {
 
             if (animation != 0) {
                 if (target->spritesheet_id < SPRITE_SHEET_ID_CRYSTAL) {
-                    animation_force_with_facing(animation, target->facing, target);
+                    animation_request_forced(animation, target->facing, target);
                 } else if (animation == ANIMATION_HURT) {
-                    animation_force_with_facing(ANIMATION_HURT, target->facing, target);
+                    animation_request_forced(ANIMATION_HURT, target->facing, target);
                 }
             }
             if (action->special_effect & ACTION_SPECIAL_EFFECT_KNOCKBACK) {
@@ -890,16 +888,16 @@ void action_start_target_response(map_unit_t* attacker, map_unit_t* target) {
                 target->status_flags_5_6 |= UNIT_STATUS_MORBOL;
             }
             if (action->special_effect & ACTION_SPECIAL_EFFECT_BREAK_EQUIPMENT) {
-                ai_init_unit_abilities(target->battle_unit->battle_unit_id);
+                ai_init_unit(target->battle_unit->battle_unit_id);
             }
             if (action->special_effect & ACTION_SPECIAL_EFFECT_STEAL_ITEM) {
-                ai_init_unit_abilities(target->battle_unit->battle_unit_id);
+                ai_init_unit(target->battle_unit->battle_unit_id);
             }
             return;
         }
         animation = ANIMATION_HURT;
     }
-    animation_store_with_facing(animation, target->facing, target);
+    animation_request(animation, target->facing, target);
 }
 
 /* Refresh the display of every unit in the strike's target list. */

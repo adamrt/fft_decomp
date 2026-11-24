@@ -108,19 +108,19 @@ void proposition_open_dispatch_confirm(void) {
     window_build_render_record_image(index, bounds, 0, &g_window_image_buffer[0x200]);
     point.x = 8;
     point.y = size.rows * 0x10 + 8;
-    window_display_text_entry(index, TEXT_ID_JOB_CONDITION_LABELS, point, &g_window_image_buffer[0x200]);
+    window_render_text_entry(index, TEXT_ID_JOB_CONDITION_LABELS, point, &g_window_image_buffer[0x200]);
     point.x = 8;
     point.y = 8;
-    window_display_text_entry(index, TEXT_ID_JOB_CONTENTS_LABEL, point, &g_window_image_buffer[0x200]);
+    window_render_text_entry(index, TEXT_ID_JOB_CONTENTS_LABEL, point, &g_window_image_buffer[0x200]);
     point.x = 68;
     point.y = 8;
-    window_display_text_entry(index, g_proposition_selected_row.name_text + (TEXT_ID_PROPOSITION_JOB_CONTENTS_BASE - 1),
+    window_render_text_entry(index, g_proposition_selected_row.name_text + (TEXT_ID_PROPOSITION_JOB_CONTENTS_BASE - 1),
         point, &g_window_image_buffer[0x200]);
     for (i = 0; i < s_proposition_send_unit_count; i++) {
         point.x = 60;
         line = i + 2;
         point.y = (size.rows + line) * 0x10 + 8;
-        window_display_text_entry(
+        window_render_text_entry(
             index, s_proposition_send_units[i] + TEXT_ID_UNIT_NAME_BASE, point, &g_window_image_buffer[0x200]);
     }
     window_load_render_record_image(index, &g_window_image_buffer[0x200]);
@@ -511,7 +511,7 @@ static void draw_participant_names(proposition_send_unit_level_t* level) {
     point.x = 8;
     point.y = 8;
     for (i = 0; i < s_proposition_send_unit_count; i++) {
-        window_display_text_entry(
+        window_render_text_entry(
             index, s_proposition_send_units[i] + TEXT_ID_UNIT_NAME_BASE, point, g_window_image_buffer);
         point.y += 0x10;
     }
@@ -557,7 +557,7 @@ static void show_candidate_portrait(proposition_send_unit_level_t* unused, s32 p
  *
  * The target's frame holds two 32-bit values no instruction touches, reproduced by
  * the unused point. */
-static void update_participant_slots(proposition_send_unit_level_t* level) {
+static void update_replace_mode(proposition_send_unit_level_t* level) {
     point32_t unused;
     u32 buttons;
     s32 unit;
@@ -623,7 +623,7 @@ static void update_participant_slots(proposition_send_unit_level_t* level) {
 /* Build the status panel data of party member `party_index` and start the
  * three unit panel threads on it (status banner, numeric panel, equipment
  * and ability panel), raising WORLD_MAP_FLAG_UNIT_PANEL_THREADS. */
-static void start_participant_panels(s32 party_index) {
+static void start_candidate_panels(s32 party_index) {
     unit_panel_thread_t* banner;
 
     unit_panel_prepare_party_unit(party_index);
@@ -644,7 +644,7 @@ static void start_participant_panels(s32 party_index) {
 /* Status view of the send-unit level: once the panel threads stop it opens the unit's status
  * screens; L1 and R1 page through the candidates with wraparound, Select opens the layout window,
  * Circle or Cross close the view and return to 'So, who you wanna send?'. */
-static void update_participant_status(proposition_send_unit_level_t* level) {
+static void update_status_mode(proposition_send_unit_level_t* level) {
     u32 buttons;
     s32 selected;
     s32 direction;
@@ -659,7 +659,7 @@ static void update_participant_status(proposition_send_unit_level_t* level) {
         g_display_object_animated_pool[level->left_arrow].flags ^= DISPLAY_OBJECT_HIDDEN;
         g_display_object_animated_pool[level->right_arrow].flags ^= DISPLAY_OBJECT_HIDDEN;
         level->mode = PROPOSITION_SEND_UNIT_MODE_STATUS;
-        start_participant_panels(
+        start_candidate_panels(
             g_menu_stack_entry_values[g_window_panel_render_state.selected_index] & TEXT_ID_ENTRY_MASK);
         level->slot = g_window_panel_render_state.selected_index;
     } else if (level->mode == PROPOSITION_SEND_UNIT_MODE_STATUS) {
@@ -794,8 +794,8 @@ void proposition_suspend_participants(menu_stack_record_t* level) {
  *
  * CANCEL and ACCEPT wait for the panel thread to close and then pop the level,
  * ACCEPT continuing into the proposition detail level and its days panel; the
- * STATUS modes run update_participant_status and REPLACE runs
- * update_participant_slots.
+ * STATUS modes run update_status_mode and REPLACE runs
+ * update_replace_mode.
  *
  * Otherwise (SELECT) the highlighted unit's portrait is shown in the preview
  * record once the list has popped in, then the new button presses are
@@ -840,12 +840,12 @@ void proposition_update_participants(menu_stack_record_t* level) {
     if (level->send_unit.mode == PROPOSITION_SEND_UNIT_MODE_STATUS_OPEN
         || level->send_unit.mode == PROPOSITION_SEND_UNIT_MODE_STATUS
         || level->send_unit.mode == PROPOSITION_SEND_UNIT_MODE_STATUS_CLOSE) {
-        update_participant_status(&level->send_unit);
+        update_status_mode(&level->send_unit);
         return;
     }
 
     if (level->send_unit.mode == PROPOSITION_SEND_UNIT_MODE_REPLACE) {
-        update_participant_slots(&level->send_unit);
+        update_replace_mode(&level->send_unit);
         return;
     }
 

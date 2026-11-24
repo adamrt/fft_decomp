@@ -40,7 +40,7 @@ void deploy_noop_1(void) {
  * announced and the record's unit limit is overwritten with 4 after being
  * published.
  */
-void deploy_find_fieldable_units(void) {
+void deploy_init_roster(void) {
     s32 index;
     s32 name_index;
     u8* name_cursor = g_text_section_pointers[TEXT_SECTION_PARTY_UNIT_NAMES];

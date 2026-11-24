@@ -279,8 +279,7 @@ void menu_scrollable_list_refresh(const menu_instruction_t* script) {
 }
 
 /* Set up a scrollable list without a scroll base and draw it with the given menu script. */
-void menu_init_and_draw_scrollable_list_simple(
-    s16* entries, s32 selected_index, u8* text_table, const menu_instruction_t* script) {
+void menu_scrollable_list_open(s16* entries, s32 selected_index, u8* text_table, const menu_instruction_t* script) {
     menu_scrollable_list_init_core(entries, selected_index, text_table);
     menu_scrollable_list_refresh(script);
 }
@@ -296,7 +295,7 @@ void menu_init_and_draw_scrollable_list_simple(
  * Uses the event-speed multiplier and an animated cursor. The unused arrays
  * retain the original stack frame: rect is at 0x20 and marker at 0x38.
  */
-menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* command) {
+menu_instruction_t* menu_opcode_10_update_scrollable_list(menu_instruction_t* command) {
     RECT rect;
     u8 unused_28[16];
     point16_t marker;

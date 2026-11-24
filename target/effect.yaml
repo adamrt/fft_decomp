@@ -377,7 +377,7 @@ links: [battle]
 functions:
   - {addr: 0x801c2500, size: 6012, name: effect_polar_mesh_update, hash: 71cd90876d1e56fd, source: src/effect/polar_mesh.c}
   - {addr: 0x801c3c7c, size: 5368, name: effect_ring_stack_mesh_update, hash: 628ae04cc4fa2217, source: src/effect/ring_stack_mesh.c}
-  - {addr: 0x801c5174, size: 5624, name: effect_particle_trails_update, hash: 6e39e4ec00d647cd, source: src/effect/particle_trails.c}
+  - {addr: 0x801c5174, size: 5624, name: effect_particle_trail_spawner_update, hash: 6e39e4ec00d647cd, source: src/effect/particle_trails.c}
 
 data:
   - {addr: 0x801c676c, name: g_effect_polar_mesh_brightness_table}
@@ -579,7 +579,7 @@ profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
 
 functions:
-  - {addr: 0x801c2500, size: 5624, name: effect_particle_trails_update, hash: 5dd38672ebdee544, source: src/effect/particle_trails.c}
+  - {addr: 0x801c2500, size: 5624, name: effect_particle_trail_spawner_update, hash: 5dd38672ebdee544, source: src/effect/particle_trails.c}
 ---
 module: effect-e167
 file: EFFECT/E167.BIN
@@ -1421,7 +1421,7 @@ profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
 
 functions:
-  - {addr: 0x801c2500, size: 5624, name: effect_particle_trails_update, hash: 5dd38672ebdee544, source: src/effect/particle_trails.c}
+  - {addr: 0x801c2500, size: 5624, name: effect_particle_trail_spawner_update, hash: 5dd38672ebdee544, source: src/effect/particle_trails.c}
   - {addr: 0x801c3af8, size: 5584, name: effect_ring_mesh_update, hash: 26a6aacc08f2798f, source: src/effect/ring_mesh.c}
 
 data:
@@ -1997,7 +1997,7 @@ profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
 
 functions:
-  - {addr: 0x801c2500, size: 5624, name: effect_particle_trails_update, hash: 5dd38672ebdee544, source: src/effect/particle_trails.c}
+  - {addr: 0x801c2500, size: 5624, name: effect_particle_trail_spawner_update, hash: 5dd38672ebdee544, source: src/effect/particle_trails.c}
   - {addr: 0x801c3af8, size: 5584, name: effect_ring_mesh_update, hash: 26a6aacc08f2798f, source: src/effect/ring_mesh.c}
 
 data:

@@ -31,7 +31,7 @@ typedef struct ending_text_record {
 } ending_text_record_t;
 typedef char ending_text_record_size_must_be_356[(sizeof(ending_text_record_t) == 356) ? 1 : -1];
 
-void ending_draw_text_records(u32* otag, s32 graphics_buffer_index);
+void ending_draw_script(u32* otag, s32 graphics_buffer_index);
 
 /* interpreter */
 typedef enum ending_script_dispatch_flag {

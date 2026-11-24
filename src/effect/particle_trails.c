@@ -43,7 +43,7 @@ typedef char effect_trail_work_size_must_be_652[sizeof(effect_trail_work_t) == 6
  * from the trail's head (the newest point while traveling, the arrival point
  * after): the mid-life child every frame and the death child when the trail
  * has run out. The tentacle mesh renderer without its mesh. */
-s32 effect_particle_trails_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame) {
+s32 effect_particle_trail_spawner_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame) {
     s16 state_index = record_index;
     SVECTOR tip;
     SVECTOR tip_spread;

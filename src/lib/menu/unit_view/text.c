@@ -59,7 +59,7 @@ void unit_panel_set_colors(unit_panel_frame_t* primitives, const unit_panel_thre
 
 /* Select the menu primitives' normal or dimmed colors: dimmed for panel style 1 or while menu
  * input lock mode 1 is on. The palette initializer receives `primitives` unchanged in $a0. */
-void unit_panel_select_palette(unit_panel_numeric_frame_t* primitives, const unit_panel_thread_t* thread) {
+void unit_panel_set_numeric_frame_colors(unit_panel_numeric_frame_t* primitives, const unit_panel_thread_t* thread) {
     if (thread->style == 1 || g_menu_input_lock_mode == 1) {
         unit_panel_set_numeric_frame_dimmed_colors(primitives);
     } else {

@@ -70,7 +70,7 @@ s32 equipment_check_item_compatibility(s16 unit_index, s16 item_entry) {
         return EQUIPMENT_SLOT_ITEM_CANNOT_EQUIP;
     }
     /* Skip to the item type's bit in the unit's bitfield, first byte's bit 7 first. */
-    bits_primary_init_reader(g_equipment_unit_data[unit_index]->equipment_categories);
+    bits_primary_init(g_equipment_unit_data[unit_index]->equipment_categories);
     bits_primary_read(item_get_type(item_id));
     return bits_primary_read(1) == 0 ? EQUIPMENT_SLOT_ITEM_CANNOT_EQUIP : EQUIPMENT_SLOT_ITEM_ALLOWED;
 }

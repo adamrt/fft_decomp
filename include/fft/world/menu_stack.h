@@ -93,7 +93,7 @@ void menu_stack_dispatch_resume(void);
 
 /* levels */
 /* Leading 32-bit fields of a menu level that owns up to two window/render record
- * pairs; release_level_records releases each index
+ * pairs; close_location_menu releases each index
  * that is not -1. */
 typedef struct menu_stack_slot_set {
     s32 result;   /* 0x00; the location menu step sets 1 on confirm, 0 on cancel */

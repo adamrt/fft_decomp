@@ -78,10 +78,6 @@ extern RECT g_gfx_draw_area;
 extern RECT g_gfx_tiled_rect;
 extern u16 g_gfx_draw_offset_y;
 
-/* Nonzero upper_half selects the buffer at y 0; zero selects y 240. */
-void gfx_build_scaled_draw_area_pair_swapped(
-    scaled_draw_area_pair_t* packets, const RECT* geometry, s32 step, s32 upper_half);
-
 /* enqueue helpers */
 extern oriented_quad_t g_gfx_blank_cell_rect;
 
@@ -97,7 +93,7 @@ void gfx_set_scaled_poly_ft4_4bpp(POLY_FT4* poly, const point16_t* texture_page,
     const sprite_sheet_frame_t* sprite_rect, const point16_t* scale, const sprite_draw_offset_t* base);
 void gfx_set_scaled_poly_ft4_8bpp(POLY_FT4* poly, const point16_t* texture, const RECT* position,
     const sprite_sheet_frame_t* uv_rect, const point16_t* scale, const sprite_draw_offset_t* offset);
-void gfx_flip_quad_negative_uv(POLY_FT4* primitive, s32 direction);
+void gfx_flip_quad_uv_if_negative(POLY_FT4* primitive, s32 direction);
 void gfx_build_gradient_grid_primitives(POLY_GT4* poly);
 
 #endif

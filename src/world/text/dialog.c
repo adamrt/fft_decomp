@@ -114,7 +114,7 @@ void message_dialog_thread(void) {
     rec.dialog_type = param;
     if ((param & 0x70) == 0x70) {
         rec.dialog_type = (param & 0x1C) | 0x10;
-        rec.dialog_type |= map_unit_check_camera_facing_by_event_unit_id(thread_current_get_parameter_3()) + 1;
+        rec.dialog_type |= map_unit_is_facing_away_from_camera_by_event_unit_id(thread_current_get_parameter_3()) + 1;
     }
 
     rec._unread_2a = 0;
@@ -131,11 +131,11 @@ void message_dialog_thread(void) {
     /* Help text is read through WORLD's text sections; the saved pointers come back at `end`. */
     if (rec.box_type == DIALOG_BOX_TYPE_HELP && rec.options == 0xC) {
         text_save_section_pointers();
-        text_relocate_pointer_table(&g_menu_screen_text_bank);
+        text_bind_section_pointers(&g_menu_screen_text_bank);
     }
     if (rec.box_type == DIALOG_BOX_TYPE_HELP && !g_formation_screen_active) {
         text_save_section_pointers();
-        text_relocate_pointer_table(&g_menu_screen_text_bank);
+        text_bind_section_pointers(&g_menu_screen_text_bank);
         /* Message 0x807 shows the selected party unit's name in a portrait box instead. */
         if (thread->function_parameter_2 == 0x807) {
             i = formation_get_selected_unit_name_id();
@@ -346,7 +346,7 @@ void message_dialog_thread(void) {
             win->portrait_code = rec.portrait;
         }
         value = thread_current_get_parameter_3();
-        menu_build_and_upload_window_image(rec.width, rec.height, &rec.rect, rec.dialog_type, rec.tail_offset);
+        menu_upload_dialog_window_image(rec.width, rec.height, &rec.rect, rec.dialog_type, rec.tail_offset);
         win->portrait_battle_unit_id = value;
     } else if (rec.box_type == DIALOG_BOX_TYPE_CENTERED) {
         win[0].quads[0].clut = 0x7CBC;
@@ -652,8 +652,7 @@ void message_dialog_thread(void) {
                     column = 0;
                     text = text_find_entry(rec.text);
                     no_wait = 0;
-                    menu_build_and_upload_window_image(
-                        rec.width, rec.height, &rec.rect, rec.dialog_type, rec.tail_offset);
+                    menu_upload_dialog_window_image(rec.width, rec.height, &rec.rect, rec.dialog_type, rec.tail_offset);
                     delay = 1;
                     cursor_x = rec.x;
                     width_override = no_value;
@@ -677,8 +676,7 @@ void message_dialog_thread(void) {
 
                 /* The box is full: start a fresh page; cursor_y lands on its first line after the += below. */
                 if (rec.box_type == DIALOG_BOX_TYPE_PORTRAIT) {
-                    menu_build_and_upload_window_image(
-                        rec.width, rec.height, &rec.rect, rec.dialog_type, rec.tail_offset);
+                    menu_upload_dialog_window_image(rec.width, rec.height, &rec.rect, rec.dialog_type, rec.tail_offset);
                 } else if (rec.box_type != DIALOG_BOX_TYPE_CENTERED) {
                     g_sound_pending_sfx_id = SOUND_SFX_TEXT_PAGE;
                     rec.first_line = rec.line;
@@ -762,7 +760,7 @@ void message_dialog_thread(void) {
                 column = 0;
                 text = text_find_entry(rec.text);
                 no_wait = 0;
-                menu_build_and_upload_window_image(rec.width, rec.height, &rec.rect, rec.dialog_type, rec.tail_offset);
+                menu_upload_dialog_window_image(rec.width, rec.height, &rec.rect, rec.dialog_type, rec.tail_offset);
                 delay = 1;
                 width_override = no_value;
                 cursor_x = rec.x;

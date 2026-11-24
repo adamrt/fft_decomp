@@ -19,7 +19,7 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-static void hide_parent_windows(void);
+static void hide_parent_brave_story_menu(void);
 static void hide_parent_tutorial_menu(void);
 
 /* Push a screen transition into `destination_level` (a menu level type): clear the map, hide date, location label and
@@ -62,7 +62,7 @@ void world_map_open_screen_transition(menu_stack_level_e destination_level, s32 
         }
         brave_story_open_menu();
         g_world_map_flags |= WORLD_MAP_FLAG_HIDE_CONTEXT_VALUE;
-        hide_parent_windows();
+        hide_parent_brave_story_menu();
         message_load_block_if_changed(MESSAGE_BLOCK_STORY_EVENTS);
         file_wait_pending();
         g_menu_stack_cursor_states[MENU_STACK_CURSOR_SLOT_EVENTS] = g_brave_story_saved_list_cursor_state;
@@ -85,7 +85,7 @@ void world_map_open_screen_transition(menu_stack_level_e destination_level, s32 
         g_menu_stack_cursor_states[MENU_STACK_CURSOR_SLOT_BATTLE_TUTORIALS] = g_brave_story_saved_list_cursor_state;
         break;
     case MENU_STACK_LEVEL_BRAVE_STORY_TREASURE:
-        hide_parent_windows();
+        hide_parent_brave_story_menu();
         message_load_block_if_changed(MESSAGE_BLOCK_TREASURES);
         file_wait_pending();
         music_queue_wait_until_empty();
@@ -121,7 +121,7 @@ void world_map_open_screen_transition(menu_stack_level_e destination_level, s32 
  * main window goes to palette 10 (sequence, frame_index and anim_counter
  * cleared), the side window to palette 6, the frame and content render
  * records to palette 2, and the completion stars to palette 5, each hidden. */
-static void hide_parent_windows(void) {
+static void hide_parent_brave_story_menu(void) {
     s32 index = g_menu_stack_depth - 1;
 
     g_display_object_animated_pool[g_menu_stack_records[index].brave_story.cursor_window].palette = 10;

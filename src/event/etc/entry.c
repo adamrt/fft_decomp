@@ -410,7 +410,7 @@ static void show_game_over(s32 graphic_id) {
         thread_yield();
         g_thread_call_target = (void (*)(void))music_poll_scenario_load;
     } while (thread_call_on_main_stack() != 0);
-    g_thread_call_target = (void (*)(void))music_switch_track;
+    g_thread_call_target = (void (*)(void))music_play_slot;
     thread_call_on_main_stack(1, 0x7f, 0);
 
     dimensions = g_fullscreen_graphics[graphic_id].dimensions;

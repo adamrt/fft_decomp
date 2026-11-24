@@ -30,8 +30,8 @@ extern u16 g_menu_input_block_frames;
 
 /* Returns the input-lock mode; the argument is ignored. */
 s32 menu_input_get_lock_mode(s32 unused_0);
-void menu_open_modal(void);
-void menu_close_modal(void);
+void menu_mark_modal_open(void);
+void menu_mark_modal_closed(void);
 
 /* 1 when a menu thread may act on input: no previous thread running, no stop request, the input not locked,
  * no help window open and no block frames left. In WORLD an open Help box also blocks input for five frames. */
@@ -40,7 +40,7 @@ s32 menu_can_accept_input(void);
 /* Clears the input while it is locked or a help window is open; returns 1 once this thread has a stop request
  * (parameter 3) and no other running thread does. WORLD's body also opens the entry's announcement text on
  * SELECT. */
-s32 menu_should_close_thread(u32* input);
+s32 menu_poll_thread_close(u32* input);
 
 /* event input */
 /* menu_input_update_event_state runs once per frame: it derives the event input from the controller, with
@@ -75,7 +75,7 @@ void menu_input_update_controller(void);
 void menu_input_clear_state(void);
 
 /* EQUIP, JOBSTTS and WORLD each build a separate body. */
-void menu_input_update_message_state(void);
+void menu_input_update(void);
 
 /* repeat timing */
 /* Six-byte row selected by the finger cursor repeat speed option (game options bits 9-11). The first three

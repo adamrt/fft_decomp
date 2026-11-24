@@ -122,10 +122,10 @@ static void refresh_stats(battle_unit_t* unit, s32 skip_status_check, s32 initia
     mem_copy_bytes_source_first(job->elemental_affinity, unit->elemental_affinity, sizeof(job->elemental_affinity));
     unit->elemental_affinity[ELEMENTAL_AFFINITY_STRENGTHEN] = 0;
     battle_unit_enable_rsm_flags(unit);
-    battle_unit_calculate_move_and_jump(unit, 1);
+    battle_unit_apply_movement_bonuses(unit, 1);
     battle_unit_set_equipment_stats(unit);
     battle_unit_set_equipment_attributes(unit, 0);
-    battle_unit_set_equippable_items(unit);
+    battle_unit_add_equippable_types(unit);
 
     for (i = 0; i < STATUS_BYTE_COUNT; i++) {
         if (initializing) {
@@ -172,7 +172,7 @@ static void refresh_stats(battle_unit_t* unit, s32 skip_status_check, s32 initia
 /* Level up at 100 EXP: one level of growth, and EXP goes back to 0 (the excess
  * is lost). At level 99 EXP is held at 99 instead. Returns 1 when the level
  * rose. */
-s32 battle_unit_check_level_up(battle_unit_t* unit) {
+s32 battle_unit_try_level_up(battle_unit_t* unit) {
     u8 level;
 
     if (unit->experience < UNIT_LEVEL_UP_EXPERIENCE) {

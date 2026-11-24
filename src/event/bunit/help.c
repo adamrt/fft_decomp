@@ -38,7 +38,7 @@ extern u8 g_unit_list_help_node_index_reload_2;
  * g_unit_list_thread_running is clear) publish it as g_menu_thread_menu_data and start
  * its thread there, unless the slot is busy. Returns 1 while that thread runs and 0 once
  * it has finished, also kept in g_unit_list_thread_running. */
-s32 menu_managed_thread_start(s32 id, menu_entry_t* desc) {
+s32 menu_managed_thread_start_or_poll(s32 id, menu_entry_t* desc) {
     if (g_unit_list_thread_running == 0) {
         if (thread_is_running(id)) {
             return 1;
@@ -64,7 +64,7 @@ void help_start_text(s32 thread_data) {
         return;
     }
     text_save_section_pointers();
-    text_relocate_pointer_table(&g_help_text_bank);
+    text_bind_section_pointers(&g_help_text_bank);
     thread_start(THREAD_SCREEN_SLOT_TEXT, message_dialog_thread);
     thread_set_parameters(THREAD_SCREEN_SLOT_TEXT, thread_data + 0x38, g_text_selection_id, 0);
     g_menu_input_lock_mode = 1;

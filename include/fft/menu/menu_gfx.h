@@ -172,7 +172,7 @@ extern menu_glyph_sheet_t g_menu_glyph_image_data;
 
 /* sprite pages */
 /* One double-buffered sprite page (0xa0 bytes): five DR_MODE texture-window packets followed by the five SPRTs
- * they apply to. build_sprite_page builds two of them in g_menu_scratch_buffer for the unit stats panels. */
+ * they apply to. draw_sprite_page builds two of them in g_menu_scratch_buffer for the unit stats panels. */
 typedef struct menu_sprite_page {
     DR_MODE modes[5]; /* 0x00 */
     SPRT sprites[5];  /* 0x3c */

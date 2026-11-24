@@ -72,7 +72,7 @@ s32 file_request_read(file_load_descriptor_t* header, s32 lba, s32 sector_count,
 
 /* Mark the load descriptor idle, flush pending CD commands, retry CdlPause until the drive accepts
  * it, then wait three vertical blanks. */
-void file_cd_reset_and_pause(file_load_descriptor_t* state) {
+void file_cd_pause(file_load_descriptor_t* state) {
     state->state = FILE_LOAD_STATE_IDLE;
     CdFlush();
     while (CdControlB(CdlPause, 0, 0) == 0) { }
@@ -81,6 +81,6 @@ void file_cd_reset_and_pause(file_load_descriptor_t* state) {
 
 /* Reset the CD-ROM library (CdReset(0)); file_poll_load calls it before retrying a failed
  * seek or a stalled read. */
-void file_reset_cd_subsystems(void) {
+void file_cd_reset(void) {
     CdReset(0);
 }

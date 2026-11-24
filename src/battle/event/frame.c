@@ -310,7 +310,7 @@ s32 script_update_event_frame(u32* ot, u32 buttons) {
 
 /* Feed `input` to the event input state, make `entry` the current ordering-table entry
  * and draw the active menu windows. No retail code calls it. */
-void script_set_current_otag_entry_and_update_input(u32* entry, s32 input) {
+void script_begin_event_frame(u32* entry, s32 input) {
     script_update_event_input(input);
     g_gfx_current_otag_entry = entry;
     menu_draw_active_window_frames();
@@ -350,7 +350,7 @@ static void process_pending_requests(void) {
     s32 pending = 0;
     effect_start_target_data_t effect_target;
 
-    map_unit_update_pending_animations();
+    map_unit_update_animation_states();
 
     jump_out_map_id = g_event_pending_map_jump_out_id;
     if (jump_out_map_id != -1) {
@@ -477,7 +477,7 @@ static void process_pending_requests(void) {
         }
         release_slot = g_event_pending_reserved_vram_release_slot;
         if (release_slot >= 0) {
-            sprite_evtchr_release_reserved_slot(release_slot);
+            sprite_evtchr_clear_attack_image_slot(release_slot);
         }
 
         sfx_id = g_sound_pending_sfx_id;
@@ -494,7 +494,7 @@ static void process_pending_requests(void) {
                 music_track_id = g_sound_music_track_2_id;
             }
             if (music_track_id != 0) {
-                music_switch_track(g_sound_current_music_track_index + 1,
+                music_play_slot(g_sound_current_music_track_index + 1,
                     script_scale_music_volume(g_event_music_switch_volume), g_event_music_switch_fade * 4);
             }
         }
@@ -559,6 +559,6 @@ void camera_store_state_to_script_variables(void) {
 
 /* The raw weather script variable. weather_get_effective applies the
  * map's indoor and snow flags to it. */
-s32 map_get_weather(void) {
+s32 weather_get_raw(void) {
     return g_script_variables[EVENT_SCRIPT_VAR_WEATHER];
 }

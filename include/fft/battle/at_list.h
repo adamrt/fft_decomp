@@ -62,9 +62,6 @@ extern u16 g_at_list_selection_finished;
 void at_list_finish_selection(void);
 
 /* Runs the g_at_list_state menu two thread slots below and waits for it to finish. */
-void at_list_start_thread(void);
-
-/* Builds and runs the AT list screen; OPTION and WORLD each build their own body. */
 void at_list_run(void);
 
 /* The ability list's preview: the turn order with the highlighted ability in it, as a scrolling list. */
