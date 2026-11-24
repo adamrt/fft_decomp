@@ -137,7 +137,7 @@ units:
   - {name: shop, source: src/world/shop/screen.c, data: [{addr: 0x8019523c, size: 112, hash: ce0c5fd435d95f05}, {addr: 0x801952ac, size: 43, hash: d479a0b4eb31609f}], bss: [{addr: 0x801953e0, size: 1, hash: 6e340b9cffb37a98}]}
   - {name: shop_fitting, source: src/world/shop/fitting.c, bss: [{addr: 0x801957a8, size: 1, hash: 6e340b9cffb37a98}]}
   - {name: fur_shop, source: src/world/shop/fur.c, bss: [{addr: 0x801cd0e4, size: 1, hash: 6e340b9cffb37a98}]}
-  - {name: office, source: src/world/shop/office.c, bss: [{addr: 0x801cd100, size: 4, hash: df3f619804a92fdb}, {addr: 0x801cd104, size: 4, hash: df3f619804a92fdb}]}
+  - {name: soldier, source: src/world/shop/soldier.c, bss: [{addr: 0x801cd100, size: 4, hash: df3f619804a92fdb}, {addr: 0x801cd104, size: 4, hash: df3f619804a92fdb}]}
   - {name: name_entry, source: src/world/name_entry.c, data: [{addr: 0x801cd144, size: 17, hash: 0a88111852095cae}], bss: [{addr: 0x801cd114, size: 1, hash: 6e340b9cffb37a98}]}
 
 libraries:
@@ -1130,18 +1130,18 @@ functions:
   - {addr: 0x80137d94, size: 572, name: shop_fur_buy_update_confirm, hash: 5ed06b07187c01ba, unit: fur_shop}
   - {addr: 0x80137fd0, size: 604, name: update_purchase_quantity, hash: e2b834949cb9e75b, unit: fur_shop}
   - {addr: 0x8013822c, size: 60, name: shop_fur_buy_update_unit_preview, hash: fd59dc58a1646c66, unit: fur_shop}
-  - {addr: 0x80138268, size: 828, name: shop_soldier_update_menu, hash: 59c669df532e38a5, unit: office}
-  - {addr: 0x801385a4, size: 300, name: shop_soldier_hire_update_preview, hash: b7926f9f68017e74, unit: office}
-  - {addr: 0x801386d0, size: 356, name: shop_soldier_hire_update_confirm, hash: 430bd6cd1b7c3751, unit: office}
-  - {addr: 0x80138834, size: 192, name: shop_soldier_hire_update_name, hash: 94a7e89b7eed87a2, unit: office}
-  - {addr: 0x801388f4, size: 384, name: shop_soldier_hire_update_fee, hash: 9070786158e1fe48, unit: office}
-  - {addr: 0x80138a74, size: 88, name: shop_soldier_reopen_menu, hash: db888e392b1c17b9, unit: office}
-  - {addr: 0x80138acc, size: 8, name: get_rename_unit_marker, hash: d042b87232f554e5, unit: office}
-  - {addr: 0x80138ad4, size: 676, name: shop_soldier_rename_update_unit, hash: fdb24ef50ba493d2, unit: office}
-  - {addr: 0x80138d78, size: 252, name: shop_soldier_rename_update_name, hash: d7ec4424b05551b9, unit: office}
-  - {addr: 0x80138e74, size: 48, name: get_hire_fee, hash: 5dd62be68bf6fe37, unit: office}
-  - {addr: 0x80138ea4, size: 88, name: shop_soldier_draw_fee, hash: 16f54220ab033331, unit: office}
-  - {addr: 0x80138efc, size: 96, name: shop_soldier_draw_unit_count, hash: 7ef787e5aeb396d5, unit: office}
+  - {addr: 0x80138268, size: 828, name: shop_soldier_update_menu, hash: 59c669df532e38a5, unit: soldier}
+  - {addr: 0x801385a4, size: 300, name: shop_soldier_hire_update_preview, hash: b7926f9f68017e74, unit: soldier}
+  - {addr: 0x801386d0, size: 356, name: shop_soldier_hire_update_confirm, hash: 430bd6cd1b7c3751, unit: soldier}
+  - {addr: 0x80138834, size: 192, name: shop_soldier_hire_update_name, hash: 94a7e89b7eed87a2, unit: soldier}
+  - {addr: 0x801388f4, size: 384, name: shop_soldier_hire_update_fee, hash: 9070786158e1fe48, unit: soldier}
+  - {addr: 0x80138a74, size: 88, name: shop_soldier_reopen_menu, hash: db888e392b1c17b9, unit: soldier}
+  - {addr: 0x80138acc, size: 8, name: get_rename_unit_marker, hash: d042b87232f554e5, unit: soldier}
+  - {addr: 0x80138ad4, size: 676, name: shop_soldier_rename_update_unit, hash: fdb24ef50ba493d2, unit: soldier}
+  - {addr: 0x80138d78, size: 252, name: shop_soldier_rename_update_name, hash: d7ec4424b05551b9, unit: soldier}
+  - {addr: 0x80138e74, size: 48, name: get_hire_fee, hash: 5dd62be68bf6fe37, unit: soldier}
+  - {addr: 0x80138ea4, size: 88, name: shop_soldier_draw_fee, hash: 16f54220ab033331, unit: soldier}
+  - {addr: 0x80138efc, size: 96, name: shop_soldier_draw_unit_count, hash: 7ef787e5aeb396d5, unit: soldier}
   - {addr: 0x80138f5c, size: 552, name: name_entry_update_keyboard, hash: 2a80491df4406613, unit: name_entry}
   - {addr: 0x80139184, size: 1652, name: name_entry_run_screen, hash: 07948f925dd3889e, unit: name_entry}
   - {addr: 0x801397f8, size: 112, name: open_key_list, hash: da934ca0e9861fd7, unit: name_entry}
