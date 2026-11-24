@@ -560,7 +560,35 @@ func (m *moduleSpec) normalize() {
 		sort.SliceStable(function.Rodata, func(i, j int) bool { return function.Rodata[i].Addr < function.Rodata[j].Addr })
 	}
 	sort.SliceStable(m.Functions, func(i, j int) bool { return m.Functions[i].Addr < m.Functions[j].Addr })
-	sort.SliceStable(m.Units, func(i, j int) bool { return m.Units[i].Name < m.Units[j].Name })
+	// Units follow the program's layout: by their first member function, or by
+	// their first owned row when they have no members; the name breaks ties.
+	unitStart := make(map[string]uint32, len(m.Units))
+	for index := range m.Units {
+		unit := &m.Units[index]
+		start := ^uint32(0)
+		for _, rows := range [][]rodataSpec{unit.Rodata, unit.Data, unit.Bss} {
+			for _, row := range rows {
+				if row.Addr < start {
+					start = row.Addr
+				}
+			}
+		}
+		unitStart[unit.Name] = start
+	}
+	firstMember := make(map[string]bool, len(m.Units))
+	for _, function := range m.Functions {
+		if function.Unit != "" && !firstMember[function.Unit] {
+			firstMember[function.Unit] = true
+			unitStart[function.Unit] = function.Addr // functions are already in address order
+		}
+	}
+	sort.SliceStable(m.Units, func(i, j int) bool {
+		a, b := unitStart[m.Units[i].Name], unitStart[m.Units[j].Name]
+		if a != b {
+			return a < b
+		}
+		return m.Units[i].Name < m.Units[j].Name
+	})
 	sortSymbols(m.Data)
 	sortSymbols(m.Imports)
 	sort.SliceStable(m.Overrides, func(i, j int) bool {
@@ -716,7 +744,13 @@ func renderConfigFiles(config *projectConfig) map[string][]byte {
 	}
 	files := make(map[string][]byte, len(grouped))
 	for path, modules := range grouped {
-		sort.Slice(modules, func(i, j int) bool { return modules[i].ID < modules[j].ID })
+		// Disc order: each program's LBA, the module id breaking ties.
+		sort.Slice(modules, func(i, j int) bool {
+			if modules[i].LBA != modules[j].LBA {
+				return modules[i].LBA < modules[j].LBA
+			}
+			return modules[i].ID < modules[j].ID
+		})
 		var out bytes.Buffer
 		for index, m := range modules {
 			if index > 0 {

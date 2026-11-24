@@ -8,50 +8,50 @@ source_dir: src/main
 profile: gcc-2.6.3_O2_aspsx-2.34
 
 units:
-  - {name: battle_otag, source: src/main/battle_otag.c}
-  - {name: display, source: src/main/display.c}
-  - {name: encounter, source: src/main/encounter.c}
-  - {name: file_loading, source: src/main/file_loading.c}
   - {name: file_requests, source: src/main/file_requests.c, data: [{addr: 0x8004eaf4, size: 36, hash: 6db65fd59fd356f6}]}
-  - {name: frame_graphics, source: src/main/frame_graphics.c, data: [{addr: 0x80047598, size: 8, hash: 37cd35309c7e000f}, {addr: 0x800475a0, size: 8, hash: 6590074fb72aab6f}, {addr: 0x800475a8, size: 8, hash: 1c46d0293ec224c0}]}
-  - {name: game_loop, source: src/main/entry.c, data: [{addr: 0x800473a0, size: 1, hash: 4bf5122f344554c5}], bss: [{addr: 0x80047608, size: 4, hash: df3f619804a92fdb}]}
-  - {name: heap, source: src/main/heap.c, data: [{addr: 0x8004e9d4, size: 64, hash: f5a5fd42d16a2030}], bss: [{addr: 0x8004e5c0, size: 16, hash: 374708fff7719dd5}]}
-  - {name: job_progress, source: src/main/job_progress.c}
   - {name: loading_draw_message, source: src/main/loading_screen.c, data: [{addr: 0x80032a68, size: 16, hash: 374708fff7719dd5}]}
-  - {name: loading_message, source: src/main/loading_message.c, bss: [{addr: 0x8004e5b8, size: 4, hash: df3f619804a92fdb}]}
-  - {name: memcard_events, source: src/main/memcard_events.c, data: [{addr: 0x800596c0, size: 32, hash: 66687aadf862bd77}]}
-  - {name: menu_sort_defaults, source: src/main/menu_sort_defaults.c}
-  - {name: new_game, source: src/main/new_game.c}
-  - {name: new_game_caption, source: src/main/new_game_caption.c}
-  - {name: open_overlay, source: src/main/open_overlay.c}
-  - {name: party, source: src/main/party.c}
-  - {name: save_init_data_tables, source: src/main/save_tables.c, profile: gcc-2.6.3_O2_aspsx-2.21, data: [{addr: 0x80059594, size: 280, hash: 1f6c9de2e555d5d5}]}
-  - {name: save_state, source: src/main/save_state.c, rodata: [{addr: 0x800473b0, size: 4, hash: 27d9bda8887f41f6}], bss: [{addr: 0x8005771c, size: 1024, hash: 5f70bf18a0860070}]}
-  - {name: sound_requests, source: src/main/sound_requests.c, data: [{addr: 0x80047080, size: 800, hash: 9ac66e2befd1621a}], bss: [{addr: 0x8004599c, size: 4, hash: df3f619804a92fdb}]}
-  - {name: startup, source: src/main/startup.c, data: [{addr: 0x8004d9b4, size: 4, hash: df3f619804a92fdb}]}
-  - {name: status_check_data, source: src/main/status_check_data.c}
-  - {name: suzuki_driver, source: src/lib/suzuki/driver.c, bss: [{addr: 0x80032a3c, size: 4, hash: df3f619804a92fdb}, {addr: 0x80032a40, size: 2, hash: 96a296d224f285c6}]}
+  - {name: suzuki_smd_lifecycle, source: src/lib/suzuki/smd_lifecycle.c}
+  - {name: suzuki_sfx, source: src/lib/suzuki/sfx.c}
+  - {name: suzuki_smd_controls, source: src/lib/suzuki/smd_controls.c}
+  - {name: suzuki_smd_records, source: src/lib/suzuki/smd_records.c}
   - {name: suzuki_heap, source: src/lib/suzuki/heap.c, profile: gcc-2.6.3_O2_G8_aspsx-2.34}
   - {name: suzuki_memory, source: src/lib/suzuki/memory.c}
-  - {name: suzuki_sfx, source: src/lib/suzuki/sfx.c}
-  - {name: suzuki_smd_channel_commands, source: src/lib/suzuki/smd_channel_commands.c}
-  - {name: suzuki_smd_controls, source: src/lib/suzuki/smd_controls.c}
-  - {name: suzuki_smd_interpreter, source: src/lib/suzuki/smd_interpreter.c, data: [{addr: 0x80028b0c, size: 512, hash: 0c5df638b3c3dc59}, {addr: 0x80028d0c, size: 128, hash: 80655c8c168e28ca}, {addr: 0x80028d8c, size: 228, hash: 6e8fc6334088202d}, {addr: 0x80028e70, size: 228, hash: ecbd552b54c02ff6}]}
-  - {name: suzuki_smd_lifecycle, source: src/lib/suzuki/smd_lifecycle.c}
-  - {name: suzuki_smd_modulation_commands, source: src/lib/suzuki/smd_modulation_commands.c, data: [{addr: 0x80028f54, size: 64, hash: def4d0f65924066c}]}
-  - {name: suzuki_smd_records, source: src/lib/suzuki/smd_records.c}
-  - {name: suzuki_smd_voices, source: src/lib/suzuki/smd_voices.c, data: [{addr: 0x80028fe8, size: 120, hash: b76b6c92808b2147}, {addr: 0x80029060, size: 120, hash: 30da9f7074541cf1}, {addr: 0x800290d8, size: 6144, hash: d3f07a5746f7a2fb}]}
   - {name: suzuki_tick, source: src/lib/suzuki/tick.c}
-  - {name: system_callbacks, source: src/main/system_callbacks.c, bss: [{addr: 0x800459b8, size: 4, hash: df3f619804a92fdb}, {addr: 0x800459bc, size: 4, hash: df3f619804a92fdb}, {addr: 0x800459c0, size: 4, hash: df3f619804a92fdb}, {addr: 0x800459c4, size: 4, hash: df3f619804a92fdb}]}
-  - {name: system_handlers, source: src/main/system_handlers.c, data: [{addr: 0x8004c6c4, size: 4, hash: df3f619804a92fdb}]}
-  - {name: unit_build, source: src/main/unit_init.c, data: [{addr: 0x80066200, size: 4, hash: df3f619804a92fdb}], bss: [{addr: 0x80066308, size: 1, hash: 6e340b9cffb37a98}]}
-  - {name: unit_data, source: src/main/game_tables.c, data: [{addr: 0x80066204, size: 48, hash: 17b0761f87b081d5}]}
-  - {name: unit_generation, source: src/main/unit_loadout.c}
-  - {name: unit_state, source: src/main/unit_state.c}
-  - {name: unit_stats, source: src/main/unit_stats.c}
+  - {name: suzuki_smd_interpreter, source: src/lib/suzuki/smd_interpreter.c, data: [{addr: 0x80028b0c, size: 512, hash: 0c5df638b3c3dc59}, {addr: 0x80028d0c, size: 128, hash: 80655c8c168e28ca}, {addr: 0x80028d8c, size: 228, hash: 6e8fc6334088202d}, {addr: 0x80028e70, size: 228, hash: ecbd552b54c02ff6}]}
+  - {name: suzuki_smd_channel_commands, source: src/lib/suzuki/smd_channel_commands.c}
+  - {name: suzuki_smd_modulation_commands, source: src/lib/suzuki/smd_modulation_commands.c, data: [{addr: 0x80028f54, size: 64, hash: def4d0f65924066c}]}
+  - {name: suzuki_smd_voices, source: src/lib/suzuki/smd_voices.c, data: [{addr: 0x80028fe8, size: 120, hash: b76b6c92808b2147}, {addr: 0x80029060, size: 120, hash: 30da9f7074541cf1}, {addr: 0x800290d8, size: 6144, hash: d3f07a5746f7a2fb}]}
+  - {name: suzuki_driver, source: src/lib/suzuki/driver.c, bss: [{addr: 0x80032a3c, size: 4, hash: df3f619804a92fdb}, {addr: 0x80032a40, size: 2, hash: 96a296d224f285c6}]}
+  - {name: game_loop, source: src/main/entry.c, data: [{addr: 0x800473a0, size: 1, hash: 4bf5122f344554c5}], bss: [{addr: 0x80047608, size: 4, hash: df3f619804a92fdb}]}
+  - {name: loading_message, source: src/main/loading_message.c, bss: [{addr: 0x8004e5b8, size: 4, hash: df3f619804a92fdb}]}
+  - {name: display, source: src/main/display.c}
+  - {name: startup, source: src/main/startup.c, data: [{addr: 0x8004d9b4, size: 4, hash: df3f619804a92fdb}]}
+  - {name: encounter, source: src/main/encounter.c}
+  - {name: new_game, source: src/main/new_game.c}
   - {name: vector, source: src/main/vector.c}
-  - {name: world_overlay, source: src/main/world_overlay.c}
+  - {name: new_game_caption, source: src/main/new_game_caption.c}
+  - {name: system_callbacks, source: src/main/system_callbacks.c, bss: [{addr: 0x800459b8, size: 4, hash: df3f619804a92fdb}, {addr: 0x800459bc, size: 4, hash: df3f619804a92fdb}, {addr: 0x800459c0, size: 4, hash: df3f619804a92fdb}, {addr: 0x800459c4, size: 4, hash: df3f619804a92fdb}]}
+  - {name: sound_requests, source: src/main/sound_requests.c, data: [{addr: 0x80047080, size: 800, hash: 9ac66e2befd1621a}], bss: [{addr: 0x8004599c, size: 4, hash: df3f619804a92fdb}]}
+  - {name: heap, source: src/main/heap.c, data: [{addr: 0x8004e9d4, size: 64, hash: f5a5fd42d16a2030}], bss: [{addr: 0x8004e5c0, size: 16, hash: 374708fff7719dd5}]}
+  - {name: file_loading, source: src/main/file_loading.c}
+  - {name: system_handlers, source: src/main/system_handlers.c, data: [{addr: 0x8004c6c4, size: 4, hash: df3f619804a92fdb}]}
+  - {name: battle_otag, source: src/main/battle_otag.c}
+  - {name: save_state, source: src/main/save_state.c, rodata: [{addr: 0x800473b0, size: 4, hash: 27d9bda8887f41f6}], bss: [{addr: 0x8005771c, size: 1024, hash: 5f70bf18a0860070}]}
   - {name: zodiac_primitives, source: src/lib/menu/unit_view/zodiac_primitives.c}
+  - {name: frame_graphics, source: src/main/frame_graphics.c, data: [{addr: 0x80047598, size: 8, hash: 37cd35309c7e000f}, {addr: 0x800475a0, size: 8, hash: 6590074fb72aab6f}, {addr: 0x800475a8, size: 8, hash: 1c46d0293ec224c0}]}
+  - {name: world_overlay, source: src/main/world_overlay.c}
+  - {name: save_init_data_tables, source: src/main/save_tables.c, profile: gcc-2.6.3_O2_aspsx-2.21, data: [{addr: 0x80059594, size: 280, hash: 1f6c9de2e555d5d5}]}
+  - {name: menu_sort_defaults, source: src/main/menu_sort_defaults.c}
+  - {name: memcard_events, source: src/main/memcard_events.c, data: [{addr: 0x800596c0, size: 32, hash: 66687aadf862bd77}]}
+  - {name: open_overlay, source: src/main/open_overlay.c}
+  - {name: status_check_data, source: src/main/status_check_data.c}
+  - {name: party, source: src/main/party.c}
+  - {name: unit_data, source: src/main/game_tables.c, data: [{addr: 0x80066204, size: 48, hash: 17b0761f87b081d5}]}
+  - {name: unit_build, source: src/main/unit_init.c, data: [{addr: 0x80066200, size: 4, hash: df3f619804a92fdb}], bss: [{addr: 0x80066308, size: 1, hash: 6e340b9cffb37a98}]}
+  - {name: unit_generation, source: src/main/unit_loadout.c}
+  - {name: unit_stats, source: src/main/unit_stats.c}
+  - {name: job_progress, source: src/main/job_progress.c}
+  - {name: unit_state, source: src/main/unit_state.c}
 
 libraries:
   - {id: crt_startup, addr: 0x80010a30, end: 0x80010ba8, kind: c-runtime, library: "Psy-Q C startup"}

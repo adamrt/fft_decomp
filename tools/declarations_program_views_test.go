@@ -218,3 +218,29 @@ extern u16 g_value;
 		})
 	}
 }
+
+func TestDeclarationsSeparateProgramOnlyFiles(t *testing.T) {
+	root := t.TempDir()
+	writeTestFile(t, filepath.Join(root, "include/fft/list.h"), []byte(`#ifndef LIST_H
+#define LIST_H
+#ifdef FFT_EVENT_BUNIT
+int list_build(int mode);
+#else
+void list_build(int mode);
+#endif
+#endif
+`))
+	writeTestFile(t, filepath.Join(root, "src/event/bunit/list.c"), []byte("int list_build(int mode) { return mode; }\n"))
+	writeTestFile(t, filepath.Join(root, "src/world/list.c"), []byte("void list_build(int mode) {}\n"))
+	bunit := &moduleSpec{ID: "event-bunit", Functions: []functionSpec{{Name: "list_build", Source: "src/event/bunit/list.c"}}}
+	world := &moduleSpec{ID: "world", Functions: []functionSpec{{Name: "list_build", Source: "src/world/list.c"}}}
+	if err := validateDeclarations(root, bunit, world); err != nil {
+		t.Fatalf("each program's own file must only meet its own view: %v", err)
+	}
+	// The same two bodies in a file both programs compile do conflict.
+	world.Functions[0].Source = "src/event/bunit/list.c"
+	writeTestFile(t, filepath.Join(root, "src/event/bunit/list.c"), []byte("void list_build(int mode) {}\n"))
+	if err := validateDeclarations(root, bunit, world); err == nil || !strings.Contains(err.Error(), "list_build") {
+		t.Fatalf("a shared file must still meet every view that compiles it: %v", err)
+	}
+}

@@ -1639,8 +1639,8 @@ profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
 
 units:
-  - {name: effect_altima_transformation_map_vertex_particles, source: src/effect/altima_vertices.c, data: [{addr: 0x801c4ecc, size: 6, hash: 3badc753202410a0}]}
   - {name: effect_dome_mesh, source: src/effect/dome_mesh.c}
+  - {name: effect_altima_transformation_map_vertex_particles, source: src/effect/altima_vertices.c, data: [{addr: 0x801c4ecc, size: 6, hash: 3badc753202410a0}]}
 
 functions:
   - {addr: 0x801c2500, size: 120, name: load_dome_vertex, hash: 8f768abda88cbfca, unit: effect_dome_mesh}

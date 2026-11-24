@@ -32,6 +32,9 @@ type declarationSite struct {
 	signature  []string
 	definition bool
 	conditions []declarationCondition // known build conditions enclosing this site
+	// views lists the configured views that compile this site's source file,
+	// by index; nil means every view (headers, and sources no module binds).
+	views map[int]bool
 }
 
 type declarationCondition struct {
@@ -172,7 +175,10 @@ func declarationSitesOverlap(a, b declarationSite, views []map[string]string) bo
 		return true
 	}
 	conditions := append(append([]declarationCondition{}, a.conditions...), b.conditions...)
-	for _, macros := range views {
+	for index, macros := range views {
+		if (a.views != nil && !a.views[index]) || (b.views != nil && !b.views[index]) {
+			continue // a program that does not compile one of the two files
+		}
 		possible := true
 		for _, condition := range conditions {
 			value, err := evaluateConditional(condition.directive, condition.expression, macros)
@@ -811,11 +817,22 @@ func (group declarationGroup) conflicting() bool {
 func collectDeclarationGroups(root string, dirs []string, modules ...*moduleSpec) ([]declarationGroup, error) {
 	var views []map[string]string
 	knownMacros := map[string]bool{}
-	for _, module := range modules {
+	compiledBy := map[string]map[int]bool{} // source path -> views that compile it
+	for index, module := range modules {
 		macros := module.macros()
 		views = append(views, macros)
 		for name := range macros {
 			knownMacros[name] = true
+		}
+		for f := range module.Functions {
+			source := filepath.ToSlash(module.sourceOf(&module.Functions[f]))
+			if source == "" {
+				continue
+			}
+			if compiledBy[source] == nil {
+				compiledBy[source] = map[int]bool{}
+			}
+			compiledBy[source][index] = true
 		}
 	}
 	sitesBySymbol := map[string][]declarationSite{}
@@ -855,6 +872,7 @@ func collectDeclarationGroups(root string, dirs []string, modules ...*moduleSpec
 					signature:  declaration.signature,
 					definition: declaration.definition,
 					conditions: conditions[declaration.line],
+					views:      compiledBy[relative],
 				})
 			}
 			return nil
