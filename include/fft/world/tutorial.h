@@ -26,7 +26,7 @@ typedef struct tutorial_menu_level {
     s32 cursor_window;
     s32 label_window; /* 0x04 */
     s32 rows_image;   /* 0x08 */
-    s32 _unknown_0c;  /* set to 24 by the push; no reader found */
+    s32 _unread_0c;   /* set to 24 by the push; no reader found */
     u8 _unused_10[8];
     s32 mode; /* 0x18; menu_stack_window_mode_e */
     s32 selected_entry;

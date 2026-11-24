@@ -899,10 +899,10 @@ s32 effect_emitter_spawn_particles(s16 record_index, s32 frame, s32 emitter_inde
     EFFECT_READ_CURVE(curve, factor, inertia_binding, frame);
     inertia_min = effect_lerp_q8(entry->emitter.spawn.inertia_start.min, entry->emitter.spawn.inertia_end.min, factor);
     inertia_max = effect_lerp_q8(entry->emitter.spawn.inertia_start.max, entry->emitter.spawn.inertia_end.max, factor);
-    discarded_selector = entry->emitter.spawn_bindings._unknown_02;
+    discarded_selector = entry->emitter.spawn_bindings.discarded;
     EFFECT_READ_CURVE(curve, factor, discarded_selector, frame);
-    effect_lerp_q8(entry->emitter._unknown_4c[0], entry->emitter._unknown_50[0], factor);
-    effect_lerp_q8(entry->emitter._unknown_4c[1], entry->emitter._unknown_50[1], factor);
+    effect_lerp_q8(entry->emitter.discarded_start[0], entry->emitter.discarded_end[0], factor);
+    effect_lerp_q8(entry->emitter.discarded_start[1], entry->emitter.discarded_end[1], factor);
     weight_binding = entry->emitter.spawn_bindings.weight;
     EFFECT_READ_CURVE(curve, factor, weight_binding, frame);
     weight_min = effect_lerp_q8(entry->emitter.weight_start.min, entry->emitter.weight_end.min, factor);

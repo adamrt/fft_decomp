@@ -144,7 +144,7 @@ static void init_script(void) {
     g_ending_script_state.dispatch.flags = ENDING_SCRIPT_DISPATCH_RUNNING;
     g_ending_script_state.dispatch.tpage = (s16)GetTPage(0, 2, 0x300, 0);
     g_ending_script_state.dispatch.clut = (s16)GetClut(0, 0x1e0);
-    g_ending_script_state._unknown_1674 = 0;
+    g_ending_script_state._unread_1674 = 0;
     g_ending_script_state.dispatch.scrolled_distance = 0;
     g_ending_script_state.dispatch.scroll_fraction = 0;
     g_ending_script_state.dispatch.scroll_speed = 0;

@@ -486,17 +486,17 @@ u8* suzuki_smd_time_signature(u8* note_data, suzuki_music_t* music, suzuki_music
     return note_data + 2;
 }
 
-/* SMD opcode 0xA4: sets the song-wide byte _unknown_01c. A5 reads it for
+/* SMD opcode 0xA4: sets the song-wide byte _unread_01c. A5 reads it for
  * its update, and music snapshots preserve it; its purpose is unknown. */
 u8* suzuki_smd_opcode_a4(u8* note_data, suzuki_music_t* music, suzuki_music_channel_t* channel) {
-    music->_unknown_01c = *note_data;
+    music->_unread_01c = *note_data;
     return note_data + 1;
 }
 
 /* SMD opcode 0xA5: adds a delta to the song-wide byte
  * that opcode 0xA4 sets. */
 u8* suzuki_smd_opcode_a5(u8* note_data, suzuki_music_t* music, suzuki_music_channel_t* channel) {
-    music->_unknown_01c += *note_data;
+    music->_unread_01c += *note_data;
     return note_data + 1;
 }
 

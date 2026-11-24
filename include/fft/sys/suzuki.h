@@ -72,12 +72,12 @@ struct suzuki_smd_header {
     u32 size;               /* 0x08; file size in bytes */
     u8 _unused_0c[4];       /* 0x0c */
     u16 id;                 /* 0x10; copied to MUS id and channel sound_id; 0 on the disc */
-    u8 _unknown_12;         /* 0x12; copied to MUS _unknown_014; 2 on the disc */
+    u8 _unread_12;          /* 0x12; copied to MUS _unread_014; 2 on the disc */
     u8 tick_divisor;        /* 0x13; divides the 48 ticks of a beat for the bar and beat counters; 1 on the disc */
     u8 channel_count;       /* 0x14 */
-    u8 _unknown_15;         /* 0x15; copied to MUS _unknown_017; 0 on the disc */
+    u8 _unread_15;          /* 0x15; copied to MUS _unread_017; 0 on the disc */
     u16 waveset_id;         /* 0x16; 0 on the disc */
-    u16 _unknown_18;        /* 0x18; copied to MUS _unknown_01a; 0x28-0x7f on the disc */
+    u16 volume;             /* 0x18; Provisional: song volume, copied to the MUS record; 0x28-0x7f on the disc */
     s8 reverb_mode;         /* 0x1a; 4 on the disc */
     u8 reverb_depth;        /* 0x1b */
     u8 reverb_delay;        /* 0x1c */
@@ -194,9 +194,9 @@ typedef struct suzuki_music_channel {
     u8* note_data;          /* 0x18; read position */
     u8* loop_note_data;     /* 0x1c; loop point set by Loop and Loop Select; End Bar jumps to it */
     u8* restart_note_data;  /* 0x20; set by suzuki_smd_init_channel_streams */
-    u32 _unknown_024;       /* 0x24; cleared by both channel initializers, never read */
+    u32 _unread_024;        /* 0x24; cleared by both channel initializers, never read */
     u16 loop_count;         /* 0x28; times End Bar has jumped to the loop point */
-    u8 _unknown_02a;        /* 0x2a; cleared by both channel initializers, never read */
+    u8 _unread_02a;         /* 0x2a; cleared by both channel initializers, never read */
     u8 loop_octave_base;    /* 0x2b; octave_base saved with loop_note_data */
     u8 instrument;          /* 0x2c; index into waveset->instruments */
     u8 voice;               /* 0x2d; SPU voice (Set Voice); only an odd voice takes Enable LFO */
@@ -341,8 +341,8 @@ typedef enum suzuki_smd_opcode {
     SUZUKI_SMD_OPCODE_TEMPO = 0xa0,              /* tempo: 75/64 quarter notes a minute per unit */
     SUZUKI_SMD_OPCODE_ACCELERANDO = 0xa1,        /* signed tempo delta */
     SUZUKI_SMD_OPCODE_TEMPO_RAMP = 0xa2,         /* ticks, target tempo */
-    SUZUKI_SMD_OPCODE_UNKNOWN_A4 = 0xa4,         /* value: sets music->_unknown_01c; suzuki_smd_opcode_a4 */
-    SUZUKI_SMD_OPCODE_UNKNOWN_A5 = 0xa5,         /* delta: adds to music->_unknown_01c; suzuki_smd_opcode_a5 */
+    SUZUKI_SMD_OPCODE_UNKNOWN_A4 = 0xa4,         /* value: sets music->_unread_01c; suzuki_smd_opcode_a4 */
+    SUZUKI_SMD_OPCODE_UNKNOWN_A5 = 0xa5,         /* delta: adds to music->_unread_01c; suzuki_smd_opcode_a5 */
     SUZUKI_SMD_OPCODE_MASTER_VOLUME = 0xa6,      /* volume of the whole music */
     SUZUKI_SMD_OPCODE_MASTER_VOLUME_RAMP = 0xa7, /* time in 32/240 s units, target volume */
     SUZUKI_SMD_OPCODE_GATE_TIME = 0xa9,  /* sixteenths of each note's length that stay keyed on; suzuki_smd_gate_time */
@@ -445,13 +445,13 @@ typedef struct suzuki_music {
     u8 _unused_00c[4];             /* 0x0c */
     s16 status;                    /* 0x10; suzuki_music_status_e */
     u16 id;                        /* 0x12; SMD id */
-    u8 _unknown_014;               /* 0x14; SMD _unknown_12, 1 for the SFX record */
+    u8 _unread_014;                /* 0x14; SMD _unread_12, 1 for the SFX record */
     u8 tick_divisor;               /* 0x15 */
     u8 channel_count;              /* 0x16 */
-    u8 _unknown_017;               /* 0x17; SMD _unknown_15, 0 for the SFX record */
+    u8 _unread_017;                /* 0x17; SMD _unread_15, 0 for the SFX record */
     s16 waveset_id;                /* 0x18; sound font id */
-    u16 _unknown_01a;              /* 0x1a; SMD _unknown_18, 0x7f for SFX */
-    u8 _unknown_01c;               /* 0x1c; set by opcode 0xA4, added to by 0xA5, cleared by the header reset */
+    u16 volume;                    /* 0x1a; Provisional: the SMD header's volume, 0x7f for SFX; never read */
+    u8 _unread_01c;                /* 0x1c; set by opcode 0xA4, added to by 0xA5, cleared by the header reset */
     u8 loop_select;                /* 0x1d; the Loop Select opcode whose byte equals it sets the loop point */
     u16 noise_clock;               /* 0x1e; SpuSetNoiseClock value (Enable Noise, Increase Noise) */
     s32 timer_ticks;               /* 0x20; incremented every tick */

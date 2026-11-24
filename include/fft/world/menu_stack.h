@@ -108,7 +108,7 @@ typedef struct menu_stack_message_level {
     s32 reload_text;
     s32 saved_blocked_buttons; /* 0x04; g_menu_blocked_buttons at push time */
     s32 window_index;          /* 0x08; window record appended by the TEXT_WINDOW push; cleared by the MESSAGE push */
-    s32 _unknown_0c;           /* 0x0c; set to 8 at push */
+    s32 _unread_0c;            /* 0x0c; set to 8 at push */
 } menu_stack_message_level_t;
 
 /* The SCROLLABLE_TEXT level, pushed by menu_stack_open_scrollable_text and stepped by
@@ -116,7 +116,7 @@ typedef struct menu_stack_message_level {
 typedef struct menu_stack_scrollable_text_level {
     s32 window_index; /* 0x00; window record of the frame */
     u8 _unused_04[0x1c];
-    s32 _unknown_20; /* 0x20; 0x28 at push; nothing reads it */
+    s32 _unread_20; /* 0x20; 0x28 at push; nothing reads it */
 } menu_stack_scrollable_text_level_t;
 
 /* Panel levels: the number panels (proposition_open_days_panel, open_variable_edit and

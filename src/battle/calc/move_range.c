@@ -45,7 +45,7 @@ typedef struct pathfind_work {
     u8 _unused_17;
     u8 terrain_width;   /* 0x18 */
     u8 terrain_depth;   /* 0x19 */
-    u8 _unknown_1a;     /* 0x1a; see g_move_config_unknown_1a_value */
+    u8 _unread_1a;      /* 0x1a; see g_move_config_unknown_1a_value */
     u8 unit_size;       /* 0x1b */
     u8 movement_set_3;  /* 0x1c */
     u8 fly_or_teleport; /* 0x1d */
@@ -475,7 +475,7 @@ static void store_spread_unit_to_scratchpad(s32 unit_id) {
     }
 
     team = unit->initial_team_flags;
-    config->_unknown_1a = g_move_config_unknown_1a_value;
+    config->_unread_1a = g_move_config_unknown_1a_value;
     mount = MOVE_RECORD_NONE;
     for (i = MOVE_RECORD_COUNT - 1; i >= 0; i--) {
         record[i].unit_id_flags = mount;
@@ -2184,7 +2184,7 @@ static move_path_t* calculate_path(s32 flags, s32 jump, s32 x, s32 y, u32 level,
         config->move = MOVE_PATHFIND_RANGE;
         config->can_ride = 0;
         g_move_path_team = 0;
-        config->_unknown_1a = g_move_config_unknown_1a_value;
+        config->_unread_1a = g_move_config_unknown_1a_value;
         empty_flags = MOVE_RECORD_NONE;
         for (i = MOVE_RECORD_COUNT - 1; i >= 0; i--) {
             records[i].unit_id_flags = empty_flags;

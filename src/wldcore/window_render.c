@@ -253,8 +253,8 @@ void window_start_number_panel_thread(s32 thread_id, u32 packed_bounds, s32 text
 
     s_window_panel_number_state.bounds.min = min;
     s_window_panel_number_state.bounds.max = max;
-    s_window_panel_number_state._unknown_04[0] = -1;
-    s_window_panel_number_state._unknown_04[1] = -1;
+    s_window_panel_number_state._unread_04[0] = -1;
+    s_window_panel_number_state._unread_04[1] = -1;
     s_window_panel_number_state.on_confirm = number_confirm_noop;
     g_menu_stack_entry_values[0] = g_menu_stack_entry_values[1] = MENU_ROW_ACTION_NONE;
     if (min < 10 && max < 10) {

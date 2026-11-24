@@ -89,7 +89,7 @@ typedef struct save_image {
     u8 item_location_flags[0x80];
     s32 script_variables[0x100];          /* 0x1884 */
     game_options_fields_t options;        /* 0x1c84; copied to g_game_options by save_image_restore */
-    u8 _unknown_1c88;                     /* 0x1c88 */
+    u8 _unread_1c88;                      /* 0x1c88 */
     s8 unit_list_sort_order[0xc];         /* 0x1c89; signed, -1-terminated */
     u8 _unused_1c95[1];                   /* 0x1c95; serialized and parity-covered */
     s8 formation_sort_order[8];           /* 0x1c96; signed, -1-terminated */
@@ -120,7 +120,7 @@ typedef struct save_icon {
 
 /* Serialized at save-image offset 0x1c88 and restored by full loads and tutorial swaps.
  * Its purpose is unknown; the original MAIN and tutorial images contain 0xc5. */
-extern u8 g_save_unknown_byte;
+extern u8 g_save_unread_byte;
 
 void save_init_data_tables(void);
 void save_init_state(void);

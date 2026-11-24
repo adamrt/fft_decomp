@@ -206,10 +206,10 @@ void menu_icon_selection_thread(void) {
         param->selected_index = cursor;
         menu_select_icon_cluts(&record->base);
         menu_update_icon_cursor_sprites(param, &record->base, i, cursor);
-        if ((records[0]._unknown_78 == 0 && records[1]._unknown_78 == 2)
-            || (records[0]._unknown_78 == 2 && records[1]._unknown_78 == 0)) {
-            records[0]._unknown_78 = 0;
-            records[1]._unknown_78 = 0;
+        if ((records[0].bob_active == 0 && records[1].bob_active == 2)
+            || (records[0].bob_active == 2 && records[1].bob_active == 0)) {
+            records[0].bob_active = 0;
+            records[1].bob_active = 0;
         }
         if (menu_should_close_thread(&g_script_event_input) != 0) {
             break;

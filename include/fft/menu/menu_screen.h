@@ -188,7 +188,7 @@ void menu_screen_update_grid_cursor(s16 alternate);
  * confirmed, including when the value is unchanged. */
 typedef struct menu_screen_number_range {
     ranges16_t bounds;        /* 0x00 */
-    s16 _unknown_04[2];       /* 0x04: -1 from window_start_number_panel_thread */
+    s16 _unread_04[2];        /* 0x04: -1 from window_start_number_panel_thread */
     void (*on_confirm)(void); /* 0x08 */
 } menu_screen_number_range_t;
 typedef char menu_screen_number_range_size_must_be_12[sizeof(menu_screen_number_range_t) == 12 ? 1 : -1];

@@ -180,7 +180,7 @@ typedef struct brave_story_participant_list_level {
 typedef struct brave_story_participant_level {
     s32 left_window;  /* 0x00 */
     s32 right_window; /* 0x04 */
-    s32 _unknown_08;  /* 0x08; cleared at push */
+    s32 _unread_08;   /* 0x08; cleared at push */
     s32 _unused_0c;   /* 0x0c */
     s32 proposition;  /* 0x10; index into g_proposition_active */
     s32 participant;  /* 0x14; slot in participant_indices */

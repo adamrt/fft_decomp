@@ -413,7 +413,7 @@ typedef struct text_dialog_record {
     u16 last_line;     /* 0x24 */
     u16 arrow_x;       /* 0x26 */
     u16 arrow_y;       /* 0x28 */
-    s16 _unknown_2a;   /* 0x2a */
+    s16 _unread_2a;    /* 0x2a */
     s16 mark;          /* 0x2c: measured width, later the 0xFB cursor mark */
     s16 lines;         /* 0x2e */
     s16 tail_offset;   /* 0x30: dialog tail offset from the window center */

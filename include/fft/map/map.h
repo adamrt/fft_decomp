@@ -258,7 +258,7 @@ typedef struct map_tile_flags {
     u8 untargetable : 1;
     u8 shading : 2;
     /* Values 0-5 in the terrain files; copied to the unread trajectory obstacle result. */
-    u8 _unknown_00 : 3;
+    u8 _unread_00 : 3;
     u8 cannot_stop : 1; /* set by no terrain file */
 } map_tile_flags_t;
 
@@ -311,7 +311,7 @@ enum {
  * flag-update order. */
 typedef struct map_tile {
     map_tile_surface_t surface;               /* 0x00 */
-    u8 _unknown_01;                           /* 0x01; 0 in every terrain file; reached only by tile data selector 1 */
+    u8 _unread_01;                            /* 0x01; 0 in every terrain file; reached only by tile data selector 1 */
     u8 height;                                /* 0x02; tile height in whole units */
     map_tile_depth_t depth_half_height;       /* 0x03 */
     u8 slope_type;                            /* 0x04; map_slope_type_e: two bits per exit side */
@@ -391,13 +391,13 @@ extern const u8 g_terrain_geomancy_abilities[];
 /* selected tile */
 /* Provisional 0xa-byte selected-tile record, filled by
  * store_selected_tile_data and copied whole by
- * unit_panel_copy_billboard_out. _unknown_02/_unknown_04 are the two bytes of
+ * unit_panel_copy_billboard_out. _unread_02/_unread_04 are the two bytes of
  * the per-surface-type main table g_terrain_tile_info_pairs, 25 and 25
  * for all 64 surface types; nothing reads them back. */
 typedef struct map_selected_tile {
     s16 surface_type;   /* 0x00 */
-    s16 _unknown_02;    /* 0x02 */
-    s16 _unknown_04;    /* 0x04 */
+    s16 _unread_02;     /* 0x02 */
+    s16 _unread_04;     /* 0x04 */
     s16 display_height; /* 0x06: half height + height * 2 + depth * 2 */
     s16 depth;          /* 0x08 */
 } map_selected_tile_t;

@@ -743,7 +743,7 @@ static void open_participant_detail(s32 proposition, s32 participant) {
     g_world_map_flags |= WORLD_MAP_FLAG_UNIT_PANEL_THREADS;
 
     depth = g_menu_stack_depth;
-    g_menu_stack_records[depth].participant._unknown_08 = 0;
+    g_menu_stack_records[depth].participant._unread_08 = 0;
     g_menu_stack_types[depth] = MENU_STACK_LEVEL_BRAVE_STORY_PARTICIPANT;
     g_menu_stack_depth = depth + 1;
 }

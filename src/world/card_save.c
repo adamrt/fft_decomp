@@ -639,7 +639,7 @@ void save_image_build(s32 slot) {
         sizeof(g_save_work_buffer->poached_item_quantities));
     bcopy(g_item_location_flags, g_save_work_buffer->item_location_flags,
         sizeof(g_save_work_buffer->item_location_flags));
-    g_save_work_buffer->_unknown_1c88 = g_save_unknown_byte;
+    g_save_work_buffer->_unread_1c88 = g_save_unread_byte;
     bcopy(
         g_script_variable_storage, g_save_work_buffer->script_variables, sizeof(g_save_work_buffer->script_variables));
     bcopy(&g_game_options, &g_save_work_buffer->options, sizeof(g_save_work_buffer->options));
@@ -759,7 +759,7 @@ s32 save_image_restore(s32 partial_load) {
         sizeof(g_save_work_buffer->poached_item_quantities));
     bcopy(g_save_work_buffer->item_location_flags, g_item_location_flags,
         sizeof(g_save_work_buffer->item_location_flags));
-    g_save_unknown_byte = g_save_work_buffer->_unknown_1c88;
+    g_save_unread_byte = g_save_work_buffer->_unread_1c88;
     bcopy(
         g_save_work_buffer->script_variables, g_script_variable_storage, sizeof(g_save_work_buffer->script_variables));
     bcopy(&g_save_work_buffer->options, &g_game_options, sizeof(g_save_work_buffer->options));

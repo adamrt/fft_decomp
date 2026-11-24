@@ -110,7 +110,7 @@ void message_dialog_thread(void) {
         rec.dialog_type |= map_unit_check_camera_facing_by_event_unit_id(thread_current_get_parameter_3()) + 1;
     }
 
-    rec._unknown_2a = 0;
+    rec._unread_2a = 0;
     rec.origin_x = 8;
     rec.origin_y = 8;
     rec.box_type = rec.dialog_type & DIALOG_TYPE_BOX_TYPE_MASK;

@@ -244,7 +244,7 @@ static s32 test_position_for_obstacle(
     y = position->vy;
     if (y >= -(height * MAP_HEIGHT_STEP) && y < -((height - ceiling) * MAP_HEIGHT_STEP)) {
         tile_ref->layer = 0;
-        g_projectile_tile_flags = tile->flags._unknown_00;
+        g_projectile_tile_flags = tile->flags._unread_00;
         return 1;
     }
 
@@ -257,7 +257,7 @@ static s32 test_position_for_obstacle(
     y = position->vy;
     if (y >= -(height * MAP_HEIGHT_STEP) && y < -((height - ceiling) * MAP_HEIGHT_STEP)) {
         tile_ref->layer = 1;
-        g_projectile_tile_flags = tile->flags._unknown_00;
+        g_projectile_tile_flags = tile->flags._unread_00;
         return 1;
     }
 

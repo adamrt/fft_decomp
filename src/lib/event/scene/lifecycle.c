@@ -280,6 +280,6 @@ static void store_selected_tile_data(void) {
     depth = map_get_tile_value(MAP_TILE_DATA_DEPTH, coords.vx, coords.vz, coords.vy) & 0xFF;
     g_map_selected_tile_data.depth = depth;
     g_map_selected_tile_data.display_height += depth * 2;
-    g_map_selected_tile_data._unknown_02 = g_terrain_tile_info_pairs[*surface_type][0];
-    g_map_selected_tile_data._unknown_04 = g_terrain_tile_info_pairs[*surface_type][1];
+    g_map_selected_tile_data._unread_02 = g_terrain_tile_info_pairs[*surface_type][0];
+    g_map_selected_tile_data._unread_04 = g_terrain_tile_info_pairs[*surface_type][1];
 }

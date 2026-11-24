@@ -256,7 +256,7 @@ static void reset_reading(novel_reading_t* record) {
     record->state_flags = 0;
     record->section = 0;
     record->counter = 0;
-    record->_unknown_18 = 0;
+    record->_unread_18 = 0;
     record->text_id = 0;
     record->counter_delta = 0;
     record->brightness = 0x30;

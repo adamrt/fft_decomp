@@ -91,7 +91,7 @@ typedef enum file_load_state {
 
 /* Asynchronous CD read state advanced by file_poll_load. */
 typedef struct file_load_descriptor {
-    s32 _unknown_00;
+    s32 _unread_00;
     file_load_state_e state;
     s32 error_count;
     s32 wait_frames;

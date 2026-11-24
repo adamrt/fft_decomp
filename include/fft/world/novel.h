@@ -45,7 +45,7 @@ typedef struct novel_reading {
     s16 counter_delta;        /* 0x12 */
     s16 text_id;              /* 0x14 */
     s16 brightness;           /* 0x16 */
-    s16 _unknown_18;          /* 0x18 */
+    s16 _unread_18;           /* 0x18 */
     s16 background_set;       /* 0x1a */
     s16 picture_render_index; /* 0x1c */
     s16 picture_id;           /* 0x1e */
@@ -115,7 +115,7 @@ typedef struct novel_level {
     s32 brightness_overlay_window; /* 0x0c; the brightness bar's overlay */
     u8 _unused_10[0xc];
     s32 treasure_id; /* 0x1c; the treasure detail reopened when the novel ends */
-    s32 _unknown_20; /* 0x20; set to 1 at push */
+    s32 _unread_20;  /* 0x20; set to 1 at push */
     s32 countdown;   /* 0x24; frames before the text history opens (9999 at push) */
     s32 phase;       /* 0x28; novel_phase_e */
     s32 fade_timer;  /* 0x2c; frames the brightness bar stays up (60 after L1 or R1) */
@@ -128,10 +128,10 @@ typedef struct novel_quit_level {
     s32 second_window; /* 0x04 */
     s32 render_index;  /* 0x08 */
     s32 _unused_0c;
-    s32 fade_out;    /* 0x10 */
-    s32 fade_in;     /* 0x14 */
-    s32 _unknown_18; /* 0x18; cleared at push */
-    s32 choice;      /* 0x1c */
+    s32 fade_out;   /* 0x10 */
+    s32 fade_in;    /* 0x14 */
+    s32 _unread_18; /* 0x18; cleared at push */
+    s32 choice;     /* 0x1c */
 } novel_quit_level_t;
 
 /* Values of novel_history_level_t.phase. */

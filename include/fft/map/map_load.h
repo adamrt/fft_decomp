@@ -182,7 +182,7 @@ typedef enum map_mesh_animation_record_type {
 /* One PART_PROPERTIES entry of a map state record. */
 typedef struct map_mesh_part_property {
     u8 parent;
-    u8 _unknown_01[3];
+    u8 _unused_01[3];
 } map_mesh_part_property_t;
 typedef char map_mesh_part_property_size_must_be_4[sizeof(map_mesh_part_property_t) == 4 ? 1 : -1];
 

@@ -94,7 +94,7 @@ void tutorial_open_menu(s32 selected_entry, s32 reset) {
     g_menu_stack_depth = record_index + 1;
     g_display_object_animated_pool[g_menu_stack_records[record_index].tutorial_menu.label_window].position.y
         = g_display_object_gs_image_pool[g_menu_stack_records[record_index].tutorial_menu.rows_image].position.y - 2;
-    g_menu_stack_records[record_index].tutorial_menu._unknown_0c = 0x18;
+    g_menu_stack_records[record_index].tutorial_menu._unread_0c = 0x18;
     g_menu_stack_types[record_index] = MENU_STACK_LEVEL_TUTORIAL;
 }
 

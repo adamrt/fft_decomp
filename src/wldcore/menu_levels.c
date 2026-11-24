@@ -1194,7 +1194,7 @@ void menu_stack_open_message(s32 text, s32 reload_text) {
     g_menu_blocked_buttons = -1;
     sound_play_effect(SOUND_SFX_WINDOW_OPEN);
     index = g_menu_stack_depth;
-    g_menu_stack_records[index].message._unknown_0c = 8;
+    g_menu_stack_records[index].message._unread_0c = 8;
     g_menu_stack_records[index].message.window_index = 0;
     g_menu_stack_types[index] = MENU_STACK_LEVEL_MESSAGE;
     g_menu_stack_depth = index + 1;
@@ -2097,7 +2097,7 @@ void menu_stack_open_scrollable_text(s32 text) {
         g_world_map_flags |= WORLD_MAP_FLAG_HIDE_LOCATION_LABEL | WORLD_MAP_FLAG_FREEZE_ANIMATION;
         g_menu_stack_depth = depth + 1;
         g_display_object_animated_pool[g_menu_stack_records[depth - 1].window_index].flags |= DISPLAY_OBJECT_HIDDEN;
-        g_menu_stack_records[depth].scrollable_text._unknown_20 = 0x28;
+        g_menu_stack_records[depth].scrollable_text._unread_20 = 0x28;
         g_menu_stack_types[depth] = MENU_STACK_LEVEL_SCROLLABLE_TEXT;
     }
 }

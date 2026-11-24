@@ -38,7 +38,7 @@ void save_init_data_tables(void) {
         record->state_flags = 0;
         g_novel_saved_readings[i].section = 0;
         g_novel_saved_readings[i].counter = 0;
-        record->_unknown_18 = 0;
+        record->_unread_18 = 0;
         record->text_id = 0;
         g_novel_saved_readings[i].counter_delta = 0;
         g_novel_saved_readings[i].buffer = &g_novel_script;

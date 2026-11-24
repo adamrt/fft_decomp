@@ -307,7 +307,7 @@ typedef char move_find_map_data_size_must_be_16[(sizeof(move_find_map_data_t) ==
 
 /* Eight-byte result copied whole into the post-movement item display. */
 typedef struct move_found_item {
-    s32 _unknown_00;   /* 0x00; reset when an item is selected */
+    s32 _unread_00;    /* 0x00; reset when an item is selected */
     u8 item_id;        /* 0x04 */
     u8 _padding_05[3]; /* tail padding to four-byte alignment */
 } move_found_item_t;

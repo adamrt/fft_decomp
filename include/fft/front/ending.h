@@ -87,7 +87,7 @@ typedef struct ending_script_state {
     /* 0x0000 */ ending_script_dispatch_state_t dispatch;
     /* 0x0030 */ ending_text_record_t records[16];
     /* 0x1670 */ s32 _unused_1670;
-    /* 0x1674 */ s32 _unknown_1674;     /* cleared by init_script */
+    /* 0x1674 */ s32 _unread_1674;      /* cleared by init_script */
     /* 0x1678 */ s32 control_parameter; /* XA channel of ENDING.XA to play */
     /* 0x167c */ s32 control_state;     /* step of the XA start or stop sequence (update_xa_audio) */
     /* 0x1680 */ s32 xa_wait_frames;    /* frames since the XA read started */

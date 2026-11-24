@@ -64,8 +64,8 @@ void menu_build_window_sprites(RECT* rect, menu_entry_t* param, menu_icon_record
     rect->y = param->vram_origin.y;
     rect->w = param->inner_width >> 2;
     rect->h = param->inner_height;
-    record->_unknown_74 = 0;
-    record->_unknown_78 = 0;
+    record->bob_timer = 0;
+    record->bob_active = 0;
     menu_init_sprite_array(record->base.sprites, 4, 0x7cfc);
     gfx_set_image_primitive_layout(record->base.sprites, &param->vram_origin, &param->window, &param->text_image);
     SetSemiTrans(&record->base.sprites[1], 0);

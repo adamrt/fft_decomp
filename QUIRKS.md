@@ -549,7 +549,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   `take_next_turn_event` has a case for turn event 0x400
   (`TURN_EVENT_UNKNOWN_0400`), which its only source,
   `turn_run_clock`, never returns;
-  `menu_icon_selection_thread` clears both icon records' `_unknown_78` when
+  `menu_icon_selection_thread` clears both icon records' `bob_active` when
   one holds 0 and the other 2, but their only writer,
   `menu_build_window_sprites`, stores 0.
 - `queue_messages_for_unit` tests the 16-record

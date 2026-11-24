@@ -133,7 +133,7 @@ void novel_open_reader(s32 argument) {
     g_menu_stack_ot_offset = 9;
     g_world_map_fade.priorities[0] = 8;
     g_world_map_fade.flags[1] |= WORLD_MAP_FADE_BOX_VISIBLE;
-    g_menu_stack_records[g_menu_stack_depth].novel._unknown_20 = 1;
+    g_menu_stack_records[g_menu_stack_depth].novel._unread_20 = 1;
     g_menu_stack_records[g_menu_stack_depth].novel.countdown = 9999;
     g_menu_stack_records[g_menu_stack_depth].novel.fade_timer = 0;
     g_menu_stack_records[g_menu_stack_depth].novel.phase = NOVEL_PHASE_RUN;
@@ -372,7 +372,7 @@ static void open_quit_menu(void) {
     fade->boxes[0].b = 0;
     fade->flags[0] |= WORLD_MAP_FADE_BOX_VISIBLE;
     g_menu_stack_records[depth].novel_quit.choice = 0;
-    g_menu_stack_records[depth].novel_quit._unknown_18 = 0;
+    g_menu_stack_records[depth].novel_quit._unread_18 = 0;
     g_menu_stack_records[depth].novel_quit.fade_in = 0;
     g_menu_stack_records[depth].novel_quit.fade_out = 0;
     g_menu_stack_types[depth] = MENU_STACK_LEVEL_SOUND_NOVEL_QUIT;

@@ -77,7 +77,7 @@ move_found_item_t* move_find_determine_item(battle_unit_t* unit) {
     }
     s_selected_item.item_id = item_id;
     test_or_set_item_flag(script_variable_get(EVENT_SCRIPT_VAR_CURRENT_MAP), find_result->entry_index, 1);
-    s_selected_item._unknown_00 = 0;
+    s_selected_item._unread_00 = 0;
     return &s_selected_item;
 }
 

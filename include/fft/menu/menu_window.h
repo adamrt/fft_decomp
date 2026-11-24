@@ -109,12 +109,15 @@ typedef struct menu_icon_sprites {
 typedef char menu_icon_sprites_size_must_be_104[(sizeof(menu_icon_sprites_t) == 104) ? 1 : -1];
 
 /* The 0x7c-byte icon record menu_build_window_sprites fills: menu_icon_sprites_t followed by three borrowed
- * icon sprites and two state words. Provisional: the state words are unnamed. */
+ * icon sprites and two state words. Provisional: the state words are a per-record copy of the cursor bob's
+ * timer and active flag (MENU_CURSOR_THREAD_WORD_BOB_TIMER and _ACTIVE, in that order), which the cursor
+ * code now keeps in thread task words; the builder clears both, and only menu_icon_selection_thread
+ * still tests the flag's 0 and 2. */
 typedef struct menu_icon_record {
     menu_icon_sprites_t base; /* 0x00 */
     SPRT* icons[3];           /* 0x68 */
-    s32 _unknown_74;          /* 0x74 */
-    s32 _unknown_78;          /* 0x78 */
+    s32 bob_timer;            /* 0x74; never read */
+    s32 bob_active;           /* 0x78; nothing sets 2 */
 } menu_icon_record_t;
 typedef char menu_icon_record_size_must_be_124[sizeof(menu_icon_record_t) == 124 ? 1 : -1];
 

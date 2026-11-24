@@ -211,7 +211,8 @@ preserving every original byte.
   repeats the typedef name without its suffix); uppercase enumerators. A size
   assert is named after its type (`unit_size_must_be_N`). Decimal for counts
   and ordinary enum values, hex for flags and encoded values.
-- Unknown members are `_unknown_XX`; `_unused_XX` means no named access;
+- Unknown members are `_unknown_XX`; `_unread_XX` means written by name but never
+  read (by C, hand-written code or DMA); `_unused_XX` means no named access;
   `_padding_XX` means proven alignment or size filler. Offsets are relative to
   the member's own struct. Never access unused or padding members by name.
 - Prefer `s8`/`u8`, `s16`/`u16`, `s32`/`u32` for explicit widths; PS1 SDK

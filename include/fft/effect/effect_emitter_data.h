@@ -97,7 +97,7 @@ typedef struct effect_emitter_spawn_curve_bindings {
     u32 velocity_angle : 4;
     u32 velocity_spread : 4;
     u32 inertia : 4;
-    u32 _unknown_02 : 4;
+    u32 discarded : 4; /* curve of discarded_start/discarded_end, read and thrown away */
     u32 weight : 4;
     u32 radial_speed : 4;
 } effect_emitter_spawn_curve_bindings_t;
@@ -191,8 +191,8 @@ typedef struct effect_geometry_entry {
                                  * bits 28-29 bind homing strength and bits 30-31 bind its curve */
     u32 color_curves;           /* 0x10: zero-based RGB curve indices in the low three nibbles */
     effect_emitter_geometry_view_t spawn;         /* 0x14: initial position, spread, angles and inertia */
-    s16 _unknown_4c[2];                           /* 0x4c: lerped to _unknown_50 and discarded */
-    s16 _unknown_50[2];                           /* 0x50 */
+    s16 discarded_start[2];                       /* 0x4c: min, max; interpolated, then the result is dropped */
+    s16 discarded_end[2];                         /* 0x50 */
     ranges16_t weight_start;                      /* 0x54: scales gravity */
     ranges16_t weight_end;                        /* 0x58 */
     ranges16_t radial_speed_start;                /* 0x5c */

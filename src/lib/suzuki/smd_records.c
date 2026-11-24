@@ -40,12 +40,12 @@ void suzuki_smd_transfer_music_data(suzuki_music_t* music) {
     music->status |= SUZUKI_MUSIC_STATUS_SMD;
     smd = music->smd;
     music->id = smd->id;
-    music->_unknown_014 = smd->_unknown_12;
+    music->_unread_014 = smd->_unread_12;
     music->tick_divisor = smd->tick_divisor;
     music->channel_count = smd->channel_count;
-    music->_unknown_017 = smd->_unknown_15;
+    music->_unread_017 = smd->_unread_15;
     music->waveset_id = smd->waveset_id;
-    music->_unknown_01a = smd->_unknown_18;
+    music->volume = smd->volume;
     music->reverb_mode = smd->reverb_mode;
     music->reverb_depth = smd->reverb_depth << 8;
     music->reverb_delay = smd->reverb_delay;
@@ -55,17 +55,17 @@ void suzuki_smd_transfer_music_data(suzuki_music_t* music) {
 }
 
 /* Sets the SFX music record's fixed header (SUZUKI_MUSIC_STATUS_SFX, id
- * 0x7fff, eight channels, _unknown_01a 0x7f), then the common header
+ * 0x7fff, eight channels, volume 0x7f), then the common header
  * defaults. */
 void suzuki_smd_init_sfx_music_header(suzuki_music_t* music) {
     music->status = SUZUKI_MUSIC_STATUS_SFX;
     music->id = 0x7fff;
-    music->_unknown_014 = 1;
+    music->_unread_014 = 1;
     music->tick_divisor = 1;
     music->channel_count = SUZUKI_SFX_CHANNEL_COUNT;
-    music->_unknown_017 = 0;
+    music->_unread_017 = 0;
     music->waveset_id = 0;
-    music->_unknown_01a = 0x7f;
+    music->volume = 0x7f;
     suzuki_smd_init_music_header(music);
 }
 
@@ -74,7 +74,7 @@ void suzuki_smd_init_sfx_music_header(suzuki_music_t* music) {
  * master volume. */
 void suzuki_smd_init_music_header(suzuki_music_t* music) {
     suzuki_smd_free_snapshots(music);
-    music->_unknown_01c = 0;
+    music->_unread_01c = 0;
     music->loop_select = 0;
     music->min_loop_count = 0;
     music->bar = 1;
@@ -179,9 +179,9 @@ void suzuki_smd_init_channels(suzuki_music_t* music) {
                 slot = voice;
                 channel->voice = slot;
                 channel->loop_note_data = 0;
-                channel->_unknown_024 = 0;
+                channel->_unread_024 = 0;
                 channel->loop_count = 0;
-                channel->_unknown_02a = 0;
+                channel->_unread_02a = 0;
                 channel->event_ticks = 0;
                 channel->length_adjust = 0;
                 channel->pitch_offset = 0;
@@ -306,9 +306,9 @@ void suzuki_sound_start_sfx(s16 channel_id, s32 sound_id, s16 volume, s16 balanc
             channel->octave_base = 0x3c;
             channel->gate_time = 0xf;
             channel->loop_note_data = 0;
-            channel->_unknown_024 = 0;
+            channel->_unread_024 = 0;
             channel->loop_count = 0;
-            channel->_unknown_02a = 0;
+            channel->_unread_02a = 0;
             channel->event_ticks = 0;
             channel->length_adjust = 0;
             channel->pitch_offset = 0;

@@ -45,7 +45,7 @@ typedef char menu_list_selection_size_must_be_2[sizeof(menu_list_selection_t) ==
  * ability-list positions. Math Skill uses list positions 4, 5 and 6. */
 typedef struct menu_unit_selection_record {
     u8 command_index;               /* 0x00 */
-    u8 _unknown_01;                 /* 0x01; reset to 0xff */
+    u8 _unread_01;                  /* 0x01; reset to 0xff */
     u8 skillset_index;              /* 0x02 */
     menu_list_selection_t lists[7]; /* 0x03 */
 } menu_unit_selection_record_t;
@@ -169,7 +169,7 @@ void command_reset_unit_record(s32 battle_unit_id) {
     for (i = 0; i < MENU_UNIT_SELECTION_RECORD_BYTES; i++) {
         if (battle_unit->auto_battle_setting == AI_AUTOBATTLE_MANUAL) {
             ((u8*)&records[battle_unit_id])[i] = 0;
-            g_menu_unit_selection_records[battle_unit_id]._unknown_01 = 0xFF;
+            g_menu_unit_selection_records[battle_unit_id]._unread_01 = 0xFF;
         }
     }
 }

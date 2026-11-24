@@ -51,7 +51,7 @@ s32 map_get_tile_value(map_tile_data_selector_e field, s32 x, s32 y, s32 layer) 
     case MAP_TILE_DATA_SURFACE_TYPE:
         return tile->surface.type;
     case MAP_TILE_DATA_UNKNOWN_01:
-        return tile->_unknown_01;
+        return tile->_unread_01;
     case MAP_TILE_DATA_HEIGHT:
         return tile->height;
     case MAP_TILE_DATA_HALF_HEIGHT:
@@ -69,7 +69,7 @@ s32 map_get_tile_value(map_tile_data_selector_e field, s32 x, s32 y, s32 layer) 
     case MAP_TILE_DATA_SHADING:
         return tile->flags.shading;
     case MAP_TILE_DATA_UNKNOWN_FLAGS_4_6:
-        return tile->flags._unknown_00;
+        return tile->flags._unread_00;
     case MAP_TILE_DATA_FLAT_CAMERA_BLOCK_MASK:
         return tile->camera_block_masks & MAP_TILE_CAMERA_BLOCK_DIRECTION_MASK;
     case MAP_TILE_DATA_MOVE_DESTINATION_MARK:
@@ -100,7 +100,7 @@ s32 map_set_tile_value(map_tile_data_selector_e field, s32 x, s32 y, s32 layer, 
         tile->surface.type = value;
         break;
     case MAP_TILE_DATA_UNKNOWN_01:
-        tile->_unknown_01 = value;
+        tile->_unread_01 = value;
         break;
     case MAP_TILE_DATA_HEIGHT:
         tile->height = value;
@@ -129,7 +129,7 @@ s32 map_set_tile_value(map_tile_data_selector_e field, s32 x, s32 y, s32 layer, 
         tile->flags.shading = value;
         break;
     case MAP_TILE_DATA_UNKNOWN_FLAGS_4_6:
-        tile->flags._unknown_00 = value;
+        tile->flags._unread_00 = value;
         break;
     case MAP_TILE_DATA_FLAT_CAMERA_BLOCK_MASK:
         tile->camera_block_masks = (tile->camera_block_masks & MAP_TILE_CAMERA_BLOCK_STEEP_MASK)

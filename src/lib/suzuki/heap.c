@@ -7,8 +7,8 @@
  * blocks in address order from g_suzuki_sound_heap_blocks. */
 typedef struct suzuki_heap_block {
     u16 flags;                      /* 0x00; suzuki_heap_block_flag_e; written, never tested */
-    u16 _unknown_02;                /* 0x02; cleared on allocation, never read */
-    u32 _unknown_04;                /* 0x04; cleared on allocation, never read */
+    u16 _unread_02;                 /* 0x02; cleared on allocation, never read */
+    u32 _unread_04;                 /* 0x04; cleared on allocation, never read */
     u8* end;                        /* 0x08; end of the payload */
     struct suzuki_heap_block* next; /* 0x0c */
 } suzuki_heap_block_t;
@@ -35,8 +35,8 @@ void suzuki_sound_init_heap(void* arena, u32 size) {
     g_suzuki_sound_heap_arena = head;
     g_suzuki_sound_heap_size = size;
     g_suzuki_sound_heap_blocks = head;
-    head->_unknown_02 = 0;
-    head->_unknown_04 = 0;
+    head->_unread_02 = 0;
+    head->_unread_04 = 0;
     head->end = (u8*)(head + 1);
     head->next = 0;
 }
@@ -64,9 +64,9 @@ void* suzuki_sound_alloc(u32 size) {
         payload = (u8*)(allocated + 1);
         allocated->end = payload + size;
         allocated->next = 0;
-        allocated->_unknown_04 = 0;
+        allocated->_unread_04 = 0;
         allocated->flags = SUZUKI_HEAP_BLOCK_ALLOCATED;
-        allocated->_unknown_02 = 0;
+        allocated->_unread_02 = 0;
         allocated->next = block->next;
         block->next = allocated;
         suzuki_sound_clear_memory(payload, size);

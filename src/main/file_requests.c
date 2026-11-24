@@ -59,7 +59,7 @@ s32 file_request_read(file_load_descriptor_t* header, s32 lba, s32 sector_count,
         PutDrawEnv(&g_gfx_draw_envs[1]);
         PutDispEnv(&g_gfx_display_envs[1]);
     }
-    header->_unknown_00 = 0;
+    header->_unread_00 = 0;
     header->sector_index = 0;
     header->error_count = 0;
     header->state = FILE_LOAD_STATE_SET_DOUBLE_SPEED;
