@@ -3468,9 +3468,9 @@ static s32 dispatch_gns_resource(u8 resource_type, map_resource_t* data) {
     s32 result;
     s32 i;
     u16 flags;
-    u8 red;
-    u8 green;
-    u8 blue;
+    u8 r;
+    u8 g;
+    u8 b;
 
     zero_vector = s_zero_svector;
     unit_scale = s_unit_scale_vector;
@@ -3725,18 +3725,19 @@ static s32 dispatch_gns_resource(u8 resource_type, map_resource_t* data) {
         map_light_dispatch_back_color_command(
             MAP_LIGHT_BACK_COLOR_SET, light->ambient.r, light->ambient.g, light->ambient.b);
 
-        red = light->gradient_top.r;
-        green = light->gradient_top.g;
-        blue = light->gradient_top.b;
-        g_map_background_gradient_colors.colors[MAP_BACKGROUND_GRADIENT_TOP].r = red;
-        g_map_background_gradient_colors.colors[MAP_BACKGROUND_GRADIENT_TOP].g = green;
-        g_map_background_gradient_colors.colors[MAP_BACKGROUND_GRADIENT_TOP].b = blue;
-        red = light->gradient_bottom.r;
-        green = light->gradient_bottom.g;
-        blue = light->gradient_bottom.b;
-        g_map_background_gradient_colors.colors[MAP_BACKGROUND_GRADIENT_BOTTOM].r = red;
-        g_map_background_gradient_colors.colors[MAP_BACKGROUND_GRADIENT_BOTTOM].g = green;
-        g_map_background_gradient_colors.colors[MAP_BACKGROUND_GRADIENT_BOTTOM].b = blue;
+        /* Each color's three loads come before its stores, which the byte stores could otherwise alias. */
+        r = light->gradient_top.r;
+        g = light->gradient_top.g;
+        b = light->gradient_top.b;
+        g_map_background_gradient_colors.colors[MAP_BACKGROUND_GRADIENT_TOP].r = r;
+        g_map_background_gradient_colors.colors[MAP_BACKGROUND_GRADIENT_TOP].g = g;
+        g_map_background_gradient_colors.colors[MAP_BACKGROUND_GRADIENT_TOP].b = b;
+        r = light->gradient_bottom.r;
+        g = light->gradient_bottom.g;
+        b = light->gradient_bottom.b;
+        g_map_background_gradient_colors.colors[MAP_BACKGROUND_GRADIENT_BOTTOM].r = r;
+        g_map_background_gradient_colors.colors[MAP_BACKGROUND_GRADIENT_BOTTOM].g = g;
+        g_map_background_gradient_colors.colors[MAP_BACKGROUND_GRADIENT_BOTTOM].b = b;
 
         /* Lightning flashes fade back to these colors. */
         s_weather_lightning_state.base_colors[0] = g_map_background_gradient_colors.colors[MAP_BACKGROUND_GRADIENT_TOP];
