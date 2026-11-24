@@ -718,14 +718,14 @@ void message_box_thread(void) {
 
                 /* Hide the cursor and arrow sprites in both buffers, one frame apart. */
                 hidden_window = WINDOW_AT(g_menu_packet_buffer_index);
-                hidden_window->sprites[0].x0 = 0x200;
-                hidden_window->sprites[1].x0 = 0x200;
-                hidden_window->sprites[2].x0 = 0x200;
+                hidden_window->sprites[0].x0 = 512;
+                hidden_window->sprites[1].x0 = 512;
+                hidden_window->sprites[2].x0 = 512;
                 thread_yield();
                 hidden_window = WINDOW_AT(g_menu_packet_buffer_index);
-                hidden_window->sprites[0].x0 = 0x200;
-                hidden_window->sprites[1].x0 = 0x200;
-                hidden_window->sprites[2].x0 = 0x200;
+                hidden_window->sprites[0].x0 = 512;
+                hidden_window->sprites[1].x0 = 512;
+                hidden_window->sprites[2].x0 = 512;
 
                 if (code == TEXT_PAGE_BREAK) {
                     continue;

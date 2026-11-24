@@ -38,26 +38,26 @@ void world_map_open_event_transition(s32 mode) {
         g_world_map_flags |= WORLD_MAP_FLAG_FREEZE_ANIMATION;
         world_map_start_fade(WORLD_MAP_FADE_OUT, 0x20);
     } else {
-        rect.x = 0x100;
+        rect.x = 256;
         rect.y = 0;
-        rect.w = 0x80;
-        rect.h = 0x100;
+        rect.w = 128;
+        rect.h = 256;
         g_world_map_flags |= WORLD_MAP_FLAG_DRAW_MAP | WORLD_MAP_FLAG_HIDE_MAP_DOTS | WORLD_MAP_FLAG_HIDE_MAP_ROUTES
             | WORLD_MAP_FLAG_NO_BACKGROUND_IMAGE | WORLD_MAP_FLAG_HIDE_CONTEXT_VALUE | WORLD_MAP_FLAG_HIDE_CALENDAR_DATE
             | WORLD_MAP_FLAG_HIDE_LOCATION_LABEL;
         g_world_map_marker_state.marker.render.flags |= DISPLAY_OBJECT_HIDDEN;
         MoveImage(&rect, 0x200, 0x100);
         DrawSync(0);
-        rect.x = 0x100;
+        rect.x = 256;
         rect.y = 0;
-        rect.w = 0x100;
-        rect.h = 0xF0;
+        rect.w = 256;
+        rect.h = 240;
         ClearImage(&rect, 0, 0, 0);
         s_event_transition_sprite.attribute = 0x42000000;
-        s_event_transition_sprite.x = 0x20;
-        s_event_transition_sprite.y = 0x20;
+        s_event_transition_sprite.x = 32;
+        s_event_transition_sprite.y = 32;
         s_event_transition_sprite.tpage = GetTPage(2, 0, 0x100, 0);
-        s_event_transition_sprite.w = 0xFF;
+        s_event_transition_sprite.w = 255;
         s_event_transition_sprite.mx = 0xA0;
         s_event_transition_sprite.my = 0x98;
         s_event_transition_sprite.scaley = ONE;
@@ -66,7 +66,7 @@ void world_map_open_event_transition(s32 mode) {
         s_event_transition_sprite.cx = 0;
         s_event_transition_sprite.v = 0;
         s_event_transition_sprite.u = 0;
-        s_event_transition_sprite.h = 0xF0;
+        s_event_transition_sprite.h = 240;
         s_event_transition_sprite.rotate = 0;
         s_event_transition_sprite.r = 0x80;
         s_event_transition_sprite.g = 0x80;
@@ -126,10 +126,10 @@ void world_map_update_event_transition(menu_stack_record_t* level) {
 
     /* Capture the screen into VRAM at (0x100, 0) and hide the map and root windows. */
     if (level->event_transition.frame == 1) {
-        rect.w = 0xFF;
+        rect.w = 255;
         rect.x = 0;
         rect.y = 0;
-        rect.h = 0xF0;
+        rect.h = 240;
         MoveImage(&rect, 0x100, 0);
         DrawSync(0);
         g_display_object_animated_pool[g_world_map_window_index].flags |= DISPLAY_OBJECT_HIDDEN;
@@ -147,10 +147,10 @@ void world_map_update_event_transition(menu_stack_record_t* level) {
             s_world_map_fade_color.b = 0xFF;
             s_world_map_fade_color.g = 0xFF;
             s_world_map_fade_color.r = 0xFF;
-            rect.x = 0x200;
-            rect.y = 0x100;
-            rect.w = 0x80;
-            rect.h = 0x100;
+            rect.x = 512;
+            rect.y = 256;
+            rect.w = 128;
+            rect.h = 256;
             g_world_map_flags ^= WORLD_MAP_FLAG_RUNNING;
             MoveImage(&rect, 0x100, 0);
             DrawSync(0);

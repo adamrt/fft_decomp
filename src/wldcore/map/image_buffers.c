@@ -15,8 +15,8 @@ void world_map_clear_image_buffers(s32 clear_scratch) {
     VSync(0);
     image_rect.x = 0;
     image_rect.y = 0;
-    image_rect.w = 0x100;
-    image_rect.h = 0x1e0;
+    image_rect.w = 256;
+    image_rect.h = 480;
     ClearImage(&image_rect, 0, 0, 0);
     if (clear_scratch != 0) {
         for (i = WORLD_MAP_BACKDROP_WORDS - 1; i >= 0; i--) {

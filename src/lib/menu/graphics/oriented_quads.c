@@ -26,9 +26,9 @@ void menu_gfx_enqueue_oriented_textured_quad(
     }
     SetSemiTrans(poly, semitrans);
 
-    setXY4(poly, descriptor->position.x + 0x80, descriptor->position.y, descriptor->position.x + (descriptor->w + 0x80),
-        descriptor->position.y, descriptor->position.x + 0x80, descriptor->position.y + descriptor->h,
-        descriptor->position.x + (descriptor->w + 0x80), descriptor->position.y + descriptor->h);
+    setXY4(poly, descriptor->position.x + 128, descriptor->position.y, descriptor->position.x + (descriptor->w + 128),
+        descriptor->position.y, descriptor->position.x + 128, descriptor->position.y + descriptor->h,
+        descriptor->position.x + (descriptor->w + 128), descriptor->position.y + descriptor->h);
 
     switch (quad_orientation & 0xff) {
     case TEXTURE_UV_FLIP_NONE:

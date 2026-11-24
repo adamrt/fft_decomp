@@ -103,10 +103,10 @@ void crystal_pickup_run_menus(void) {
         }
     }
 
-    menu->window.x = 0xc8;
-    menu->window.y = 0x40;
-    menu->window.w = 0x70;
-    menu->text_image.source.w = 0x70;
+    menu->window.x = 200;
+    menu->window.y = 64;
+    menu->window.w = 112;
+    menu->text_image.source.w = 112;
     menu->inner_width = 0x70;
     if (value_count < 8) {
         menu_text_layout_t* layout = menu->context;
@@ -348,24 +348,24 @@ static void init_at_list(menu_entry_t* menu) {
     if (has_special_entry != 0) {
         menu_text_layout_t* layout;
 
-        menu->window.y = 0x20;
+        menu->window.y = 32;
         layout = menu->context;
         layout->row_count = 10;
-        menu->window.x = 0x8c;
-        menu->window.y = 0x20;
-        menu->window.w = 0xe8;
-        menu->text_image.source.w = 0xe8;
+        menu->window.x = 140;
+        menu->window.y = 32;
+        menu->window.w = 232;
+        menu->text_image.source.w = 232;
         menu->inner_width = 0xe8;
     } else {
         menu_text_layout_t* layout;
 
-        menu->window.y = 0x20;
+        menu->window.y = 32;
         layout = menu->context;
         layout->row_count = 10;
-        menu->window.x = 0xbe;
-        menu->window.y = 0x20;
-        menu->window.w = 0x84;
-        menu->text_image.source.w = 0x84;
+        menu->window.x = 190;
+        menu->window.y = 32;
+        menu->window.w = 132;
+        menu->text_image.source.w = 132;
         menu->inner_width = 0x84;
     }
 

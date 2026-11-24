@@ -117,9 +117,9 @@ void gfx_build_gradient_grid_primitives(POLY_GT4* poly) {
             intensity = (row + 1) * 8 + 0x40;
             setRGB2(poly, intensity, intensity, intensity);
             setRGB3(poly, intensity, intensity, intensity);
-            setXY4(poly, column * 0x40 + 0x80, row * 0x20, column * 0x40 + 0xc0, row * 0x20, column * 0x40 + 0x80,
-                row * 0x20 + 0x20, column * 0x40 + 0xc0, row * 0x20 + 0x20);
-            setUV4(poly, 0x58, 0xd8, 0x98, 0xd8, 0x58, 0xf8, 0x98, 0xf8);
+            setXY4(poly, column * 64 + 128, row * 32, column * 64 + 192, row * 32, column * 64 + 128, row * 32 + 32,
+                column * 64 + 192, row * 32 + 32);
+            setUV4(poly, 88, 216, 152, 216, 88, 248, 152, 248);
             SetSemiTrans(poly, 1);
             SetShadeTex(poly, 0);
             gfx_draw_or_append_gpu_primitive(poly);

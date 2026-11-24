@@ -189,8 +189,8 @@ void world_map_update_screen_transition(menu_stack_record_t* level) {
             DrawSync(0);
             rect.x = 0;
             rect.y = 0;
-            rect.w = 0x100;
-            rect.h = 0xF0;
+            rect.w = 256;
+            rect.h = 240;
             StoreImage(&rect, g_world_map_scratch_buffer);
             DrawSync(0);
             VSync(0);

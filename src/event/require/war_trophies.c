@@ -233,12 +233,12 @@ void war_trophy_list_thread(void) {
             menu_init_default_poly_ft4(&buffer->quads[i]);
         }
         menu_init_sprt(&buffer->banner);
-        prims->banner.x0 = 0x88;
-        prims->banner.y0 = 0x78;
+        prims->banner.x0 = 136;
+        prims->banner.y0 = 120;
         prims->banner.u0 = 8;
         prims->banner.v0 = 0x78;
-        prims->banner.h = 0x78;
-        prims->banner.w = 0xf0;
+        prims->banner.h = 120;
+        prims->banner.w = 240;
         prims->banner.clut = 0x7cbc;
         mem_copy_bytes_nonempty(&prims[1], g_war_trophy_primitives, sizeof(war_trophy_primitives_t));
 
@@ -276,7 +276,7 @@ void war_trophy_list_thread(void) {
                 /* Text lines go into the texture the banner sprite draws, where texture x + 0x80
                  * is screen x, so each line lands just right of its icon. */
                 if (s_war_trophy_entry_count < 5) {
-                    g_war_trophy_image_rect.x = 0x60;
+                    g_war_trophy_image_rect.x = 96;
                     g_war_trophy_image_rect.y = row * 20 + 0x78;
                 } else {
                     g_war_trophy_image_rect.x = (row & 1) ? 0x94 : 0x2c;
@@ -310,8 +310,8 @@ void war_trophy_list_thread(void) {
                     quad->x3 = get_column_x(i, s_war_trophy_entry_count) + 0x10;
                     quad->y3 = get_row_y(i - start, s_war_trophy_entry_count) + 0x10;
                     item_set_icon_sprite(&sprite, s_war_trophy_entry_values[i]);
-                    setUV4(quad, sprite.u0, sprite.v0, sprite.u0 + 0x10, sprite.v0, sprite.u0, sprite.v0 + 0x10,
-                        sprite.u0 + 0x10, sprite.v0 + 0x10);
+                    setUV4(quad, sprite.u0, sprite.v0, sprite.u0 + 16, sprite.v0, sprite.u0, sprite.v0 + 16,
+                        sprite.u0 + 16, sprite.v0 + 16);
                     quad->clut = sprite.clut;
                     quad->tpage = GetTPage(0, 0, 0x380, 0x120);
                     gfx_draw_or_append_gpu_primitive(quad);
@@ -328,7 +328,7 @@ void war_trophy_list_thread(void) {
                     quad->x3 = get_column_x(i, s_war_trophy_entry_count)
                         + text_count_decimal_digits(s_war_trophy_entry_values[i]) * 7 + 0x24;
                     quad->y3 = get_row_y(i - start, s_war_trophy_entry_count) + 0xc;
-                    setUV4(quad, 0x76, 0x10, 0x88, 0x10, 0x76, 0x18, 0x88, 0x18);
+                    setUV4(quad, 118, 16, 136, 16, 118, 24, 136, 24);
                     quad->clut = 0x7cbc;
                     quad->tpage = GetTPage(0, 0, 0x3c0, 0x100);
                     gfx_draw_or_append_gpu_primitive(quad);
@@ -430,9 +430,9 @@ void war_trophy_gil_ticker_thread(void) {
             s_war_trophy_money_next_digit_polys[buffer][j].clut
                 = getClut(g_conditions_banner_palette_rect.x, g_conditions_banner_palette_rect.y);
             pd = (POLY_FT4*)((s32)s_war_trophy_money_digit_polys + (j * 0x28 + buffer * 0xf0));
-            setXY4(pd, X0, 0x80, X0 + 13, 0x80, X0, 0x97, X0 + 13, 0x97);
+            setXY4(pd, X0, 128, X0 + 13, 128, X0, 151, X0 + 13, 151);
             pn = (POLY_FT4*)((s32)s_war_trophy_money_next_digit_polys + (j * 0x28 + buffer * 0xf0));
-            setXY4(pn, X0, 0x69, X0 + 13, 0x69, X0, 0x80, X0 + 13, 0x80);
+            setXY4(pn, X0, 105, X0 + 13, 105, X0, 128, X0 + 13, 128);
             /* Digits from the thousands up move 8 pixels left to make room for the comma.
              * Only x0 moves here; the roll loop rebuilds the other vertices from it. */
             if (j >= 3) {
@@ -450,19 +450,19 @@ void war_trophy_gil_ticker_thread(void) {
 
         comma_poly = &s_war_trophy_money_comma_polys[i];
         menu_init_default_poly_ft4(comma_poly);
-        setXY4(comma_poly, s_war_trophy_money_digit_polys[0][2].x0 - 10, 0x8f,
-            s_war_trophy_money_digit_polys[0][2].x0 - 4, 0x8f, s_war_trophy_money_digit_polys[0][2].x0 - 10, 0x99,
-            s_war_trophy_money_digit_polys[0][2].x0 - 4, 0x99);
-        setUV4(comma_poly, 0x82, 0x40, 0x88, 0x40, 0x82, 0x4a, 0x88, 0x4a);
+        setXY4(comma_poly, s_war_trophy_money_digit_polys[0][2].x0 - 10, 143,
+            s_war_trophy_money_digit_polys[0][2].x0 - 4, 143, s_war_trophy_money_digit_polys[0][2].x0 - 10, 153,
+            s_war_trophy_money_digit_polys[0][2].x0 - 4, 153);
+        setUV4(comma_poly, 130, 64, 136, 64, 130, 74, 136, 74);
         s_war_trophy_money_comma_polys[i].tpage = getTPage(0, 0, 384, 0);
         s_war_trophy_money_comma_polys[i].clut
             = getClut(g_conditions_banner_palette_rect.x, g_conditions_banner_palette_rect.y);
         sign_poly = &s_war_trophy_money_sign_polys[i];
         menu_init_default_poly_ft4(sign_poly);
-        setXY4(sign_poly, s_war_trophy_money_digit_polys[0][0].x0 + 0x11, 0x80,
-            s_war_trophy_money_digit_polys[0][0].x0 + 0x31, 0x80, s_war_trophy_money_digit_polys[0][0].x0 + 0x11, 0x97,
-            s_war_trophy_money_digit_polys[0][0].x0 + 0x31, 0x97);
-        setUV4(sign_poly, 0x88, 0x32, 0xa8, 0x32, 0x88, 0x49, 0xa8, 0x49);
+        setXY4(sign_poly, s_war_trophy_money_digit_polys[0][0].x0 + 17, 128,
+            s_war_trophy_money_digit_polys[0][0].x0 + 49, 128, s_war_trophy_money_digit_polys[0][0].x0 + 17, 151,
+            s_war_trophy_money_digit_polys[0][0].x0 + 49, 151);
+        setUV4(sign_poly, 136, 50, 168, 50, 136, 73, 168, 73);
         s_war_trophy_money_sign_polys[i].tpage = getTPage(0, 0, 384, 0);
         s_war_trophy_money_sign_polys[i].clut
             = getClut(g_conditions_banner_palette_rect.x, g_conditions_banner_palette_rect.y);
@@ -497,25 +497,25 @@ void war_trophy_gil_ticker_thread(void) {
                 off = j * 0x28 + buffer * 0xf0;
                 x = s_war_trophy_money_digit_polys[buffer][j].x0;
                 pd = (POLY_FT4*)((s32)s_war_trophy_money_digit_polys + off);
-                setXY4(pd, x, ((g_war_trophy_money_digit_positions_q8[j] >> 8) & 0x1f) + 0x80, x + 13,
-                    ((g_war_trophy_money_digit_positions_q8[j] >> 8) & 0x1f) + 0x80, x,
-                    ((g_war_trophy_money_digit_positions_q8[j] >> 8) & 0x1f) + 0x97, x + 13,
-                    ((g_war_trophy_money_digit_positions_q8[j] >> 8) & 0x1f) + 0x97);
-                setUV4(pd, (g_war_trophy_money_digit_positions_q8[j] >> 13) % 10 * 13, 0x32,
-                    (g_war_trophy_money_digit_positions_q8[j] >> 13) % 10 * 13 + 13, 0x32,
-                    (g_war_trophy_money_digit_positions_q8[j] >> 13) % 10 * 13, 0x49,
-                    (g_war_trophy_money_digit_positions_q8[j] >> 13) % 10 * 13 + 13, 0x49);
+                setXY4(pd, x, ((g_war_trophy_money_digit_positions_q8[j] >> 8) & 31) + 128, x + 13,
+                    ((g_war_trophy_money_digit_positions_q8[j] >> 8) & 31) + 128, x,
+                    ((g_war_trophy_money_digit_positions_q8[j] >> 8) & 31) + 151, x + 13,
+                    ((g_war_trophy_money_digit_positions_q8[j] >> 8) & 31) + 151);
+                setUV4(pd, (g_war_trophy_money_digit_positions_q8[j] >> 13) % 10 * 13, 50,
+                    (g_war_trophy_money_digit_positions_q8[j] >> 13) % 10 * 13 + 13, 50,
+                    (g_war_trophy_money_digit_positions_q8[j] >> 13) % 10 * 13, 73,
+                    (g_war_trophy_money_digit_positions_q8[j] >> 13) % 10 * 13 + 13, 73);
                 x = s_war_trophy_money_next_digit_polys[buffer][j].x0;
                 off = j * 0x28 + buffer * 0xf0;
                 pn = (POLY_FT4*)((s32)s_war_trophy_money_next_digit_polys + off);
-                setXY4(pn, x, s_war_trophy_money_digit_polys[buffer][j].y0 - 0x20, x + 13,
-                    s_war_trophy_money_digit_polys[buffer][j].y0 - 0x20, x,
+                setXY4(pn, x, s_war_trophy_money_digit_polys[buffer][j].y0 - 32, x + 13,
+                    s_war_trophy_money_digit_polys[buffer][j].y0 - 32, x,
                     s_war_trophy_money_digit_polys[buffer][j].y0 - 9, x + 13,
                     s_war_trophy_money_digit_polys[buffer][j].y0 - 9);
-                setUV4(pn, ((g_war_trophy_money_digit_positions_q8[j] >> 13) + 1) % 10 * 13, 0x32,
-                    ((g_war_trophy_money_digit_positions_q8[j] >> 13) + 1) % 10 * 13 + 13, 0x32,
-                    ((g_war_trophy_money_digit_positions_q8[j] >> 13) + 1) % 10 * 13, 0x49,
-                    ((g_war_trophy_money_digit_positions_q8[j] >> 13) + 1) % 10 * 13 + 13, 0x49);
+                setUV4(pn, ((g_war_trophy_money_digit_positions_q8[j] >> 13) + 1) % 10 * 13, 50,
+                    ((g_war_trophy_money_digit_positions_q8[j] >> 13) + 1) % 10 * 13 + 13, 50,
+                    ((g_war_trophy_money_digit_positions_q8[j] >> 13) + 1) % 10 * 13, 73,
+                    ((g_war_trophy_money_digit_positions_q8[j] >> 13) + 1) % 10 * 13 + 13, 73);
                 /* Once its turn comes (higher digits later), a digit slows from six short of its
                  * target and stops on it when its cell is exactly aligned. */
                 if (j * 32 + (digits - 1) * 16 < tick) {
@@ -587,10 +587,10 @@ skipped:
 
             x = s_war_trophy_money_digit_polys[buffer][j].x0;
             digit_quad = (POLY_FT4*)((s32)s_war_trophy_money_digit_polys + (j * 0x28 + buffer * 0xf0));
-            setXY4(digit_quad, x, 0x80, x + 13, 0x80, x, 0x97, x + 13, 0x97);
-            setUV4(digit_quad, g_war_trophy_money_digit_targets[j] * 13, 0x32,
-                g_war_trophy_money_digit_targets[j] * 13 + 13, 0x32, g_war_trophy_money_digit_targets[j] * 13, 0x49,
-                g_war_trophy_money_digit_targets[j] * 13 + 13, 0x49);
+            setXY4(digit_quad, x, 128, x + 13, 128, x, 151, x + 13, 151);
+            setUV4(digit_quad, g_war_trophy_money_digit_targets[j] * 13, 50,
+                g_war_trophy_money_digit_targets[j] * 13 + 13, 50, g_war_trophy_money_digit_targets[j] * 13, 73,
+                g_war_trophy_money_digit_targets[j] * 13 + 13, 73);
             gfx_draw_or_append_gpu_primitive(&s_war_trophy_money_digit_polys[buffer][j]);
         }
         gfx_draw_or_append_gpu_primitive(&areas[buffer]);
@@ -618,10 +618,10 @@ skipped:
 
             x = s_war_trophy_money_digit_polys[buffer][j].x0;
             digit_quad = (POLY_FT4*)((s32)s_war_trophy_money_digit_polys + (j * 0x28 + buffer * 0xf0));
-            setXY4(digit_quad, x, 0x80, x + 13, 0x80, x, 0x97, x + 13, 0x97);
-            setUV4(digit_quad, g_war_trophy_money_digit_targets[j] * 13, 0x32,
-                g_war_trophy_money_digit_targets[j] * 13 + 13, 0x32, g_war_trophy_money_digit_targets[j] * 13, 0x49,
-                g_war_trophy_money_digit_targets[j] * 13 + 13, 0x49);
+            setXY4(digit_quad, x, 128, x + 13, 128, x, 151, x + 13, 151);
+            setUV4(digit_quad, g_war_trophy_money_digit_targets[j] * 13, 50,
+                g_war_trophy_money_digit_targets[j] * 13 + 13, 50, g_war_trophy_money_digit_targets[j] * 13, 73,
+                g_war_trophy_money_digit_targets[j] * 13 + 13, 73);
             setRGB0(digit_quad, pass, pass, pass);
             gfx_draw_or_append_gpu_primitive(&s_war_trophy_money_digit_polys[buffer][j]);
         }

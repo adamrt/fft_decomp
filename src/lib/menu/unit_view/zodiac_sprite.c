@@ -59,8 +59,8 @@ void zodiac_build_sprite_polygon(POLY_FT4* poly, point16_t* texture_page, const 
     x1 = w + 0x100;
     y1 = h + 0x78;
 
-    setXY4(poly, position->x + ox + offset->position.x + 0x100, position->y + oy + offset->position.y + 0x78,
-        position->x + ox + offset->position.x + x1, position->y + oy + offset->position.y + 0x78,
-        position->x + ox + offset->position.x + 0x100, position->y + oy + offset->position.y + y1,
+    setXY4(poly, position->x + ox + offset->position.x + 256, position->y + oy + offset->position.y + 120,
+        position->x + ox + offset->position.x + x1, position->y + oy + offset->position.y + 120,
+        position->x + ox + offset->position.x + 256, position->y + oy + offset->position.y + y1,
         position->x + ox + offset->position.x + x1, position->y + oy + offset->position.y + y1);
 }

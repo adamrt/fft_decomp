@@ -60,8 +60,8 @@ static void start_list_thread(s32 thread_id, s32 limit, point32_t* extent, point
     g_music_test_list_state.text_ids[0] = s_music_test_list_entries;
     g_music_test_list_state.text_colors[0] = g_music_test_list_entry_flags;
     g_music_test_list_state.mode[0] = MENU_TEXT_COLUMN_TEXT;
-    g_music_test_list_params.vram_origin.x = 0x200;
-    g_music_test_list_params.vram_origin.y = 0x100;
+    g_music_test_list_params.vram_origin.x = 512;
+    g_music_test_list_params.vram_origin.y = 256;
     g_music_test_list_params.inner_width = width;
     g_music_test_list_params.inner_height = 0;
     g_music_test_list_params.window.x = origin->x - 0x80;
@@ -152,10 +152,10 @@ void music_test_update_menu(controller_record_t* record) {
 
     if (state->step == MUSIC_TEST_STEP_OPEN) {
         if (!(g_fade_tile.flags & FADE_TILE_ACTIVE)) {
-            extent.x = 0x15;
-            extent.y = 0xB;
-            origin.x = 0x8C;
-            origin.y = 0x14;
+            extent.x = 21;
+            extent.y = 11;
+            origin.x = 140;
+            origin.y = 20;
             start_list_thread(MUSIC_TEST_THREAD_SLOT_LIST, 0x60, &extent, &origin);
             state->step = MUSIC_TEST_STEP_IDLE;
         }

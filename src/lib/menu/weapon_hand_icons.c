@@ -31,24 +31,24 @@ void item_list_draw_weapon_hand_icons(s16 weapon_id) {
             rect.w = 8;
             rect.h = 8;
             menu_gfx_enqueue_textured_quad(&rect, 0xB8, 0x34, 0, 0, 0x1F, 0x7D7C, 8);
-            rect.x = 0xD2;
-            rect.w = 0x15;
+            rect.x = 210;
+            rect.w = 21;
             menu_gfx_enqueue_textured_quad(&rect, 0xBE, 0x58, 0, 0, 0x1F, 0x7D7C, 8);
-            rect.x = 0xE8;
-            rect.w = 0x10;
+            rect.x = 232;
+            rect.w = 16;
             rect.y = y;
-            rect.h = 0xA;
+            rect.h = 10;
             menu_gfx_enqueue_textured_quad(&rect, 0xC9, 0x6E, 0, 0, 0x1F, 0x7D7C, 8);
             return;
         }
         if (two_hands) {
             rect.x = x;
             rect.y = y;
-            rect.w = 0x13;
+            rect.w = 19;
             rect.h = 8;
             menu_gfx_enqueue_textured_quad(&rect, 0, 0xD0, 0, 0, 0x1F, 0x7D7C, 8);
-            rect.x = 0xDD;
-            rect.w = 0x15;
+            rect.x = 221;
+            rect.w = 21;
             menu_gfx_enqueue_textured_quad(&rect, 0xBE, 0x58, 0, 0, 0x1F, 0x7D7C, 8);
             y = 0xC5;
         }
@@ -58,12 +58,12 @@ void item_list_draw_weapon_hand_icons(s16 weapon_id) {
             rect.w = 8;
             rect.h = 8;
             menu_gfx_enqueue_textured_quad(&rect, 0xB8, 0x34, 0, 0, 0x1F, 0x7D7C, 8);
-            rect.x = 0xD2;
+            rect.x = 210;
             rect.y = y;
-            rect.w = 0x18;
+            rect.w = 24;
             rect.h = 8;
             menu_gfx_enqueue_textured_quad(&rect, 0, 0xC8, 0, 0, 0x1F, 0x7D7C, 8);
-            rect.x = 0xEA;
+            rect.x = 234;
             rect.w = 4;
             menu_gfx_enqueue_textured_quad(&rect, 0xCF, 0x58, 0, 0, 0x1F, 0x7D7C, 8);
         }
@@ -73,13 +73,13 @@ void item_list_draw_weapon_hand_icons(s16 weapon_id) {
             rect.w = 6;
             rect.h = 8;
             menu_gfx_enqueue_textured_quad(&rect, 0xB1, 0x34, 0, 0, 0x1F, 0x7D7C, 8);
-            rect.x = 0xD0;
-            rect.w = 0x11;
+            rect.x = 208;
+            rect.w = 17;
             menu_gfx_enqueue_textured_quad(&rect, 0xBE, 0x58, 0, 0, 0x1F, 0x7D7C, 8);
-            rect.x = 0xE2;
-            rect.w = 0x10;
+            rect.x = 226;
+            rect.w = 16;
             rect.y = y;
-            rect.h = 0xA;
+            rect.h = 10;
             menu_gfx_enqueue_textured_quad(&rect, 0xC9, 0x6E, 0, 0, 0x1F, 0x7D7C, 8);
         }
     }

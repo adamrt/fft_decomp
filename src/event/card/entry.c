@@ -171,54 +171,54 @@ static void init_graphics(void) {
     g_text_section_pointers[TEXT_SECTION_OVERLAY_SCREEN] = g_text_data;
     g_text_section_pointers[TEXT_SECTION_FORMATION_MESSAGES] = g_save_text_command_help;
 
-    rect.x = 0x100;
+    rect.x = 256;
     rect.y = 0;
-    rect.w = 0x40;
-    rect.h = 0x30;
+    rect.w = 64;
+    rect.h = 48;
     gfx_load_image_and_wait(&rect, g_menu_glyph_sheet->pixels);
 
-    rect.x = 0x100;
-    rect.y = 0xfa;
-    rect.w = 0x40;
+    rect.x = 256;
+    rect.y = 250;
+    rect.w = 64;
     rect.h = 4;
     gfx_load_image_and_wait(&rect, g_save_menu_clut);
 
-    rect.x = 0x3c0;
-    rect.y = 0x1f0;
-    rect.w = 0x10;
+    rect.x = 960;
+    rect.y = 496;
+    rect.w = 16;
     rect.h = 1;
     gfx_store_image_and_wait(&rect, image_data);
     *(u16*)&image_data[4] = 0;
 
-    rect.x = 0x120;
-    rect.y = 0xfe;
-    rect.w = 0x10;
+    rect.x = 288;
+    rect.y = 254;
+    rect.w = 16;
     rect.h = 1;
     gfx_load_image_and_wait(&rect, image_data);
 
-    rect.x = 0x100;
-    rect.y = 0xfe;
-    rect.w = 0xc;
+    rect.x = 256;
+    rect.y = 254;
+    rect.w = 12;
     rect.h = 1;
     gfx_load_image_and_wait(&rect, &image_data[4]);
 
-    rect.x = 0x3c0;
-    rect.y = 0x1f4;
-    rect.w = 0x10;
+    rect.x = 960;
+    rect.y = 500;
+    rect.w = 16;
     rect.h = 1;
     gfx_store_image_and_wait(&rect, image_data);
     /* Fieldwise or aggregate clearing adds instructions under this routine's -O0 profile. */
     *(u16*)&image_data[4] = 0;
 
-    rect.x = 0x130;
-    rect.y = 0xfe;
-    rect.w = 0x10;
+    rect.x = 304;
+    rect.y = 254;
+    rect.w = 16;
     rect.h = 1;
     gfx_load_image_and_wait(&rect, image_data);
 
-    rect.x = 0x110;
-    rect.y = 0xfe;
-    rect.w = 0xc;
+    rect.x = 272;
+    rect.y = 254;
+    rect.w = 12;
     rect.h = 1;
     gfx_load_image_and_wait(&rect, &image_data[4]);
 
@@ -755,10 +755,10 @@ static void update_card_scan(void) {
          * start the checking message, then one idle call. */
         if (g_save_scan_setup_step < 3) {
             if (g_save_scan_setup_step == 0) {
-                rect.x = 0x180;
+                rect.x = 384;
                 rect.y = 0;
-                rect.w = 0x40;
-                rect.h = 0xf0;
+                rect.w = 64;
+                rect.h = 240;
                 ClearImage(&rect, 0, 0, 0);
             }
             if (g_save_scan_setup_step == 1) {
@@ -986,20 +986,20 @@ static void render_slot_text(s32 slot) {
     RECT rect;
 
     if (slot < 6) {
-        rect.x = 0x100;
+        rect.x = 256;
         rect.y = slot * 0x20 + 0x30;
-        rect.w = 0x32;
-        rect.h = 0x20;
+        rect.w = 50;
+        rect.h = 32;
     } else if (slot < 11) {
-        rect.x = 0x1c0;
+        rect.x = 448;
         rect.y = (slot - 6) * 0x20 + 0x40;
-        rect.w = 0x32;
-        rect.h = 0x20;
+        rect.w = 50;
+        rect.h = 32;
     } else {
-        rect.x = 0x180;
+        rect.x = 384;
         rect.y = (slot - 11) * 0x20 + 0x60;
-        rect.w = 0x32;
-        rect.h = 0x20;
+        rect.w = 50;
+        rect.h = 32;
     }
     text_render_id_rows_to_vram(g_save_slot_descriptions[slot], g_save_slot_text_row_ids, &rect, 0);
 }
@@ -1220,15 +1220,15 @@ static void update_slot_list(u16 input) {
         }
 
         if (g_save_slot_file_states[index] == SAVE_SLOT_AVAILABLE) {
-            rect.x = 0x74;
+            rect.x = 116;
             rect.y = g_save_slot_window.rect.y + 4;
-            rect.w = 0x28;
-            rect.h = 0x10;
+            rect.w = 40;
+            rect.h = 16;
         } else {
-            rect.x = 0x1c;
+            rect.x = 28;
             rect.y = g_save_slot_window.rect.y - 4;
-            rect.w = 0xc8;
-            rect.h = 0x1f;
+            rect.w = 200;
+            rect.h = 31;
         }
 
         /* Read the slot's text strip from where render_slot_text put it. */
@@ -1266,18 +1266,18 @@ static void update_slot_list(u16 input) {
 
     /* Scroll arrows: up once the list has scrolled, down while rows remain below the visible four. */
     if (g_save_list_top_row != 0) {
-        rect.x = 0xe3;
-        rect.y = 0x20;
+        rect.x = 227;
+        rect.y = 32;
         rect.w = 8;
-        rect.h = 0x10;
+        rect.h = 16;
         menu_gfx_enqueue_textured_quad(
             &rect, 0xd8, 0, 0, 0, g_menu_cursor_texture_page, g_menu_cursor_mode0_foreground_clut, 15);
     }
     if (g_save_listed_slot_count - g_save_list_top_row >= 5) {
-        rect.x = 0xe3;
-        rect.y = 0xba;
+        rect.x = 227;
+        rect.y = 186;
         rect.w = 8;
-        rect.h = 0x10;
+        rect.h = 16;
         menu_gfx_enqueue_textured_quad(
             &rect, 0xe0, 0, 0, 0, g_menu_cursor_texture_page, g_menu_cursor_mode0_foreground_clut, 15);
     }

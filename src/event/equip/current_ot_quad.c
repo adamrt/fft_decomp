@@ -25,7 +25,7 @@ void menu_gfx_enqueue_textured_quad_current_ot(const RECT* rect, s32 u, s32 v, c
     }
     SetSemiTrans(poly, semitrans);
 
-    setXYWH(poly, rect->x + 0x80, rect->y, rect->w, rect->h);
+    setXYWH(poly, rect->x + 128, rect->y, rect->w, rect->h);
     setUVWH(poly, u, v, rect->w, rect->h);
     poly->clut = clut;
     poly->tpage = texture_page;

@@ -81,17 +81,17 @@ u8* menu_build_window_image(s32 width, s32 height, RECT* rect, s32 mode, s32 tai
         menu_build_window_image_row(src, row, words, src_index);
     }
     if (kind != DIALOG_OPTIONS_NO_TAIL) {
-        s_menu_window_sprite_glyph.rect.x = 0x58;
+        s_menu_window_sprite_glyph.rect.x = 88;
         s_menu_window_sprite_glyph.rect.y = 0;
         if ((mode & DIALOG_TYPE_OPTIONS_MASK) == DIALOG_OPTIONS_ALTERNATE_TAIL) {
-            s_menu_window_sprite_glyph.rect.x = 0x68;
+            s_menu_window_sprite_glyph.rect.x = 104;
         }
         if ((mode & DIALOG_TYPE_POSITION_MASK) == DIALOG_POSITION_TOP) {
-            s_menu_window_sprite_glyph.rect.y = 0x10;
+            s_menu_window_sprite_glyph.rect.y = 16;
         }
         s_menu_window_sprite_position.rect.x = (width >> 1) + tail_offset - 8;
         if ((mode & DIALOG_TYPE_POSITION_MASK) != DIALOG_POSITION_BOTTOM) {
-            s_menu_window_sprite_position.rect.y = 0x38;
+            s_menu_window_sprite_position.rect.y = 56;
         } else {
             s_menu_window_sprite_position.rect.y = 0;
         }
@@ -106,7 +106,7 @@ u8* menu_build_window_image(s32 width, s32 height, RECT* rect, s32 mode, s32 tai
             }
         }
         if (s_menu_window_sprite_position.rect.x < 0x10) {
-            s_menu_window_sprite_position.rect.x = 0x10;
+            s_menu_window_sprite_position.rect.x = 16;
         }
         if (width - 0x10 < s_menu_window_sprite_position.rect.x) {
             s_menu_window_sprite_position.rect.x = width - 0x10;
@@ -174,13 +174,13 @@ u8* menu_build_and_upload_window_frame_image(s32 width, s32 height, RECT* rect, 
     for (i = 0; i < height; i++) {
         if (size >= 0x3000 && mode == MENU_WINDOW_FRAME_UPLOAD && (i & 0x5F) == 0) {
             if (i == 0) {
-                upload.h = 0x60;
+                upload.h = 96;
             } else {
                 LoadImage(&upload, (u32*)buffer);
                 thread_wait_frames(1);
                 upload.y += 0x60;
                 if (i - height >= 0x60) {
-                    upload.h = 0x60;
+                    upload.h = 96;
                 } else {
                     upload.h = height - i;
                 }

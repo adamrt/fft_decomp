@@ -58,9 +58,9 @@ void brave_story_open_unexplored_land_list(void) {
         i = 8;
     }
     layout.text_width = 0x60;
-    origin.x = 0x80;
+    origin.x = 128;
     layout.visible_rows = i;
-    origin.y = 0x50;
+    origin.y = 80;
     menu_stack_restore_cursor(MENU_STACK_CURSOR_SLOT_UNEXPLORED_LANDS, count, i);
     window_start_panel_thread(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL,
         g_menu_stack_records[g_menu_stack_depth].panel.entry_count, &layout, &origin);
@@ -167,11 +167,11 @@ static void open_land_detail(s32 value) {
     switch (coordinate_mode) {
     case 0:
         g_text_window.image_position.x = 0;
-        g_text_window.image_position.y = 0x60;
+        g_text_window.image_position.y = 96;
         break;
     case 1:
         g_text_window.image_position.x = 0;
-        g_text_window.image_position.y = 0x70;
+        g_text_window.image_position.y = 112;
         break;
     }
 
@@ -318,9 +318,9 @@ void brave_story_open_treasure_list(void) {
         i = 8;
     }
     layout.text_width = 0x5A;
-    origin.x = 0x88;
+    origin.x = 136;
     layout.visible_rows = i;
-    origin.y = 0x50;
+    origin.y = 80;
     menu_stack_restore_cursor(MENU_STACK_CURSOR_SLOT_TREASURES, count, i);
     window_start_panel_thread(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL,
         g_menu_stack_records[g_menu_stack_depth].panel.entry_count, &layout, &origin);
@@ -423,11 +423,11 @@ void brave_story_open_treasure_detail(s32 value) {
     switch (coordinate_mode) {
     case 0:
         g_text_window.image_position.x = 0;
-        g_text_window.image_position.y = 0x60;
+        g_text_window.image_position.y = 96;
         break;
     case 1:
         g_text_window.image_position.x = 0;
-        g_text_window.image_position.y = 0x70;
+        g_text_window.image_position.y = 112;
         break;
     }
 
@@ -713,9 +713,9 @@ static void open_reading_choice(s32 mode) {
     index = display_object_append_image(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].novel_resume.message_render = index;
     bounds.x = 0;
-    bounds.y = 0x70;
-    bounds.w = 0x7C;
-    bounds.h = 0x80;
+    bounds.y = 112;
+    bounds.w = 124;
+    bounds.h = 128;
     g_text_substitution_values[0] = mode + TEXT_ID_TREASURE_NAME_BASE;
     window_init_text_record(index, bounds, 1, TEXT_ID_SUBSTITUTED_TEXT, g_window_image_buffer);
     g_display_object_gs_image_pool[index].priority = 0xA;
@@ -733,10 +733,10 @@ static void open_reading_choice(s32 mode) {
 
     index = display_object_append_image(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].novel_resume.option_render = index;
-    bounds.x = 0x80;
-    bounds.y = 0x70;
-    bounds.w = 0x70;
-    bounds.h = 0x70;
+    bounds.x = 128;
+    bounds.y = 112;
+    bounds.w = 112;
+    bounds.h = 112;
     window_init_text_record(index, bounds, 1, TEXT_ID_SOUND_NOVEL_RESUME_CHOICES, g_window_image_buffer + 0x400);
     g_display_object_gs_image_pool[index].priority = 0xA;
     base4 = &g_display_object_gs_image_pool[index].position;

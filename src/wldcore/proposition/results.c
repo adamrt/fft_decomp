@@ -678,9 +678,9 @@ void proposition_open_active_list(void) {
     }
 
     layout.text_width = 0x96;
-    origin.x = 0x4C;
+    origin.x = 76;
     layout.visible_rows = i;
-    origin.y = 0x50;
+    origin.y = 80;
     menu_stack_restore_cursor(MENU_STACK_CURSOR_SLOT_ACTIVE_PROPOSITIONS, g_proposition_count, i);
     window_start_panel_thread(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL,
         g_menu_stack_records[g_menu_stack_depth].panel.entry_count, &layout, &origin);
@@ -804,9 +804,9 @@ static void open_recall(s32 proposition) {
 
     index = display_object_append_image(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].proposition_cancel_confirm.choice_render = index;
-    bounds.x = 0x80;
-    bounds.w = 0x28;
-    bounds.h = 0x30;
+    bounds.x = 128;
+    bounds.w = 40;
+    bounds.h = 48;
     bounds.y = 0;
     window_init_text_record(index, bounds, 0, TEXT_ID_OK_NO, g_window_image_buffer);
     base = &g_display_object_gs_image_pool[index].position;
@@ -867,8 +867,8 @@ void proposition_build_detail_panel(proposition_detail_panel_t* panel, s32 propo
     g_text_substitution_values[1] = g_proposition_active[proposition].assigned_days;
     g_text_substitution_values[2] = g_proposition_active[proposition].location | TEXT_ID_LOCATION_NAME_BASE;
     bounds.x = 0;
-    bounds.y = 0x60;
-    bounds.w = 0xF4;
+    bounds.y = 96;
+    bounds.w = 244;
     bounds.h = (g_proposition_active[proposition].participant_count + rows) * 0x10 + 0x10;
     window_build_render_record_image(index, bounds, coordinate_mode, g_proposition_detail_image_buffer);
     point.x = 8;
@@ -877,14 +877,14 @@ void proposition_build_detail_panel(proposition_detail_panel_t* panel, s32 propo
     point.x = 8;
     point.y = 8;
     window_display_text_entry(index, TEXT_ID_JOB_CONTENTS_LABEL, point, g_proposition_detail_image_buffer);
-    point.x = 0x44;
+    point.x = 68;
     point.y = 8;
     window_display_text_entry(
         index, *panel_text + (TEXT_ID_PROPOSITION_JOB_CONTENTS_BASE - 1), point, g_proposition_detail_image_buffer);
     for (i = 0; i < g_proposition_active[proposition].participant_count; i++) {
         s32 row = i + 2;
 
-        point.x = 0x3C;
+        point.x = 60;
         point.y = (text_rows + row) * 0x10 + 8;
         window_display_text_entry(index,
             g_proposition_active[proposition].participant_indices[i] | TEXT_ID_UNIT_NAME_BASE, point,

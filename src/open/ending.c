@@ -129,15 +129,15 @@ static void init_script(void) {
     g_gfx_screen_environments[1].draw.ofs[0] = 0x100;
     g_gfx_screen_environments[1].draw.ofs[1] = 0x168;
     g_gfx_screen_environments[0].draw.isbg = g_gfx_screen_environments[1].draw.isbg = 0;
-    g_fade_tile.rect.x = -0x100;
-    g_fade_tile.rect.y = -0x78;
-    g_fade_tile.rect.w = 0x200;
-    g_fade_tile.rect.h = 0xf0;
+    g_fade_tile.rect.x = -256;
+    g_fade_tile.rect.y = -120;
+    g_fade_tile.rect.w = 512;
+    g_fade_tile.rect.h = 240;
     g_gfx_screen_environments[0].disp.isrgb24 = g_gfx_screen_environments[1].disp.isrgb24 = 0;
     rect.x = 0;
     rect.y = 0;
-    rect.w = 0x200;
-    rect.h = 0x1e0;
+    rect.w = 512;
+    rect.h = 480;
     ClearImage(&rect, 0, 0, 0);
     DrawSync(0);
 
@@ -167,10 +167,10 @@ static void init_script(void) {
         setRGB0(prim, 0x80, 0x80, 0x80);
     }
 
-    setUV4(&g_ending_credit_band_primitives[0], 0xf8, 0, 0xf9, 0, 0xf8, 0x30, 0xf9, 0x30);
-    setXY4(&g_ending_credit_band_primitives[0], -0x100, 0x48, 0x100, 0x48, -0x100, 0x78, 0x100, 0x78);
-    setUV4(&g_ending_credit_band_primitives[1], 0xfc, 0, 0xfd, 0, 0xfc, 0x30, 0xfd, 0x30);
-    setXY4(&g_ending_credit_band_primitives[1], -0x100, -0x78, 0x100, -0x78, -0x100, -0x48, 0x100, -0x48);
+    setUV4(&g_ending_credit_band_primitives[0], 248, 0, 249, 0, 248, 48, 249, 48);
+    setXY4(&g_ending_credit_band_primitives[0], -256, 72, 256, 72, -256, 120, 256, 120);
+    setUV4(&g_ending_credit_band_primitives[1], 252, 0, 253, 0, 252, 48, 253, 48);
+    setXY4(&g_ending_credit_band_primitives[1], -256, -120, 256, -120, -256, -72, 256, -72);
 
     for (i = 0; i < 2; i++) {
         prim = &g_ending_fade_primitives[i];
@@ -179,14 +179,14 @@ static void init_script(void) {
         g_ending_fade_primitives[i].tpage = GetTPage(1, 2, 0x200, 0);
         g_ending_fade_primitives[i].clut = GetClut(0, 0x1e1);
         setRGB0(prim, 0, 0, 0);
-        setUV4(prim, 0, 0, 0xff, 0, 0, 0xb4, 0xff, 0xb4);
-        setXY4(prim, -0x100, -0x5a, 0x100, -0x5a, -0x100, 0x5a, 0x100, 0x5a);
+        setUV4(prim, 0, 0, 255, 0, 0, 180, 255, 180);
+        setXY4(prim, -256, -90, 256, -90, -256, 90, 256, 90);
     }
 
-    rect.x = 0x100;
+    rect.x = 256;
     rect.y = 0;
-    rect.w = 0x100;
-    rect.h = 0x100;
+    rect.w = 256;
+    rect.h = 256;
     ClearImage(&rect, 0, 0, 0);
     DrawSync(0);
 }

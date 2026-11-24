@@ -117,7 +117,7 @@ void bar_build_rows(bar_menu_level_t* level) {
     index = level->rows_image;
     bounds.x = 0;
     bounds.y = 0;
-    bounds.w = 0x48;
+    bounds.w = 72;
     bounds.h = level->entry_count * 0x10 + 0x10;
     window_build_render_record_image(index, bounds, 0, g_window_image_buffer);
     g_display_object_gs_image_pool[index].priority = 0xA;
@@ -375,9 +375,9 @@ static void open_rumor_list(void) {
             i = 8;
         }
         layout.text_width = 0x96;
-        origin.x = 0x4C;
+        origin.x = 76;
         layout.visible_rows = i;
-        origin.y = 0x50;
+        origin.y = 80;
         menu_stack_restore_cursor(MENU_STACK_CURSOR_SLOT_RUMORS, count, i);
         window_start_panel_thread(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL,
             g_menu_stack_records[g_menu_stack_depth].panel.entry_count, &layout, &origin);
@@ -482,11 +482,11 @@ static void open_rumor_detail(s32 value) {
     switch (coordinate_mode) {
     case 1:
         g_text_window.image_position.x = 0;
-        g_text_window.image_position.y = 0x70;
+        g_text_window.image_position.y = 112;
         break;
     case 0:
         g_text_window.image_position.x = 0;
-        g_text_window.image_position.y = 0x60;
+        g_text_window.image_position.y = 96;
         break;
     }
     g_text_window.base.x = -122;
@@ -592,9 +592,9 @@ void proposition_open_available_list(void) {
             i = 6;
         }
         layout.text_width = 0x96;
-        origin.x = 0x4C;
+        origin.x = 76;
         layout.visible_rows = i;
-        origin.y = 0x50;
+        origin.y = 80;
         menu_stack_restore_cursor(MENU_STACK_CURSOR_SLOT_AVAILABLE_PROPOSITIONS, count, i);
         window_start_panel_thread(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL,
             g_menu_stack_records[g_menu_stack_depth].panel.entry_count, &layout, &origin);
@@ -729,9 +729,9 @@ void proposition_open_detail(s32 value) {
     proposition_unpack_row(&g_proposition_selected_row, value);
     index = display_object_append_image(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].proposition_detail.render_index = index;
-    bounds.y = 0x60;
-    bounds.w = 0xF4;
-    bounds.h = 0x80;
+    bounds.y = 96;
+    bounds.w = 244;
+    bounds.h = 128;
     bounds.x = 0;
     window_init_text_record(index, bounds, 0, value + TEXT_ID_WORLD_MESSAGE_BASE, g_window_image_buffer);
     base = &g_display_object_gs_image_pool[index].position;
@@ -786,8 +786,8 @@ void proposition_update_detail(menu_stack_record_t* owner) {
             thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_ACCEPT_JOB_PROMPT, 0);
         }
         proposition_suspend_detail(owner);
-        origin.x = 0x48;
-        origin.y = 0x20;
+        origin.x = 72;
+        origin.y = 32;
         window_build_yes_no_panel(origin);
         g_menu_stack_types[g_menu_stack_depth] = MENU_STACK_LEVEL_PROPOSITION_ACCEPT;
         g_menu_stack_depth++;
@@ -818,9 +818,9 @@ void window_build_yes_no_panel(point32_t origin) {
 
     index = display_object_append_image(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].accept_confirm.render_index = index;
-    bounds.x = 0x80;
-    bounds.w = 0x28;
-    bounds.h = 0x30;
+    bounds.x = 128;
+    bounds.w = 40;
+    bounds.h = 48;
     bounds.y = 0;
     window_init_text_record(index, bounds, 0, TEXT_ID_OK_NO, g_window_image_buffer);
     g_display_object_gs_image_pool[index].priority = 8;
@@ -965,8 +965,8 @@ void proposition_open_days_panel(void) {
     thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_CHOOSE_DAYS, 0);
     g_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS;
     g_menu_stack_ot_offset = 8;
-    origin.x = 0x38;
-    origin.y = 0x20;
+    origin.x = 56;
+    origin.y = 32;
     g_window_panel_value = min_days;
     window_start_number_panel_thread(
         WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, min_days | (max_days << 16), TEXT_ID_DAYS_LABEL, &origin);

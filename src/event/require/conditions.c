@@ -404,9 +404,9 @@ void conditions_special_thread(void) {
 
         setUV4(poly, QUAD.source.x, QUAD.source.y, QUAD.source.x + QUAD.source.w, QUAD.source.y, QUAD.source.x,
             QUAD.source.y + QUAD.source.h, QUAD.source.x + QUAD.source.w, QUAD.source.y + QUAD.source.h);
-        setXY4(poly, QUAD.offset.x + 0x100, QUAD.offset.y + 0x78, QUAD.offset.x + 0x100 + QUAD.source.w,
-            QUAD.offset.y + 0x78, QUAD.offset.x + 0x100, QUAD.offset.y + 0x78 + QUAD.source.h,
-            QUAD.offset.x + 0x100 + QUAD.source.w, QUAD.offset.y + 0x78 + QUAD.source.h);
+        setXY4(poly, QUAD.offset.x + 256, QUAD.offset.y + 120, QUAD.offset.x + 256 + QUAD.source.w, QUAD.offset.y + 120,
+            QUAD.offset.x + 256, QUAD.offset.y + 120 + QUAD.source.h, QUAD.offset.x + 256 + QUAD.source.w,
+            QUAD.offset.y + 120 + QUAD.source.h);
     }
     mem_copy_bytes_nonempty(g_gfx_poly_gt4_buffers[1], g_gfx_poly_gt4_buffers, 40 * sizeof(POLY_GT4));
 

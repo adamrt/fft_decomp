@@ -379,19 +379,19 @@ static void build_ability_preview(void) {
         menu_scroll_text_layout_t* layout = entry->context;
 
         layout->columns.row_count = 6;
-        entry->window.x = 0x8c;
-        entry->window.y = 0x30;
-        entry->window.w = 0xe8;
-        entry->text_image.source.w = 0xe8;
+        entry->window.x = 140;
+        entry->window.y = 48;
+        entry->window.w = 232;
+        entry->text_image.source.w = 232;
         entry->inner_width = 0xe8;
     } else {
         menu_scroll_text_layout_t* layout = entry->context;
 
         layout->columns.row_count = 6;
-        entry->window.x = 0xbe;
-        entry->window.y = 0x30;
-        entry->window.w = 0x84;
-        entry->text_image.source.w = 0x84;
+        entry->window.x = 190;
+        entry->window.y = 48;
+        entry->window.w = 132;
+        entry->text_image.source.w = 132;
         entry->inner_width = 0x84;
         g_at_list_layout.columns.mode[2] = MENU_TEXT_COLUMN_HIDDEN;
     }

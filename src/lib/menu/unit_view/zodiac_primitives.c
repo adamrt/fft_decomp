@@ -111,6 +111,6 @@ void zodiac_build_primitives(zodiac_draw_context_t* context, POLY_FT4* poly) {
     setRGB0(poly, 8, 8, 8);
     SetSemiTrans(poly, 1);
     SetShadeTex(poly, 0);
-    setXY4(poly, 0, 0, 0xff, 0, 0, 0xff, 0xff, 0xff);
+    setXY4(poly, 0, 0, 255, 0, 0, 255, 255, 255);
     addPrim(context->ot, poly);
 }

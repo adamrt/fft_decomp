@@ -12,6 +12,6 @@ void gfx_enqueue_line_f2(const point16_t endpoints[2], const rgb24_t* color, u8 
 
     setRGB0(line, color->r, color->g, color->b);
     SetSemiTrans(line, semitrans);
-    setXY2(line, endpoints[0].x + 0x80, endpoints[0].y, endpoints[1].x + 0x80, endpoints[1].y);
+    setXY2(line, endpoints[0].x + 128, endpoints[0].y, endpoints[1].x + 128, endpoints[1].y);
     addPrim(&g_menu_gfx_context->otag[otag_index], line);
 }

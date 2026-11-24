@@ -26,7 +26,7 @@ void text_render_id_rows_to_vram(const u8* text_table, const s16* text_ids, cons
     destination_row.x = destination->x;
     destination_row.y = destination->y;
     destination_row.w = destination->w;
-    destination_row.h = 0x10;
+    destination_row.h = 16;
     for (; *text_ids != -1; text_ids++) {
         row_text_ids[0] = *text_ids;
         row_text_ids[1] = -1;

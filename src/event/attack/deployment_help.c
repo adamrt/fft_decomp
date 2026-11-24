@@ -235,21 +235,20 @@ void deploy_help_cursor_thread(void) {
             shade[buffer].v2 = 0;
             shade[buffer].v3 = 0x10;
 
-            setXY4(&cursor[buffer], x, y + bob, x + 0x10, y + bob, x, y + bob + 0x10, x + 0x10, y + bob + 0x10);
-            setXY4(&shade[buffer], x + 2, y + bob + 2, x + 0x12, y + bob + 2, x + 2, y + bob + 0x12, x + 0x12,
-                y + bob + 0x12);
+            setXY4(&cursor[buffer], x, y + bob, x + 16, y + bob, x, y + bob + 16, x + 16, y + bob + 16);
+            setXY4(&shade[buffer], x + 2, y + bob + 2, x + 18, y + bob + 2, x + 2, y + bob + 18, x + 18, y + bob + 18);
         } else {
             u = 0xa8;
-            setUV4(&cursor[buffer], u, 0, u_mid, 0, 0xa8, 0x10, u_mid, 0x10);
+            setUV4(&cursor[buffer], u, 0, u_mid, 0, 168, 16, u_mid, 16);
 
             u = 0xb8;
-            setUV4(&shade[buffer], u, 0, 0xc8, 0, u_mid, 0x10, 0xc8, 0x10);
+            setUV4(&shade[buffer], u, 0, 200, 0, u_mid, 16, 200, 16);
 
-            setXY4(&cursor[buffer], x + bob, y, x + bob + 0x10, y, x + bob, y + 0x10, x + bob + 0x10, y + 0x10);
+            setXY4(&cursor[buffer], x + bob, y, x + bob + 16, y, x + bob, y + 16, x + bob + 16, y + 16);
 
             shadow_offset = bob + 2;
-            setXY4(&shade[buffer], x + shadow_offset, y + 2, x + shadow_offset + 0x10, y + 2, x + shadow_offset,
-                y + 0x12, x + shadow_offset + 0x10, y + 0x12);
+            setXY4(&shade[buffer], x + shadow_offset, y + 2, x + shadow_offset + 16, y + 2, x + shadow_offset, y + 18,
+                x + shadow_offset + 16, y + 18);
         }
 
         /* The cursor and its shade switch palettes while the help text is open. */

@@ -1600,7 +1600,7 @@ s32 effect_secondary_reflect_handler(void) {
                 = work->clut[g_effect_buffer_index][(cleared - span) * 2 + 1] = 0;
         }
         rect.x = (g_effect_secondary_current->own_slot_id - 1) * 16 + 1;
-        rect.y = 0x1fc;
+        rect.y = 508;
         rect.w = 6;
         rect.h = 1;
         LoadImage(&rect, (u32*)work->clut[g_effect_buffer_index]);

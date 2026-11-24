@@ -26,7 +26,7 @@ void menu_gfx_enqueue_oriented_textured_quad_rect(
     }
     SetSemiTrans(poly, quad_semitrans);
 
-    setXYWH(poly, rect->x + 0x80, rect->y, rect->w, rect->h);
+    setXYWH(poly, rect->x + 128, rect->y, rect->w, rect->h);
 
     switch (orientation & 0xff) {
     case TEXTURE_UV_FLIP_NONE:

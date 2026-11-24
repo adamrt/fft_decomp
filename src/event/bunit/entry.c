@@ -62,46 +62,46 @@ static void init_graphics(void) {
     menu_set_event_speed(0);
     g_text_section_pointers[TEXT_SECTION_EVENT_MESSAGES] = g_unit_list_text_menu_section;
     g_text_section_pointers[TEXT_SECTION_COMPOSED_TEXT] = g_unit_list_text_reorder_list_buffer;
-    rect.x = 0x100;
+    rect.x = 256;
     rect.y = 0;
-    rect.w = 0x40;
-    rect.h = 0x30;
+    rect.w = 64;
+    rect.h = 48;
     gfx_load_image_and_wait(&rect, g_menu_glyph_sheet->pixels);
-    rect.x = 0x3C0;
-    rect.y = 0x1F0;
-    rect.w = 0x10;
+    rect.x = 960;
+    rect.y = 496;
+    rect.w = 16;
     rect.h = 1;
     gfx_store_image_and_wait(&rect, palette);
     palette[4] = 0;
-    rect.x = 0x120;
-    rect.y = 0xFE;
-    rect.w = 0x10;
+    rect.x = 288;
+    rect.y = 254;
+    rect.w = 16;
     rect.h = 1;
     gfx_load_image_and_wait(&rect, palette);
-    rect.x = 0x100;
-    rect.y = 0xFE;
-    rect.w = 0xC;
+    rect.x = 256;
+    rect.y = 254;
+    rect.w = 12;
     rect.h = 1;
     gfx_load_image_and_wait(&rect, palette + 4);
-    rect.x = 0x3C0;
-    rect.y = 0x1F4;
-    rect.w = 0x10;
+    rect.x = 960;
+    rect.y = 500;
+    rect.w = 16;
     rect.h = 1;
     gfx_store_image_and_wait(&rect, palette);
     palette[4] = 0;
-    rect.x = 0x130;
-    rect.y = 0xFE;
-    rect.w = 0x10;
+    rect.x = 304;
+    rect.y = 254;
+    rect.w = 16;
     rect.h = 1;
     gfx_load_image_and_wait(&rect, palette);
-    rect.x = 0x110;
-    rect.y = 0xFE;
-    rect.w = 0xC;
+    rect.x = 272;
+    rect.y = 254;
+    rect.w = 12;
     rect.h = 1;
     gfx_load_image_and_wait(&rect, palette + 4);
-    rect.x = 0x100;
-    rect.y = 0xFA;
-    rect.w = 0x40;
+    rect.x = 256;
+    rect.y = 250;
+    rect.w = 64;
     rect.h = 4;
     gfx_load_image_and_wait(&rect, block);
     g_text_selection_id = 0;
@@ -418,7 +418,7 @@ static void update_unit_grid_selection(void) {
             value = g_unit_list_status_banner_at_bottom;
             g_unit_list_status_banner_at_bottom_latch = value;
             if (value != 0) {
-                g_unit_panel_status_display_thread_params.position.y = 0x90;
+                g_unit_panel_status_display_thread_params.position.y = 144;
             } else {
                 g_unit_panel_status_display_thread_params.position.y = 0;
             }
@@ -444,7 +444,7 @@ static void update_unit_grid_selection(void) {
                 g_unit_panel_status_display_thread_params.flags |= MENU_STATUS_PANEL_SLIDE_UP;
             }
         } else if (g_unit_list_status_banner_at_bottom != 0) {
-            g_unit_panel_status_display_thread_params.position.y = 0x90;
+            g_unit_panel_status_display_thread_params.position.y = 144;
         } else {
             g_unit_panel_status_display_thread_params.position.y = 0;
         }

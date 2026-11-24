@@ -68,18 +68,18 @@ menu_window_buffer_t* menu_alloc_window_buffer_pair(void) {
                 buffer->sprites[1].clut = 0x7dbc;
                 buffer->sprites[2].clut = 0x7cbc;
                 buffer->icon_sprites[0].u0 = 0xd8;
-                buffer->sprites[0].w = 0x10;
-                buffer->sprites[0].h = 0x10;
-                buffer->sprites[1].w = 0x10;
-                buffer->sprites[1].h = 0x10;
-                buffer->sprites[2].w = 0x10;
-                buffer->sprites[2].h = 0x10;
+                buffer->sprites[0].w = 16;
+                buffer->sprites[0].h = 16;
+                buffer->sprites[1].w = 16;
+                buffer->sprites[1].h = 16;
+                buffer->sprites[2].w = 16;
+                buffer->sprites[2].h = 16;
                 buffer->sprites[0].v0 = 0;
                 buffer->sprites[1].v0 = 0;
                 buffer->icon_sprites[0].w = 8;
-                buffer->icon_sprites[0].h = 0x10;
+                buffer->icon_sprites[0].h = 16;
                 buffer->icon_sprites[1].w = 8;
-                buffer->icon_sprites[1].h = 0x10;
+                buffer->icon_sprites[1].h = 16;
                 buffer->icon_sprites[2].w = 8;
                 buffer->icon_sprites[2].h = 8;
                 buffer->icon_sprites[0].v0 = 0;
@@ -250,7 +250,7 @@ void menu_draw_active_window_frames(void) {
             /* Portrait slot n is 32 x 48 pixels at u = 32 n of the portrait page, with its
              * CLUT at x = 0x1C0 + 16 (n % 4), y = 0xFE + n / 4. */
             u = window->portrait_code << 5;
-            setUV4(&window->quads[1], u, 0xCE, u + 0x1F, 0xCE, u, 0xFE, u + 0x1F, 0xFE);
+            setUV4(&window->quads[1], u, 206, u + 31, 206, u, 254, u + 31, 254);
             window->quads[1].tpage = GetTPage(0, 0, 0x1C0, 0);
             window->quads[1].clut = GetClut(window->portrait_code % 4 * 16 + 0x1C0, window->portrait_code / 4 + 0xFE);
 #else

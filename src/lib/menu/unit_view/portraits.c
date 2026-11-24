@@ -84,9 +84,9 @@ void portrait_build_transition(const RECT* texture_rect, s32* transition, const 
     second_rect.x += 0x10;
 
     for (i = 0; i < 4; i++) {
-        setXY4(&poly[i], g_menu_portrait_origin.x + 2, g_menu_portrait_origin.y + 2, g_menu_portrait_origin.x + 0x21,
-            g_menu_portrait_origin.y + 2, g_menu_portrait_origin.x + 2, g_menu_portrait_origin.y + 0x32,
-            g_menu_portrait_origin.x + 0x21, g_menu_portrait_origin.y + 0x32);
+        setXY4(&poly[i], g_menu_portrait_origin.x + 2, g_menu_portrait_origin.y + 2, g_menu_portrait_origin.x + 33,
+            g_menu_portrait_origin.y + 2, g_menu_portrait_origin.x + 2, g_menu_portrait_origin.y + 50,
+            g_menu_portrait_origin.x + 33, g_menu_portrait_origin.y + 50);
     }
 
     if (*transition == 0) {

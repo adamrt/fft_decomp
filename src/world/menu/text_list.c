@@ -143,7 +143,7 @@ void menu_screen_text_list_thread(void) {
     entry->text_image.source.h = binding->row_count * 16 + 28;
 
     image_parameters.source.x = 0;
-    image_parameters.source.y = 0x7E;
+    image_parameters.source.y = 126;
     image_parameters.x_screen_offset = 8;
     image_parameters.y_screen_offset = 12;
     image_parameters.source.w = entry->window.w - 18;
@@ -152,8 +152,8 @@ void menu_screen_text_list_thread(void) {
     gfx_set_draw_mode_for_texture_page(&page->icon_mode, MENU_TEXTURE_PAGE_FRAME);
     texture_window.x = 0;
     texture_window.y = entry->vram_origin.y & 0xFF;
-    texture_window.w = 0x100;
-    texture_window.h = 0x100;
+    texture_window.w = 256;
+    texture_window.h = 256;
 
     for (i = 0; i < 2; i++) {
         s_text_list_pages[i].icons.icons[0] = &icons0[i];

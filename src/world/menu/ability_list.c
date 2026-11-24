@@ -83,7 +83,7 @@ void ability_list_scrolling_thread(void) {
     row_buffer_live = 0;
     entry->text_image.source.h = layout->columns.row_count * 16 + 28;
     window.source.x = 0x108 - entry->inner_width;
-    window.source.y = 0xFE;
+    window.source.y = 254;
     window.x_screen_offset = 8;
     window.y_screen_offset = 12;
     hold_time = 0;
@@ -100,9 +100,9 @@ void ability_list_scrolling_thread(void) {
     ClearImage(&clear, 0, 0, 0);
 
     texture_window.x = 0;
-    texture_window.y = 0x80;
-    texture_window.w = 0x100;
-    texture_window.h = 0x80;
+    texture_window.y = 128;
+    texture_window.w = 256;
+    texture_window.h = 128;
     for (i = 0; i < 2; i++) {
         page[i].icons.icons[0] = &icons0[i];
         page[i].icons.icons[1] = &icons1[i];
@@ -169,7 +169,7 @@ void ability_list_scrolling_thread(void) {
     redraw_pending = 1;
     ring = 0;
     image_rect.x = window.source.x / 4 + entry->vram_origin.x;
-    image_rect.y = 0x80;
+    image_rect.y = 128;
     image_rect.w = window.source.w / 4;
     image_rect.h = window.source.h;
     LoadImage(&image_rect, (u32*)buffer);

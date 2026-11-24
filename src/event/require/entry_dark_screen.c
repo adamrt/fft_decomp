@@ -256,7 +256,7 @@ void require_dark_screen_entrypoint(void) {
         }
 
         SetPolyF4(&s_conditions_burst_flash_polys[0]);
-        setXY4(&s_conditions_burst_flash_polys[0], 0x80, 0, 0x180, 0, 0x80, 0x100, 0x180, 0x100);
+        setXY4(&s_conditions_burst_flash_polys[0], 128, 0, 384, 0, 128, 256, 384, 256);
         setRGB0(&s_conditions_burst_flash_polys[0], 0x30, 0x28, 0x10);
         SetSemiTrans(&s_conditions_burst_flash_polys[0], 1);
         mem_copy_bytes_nonempty(

@@ -49,9 +49,9 @@ void tutorial_open_topic_list(void) {
         visible = 8;
     }
     layout.text_width = 0x8c;
-    origin.x = 0x54;
+    origin.x = 84;
     layout.visible_rows = visible;
-    origin.y = 0x50;
+    origin.y = 80;
     menu_stack_restore_cursor(MENU_STACK_CURSOR_SLOT_TUTORIAL_TOPICS, count, visible);
     window_start_panel_thread(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL,
         g_menu_stack_records[g_menu_stack_depth].panel.entry_count, &layout, &origin);
@@ -131,11 +131,11 @@ static void open_topic(s32 topic) {
     switch (coordinate_mode) {
     case 0:
         g_text_window.image_position.x = 0;
-        g_text_window.image_position.y = 0x60;
+        g_text_window.image_position.y = 96;
         break;
     case 1:
         g_text_window.image_position.x = 0;
-        g_text_window.image_position.y = 0x70;
+        g_text_window.image_position.y = 112;
         break;
     }
     g_text_window.base.x = -122;

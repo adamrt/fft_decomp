@@ -138,7 +138,7 @@ void unit_panel_numbers_thread(void) {
         buffer->draw_offsets[0].position.x = thread->position.x - 0x80;
         buffer->draw_offsets[0].position.y = thread->position.y + g_gfx_draw_offset_y;
         SetDrawOffset(&buffer->draw_offsets[0].packet, (u16*)&buffer->draw_offsets[0].position);
-        buffer->draw_offsets[1].position.x = -0x80;
+        buffer->draw_offsets[1].position.x = -128;
         buffer->draw_offsets[1].position.y = g_gfx_draw_offset_y;
         SetDrawOffset(&buffer->draw_offsets[1].packet, (u16*)&buffer->draw_offsets[1].position);
 

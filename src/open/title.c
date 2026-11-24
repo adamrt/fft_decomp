@@ -194,10 +194,10 @@ void title_push_menu(s32 argument) {
     gfx_init_screen_environments(0);
     rect.x = 0;
     rect.y = 0;
-    rect.w = 0x140;
-    rect.h = 0xf0;
+    rect.w = 320;
+    rect.h = 240;
     if (g_gfx_active_buffer_index != 0) {
-        rect.y = 0xf0;
+        rect.y = 240;
     }
     LoadImage(&rect, g_file_destination);
     DrawSync(0);
@@ -213,7 +213,7 @@ void title_push_menu(s32 argument) {
     g_display_object_animated_pool[record].anim_counter = 0;
     g_display_object_animated_pool[record].frame_index = 0;
     positions[record].x = 0;
-    positions[record].y = 0x64;
+    positions[record].y = 100;
 
     for (i = 0, y = 0x1e; i < 4; i++) {
         record = display_object_append_animated(g_display_object_queue, &g_display_object_queue_count);
@@ -224,7 +224,7 @@ void title_push_menu(s32 argument) {
         g_display_object_animated_pool[record].frame_index = 0;
         positions[record].y = y;
         y += 0xc;
-        positions[record].x = -0x18;
+        positions[record].x = -24;
     }
 
     record = display_object_append_animated(g_display_object_queue, &g_display_object_queue_count);
@@ -679,13 +679,13 @@ static void update_new_game(controller_record_t* record) {
         if (g_gfx_active_buffer_index != 0) {
             rect.x = 0;
             rect.y = 0;
-            rect.w = 0x100;
-            rect.h = 0xF0;
+            rect.w = 256;
+            rect.h = 240;
         } else {
             rect.x = 0;
-            rect.y = 0xF0;
-            rect.w = 0x100;
-            rect.h = 0xF0;
+            rect.y = 240;
+            rect.w = 256;
+            rect.h = 240;
         }
         StoreImage(&rect, g_file_destination);
         DrawSync(0);
@@ -693,13 +693,13 @@ static void update_new_game(controller_record_t* record) {
         if (g_gfx_active_buffer_index == 0) {
             rect.x = 0;
             rect.y = 0;
-            rect.w = 0x100;
-            rect.h = 0xF0;
+            rect.w = 256;
+            rect.h = 240;
         } else {
             rect.x = 0;
-            rect.y = 0xF0;
-            rect.w = 0x100;
-            rect.h = 0xF0;
+            rect.y = 240;
+            rect.w = 256;
+            rect.h = 240;
         }
         LoadImage(&rect, g_file_destination);
         DrawSync(0);
@@ -759,8 +759,8 @@ static void push_birthday_menu(void) {
     g_controller_records[g_controller_depth].birthday_date.title_image = record;
     quad.x = 0;
     quad.y = 0;
-    quad.w = 0x80;
-    quad.h = 0x40;
+    quad.w = 128;
+    quad.h = 64;
     window_init_text_record(record, quad, 0, 0xB800, g_birthday_title_image);
     position = &g_display_object_gpu_image_pool[0].position;
     position = (point32_t*)((u8*)position + record * sizeof(display_object_gpu_image_t));
@@ -802,9 +802,9 @@ static void build_birthday_text(birthday_date_state_t* menu) {
 
     menu->window_image = index;
     quad.x = 0;
-    quad.y = 0x40;
-    quad.w = 0x50;
-    quad.h = 0x20;
+    quad.y = 64;
+    quad.w = 80;
+    quad.h = 32;
     window_build_render_record_image(index, quad, 0, (u32*)g_birthday_window_image);
 
     /* The month names are text entries 0xB803 (January) to 0xB80E. Entry 0xB801
@@ -818,7 +818,7 @@ static void build_birthday_text(birthday_date_state_t* menu) {
     *substitution = text_id;
     window_display_text_entry(index, 0xB801, position, g_birthday_window_image);
 
-    position.x = 0x30;
+    position.x = 48;
     position.y = 8;
     *substitution = menu->day;
     window_display_text_entry(index, 0xB802, position, g_birthday_window_image);
@@ -1009,9 +1009,9 @@ static void push_birthday_confirmation(void) {
     record = display_object_append_image(g_display_object_queue, &g_display_object_queue_count);
     g_controller_records[g_controller_depth].birthday_confirmation.menu_image = record;
     quad.x = 0;
-    quad.y = 0x60;
-    quad.w = 0x28;
-    quad.h = 0x30;
+    quad.y = 96;
+    quad.w = 40;
+    quad.h = 48;
     window_init_text_record(record, quad, 0, 0xB80F, g_birthday_title_image);
     controller = g_controller_depth;
     position = &g_display_object_gpu_image_pool[0].position;

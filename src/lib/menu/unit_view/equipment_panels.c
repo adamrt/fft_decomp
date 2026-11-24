@@ -167,7 +167,7 @@ void unit_panel_equipment_ability_thread(void) {
             } else {
                 /* The target indexes the five icon sprites from their own base (i * 0x14 + 0x1a8), as a
                  * separate array after the 19 label sprites would. */
-                (screen->frame.sprites + i)[19].x0 = -0x200;
+                (screen->frame.sprites + i)[19].x0 = -512;
             }
         }
 
@@ -188,7 +188,7 @@ void unit_panel_equipment_ability_thread(void) {
         screen->draw_offsets[0].position.x = thread->position.x - 0x80;
         screen->draw_offsets[0].position.y = thread->position.y + g_gfx_draw_offset_y;
         SetDrawOffset(&screen->draw_offsets[0].packet, (u16*)&screen->draw_offsets[0].position);
-        screen->draw_offsets[1].position.x = -0x80;
+        screen->draw_offsets[1].position.x = -128;
         screen->draw_offsets[1].position.y = g_gfx_draw_offset_y;
         SetDrawOffset(&screen->draw_offsets[1].packet, (u16*)&screen->draw_offsets[1].position);
 

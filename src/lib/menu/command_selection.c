@@ -433,7 +433,7 @@ static void build_ability_list_rows(s32 mode) {
     }
 
     /* Six rows show at most; a shorter list's window moves down 8 pixels per missing row. */
-    g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST].window.y = 0x30;
+    g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST].window.y = 48;
     if (count >= 7) {
         g_ability_list_ability_layout.columns.hidden_rows = count - 6;
         g_ability_list_ability_layout.columns.row_count = 6;

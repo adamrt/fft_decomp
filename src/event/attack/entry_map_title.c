@@ -71,12 +71,12 @@ static void build_title_strips(POLY_GT4* polys, s32 width, s32 shade, s32 revers
             poly->clut = 0x3fdc;
             if (row == 0) {
                 if (reverse == 0) {
-                    setUVWH(poly, 0, 0xe0, width, 0x14);
-                    setXYWH(poly, x + 0x80 + dx, y + 0x60 + dy, width, height);
+                    setUVWH(poly, 0, 224, width, 20);
+                    setXYWH(poly, x + 128 + dx, y + 96 + dy, width, height);
                 } else {
                     rest = 0xff - width;
-                    setUVWH(poly, width, 0xe0, rest, 0x14);
-                    setXYWH(poly, x + (0x80 + width) + dx, y + 0x60 + dy, rest, height);
+                    setUVWH(poly, width, 224, rest, 20);
+                    setXYWH(poly, x + (128 + width) + dx, y + 96 + dy, rest, height);
                 }
                 setRGB0(poly, shade, shade, shade);
                 setRGB1(poly, shade, shade, shade);
@@ -99,15 +99,15 @@ static void build_title_strips(POLY_GT4* polys, s32 width, s32 shade, s32 revers
                     if (width >= 0xdf) {
                         edge = 0xfe - width;
                     }
-                    setUVWH(poly, width, 0xe0, edge, 0x14);
-                    setXYWH(poly, x + 0x80 + width + dx, y + 0x60 + dy, edge, height);
+                    setUVWH(poly, width, 224, edge, 20);
+                    setXYWH(poly, x + 128 + width + dx, y + 96 + dy, edge, height);
                 } else {
                     edge = 0x20;
                     if (width < 0x20) {
                         edge = width;
                     }
-                    setUVWH(poly, width - edge, 0xe0, edge, 0x14);
-                    setXYWH(poly, x + (0x80 + width) - edge + dx, y + 0x60 + dy, edge, height);
+                    setUVWH(poly, width - edge, 224, edge, 20);
+                    setXYWH(poly, x + (128 + width) - edge + dx, y + 96 + dy, edge, height);
                 }
             }
             poly++;

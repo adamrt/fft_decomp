@@ -188,17 +188,17 @@ static void build_chapter_title_polygons(
                     setUV4(poly, DIM.source.x + DIM.source.w - fade, DIM.source.y, DIM.source.x + DIM.source.w,
                         DIM.source.y, DIM.source.x + DIM.source.w - fade, DIM.source.y + DIM.source.h,
                         DIM.source.x + DIM.source.w, DIM.source.y + DIM.source.h);
-                    setXY4(poly, DIM.offset.x + DIM.source.w - fade + 0x100, DIM.offset.y + 0x80,
-                        DIM.offset.x + DIM.source.w + 0x100, DIM.offset.y + 0x80,
-                        DIM.offset.x + DIM.source.w - fade + 0x100, DIM.offset.y + 0x80 + DIM.source.h,
-                        DIM.offset.x + DIM.source.w + 0x100, DIM.offset.y + 0x80 + DIM.source.h);
+                    setXY4(poly, DIM.offset.x + DIM.source.w - fade + 256, DIM.offset.y + 128,
+                        DIM.offset.x + DIM.source.w + 256, DIM.offset.y + 128, DIM.offset.x + DIM.source.w - fade + 256,
+                        DIM.offset.y + 128 + DIM.source.h, DIM.offset.x + DIM.source.w + 256,
+                        DIM.offset.y + 128 + DIM.source.h);
                     setRGB0(poly, color, color, color);
                     setRGB1(poly, color, color, color);
                     setRGB2(poly, color, color, color);
                     setRGB3(poly, color, color, color);
                 } else {
                     setUVWH(poly, DIM.source.x, DIM.source.y, fade, DIM.source.h);
-                    setXYWH(poly, DIM.offset.x + 0x100, DIM.offset.y + 0x80, fade, DIM.source.h);
+                    setXYWH(poly, DIM.offset.x + 256, DIM.offset.y + 128, fade, DIM.source.h);
                     setRGB0(poly, color, color, color);
                     setRGB1(poly, color, color, color);
                     setRGB2(poly, color, color, color);
@@ -210,15 +210,15 @@ static void build_chapter_title_polygons(
                     setUV4(poly, DIM.source.x + DIM.source.w - fade - clip, DIM.source.y,
                         DIM.source.x + DIM.source.w - fade, DIM.source.y, DIM.source.x + DIM.source.w - fade - clip,
                         DIM.source.y + DIM.source.h, DIM.source.x + DIM.source.w - fade, DIM.source.y + DIM.source.h);
-                    setXYWH(poly, DIM.offset.x + DIM.source.w - fade + 0x100 - clip, DIM.offset.y + 0x80, clip,
-                        DIM.source.h);
+                    setXYWH(
+                        poly, DIM.offset.x + DIM.source.w - fade + 256 - clip, DIM.offset.y + 128, clip, DIM.source.h);
                     setRGB0(poly, 0, 0, 0);
                     setRGB1(poly, color, color, color);
                     setRGB2(poly, 0, 0, 0);
                     setRGB3(poly, color, color, color);
                 } else {
                     setUVWH(poly, DIM.source.x + fade, DIM.source.y, clip, DIM.source.h);
-                    setXYWH(poly, DIM.offset.x + fade + 0x100, DIM.offset.y + 0x80, clip, DIM.source.h);
+                    setXYWH(poly, DIM.offset.x + fade + 256, DIM.offset.y + 128, clip, DIM.source.h);
                     setRGB0(poly, color, color, color);
                     setRGB1(poly, 0, 0, 0);
                     setRGB2(poly, color, color, color);
@@ -319,8 +319,8 @@ static void build_game_over_polygons(
                     primitive->v1 = ROW->source.y + fade + clip;
                     primitive->u3 = ROW->source.x;
                     primitive->v3 = ROW->source.y + fade + clip;
-                    setXY4(primitive, ROW->offset.y + fade_x, ROW->offset.x + 0x80, ROW->offset.y + fade_x + clip,
-                        ROW->offset.x + 0x80, ROW->offset.y + fade_x, ROW->offset.x + (ROW->source.w + 0x80U),
+                    setXY4(primitive, ROW->offset.y + fade_x, ROW->offset.x + 128, ROW->offset.y + fade_x + clip,
+                        ROW->offset.x + 128, ROW->offset.y + fade_x, ROW->offset.x + (ROW->source.w + 0x80U),
                         ROW->offset.y + fade_x + clip, ROW->offset.x + (ROW->source.w + 0x80U));
                     setRGB0(primitive, color, color, color);
                     setRGB1(primitive, 0, 0, 0);

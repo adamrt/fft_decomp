@@ -421,9 +421,9 @@ static s32 build_height_pieces(s32 group, POLY_GT4* poly) {
             g_unit_view_quad_origin.y + piece->y_screen_offset + (piece->source.h - 1),
             g_unit_view_quad_origin.x + piece->x_screen_offset + piece->source.w,
             g_unit_view_quad_origin.y + piece->y_screen_offset + (piece->source.h - 1));
-        setUV4(poly, piece->source.x, piece->source.y - 0x78, piece->source.x + piece->source.w, piece->source.y - 0x78,
-            piece->source.x, piece->source.y - 0x78 + (piece->source.h - 1), piece->source.x + piece->source.w,
-            piece->source.y - 0x78 + (piece->source.h - 1));
+        setUV4(poly, piece->source.x, piece->source.y - 120, piece->source.x + piece->source.w, piece->source.y - 120,
+            piece->source.x, piece->source.y - 120 + (piece->source.h - 1), piece->source.x + piece->source.w,
+            piece->source.y - 120 + (piece->source.h - 1));
         setRGB0(poly, colors->vertex[0].r, colors->vertex[0].g, colors->vertex[0].b);
         setRGB1(poly, colors->vertex[1].r, colors->vertex[1].g, colors->vertex[1].b);
         setRGB2(poly, colors->vertex[2].r, colors->vertex[2].g, colors->vertex[2].b);
@@ -497,7 +497,7 @@ static s32 display_action_preview(
     extra = 0;
     show_empty = 0;
     panel = &g_unit_view_attack_caster_stats_setup[6];
-    panel[0].x = 0xf;
+    panel[0].x = 15;
     panel[0].kind = 1;
     panel[0].format = MENU_DECIMAL_SIGN_MINUS | 3;
     panel[0].y = 0;
@@ -916,8 +916,8 @@ static void stats_panel_thread(
         }
         params = g_unit_view_stats_sprite_image_params_by_mode[mode];
         if (g_unit_view_stats_bounce_step == 0) {
-            setXY4(&page->portrait, frame_rect->x + 2, frame_rect->y + 2, frame_rect->x + 0x21, frame_rect->y + 2,
-                frame_rect->x + 2, frame_rect->y + 0x32, frame_rect->x + 0x21, frame_rect->y + 0x32);
+            setXY4(&page->portrait, frame_rect->x + 2, frame_rect->y + 2, frame_rect->x + 33, frame_rect->y + 2,
+                frame_rect->x + 2, frame_rect->y + 50, frame_rect->x + 33, frame_rect->y + 50);
             mem_copy_bytes_nonempty(
                 &params[6], &g_unit_view_stats_icon_image_params[status->team_kind], sizeof(*params));
             for (i = 0; i < 7; i++, params++) {
@@ -1025,7 +1025,7 @@ static void stats_panel_thread(
             offs->a.position.y = base_y;
         }
         SetDrawOffset(&offs->a.packet, (u16*)&offs->a.position);
-        offs->b.position.x = -0x80;
+        offs->b.position.x = -128;
         offs->b.position.y = base_y;
         SetDrawOffset(&offs->b.packet, (u16*)&offs->b.position);
         gfx_draw_or_append_gpu_primitive(&offs->b);
@@ -1235,8 +1235,8 @@ void unit_view_summary_thread(void) {
     LoadImage(&rects[3], (u32*)digits->roster_slot);
 
     frames[0].sprites[6].clut = MENU_CLUT_NORMAL;
-    frames[0].sprites[6].w = 0x18;
-    frames[0].sprites[6].h = 0x14;
+    frames[0].sprites[6].w = 24;
+    frames[0].sprites[6].h = 20;
     /* Zodiac icons are 24 x 20 cells, seven to a row from v = 0x2A. */
     zodiac = g_unit_panel_selected_unit.zodiac;
     frames[0].sprites[6].u0 = zodiac % 7 * 0x18;
@@ -1306,7 +1306,7 @@ void unit_view_summary_thread(void) {
 
         frame_record->offset_a.x = slide - 0x80;
         SetDrawOffset(&frame_record->draw_offset_a, (u16*)&frame_record->offset_a);
-        frame_record->offset_b.x = -0x80;
+        frame_record->offset_b.x = -128;
         frame_record->offset_b.y = value;
         SetDrawOffset(&frame_record->draw_offset_b, (u16*)&frame_record->offset_b);
         gfx_draw_or_append_gpu_primitive(&frame_record->draw_offset_b);
@@ -1395,7 +1395,7 @@ void portrait_build_unit_poly(POLY_FT4* poly, s32 battle_unit_id) {
     u8 v;
 
     if (battle_unit_get(battle_unit_id)->unit_id == g_portrait_special_unit_id) {
-        setUV4(poly, 0xe0, 0xcf, 0xff, 0xcf, 0xe0, 0xff, 0xff, 0xff);
+        setUV4(poly, 224, 207, 255, 207, 224, 255, 255, 255);
         poly->tpage = GetTPage(0, 0, 0x380, 0x100);
         poly->clut = GetClut(0x40, 0x1fe);
     } else {
@@ -1408,7 +1408,7 @@ void portrait_build_unit_poly(POLY_FT4* poly, s32 battle_unit_id) {
         } else {
             poly->tpage = GetTPage(0, 0, 0x340, 0x100);
         }
-        setUV4(poly, 0x80, v, 0x80, v + 0x20, 0x50, v, 0x50, v + 0x20);
+        setUV4(poly, 128, v, 128, v + 32, 80, v, 80, v + 32);
         poly->v1--;
         poly->v3--;
         poly->clut = GetClut((map_unit_id & 0xf) * 16, MAP_CLUT_ROWS_Y + MAP_CLUT_ROW_UNITS_SECOND);
@@ -1584,8 +1584,8 @@ void status_screen_thread(void) {
     records = frame_record;
     menu_init_scaled_draw_area_packets(&frame_record->draw_areas);
     /* Move the hovered-unit and summary panels to the top while the editor shows. */
-    g_unit_view_hovered_stats_rect.y = 0x1A;
-    g_unit_view_summary_panel_rect.y = 0x1A;
+    g_unit_view_hovered_stats_rect.y = 26;
+    g_unit_view_summary_panel_rect.y = 26;
     gfx_set_draw_mode_for_texture_page(&frame_record->frame.frame_draw_mode, MENU_TEXTURE_PAGE_FRAME);
     gfx_set_draw_mode_for_texture_page(&frame_record->frame.text_draw_mode, MENU_TEXTURE_PAGE_TEXT_IMAGES);
     gfx_set_draw_mode_for_texture_page(&frame_record->frame.image_draw_mode, MENU_TEXTURE_PAGE_ITEM_ICONS);
@@ -1593,8 +1593,8 @@ void status_screen_thread(void) {
     SetTile(&frame_record->frame.tiles[0]);
     SetSemiTrans(&frame_record->frame.tiles[0], 1);
     setRGB0(&frame_record->frame.tiles[0], 0x30, 0x30, 0x30);
-    frame_record->frame.tiles[0].w = 0x10;
-    frame_record->frame.tiles[0].h = 0x5A;
+    frame_record->frame.tiles[0].w = 16;
+    frame_record->frame.tiles[0].h = 90;
     frame_record->frame.tiles[0].x0 = s_status_screen_panel_rect.x;
     frame_record->frame.tiles[0].y0 = s_status_screen_panel_rect.y + 1;
     mem_copy_bytes_nonempty(&frame_record->frame.tiles[1], &frame_record->frame.tiles[0], sizeof(TILE));
@@ -1804,8 +1804,8 @@ void status_screen_thread(void) {
 
     /* Return the panels to the bottom; step 6 starts the summary panel's bounce there,
      * and it resets the step to 0 when the bounce ends. */
-    g_unit_view_hovered_stats_rect.y = 0xAA;
-    g_unit_view_summary_panel_rect.y = 0xAA;
+    g_unit_view_hovered_stats_rect.y = 170;
+    g_unit_view_summary_panel_rect.y = 170;
     g_menu_panel_fade_mode = MENU_PANEL_FADE_IN;
     g_unit_view_stats_bounce_step = 6;
     sound_queue_cancel();

@@ -3703,8 +3703,8 @@ void battle_state_open_sp2_files_update(void) {
                 g_sprite_evtchr_slots[slot].owner = unit->map_unit_id | SPRITE_EVTCHR_SLOT_OWNER_SP2;
                 image_rect.x = g_sprite_evtchr_slots[slot].image_rect.x;
                 image_rect.y = g_sprite_evtchr_slots[slot].image_rect.y;
-                image_rect.w = 0x40;
-                image_rect.h = 0x100;
+                image_rect.w = 64;
+                image_rect.h = 256;
                 LoadImage(&image_rect, g_sprite_sp2_data);
                 start_next_strike();
                 break;

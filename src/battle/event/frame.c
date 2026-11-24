@@ -125,9 +125,9 @@ s32 script_update_event_frame(u32* ot, u32 buttons) {
      * overlay area into the frame buffer every frame. */
     if (g_gfx_draw_primitives_immediately) {
         DrawSync(0);
-        rect.w = 0x100;
+        rect.w = 256;
         rect.x = 0;
-        rect.h = 0xF0;
+        rect.h = 240;
         rect.y = (g_gfx_screen_polarity & 1) * 0xF0;
         LoadImage(&rect, (u32*)g_heap_high_overlay_load_address);
     }

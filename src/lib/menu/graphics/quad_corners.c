@@ -24,7 +24,7 @@ void gfx_enqueue_textured_quad_corners(const textured_quad_source_t* src, const 
         SetShadeTex(poly, 1);
     }
     SetSemiTrans(poly, semi);
-    setXY4(poly, src->x0 + 0x80, src->y0, src->x1 + 0x80, src->y1, src->x2 + 0x80, src->y2, src->x3 + 0x80, src->y3);
+    setXY4(poly, src->x0 + 128, src->y0, src->x1 + 128, src->y1, src->x2 + 128, src->y2, src->x3 + 128, src->y3);
     setUV4(poly, src->u0, src->v0, src->u1, src->v1, src->u2, src->v2, src->u3, src->v3);
     poly->clut = src->clut;
     poly->tpage = src->tpage;

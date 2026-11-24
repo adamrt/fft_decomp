@@ -43,8 +43,8 @@ void menu_window_frame_thread(void) {
     menu = (urect16_t*)thread_current_get_parameter_1();
 
     mem_zero_words(s_menu_window_frame_image, 0x400);
-    texture.w = 0x80;
-    texture.h = 0x10;
+    texture.w = 128;
+    texture.h = 16;
     gfx_alloc_texture_rect(&texture, &prim->texture_prim, (u32*)-1);
     g_text_glyph_source.stride = 0x100;
     g_text_glyph_dest.stride = 0x80;

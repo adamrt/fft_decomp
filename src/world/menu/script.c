@@ -662,17 +662,17 @@ menu_instruction_t* menu_opcode_0d_draw_formatted_number(menu_instruction_t* com
         value &= ~MENU_NUMBER_VALUE_DISABLED;
     }
     if (command->number.style == 1) {
-        glyph.x = 0x78;
+        glyph.x = 120;
         glyph.y = 1;
         glyph.w = 8;
         glyph.h = 14;
     } else if (command->number.style == 0) {
-        glyph.x = 0x78;
-        glyph.y = 0x10;
+        glyph.x = 120;
+        glyph.y = 16;
         glyph.w = 6;
         glyph.h = 11;
     } else {
-        glyph.x = 0x20;
+        glyph.x = 32;
         glyph.y = 0;
         glyph.w = 10;
         glyph.h = 16;
@@ -700,7 +700,7 @@ menu_instruction_t* menu_opcode_0d_draw_formatted_number(menu_instruction_t* com
                 minus_rect.w = 6;
                 minus_rect.h = 11;
                 if (command->number.opcode == MENU_SCRIPT_OP_NUMBER_DIM_LEADING_ZEROS) {
-                    minus_rect.x = 0xAE;
+                    minus_rect.x = 174;
                 }
                 menu_gfx_enqueue_textured_quad(&minus_rect, 0xBA, 0x10, color, g_menu_gfx_semitransparency,
                     g_menu_screen_window_tpage, clut, g_menu_gfx_otag_index);
@@ -1023,8 +1023,8 @@ void menu_scrollable_list_refresh(const menu_instruction_t* script) {
         g_menu_list_selected_index = g_menu_list_entry_count - 1;
     }
     if (g_menu_screen_list_text_table) {
-        rect.x = 0x240;
-        rect.y = 0x130;
+        rect.x = 576;
+        rect.y = 304;
         rect.w = g_menu_screen_list_image_width;
         rect.h = g_menu_screen_list_visible_rows * 16;
         ClearImage(&rect, 0, 0, 0);
@@ -1032,8 +1032,8 @@ void menu_scrollable_list_refresh(const menu_instruction_t* script) {
             text_ids[i] = g_menu_screen_list_entry_ids[i + g_menu_scroll_base_index];
         }
         text_ids[i] = -1;
-        rect.x = 0x240;
-        rect.y = 0x130;
+        rect.x = 576;
+        rect.y = 304;
         rect.w = g_menu_screen_list_image_width;
         rect.h = g_menu_screen_row_height;
         text_render_id_rows_to_vram(g_menu_screen_list_text_table, text_ids, &rect, 0);
@@ -1117,8 +1117,8 @@ menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* comm
                     g_menu_screen_list_scroll_direction = -1;
                     if (g_menu_screen_list_text_table) {
                         g_menu_screen_list_row_text_ids[0] = g_menu_screen_list_entry_ids[index - 1];
-                        rect.x = 0x240;
-                        rect.y = 0x120;
+                        rect.x = 576;
+                        rect.y = 288;
                         rect.w = g_menu_screen_list_image_width;
                         rect.h = g_menu_screen_row_height;
                         text_render_id_rows_to_vram(
@@ -1135,7 +1135,7 @@ menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* comm
                     if (g_menu_screen_list_text_table) {
                         index = g_menu_scroll_base_index + g_menu_screen_list_visible_rows - 1;
                         g_menu_screen_list_row_text_ids[0] = g_menu_screen_list_entry_ids[index + 1];
-                        rect.x = 0x240;
+                        rect.x = 576;
                         rect.y = g_menu_screen_list_visible_rows * g_menu_screen_row_height + 0x130;
                         rect.w = g_menu_screen_list_image_width;
                         rect.h = g_menu_screen_row_height;
@@ -1165,7 +1165,7 @@ menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* comm
             g_menu_scroll_base_index = --g_menu_list_selected_index;
             if (g_menu_screen_list_text_table) {
                 for (i = 0; i < g_menu_screen_list_visible_rows; i++) {
-                    rect.x = 0x240;
+                    rect.x = 576;
                     rect.y = (i - 1) * g_menu_screen_row_height + 0x130;
                     rect.w = g_menu_screen_list_image_width;
                     rect.h = g_menu_screen_row_height;
@@ -1186,7 +1186,7 @@ menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* comm
             g_menu_scroll_base_index++;
             g_menu_list_selected_index++;
             if (g_menu_screen_list_text_table) {
-                rect.x = 0x240;
+                rect.x = 576;
                 rect.y = g_menu_screen_row_height + 0x130;
                 rect.w = g_menu_screen_list_image_width;
                 rect.h = g_menu_screen_row_height * g_menu_screen_list_visible_rows;

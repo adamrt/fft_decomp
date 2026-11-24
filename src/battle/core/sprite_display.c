@@ -134,8 +134,8 @@ sprite_display_t* sprite_display_init_status_bubble(s32 map_unit_id) {
     for (i = 0; i < 1; i++) {
         display->parts[i].y_shift = 0;
         display->parts[i].x_shift = 0;
-        display->parts[i].width = 0xe;
-        display->parts[i].height = 0xc;
+        display->parts[i].width = 14;
+        display->parts[i].height = 12;
         display->parts[i].u = 0;
         display->parts[i].v = 0xb0;
         display->parts[i].flags = 0;
@@ -162,8 +162,8 @@ sprite_display_t* sprite_display_init_item(s32 map_unit_id) {
     for (i = 0; i < 1; i++) {
         display->parts[i].y_shift = 0;
         display->parts[i].x_shift = 0;
-        display->parts[i].width = 0x10;
-        display->parts[i].height = 0x10;
+        display->parts[i].width = 16;
+        display->parts[i].height = 16;
         display->parts[i].flags = 0;
     }
     return display;

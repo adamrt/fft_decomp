@@ -83,9 +83,9 @@ void proposition_open_dispatch_confirm(void) {
 
     index = display_object_append_image(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].dispatch_confirm.render_index = index;
-    bounds.x = 0x80;
-    bounds.w = 0x28;
-    bounds.h = 0x30;
+    bounds.x = 128;
+    bounds.w = 40;
+    bounds.h = 48;
     bounds.y = 0;
     window_init_text_record(index, bounds, 0, TEXT_ID_OK_NO, g_window_image_buffer);
     g_display_object_gs_image_pool[index].priority = 8;
@@ -99,8 +99,8 @@ void proposition_open_dispatch_confirm(void) {
     location = &g_proposition_selected_row.name_text;
     text_measure_pixels(
         &size.width, &size.rows, text_find_entry(*location + (TEXT_ID_PROPOSITION_JOB_CONTENTS_BASE - 1)));
-    bounds.y = 0x60;
-    bounds.w = 0xF4;
+    bounds.y = 96;
+    bounds.w = 244;
     bounds.x = 0;
     row = size.rows + 2;
     bounds.h = (s_proposition_send_unit_count - -row) * 0x10 + 0x10;
@@ -114,12 +114,12 @@ void proposition_open_dispatch_confirm(void) {
     point.x = 8;
     point.y = 8;
     window_display_text_entry(index, TEXT_ID_JOB_CONTENTS_LABEL, point, &g_window_image_buffer[0x200]);
-    point.x = 0x44;
+    point.x = 68;
     point.y = 8;
     window_display_text_entry(
         index, *location + (TEXT_ID_PROPOSITION_JOB_CONTENTS_BASE - 1), point, &g_window_image_buffer[0x200]);
     for (i = 0; i < s_proposition_send_unit_count; i++) {
-        point.x = 0x3C;
+        point.x = 60;
         line = i + 2;
         point.y = (size.rows + line) * 0x10 + 8;
         window_display_text_entry(
@@ -293,7 +293,7 @@ void proposition_open_participants(void) {
     layout.text_width = 0x6E;
     layout.visible_rows = count;
     origin.x = 8;
-    origin.y = 0x50;
+    origin.y = 80;
     window_init_panel_state(0xC, g_menu_stack_records[g_menu_stack_depth].send_unit.unit_count, &layout, &origin);
 
     /* The initializer hides label column 1; show it with each candidate's level as digits. */
@@ -328,10 +328,10 @@ void proposition_open_participants(void) {
 
     index = display_object_append_image(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].send_unit.list_frame.render_index = index;
-    bounds.x = 0x80;
+    bounds.x = 128;
     bounds.y = 0;
-    bounds.w = 0x6C;
-    bounds.h = 0x40;
+    bounds.w = 108;
+    bounds.h = 64;
     window_init_text_record(index, bounds, 0, 0, g_window_image_buffer);
     g_display_object_gs_image_pool[index].priority = 9;
     {
@@ -375,10 +375,10 @@ void proposition_open_participants(void) {
 
     index = display_object_append_image(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].send_unit.list_render = index;
-    bounds.x = 0x80;
-    bounds.y = 0x40;
-    bounds.w = 0x30;
-    bounds.h = 0x3B;
+    bounds.x = 128;
+    bounds.y = 64;
+    bounds.w = 48;
+    bounds.h = 59;
     window_init_text_record(index, bounds, 0, 0, g_window_image_buffer);
     g_display_object_gs_image_pool[index].priority = 9;
     {
@@ -400,10 +400,10 @@ void proposition_open_participants(void) {
 
     index = display_object_append_image(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].send_unit.portrait_frame = index;
-    bounds.x = 0x80;
-    bounds.y = 0x40;
-    bounds.w = 0x30;
-    bounds.h = 0x3B;
+    bounds.x = 128;
+    bounds.y = 64;
+    bounds.w = 48;
+    bounds.h = 59;
     window_init_text_record(index, bounds, 0, 0, g_window_image_buffer);
     g_display_object_gs_image_pool[index].priority = 9;
     g_display_object_gs_image_pool[index].flags |= DISPLAY_OBJECT_HIDDEN;

@@ -312,7 +312,7 @@ menu_draw_number_command_t* menu_opcode_0d_draw_decimal_number(menu_draw_number_
     glyph.u = 0x78;
     glyph.v = 0x10;
     glyph.w = 6;
-    glyph.h = 0xB;
+    glyph.h = 11;
     pad = command->width - sprintf(text, g_menu_text_decimal_format, value);
     pos = 0;
     color = &g_menu_text_color;
@@ -412,8 +412,8 @@ void menu_draw_sliding_cursor(const point16_t* pos, u16* state, s32 mode) {
 
     rect.x = offset + pos->x - 2;
     rect.y = pos->y;
-    rect.w = 0x10;
-    rect.h = 0x10;
+    rect.w = 16;
+    rect.h = 16;
     menu_gfx_enqueue_textured_quad(&rect, 0xA8, 0, 0, 0, g_menu_cursor_texture_page, front_clut, 0x3C);
     rect.x += 2;
     rect.y += 2;

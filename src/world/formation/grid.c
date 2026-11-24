@@ -473,7 +473,7 @@ void formation_grid_init_cursor(s32 formation_index) {
     g_formation_stat_display_mode = MENU_UNIT_READOUT_HP;
     g_formation_unit_banner_at_bottom_latch = g_formation_unit_banner_at_bottom;
     if (g_formation_unit_banner_at_bottom != 0) {
-        g_unit_panel_status_display_thread_params.position.y = 0x90;
+        g_unit_panel_status_display_thread_params.position.y = 144;
     } else {
         g_unit_panel_status_display_thread_params.position.y = 0;
     }
@@ -609,8 +609,8 @@ s32 unit_grid_update(s16 background_y, s16 toggle_banner, s16 allow_browse, s16 
     if (toggle_banner != 0) {
         g_formation_unit_banner_at_bottom = check_banner_at_bottom(g_formation_scroll_position);
     }
-    pos.w = 0x38;
-    pos.h = 0x30;
+    pos.w = 56;
+    pos.h = 48;
     y = 0x24 + g_formation_scroll_position + g_formation_scroll_velocity;
     gfx_set_otag_index(8);
     i = 0;
@@ -758,9 +758,9 @@ void unit_grid_draw_background(s32 y, s32 unused_1) {
 
     draw_row = 0;
     rect.y = y;
-    rect.w = 0x40;
+    rect.w = 64;
     rect.clut = 0x40;
-    rect.h = 0x20;
+    rect.h = 32;
     rect.tpage = 0x20;
     rect.v = 0xD8;
     for (row = 0; y < 0x101; row++) {
@@ -1121,8 +1121,8 @@ u8 formation_sprite_update_slide(void) {
 void formation_sprite_draw_at_rest(s16 unit_index) {
     point16_t pos;
 
-    pos.x = 0x8B;
-    pos.y = 0x9E;
+    pos.x = 139;
+    pos.y = 158;
     formation_unit_draw_sprite(unit_index, &pos, 0, 6);
 }
 
@@ -1304,12 +1304,12 @@ static void draw_unit_readout(
             }
             rect.x = x;
             rect.y = top + 8;
-            rect.w = 0x25;
+            rect.w = 37;
             rect.h = 3;
             menu_gfx_enqueue_textured_quad(&rect, 0xD8, 0xCA, color, 0, g_menu_cursor_texture_page, clut, priority - 1);
             xy[0].x = s_formation_gauge_bar_offsets.top_x + x;
             xy[0].y = s_formation_gauge_bar_offsets.top_y + top + 8;
-            xy[3].x = xy[1].x = 0x20;
+            xy[3].x = xy[1].x = 32;
             xy[1].x += xy[0].x;
             xy[1].y = s_formation_gauge_bar_offsets.top_y + top + 8;
             xy[2].x = s_formation_gauge_bar_offsets.bottom_x + x;

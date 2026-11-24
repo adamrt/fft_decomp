@@ -309,12 +309,12 @@ static void draw_text_lines(s32 intensity) {
         prims[prim_index].tpage = GetTPage(0, 1, g_prologue.tpage_x, g_prologue.tpage_y);
         prims[prim_index + 1].tpage = GetTPage(0, 2, g_prologue.tpage_x, g_prologue.tpage_y);
 
-        setXY4(&prims[prim_index], left, top_y, left + width, top_y, left, top_y + 0x10, left + width, top_y + 0x10);
+        setXY4(&prims[prim_index], left, top_y, left + width, top_y, left, top_y + 16, left + width, top_y + 16);
         width_plus_one = width + 1;
-        setXY4(&prims[prim_index + 1], left + 1, top_y + 1, left + width_plus_one, top_y + 1, left + 1, top_y + 0x11,
-            left + width_plus_one, top_y + 0x11);
-        setUV4(&prims[prim_index], u, v, u + width, v, u, v + 0x10, u + width, v + 0x10);
-        setUV4(&prims[prim_index + 1], u, v, u + width, v, u, v + 0x10, u + width, v + 0x10);
+        setXY4(&prims[prim_index + 1], left + 1, top_y + 1, left + width_plus_one, top_y + 1, left + 1, top_y + 17,
+            left + width_plus_one, top_y + 17);
+        setUV4(&prims[prim_index], u, v, u + width, v, u, v + 16, u + width, v + 16);
+        setUV4(&prims[prim_index + 1], u, v, u + width, v, u, v + 16, u + width, v + 16);
 
         SetSemiTrans(&prims[prim_index], 1);
         SetSemiTrans(&prims[prim_index + 1], 1);

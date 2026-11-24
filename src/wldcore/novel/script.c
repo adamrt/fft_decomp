@@ -834,8 +834,8 @@ static void novel_opcode_1c_show_value_display(void) {
     if (mode != HUD_VALUE_PLAY_TIME) {
         g_hud_value = g_novel_reading.counter;
     }
-    g_hud_value_position.x = -0x20;
-    g_hud_value_position.y = 0x54;
+    g_hud_value_position.x = -32;
+    g_hud_value_position.y = 84;
     g_hud_ot_priority = 0xa;
     g_novel_reading.state_flags |= NOVEL_STATE_FETCH | NOVEL_STATE_VALUE_DISPLAY;
 }

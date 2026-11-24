@@ -321,7 +321,7 @@ void unit_panel_banner_thread(void) {
         panel->draw_offset_a.position.x = draw_x - 0x80;
         panel->draw_offset_a.position.y = thread->position.y + draw_y;
         SetDrawOffset(&panel->draw_offset_a.packet, (u16*)&panel->draw_offset_a.position);
-        panel->draw_offset_b.position.x = -0x80;
+        panel->draw_offset_b.position.x = -128;
         panel->draw_offset_b.position.y = g_gfx_draw_offset_y;
         SetDrawOffset(&panel->draw_offset_b.packet, (u16*)&panel->draw_offset_b.position);
         draw_x = (u16)thread->position.x;
@@ -329,7 +329,7 @@ void unit_panel_banner_thread(void) {
         editor->draw_offset_a.position.x = draw_x - 0x80;
         editor->draw_offset_a.position.y = thread->position.y + draw_y;
         SetDrawOffset(&editor->draw_offset_a.packet, (u16*)&editor->draw_offset_a.position);
-        editor->draw_offset_b.position.x = -0x80;
+        editor->draw_offset_b.position.x = -128;
         editor->draw_offset_b.position.y = g_gfx_draw_offset_y;
         SetDrawOffset(&editor->draw_offset_b.packet, (u16*)&editor->draw_offset_b.position);
 

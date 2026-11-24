@@ -29,7 +29,7 @@ void text_render_id_rows_to_vram(const u8* text_table, const s16* text_ids, cons
     upload_rect.x = destination->x;
     upload_rect.y = destination->y;
     upload_rect.w = destination->w;
-    upload_rect.h = 0x10;
+    upload_rect.h = 16;
 
     while (*text_ids != -1) {
         row_text_ids[0] = *text_ids;

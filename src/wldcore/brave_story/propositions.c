@@ -90,9 +90,9 @@ void brave_story_open_propositions_level(void) {
 
     index = display_object_append_image(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].brave_story_propositions.rows_image = index;
-    bounds.x = 0x80;
-    bounds.y = 0x80;
-    bounds.w = 0x4C;
+    bounds.x = 128;
+    bounds.y = 128;
+    bounds.w = 76;
     bounds.h = g_menu_stack_records[g_menu_stack_depth].brave_story_propositions.entry_count * 0x10 + 0x10;
     window_build_render_record_image(index, bounds, 0, g_window_image_buffer);
     g_display_object_gs_image_pool[index].priority = 9;
@@ -367,9 +367,9 @@ static void open_advancing_list(void) {
     i = 0;
     index = display_object_append_image(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].proposition_list.render_index = index;
-    bounds.y = 0x40;
+    bounds.y = 64;
     bounds.x = 0;
-    bounds.w = 0xD8;
+    bounds.w = 216;
     bounds.h = g_menu_stack_records[g_menu_stack_depth].proposition_list.entry_count * 0x10 + 0x10;
     window_build_render_record_image(index, bounds, 2, g_window_image_buffer);
     g_display_object_gs_image_pool[index].priority = 8;
@@ -389,7 +389,7 @@ static void open_advancing_list(void) {
         i++;
     }
 
-    point.x = 0x9C;
+    point.x = 156;
     point.y = 8;
     for (i = 0; i < g_menu_stack_records[g_menu_stack_depth].proposition_list.entry_count; i++) {
         g_text_substitution_values[0]
@@ -399,7 +399,7 @@ static void open_advancing_list(void) {
         point.y += 0x10;
     }
 
-    point.x = 0xB6;
+    point.x = 182;
     point.y = 8;
     for (i = 0; i < g_menu_stack_records[g_menu_stack_depth].proposition_list.entry_count; i++) {
         s32 entry = g_menu_stack_records[g_menu_stack_depth].proposition_list.entries[i];
@@ -693,10 +693,10 @@ static void open_participant_detail(s32 proposition, s32 participant) {
     s32 index;
     s32 depth;
 
-    rect.x = 0x180;
+    rect.x = 384;
     rect.y = 0;
-    rect.w = 0x40;
-    rect.h = 0x100;
+    rect.w = 64;
+    rect.h = 256;
     MoveImage(&rect, 0x200, 0x100);
     DrawSync(0);
     g_menu_stack_records[g_menu_stack_depth].participant.proposition = proposition;
@@ -911,10 +911,10 @@ void brave_story_update_participant_detail_input(menu_stack_record_t* level) {
     s32 participant;
 
     if ((g_world_map_flags & WORLD_MAP_FLAG_INPUT_BLOCKED) && thread_is_running(THREAD_SCREEN_SLOT_UNIT_STATUS) == 0) {
-        rect.x = 0x200;
-        rect.y = 0x100;
-        rect.w = 0x40;
-        rect.h = 0x100;
+        rect.x = 512;
+        rect.y = 256;
+        rect.w = 64;
+        rect.h = 256;
         g_world_map_flags &= ~(WORLD_MAP_FLAG_INPUT_BLOCKED | WORLD_MAP_FLAG_UNIT_PANEL_THREADS);
         g_menu_stack_depth--;
         MoveImage(&rect, 0x180, 0);
@@ -1038,9 +1038,9 @@ static void open_work_history(void) {
         i = 8;
     }
     layout.text_width = 0x96;
-    origin.x = 0x4C;
+    origin.x = 76;
     layout.visible_rows = i;
-    origin.y = 0x50;
+    origin.y = 80;
     menu_stack_restore_cursor(MENU_STACK_CURSOR_SLOT_WORK_HISTORY, count, i);
     window_start_panel_thread(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL,
         g_menu_stack_records[g_menu_stack_depth].panel.entry_count, &layout, &origin);
@@ -1133,11 +1133,11 @@ static void open_work_history_entry(s32 value) {
     switch (coordinate_mode) {
     case 0:
         g_text_window.image_position.x = 0;
-        g_text_window.image_position.y = 0x60;
+        g_text_window.image_position.y = 96;
         break;
     case 1:
         g_text_window.image_position.x = 0;
-        g_text_window.image_position.y = 0x70;
+        g_text_window.image_position.y = 112;
         break;
     }
     g_text_window.base.x = -122;

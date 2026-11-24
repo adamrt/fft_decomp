@@ -156,7 +156,7 @@ void option_game_options_thread(void) {
     /* The window sprite starts two lines above the first row (v0 = ring * 16 + accum - 2), so the
      * two lines above the text ring's first row must stay blank. */
     clear.x = entry->vram_origin.x;
-    clear.y = 0xFE;
+    clear.y = 254;
     clear.w = image_parameters.source.w / 4;
     clear.h = 2;
     ClearImage(&clear, 0, 0, 0);

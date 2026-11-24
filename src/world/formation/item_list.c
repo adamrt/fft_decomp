@@ -50,7 +50,7 @@ s32 item_list_update(void) {
         g_formation_item_menu_mode = MENU_ITEM_LIST_STATE_BROWSE;
         g_formation_unit_banner_enabled = 0;
         g_unit_panel_preview_stats_thread_params.position.x = 0;
-        g_unit_panel_preview_stats_thread_params.position.y = -0x49;
+        g_unit_panel_preview_stats_thread_params.position.y = -73;
     }
     g_formation_cursor_ot_override = 9;
     if (g_formation_item_menu_mode == MENU_ITEM_LIST_STATE_CLOSE) {

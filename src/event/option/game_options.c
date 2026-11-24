@@ -96,7 +96,7 @@ void option_game_options_thread(void) {
     /* The window sprite starts two lines above the first row (v0 = ring * 16 + accum - 2), so the
      * two lines above the text ring's first row must stay blank. */
     clear.x = entry->vram_origin.x;
-    clear.y = 0xFE;
+    clear.y = 254;
     clear.w = image_parameters.source.w / 4;
     clear.h = 2;
     ClearImage(&clear, 0, 0, 0);
@@ -105,8 +105,8 @@ void option_game_options_thread(void) {
     gfx_set_draw_mode_for_texture_page(&page->text_mode, MENU_TEXTURE_PAGE_ALLOCATED_IMAGES);
     texture_window.x = 0;
     texture_window.y = 0;
-    texture_window.w = 0x100;
-    texture_window.h = 0x100;
+    texture_window.w = 256;
+    texture_window.h = 256;
     SetDrawMode(&page->list_mode, 0, 0, GetTPage(0, 0, entry->vram_origin.x & 0xFFC0, entry->vram_origin.y & 0xFF00),
         &texture_window);
 
@@ -115,7 +115,7 @@ void option_game_options_thread(void) {
         menu_init_sprt(&arrow[i]);
         page->arrows[i].clut = 0x7D7C;
         arrow[i].w = 8;
-        arrow[i].h = 0x10;
+        arrow[i].h = 16;
         arrow[i].u0 = arrow_u;
         arrow[i].v0 = 0;
         arrow[i].x0 = entry->window.x + entry->window.w - 0xF;
@@ -137,7 +137,7 @@ void option_game_options_thread(void) {
 
     menu_init_sprite_array(base->arrow_marks, 2, MENU_CLUT_NORMAL);
     base->arrow_marks[0].w = 6;
-    base->arrow_marks[0].h = 0xC;
+    base->arrow_marks[0].h = 12;
     base->arrow_marks[1].w = 4;
     base->arrow_marks[1].h = 4;
     base->arrow_marks[0].u0 = 0xE8;
@@ -239,7 +239,7 @@ void option_game_options_thread(void) {
                     image_rect.y = ((ring - 1) * 16) & 0xFF;
                 }
                 image = g_menu_render_buffer;
-                image_rect.h = 0x10;
+                image_rect.h = 16;
                 mem_zero_words(image, entry->inner_width * 8);
                 g_menu_window_text_pen.stride = entry->inner_width;
                 for (column = 0; column < 2; column++) {

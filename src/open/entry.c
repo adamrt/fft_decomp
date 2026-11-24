@@ -387,8 +387,8 @@ static u32* acquire_next_frame(movie_mdec_state_t* state) {
 
         clear_rect.x = 0;
         clear_rect.y = 0;
-        clear_rect.w = 0x1e0;
-        clear_rect.h = 0x1e0;
+        clear_rect.w = 480;
+        clear_rect.h = 480;
         ClearImage(&clear_rect, 0, 0, 0);
         g_movie_width = header->width;
         g_movie_height = header->height;

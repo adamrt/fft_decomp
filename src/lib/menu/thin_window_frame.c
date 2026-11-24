@@ -38,8 +38,8 @@ void menu_thin_window_frame_thread(void) {
     pixels = menu_alloc_memory(0x400);
 
     mem_zero_words(pixels, 0x400);
-    texture.w = 0x80;
-    texture.h = 0x10;
+    texture.w = 128;
+    texture.h = 16;
     gfx_alloc_texture_rect(&texture, &prim->texture_prim, (u32*)-1);
     g_text_glyph_source.stride = 0x100;
     g_text_glyph_dest.stride = 0x80;

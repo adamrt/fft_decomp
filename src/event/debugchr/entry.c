@@ -802,15 +802,14 @@ editor:
                 upright_cursor = PRIM_AT(cursor_prims, buffer);
                 upright_shadow = &s_unit_editor_cursor_shade_polys[buffer];
                 bob_y = y - (((i * g_script_event_speed) >> 4) & 3);
-                setXY4(upright_cursor, x, bob_y, x + 0x10, bob_y, x, bob_y + 0x10, x + 0x10, bob_y + 0x10);
-                setXY4(
-                    upright_shadow, x + 2, bob_y + 2, x + 0x12, bob_y + 2, x + 2, bob_y + 0x12, x + 0x12, bob_y + 0x12);
+                setXY4(upright_cursor, x, bob_y, x + 16, bob_y, x, bob_y + 16, x + 16, bob_y + 16);
+                setXY4(upright_shadow, x + 2, bob_y + 2, x + 18, bob_y + 2, x + 2, bob_y + 18, x + 18, bob_y + 18);
                 s_unit_editor_cursor_polys[buffer].clut = 0x7D7C;
             } else {
                 upright_edit_cursor = PRIM_AT(cursor_prims, buffer);
                 upright_edit_shadow = &s_unit_editor_cursor_shade_polys[buffer];
-                setXY4(upright_edit_cursor, x, y, x + 0x10, y, x, y + 0x10, x + 0x10, y + 0x10);
-                setXY4(upright_edit_shadow, x + 2, y + 2, x + 0x12, y + 2, x + 2, y + 0x12, x + 0x12, y + 0x12);
+                setXY4(upright_edit_cursor, x, y, x + 16, y, x, y + 16, x + 16, y + 16);
+                setXY4(upright_edit_shadow, x + 2, y + 2, x + 18, y + 2, x + 2, y + 18, x + 18, y + 18);
                 s_unit_editor_cursor_polys[buffer].clut = 0x7E7C;
             }
         } else if (s_unit_editor_field_edit_active == 0) {
@@ -842,12 +841,12 @@ editor:
 
             bob_x = ((i * g_script_event_speed) >> 4) & 3;
             cursor_x = x - bob_x;
-            setXY4(cursor, cursor_x, y, cursor_x + 0x10, y, cursor_x, y + 0x10, cursor_x + 0x10, y + 0x10);
+            setXY4(cursor, cursor_x, y, cursor_x + 16, y, cursor_x, y + 16, cursor_x + 16, y + 16);
             /* A separate temporary schedules the decrement after the
              * cursor's `cursor_x + 0x10` sums; `bob_x -= 2` would move it ahead. */
             shadow_bob_x = bob_x - 2;
-            setXY4(shadow, x - shadow_bob_x, y + 2, (x - shadow_bob_x) + 0x10, y + 2, x - shadow_bob_x, y + 0x12,
-                (x - shadow_bob_x) + 0x10, y + 0x12);
+            setXY4(shadow, x - shadow_bob_x, y + 2, (x - shadow_bob_x) + 16, y + 2, x - shadow_bob_x, y + 18,
+                (x - shadow_bob_x) + 16, y + 18);
             s_unit_editor_cursor_polys[buffer].clut = 0x7D7C;
         } else {
             edit_cursor = PRIM_AT(cursor_prims, buffer);
@@ -876,8 +875,8 @@ editor:
             edit_shadow->u3 = uv_s_far;
             edit_shadow->v3 = 0x10;
 
-            setXY4(edit_cursor, x, y, x + 0x10, y, x, y + 0x10, x + 0x10, y + 0x10);
-            setXY4(edit_shadow, x + 2, y + 2, x + 0x12, y + 2, x + 2, y + 0x12, x + 0x12, y + 0x12);
+            setXY4(edit_cursor, x, y, x + 16, y, x, y + 16, x + 16, y + 16);
+            setXY4(edit_shadow, x + 2, y + 2, x + 18, y + 2, x + 2, y + 18, x + 18, y + 18);
             s_unit_editor_cursor_polys[buffer].clut = 0x7E7C;
         }
 

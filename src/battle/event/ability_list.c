@@ -106,7 +106,7 @@ void ability_list_scrolling_thread(void) {
     entry->text_image.source.h = layout->columns.row_count * 16 + 0x1C;
 
     window.source.x = 0x108 - entry->inner_width;
-    window.source.y = 0xFE;
+    window.source.y = 254;
     window.x_screen_offset = 8;
     window.y_screen_offset = 0xC;
     window.source.w = entry->inner_width - 8;
@@ -118,9 +118,9 @@ void ability_list_scrolling_thread(void) {
     ClearImage(&clear, 0, 0, 0);
 
     texture_window.x = 0;
-    texture_window.y = 0x80;
-    texture_window.w = 0x100;
-    texture_window.h = 0x80;
+    texture_window.y = 128;
+    texture_window.w = 256;
+    texture_window.h = 128;
 
     for (i = 0; i < 2; i++) {
         base[i].icons.icons[0] = &icons0[i];
@@ -137,7 +137,7 @@ void ability_list_scrolling_thread(void) {
         menu_init_sprt(&page->arrows[i]);
         page->arrows[i].clut = 0x7D7C;
         page->arrows[i].w = 8;
-        page->arrows[i].h = 0x10;
+        page->arrows[i].h = 16;
         page->arrows[i].u0 = arrow_u;
         page->arrows[i].v0 = 0;
         page->arrows[i].x0 = entry->window.x + entry->window.w - 0xF;
@@ -158,7 +158,7 @@ void ability_list_scrolling_thread(void) {
 
     menu_init_sprite_array(page->arrow_marks, 2, MENU_CLUT_NORMAL);
     page->arrow_marks[0].w = 6;
-    page->arrow_marks[0].h = 0xC;
+    page->arrow_marks[0].h = 12;
     page->arrow_marks[1].w = 4;
     page->arrow_marks[1].h = 4;
     page->arrow_marks[0].u0 = 0xE8;
@@ -197,7 +197,7 @@ void ability_list_scrolling_thread(void) {
     ring = 0;
 
     image_rect.x = window.source.x / 4 + entry->vram_origin.x;
-    image_rect.y = 0x80;
+    image_rect.y = 128;
     image_rect.w = window.source.w / 4;
     image_rect.h = window.source.h;
     LoadImage(&image_rect, (u32*)buffer);
@@ -295,7 +295,7 @@ void ability_list_scrolling_thread(void) {
                 } else {
                     image_rect.y = (((ring - 1) * 16) & 0x7F) + entry->vram_origin.y;
                 }
-                image_rect.h = 0x10;
+                image_rect.h = 16;
                 image_rect.y += 0x80;
                 row_buffer_live = 1;
                 buffer = menu_alloc_memory(window.source.w * 8);

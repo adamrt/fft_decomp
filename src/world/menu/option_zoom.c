@@ -51,7 +51,7 @@ void option_build_scaled_draw_area_packets(
     if (upper_half) {
         pair->rects[1].y = 0;
     } else {
-        pair->rects[1].y = 0xF0;
+        pair->rects[1].y = 240;
         pair->rects[0].y += 0xF0;
     }
     SetDrawArea(&pair->areas[0], &pair->rects[0]);

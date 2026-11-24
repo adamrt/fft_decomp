@@ -11,7 +11,7 @@ void portrait_build_party_poly(POLY_FT4* poly, s32 index) {
     s32 u = (index % 7) * 0x20;
     s32 v = (index / 7) * 0x30;
 
-    setUV4(poly, u, v + 0x28, u + 0x1f, v + 0x28, u, v + 0x58, u + 0x1f, v + 0x58);
+    setUV4(poly, u, v + 40, u + 31, v + 40, u, v + 88, u + 31, v + 88);
     poly->tpage = GetTPage(0, 0, 0x100, 0);
     poly->clut = GetClut(((index % 3) << 4) + 0x100, index / 3);
 }

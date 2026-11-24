@@ -83,8 +83,8 @@ s32 item_list_update_rearrange_mode(void) {
             cursor_clut = g_menu_cursor_mode1_foreground_clut;
             shadow_clut = g_menu_cursor_mode1_background_clut;
         }
-        rect.w = 0x10;
-        rect.h = 0x10;
+        rect.w = 16;
+        rect.h = 16;
         rect.x = 0;
         rect.y = row * 16 - (s16)(g_menu_list_scroll_offset - 0x5E);
         menu_gfx_enqueue_textured_quad(&rect, 0xA8, 0, 0, 0, 0x5F, cursor_clut, VARIANT_MENU_ITEM_CURSOR_DEPTH);

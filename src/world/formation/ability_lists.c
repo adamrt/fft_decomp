@@ -121,8 +121,8 @@ s32 formation_ability_update_learn_list(void) {
             g_ability_list_ability_entries, ABILITY_LIST_MODE_LEARN_MENU);
         menu_scrollable_list_init_core(
             g_ability_list_ability_entries, 0, g_text_section_pointers[TEXT_SECTION_ABILITY_NAMES]);
-        rect.x = 0x240;
-        rect.y = 0x1C8;
+        rect.x = 576;
+        rect.y = 456;
         rect.w = 20;
         rect.h = 16;
         g_formation_ability_learn_job_name_list[0] = g_formation_ability_learn_selected_job;
@@ -287,8 +287,8 @@ s32 ability_list_update(void) {
         menu_selection_clear_record(11);
         menu_selection_clear_record(12);
         menu_selection_clear_record(13);
-        rect.x = 0x240;
-        rect.y = 0x1C8;
+        rect.x = 576;
+        rect.y = 456;
         rect.w = 20;
         rect.h = 16;
         g_formation_ability_view_job_names[0] = g_formation_ability_learn_selected_job;

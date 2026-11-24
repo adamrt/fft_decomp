@@ -59,7 +59,7 @@ s32 item_list_update(void) {
         g_equipment_substate = MENU_ITEM_LIST_STATE_BROWSE;
         g_equipment_unit_banner_enabled = 0;
         g_unit_panel_preview_stats_thread_params.position.x = 0;
-        g_unit_panel_preview_stats_thread_params.position.y = -0x49;
+        g_unit_panel_preview_stats_thread_params.position.y = -73;
         gfx_load_image_and_wait(&g_equipment_status_label_image_rect, g_equipment_status_label_image);
     }
     if (g_equipment_substate == MENU_ITEM_LIST_STATE_CLOSE) {

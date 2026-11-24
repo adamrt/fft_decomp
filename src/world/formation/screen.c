@@ -81,24 +81,24 @@ void formation_init_display(void) {
     if (g_menu_screen_context_id != MENU_SCREEN_CONTEXT_NAME_ENTRY) {
         rect.x = 0;
         rect.y = 0;
-        rect.w = 0x100;
-        rect.h = 0x1E0;
+        rect.w = 256;
+        rect.h = 480;
         ClearImage(&rect, 0, 0, 0);
         SetDispMask(1);
     }
-    rect.x = 0x240;
-    rect.y = 0x100;
-    rect.w = 0x40;
-    rect.h = 0x30;
+    rect.x = 576;
+    rect.y = 256;
+    rect.w = 64;
+    rect.h = 48;
     gfx_load_image_and_wait(&rect, g_menu_glyph_sheet->pixels);
-    rect.x = 0x240;
-    rect.y = 0x1FA;
-    rect.w = 0x40;
+    rect.x = 576;
+    rect.y = 506;
+    rect.w = 64;
     rect.h = 4;
     gfx_load_image_and_wait(&rect, g_formation_menu_palettes);
-    rect.x = 0x3C0;
-    rect.y = 0x1F0;
-    rect.w = 0x10;
+    rect.x = 960;
+    rect.y = 496;
+    rect.w = 16;
     rect.h = 1;
     gfx_store_image_and_wait(&rect, palette);
 
@@ -108,32 +108,32 @@ void formation_init_display(void) {
     palette[4].red = palette[4].green = palette[4].blue = palette[4].semi_transparent = 0;
     palette[8].red = palette[8].green = palette[8].blue = palette[8].semi_transparent = 0;
     palette[12].red = palette[12].green = palette[12].blue = palette[12].semi_transparent = 0;
-    rect.x = 0x260;
-    rect.y = 0x1FE;
-    rect.w = 0x10;
+    rect.x = 608;
+    rect.y = 510;
+    rect.w = 16;
     rect.h = 1;
     gfx_load_image_and_wait(&rect, palette);
-    rect.x = 0x240;
-    rect.y = 0x1FE;
-    rect.w = 0xC;
+    rect.x = 576;
+    rect.y = 510;
+    rect.w = 12;
     rect.h = 1;
     gfx_load_image_and_wait(&rect, &palette[4]);
-    rect.x = 0x3C0;
-    rect.y = 0x1F4;
-    rect.w = 0x10;
+    rect.x = 960;
+    rect.y = 500;
+    rect.w = 16;
     rect.h = 1;
     gfx_store_image_and_wait(&rect, palette);
     palette[4].red = palette[4].green = palette[4].blue = palette[4].semi_transparent = 0;
     palette[8].red = palette[8].green = palette[8].blue = palette[8].semi_transparent = 0;
     palette[12].red = palette[12].green = palette[12].blue = palette[12].semi_transparent = 0;
-    rect.x = 0x270;
-    rect.y = 0x1FE;
-    rect.w = 0x10;
+    rect.x = 624;
+    rect.y = 510;
+    rect.w = 16;
     rect.h = 1;
     gfx_load_image_and_wait(&rect, palette);
-    rect.x = 0x250;
-    rect.y = 0x1FE;
-    rect.w = 0xC;
+    rect.x = 592;
+    rect.y = 510;
+    rect.w = 12;
     rect.h = 1;
     gfx_load_image_and_wait(&rect, &palette[4]);
     gfx_load_image_and_wait(&s_status_label_rect, s_status_label_image);
@@ -519,7 +519,7 @@ void formation_init_menu_state(void) {
     g_formation_order_open = 0;
     /* Through the records rather than the member scalars (offset_y, flags,
      * highlight): the target addresses these stores from one base each. */
-    g_unit_panel_status_display_thread_params.position.y = 0x90;
+    g_unit_panel_status_display_thread_params.position.y = 144;
     g_unit_panel_status_display_thread_params.flags = 0;
     g_unit_panel_status_display_thread_params.style = 0;
     g_unit_panel_comparison_display_thread_params.style = 0;
@@ -674,9 +674,9 @@ void update_unit_grid_menu(void) {
                 if ((input & PSX_PAD_TRIANGLE) || (input & PSX_PAD_START) || g_formation_triangle_menu_open != 0) {
                     /* Keep the menu clear of the banner and of the cursor's half of the grid. */
                     if (g_formation_unit_banner_at_bottom != 0) {
-                        g_formation_triangle_menu.window.y = 0x20;
+                        g_formation_triangle_menu.window.y = 32;
                     } else {
-                        g_formation_triangle_menu.window.y = 0x78;
+                        g_formation_triangle_menu.window.y = 120;
                     }
                     g_formation_triangle_menu.window.x
                         = ((g_unit_selected_index % 4) < 2 || g_formation_unit_browse_enabled != 0) ? 0x12C : 0x8A;
@@ -748,7 +748,7 @@ void unit_grid_update_selection(void) {
             }
         } else {
             if ((g_formation_unit_banner_at_bottom_latch = g_formation_unit_banner_at_bottom) != 0) {
-                g_unit_panel_status_display_thread_params.position.y = 0x90;
+                g_unit_panel_status_display_thread_params.position.y = 144;
             } else {
                 g_unit_panel_status_display_thread_params.position.y = 0;
             }
@@ -774,7 +774,7 @@ void unit_grid_update_selection(void) {
                 *flags |= MENU_STATUS_PANEL_SLIDE_UP;
             }
         } else if (g_formation_unit_banner_at_bottom != 0) {
-            g_unit_panel_status_display_thread_params.position.y = 0x90;
+            g_unit_panel_status_display_thread_params.position.y = 144;
         } else {
             g_unit_panel_status_display_thread_params.position.y = 0;
         }
@@ -884,7 +884,7 @@ void formation_update_selection_stage(void) {
             }
         } else {
             if ((g_formation_unit_banner_at_bottom_latch = g_formation_unit_banner_at_bottom) != 0) {
-                g_unit_panel_status_display_thread_params.position.y = 0x90;
+                g_unit_panel_status_display_thread_params.position.y = 144;
             } else {
                 g_unit_panel_status_display_thread_params.position.y = 0;
             }
@@ -915,7 +915,7 @@ void formation_update_selection_stage(void) {
                 *flags |= MENU_STATUS_PANEL_SLIDE_UP;
             }
         } else if (g_formation_unit_banner_at_bottom != 0) {
-            g_unit_panel_status_display_thread_params.position.y = 0x90;
+            g_unit_panel_status_display_thread_params.position.y = 144;
         } else {
             g_unit_panel_status_display_thread_params.position.y = 0;
         }

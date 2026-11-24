@@ -77,7 +77,7 @@ void at_list_run(void) {
     entry->text_image.source.h = layout->row_count * 16 + 0x1C;
 
     image_parameters.source.x = 0;
-    image_parameters.source.y = 0x7E;
+    image_parameters.source.y = 126;
     image_parameters.x_screen_offset = 8;
     image_parameters.y_screen_offset = 0xC;
     image_parameters.source.w = entry->window.w - 0x12;
@@ -86,8 +86,8 @@ void at_list_run(void) {
     gfx_set_draw_mode_for_texture_page(&page->icon_mode, MENU_TEXTURE_PAGE_FRAME);
     texture_window.x = 0;
     texture_window.y = entry->vram_origin.y & 0xff;
-    texture_window.w = 0x100;
-    texture_window.h = 0x100;
+    texture_window.w = 256;
+    texture_window.h = 256;
 
     for (i = 0; i < 2; i++) {
         g_at_list_pages[i].icons.icons[0] = &icons0[i];
@@ -104,7 +104,7 @@ void at_list_run(void) {
         menu_init_sprt(&page->arrows[i]);
         page->arrows[i].clut = 0x7D7C;
         page->arrows[i].w = 8;
-        page->arrows[i].h = 0x10;
+        page->arrows[i].h = 16;
         page->arrows[i].u0 = arrow_u;
         page->arrows[i].v0 = 0;
         page->arrows[i].x0 = entry->window.x + entry->window.w - 0xF;
@@ -124,7 +124,7 @@ void at_list_run(void) {
 
     menu_init_sprite_array(page->arrow_marks, 2, MENU_CLUT_NORMAL);
     page->arrow_marks[0].w = 6;
-    page->arrow_marks[0].h = 0xC;
+    page->arrow_marks[0].h = 12;
     page->arrow_marks[1].w = 4;
     page->arrow_marks[1].h = 4;
     page->arrow_marks[0].u0 = 0xE8;
@@ -224,7 +224,7 @@ void at_list_run(void) {
                     } else {
                         image_rect.y = (((ring - 1) * 16) & 0xFF) + entry->vram_origin.y;
                     }
-                    image_rect.h = 0x10;
+                    image_rect.h = 16;
                     buffer = g_menu_render_buffer;
                     mem_zero_words(buffer, 0x800);
                     g_menu_window_text_pen.stride = entry->inner_width;

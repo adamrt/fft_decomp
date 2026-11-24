@@ -161,7 +161,7 @@ void brave_story_open_menu(void) {
     g_menu_stack_records[g_menu_stack_depth].brave_story.rows_image = index;
     bounds.x = 0;
     bounds.y = 0;
-    bounds.w = 0x5C;
+    bounds.w = 92;
     bounds.h = g_menu_stack_records[g_menu_stack_depth].brave_story.entry_count * 0x10 + 0x10;
     window_build_render_record_image(index, bounds, 0, g_window_image_buffer);
     g_display_object_gs_image_pool[index].priority = 0xA;
@@ -194,10 +194,10 @@ void brave_story_open_menu(void) {
         value = 9999;
     }
     g_text_substitution_values[1] = value;
-    bounds.x = 0x80;
-    bounds.y = 0x40;
-    bounds.w = 0x5C;
-    bounds.h = 0x30;
+    bounds.x = 128;
+    bounds.y = 64;
+    bounds.w = 92;
+    bounds.h = 48;
     window_init_text_record(index, bounds, 0, TEXT_ID_INJURED_CASUALTIES, g_window_image_buffer);
     g_display_object_gs_image_pool[index].priority = 0xA;
     {
@@ -634,9 +634,9 @@ static void open_event_list(void) {
         i = 8;
     }
     layout.text_width = 0x94;
-    origin.x = 0x4C;
+    origin.x = 76;
     layout.visible_rows = i;
-    origin.y = 0x4F;
+    origin.y = 79;
     menu_stack_restore_cursor(MENU_STACK_CURSOR_SLOT_EVENTS, count, i);
     window_start_panel_thread(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL,
         g_menu_stack_records[g_menu_stack_depth].panel.entry_count, &layout, &origin);
@@ -728,11 +728,11 @@ void brave_story_open_event_detail(s32 value) {
     switch (coordinate_mode) {
     case 0:
         g_text_window.image_position.x = 0;
-        g_text_window.image_position.y = 0x60;
+        g_text_window.image_position.y = 96;
         break;
     case 1:
         g_text_window.image_position.x = 0;
-        g_text_window.image_position.y = 0x70;
+        g_text_window.image_position.y = 112;
         break;
     }
     g_text_window.base.x = -122;
@@ -858,9 +858,9 @@ static void open_person_list(void) {
         i = 8;
     }
     layout.text_width = 0x60;
-    origin.x = 0x80;
+    origin.x = 128;
     layout.visible_rows = i;
-    origin.y = 0x50;
+    origin.y = 80;
     menu_stack_restore_cursor(MENU_STACK_CURSOR_SLOT_PERSONS, count, i);
     window_start_panel_thread(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL,
         g_menu_stack_records[g_menu_stack_depth].panel.entry_count, &layout, &origin);
@@ -1011,9 +1011,9 @@ void brave_story_update_person_detail(menu_stack_record_t* level) {
         }
         script_variable_set(EVENT_SCRIPT_VAR_DIALOG_PORTRAIT, 0xFF);
         entry = level->detail.value;
-        g_text_window.image_position.y = 0x70;
-        g_text_window.base.x = -0x7A;
-        g_text_window.base.y = -0x28;
+        g_text_window.image_position.y = 112;
+        g_text_window.base.x = -122;
+        g_text_window.base.y = -40;
         g_text_window.text_width = 0xDC;
         g_text_window.rows_per_page = 8;
         g_text_window.priority = 9;

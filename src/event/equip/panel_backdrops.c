@@ -86,27 +86,27 @@ draw_panels:
         if (i == 0) {
             y = 0x23;
         }
-        setXY0(&prims->center, 0x80, y);
-        setWH(&prims->center, 0x100, 0x32);
+        setXY0(&prims->center, 128, y);
+        setWH(&prims->center, 256, 50);
         for (j = 0; j < 9; j++) {
             SetTile(&prims->top[j]);
             setRGB0(&prims->top[j], 0, 0, 0);
             SetSemiTrans(&prims->top[j], 1);
             y = 0xa9;
-            setWH(&prims->top[j], 0x100, 1);
+            setWH(&prims->top[j], 256, 1);
             if (i == 0) {
                 y = 0x1a;
             }
-            setXY0(&prims->top[j], 0x80, y + j);
+            setXY0(&prims->top[j], 128, y + j);
             SetTile(&prims->bottom[j]);
             setRGB0(&prims->bottom[j], 0, 0, 0);
             SetSemiTrans(&prims->bottom[j], 1);
             y = 0xe4;
-            setWH(&prims->bottom[j], 0x100, 1);
+            setWH(&prims->bottom[j], 256, 1);
             if (i == 0) {
                 y = 0x55;
             }
-            setXY0(&prims->bottom[j], 0x80, y + j);
+            setXY0(&prims->bottom[j], 128, y + j);
         }
         if (g_equipment_indicator_state[i] == MENU_INDICATOR_STATE_HIDDEN) {
             setRGB0(&prims->center, 0, 0, 0);

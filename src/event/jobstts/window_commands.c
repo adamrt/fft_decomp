@@ -152,7 +152,7 @@ menu_instruction_t* menu_opcode_12_draw_opening_window_frame(menu_instruction_t*
             g_menu_script_input = 0;
         }
         scale = s_status_screen_gfx_transition_height_percent[g_gfx_transition_frame];
-        rect.w = 0x100;
+        rect.w = 256;
         rect.h = (command->window.height * scale) / 100;
         rect.x = 0;
         rect.y = (command->window.y + (command->window.height >> 1)) - (rect.h >> 1);

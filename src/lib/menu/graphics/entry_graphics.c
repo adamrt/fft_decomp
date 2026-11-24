@@ -322,7 +322,7 @@ void gfx_build_scaled_draw_area_pair_swapped(
     if (upper_half != 0) {
         packets->rects[1].y = 0;
     } else {
-        packets->rects[1].y = 0xF0;
+        packets->rects[1].y = 240;
         packets->rects[0].y += 0xF0;
     }
     SetDrawArea(&packets->areas[0], &packets->rects[0]);

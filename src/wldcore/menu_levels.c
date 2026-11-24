@@ -714,16 +714,16 @@ scroll:
         g_display_object_animated_pool[level->map_cursor.window_index].position.x += amount.x;
         g_display_object_animated_pool[level->map_cursor.window_index].position.y += amount.y;
         if (g_display_object_animated_pool[level->map_cursor.window_index].position.x < -0x70) {
-            g_display_object_animated_pool[level->map_cursor.window_index].position.x = -0x70;
+            g_display_object_animated_pool[level->map_cursor.window_index].position.x = -112;
         }
         if (g_display_object_animated_pool[level->map_cursor.window_index].position.x >= 0x79) {
-            g_display_object_animated_pool[level->map_cursor.window_index].position.x = 0x78;
+            g_display_object_animated_pool[level->map_cursor.window_index].position.x = 120;
         }
         if (g_display_object_animated_pool[level->map_cursor.window_index].position.y < -0x68) {
-            g_display_object_animated_pool[level->map_cursor.window_index].position.y = -0x68;
+            g_display_object_animated_pool[level->map_cursor.window_index].position.y = -104;
         }
         if (g_display_object_animated_pool[level->map_cursor.window_index].position.y >= 0x69) {
-            g_display_object_animated_pool[level->map_cursor.window_index].position.y = 0x68;
+            g_display_object_animated_pool[level->map_cursor.window_index].position.y = 104;
         }
     } else {
         /* In wide view the d-pad scrolls the map 4 units a frame instead of moving the cursor. */
@@ -1121,7 +1121,7 @@ void menu_stack_open_text_window(s32 text, s32 reload_text) {
 
     *text_id = text;
     window->image_position.x = 0;
-    g_text_window.image_position.y = 0xC0;
+    g_text_window.image_position.y = 192;
     box.x = (dims.width + 24) & 0xFFFC;
     box.y = (dims.rows << 4) + 16;
     g_text_window.base.x = -(box.x / 2);
@@ -1289,7 +1289,7 @@ static void draw_variable_list(debug_variable_list_level_t* level) {
     index = level->render_index;
     bounds.x = 0;
     bounds.y = 0;
-    bounds.w = 0x68;
+    bounds.w = 104;
     bounds.h = value * 0x10 + 0x10;
     window_build_render_record_image(index, bounds, 0, g_window_image_buffer);
     /* Direct record indexing moves the symbol load after the index scaling
@@ -1430,8 +1430,8 @@ static void open_variable_edit(s32 variable_id, s32 value) {
     g_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS;
     g_menu_stack_ot_offset = 2;
     g_window_panel_value = value;
-    origin.x = 0x20;
-    origin.y = 0x20;
+    origin.x = 32;
+    origin.y = 32;
     window_start_number_panel_thread(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 9999 << 16, 0, &origin);
     record_index = g_menu_stack_depth;
     g_menu_stack_records[record_index].panel.result = 0;
@@ -1740,7 +1740,7 @@ void location_open_menu(s32 menu) {
         g_display_object_animated_pool[index].frame_index = 0;
         position = (display_object_position_stride_t*)&records->position;
         position[index].x = -8;
-        position[index].y = 0x10;
+        position[index].y = 16;
         ((CVECTOR*)((u8*)color + index * sizeof(g_display_object_animated_pool[0])))->r = 0;
         ((CVECTOR*)((u8*)color + index * sizeof(g_display_object_animated_pool[0])))->g = 0;
         ((CVECTOR*)((u8*)color + index * sizeof(g_display_object_animated_pool[0])))->b = 0;
@@ -1773,15 +1773,15 @@ void location_open_menu(s32 menu) {
     layout.visible_rows = i;
     origin.x = 0x80 - (((layout.text_width + 0x18) & 0xFFFC) >> 1);
     if (g_world_map_marker_state.marker.picture_id != 0) {
-        origin.y = 0x80;
+        origin.y = 128;
     } else {
         origin.y = 0x70 - i * 8;
     }
     menu_stack_restore_cursor(MENU_STACK_CURSOR_SLOT_LOCATION, count, i);
     window_init_panel_state(0xC, g_menu_stack_records[g_menu_stack_depth].location_menu.entry_count, &layout, &origin);
-    g_window_panel_render_state.vram_origin.x = 0x240;
+    g_window_panel_render_state.vram_origin.x = 576;
     g_window_panel_render_state.header_id = 0;
-    g_window_panel_render_state.vram_origin.y = 0x100;
+    g_window_panel_render_state.vram_origin.y = 256;
 
     if (g_world_map_marker_state.marker.picture_id != 0) {
         s32 unused[6]; /* frame padding: the target frame is 0xb8 */
@@ -2078,7 +2078,7 @@ void menu_stack_open_scrollable_text(s32 text) {
 
         g_text_window.text_id = text;
         g_text_window.image_position.x = 0;
-        g_text_window.image_position.y = 0x60;
+        g_text_window.image_position.y = 96;
         g_text_window.base.x = -(((width + 24) & 0xFFFC) >> 1);
         g_text_window.base.y = -((rows << 3) + 8);
         g_text_window.text_width = width;
@@ -2140,8 +2140,8 @@ static void open_party_number(void) {
 
     g_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS;
     g_menu_stack_ot_offset = 3;
-    origin.x = -0x28;
-    origin.y = -0x16;
+    origin.x = -40;
+    origin.y = -22;
     g_window_panel_value = 0;
     window_start_number_panel_thread(
         WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 999 << 16, TEXT_ID_PARTY_NUMBER_LABEL, &origin);

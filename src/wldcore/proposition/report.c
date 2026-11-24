@@ -100,9 +100,9 @@ void proposition_open_returned_list(void) {
             i = 6;
         }
         layout.text_width = 0x96;
-        origin.x = 0x48;
+        origin.x = 72;
         layout.visible_rows = i;
-        origin.y = 0x50;
+        origin.y = 80;
         menu_stack_restore_cursor(MENU_STACK_CURSOR_SLOT_RETURNED, count, i);
         window_start_panel_thread(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL,
             g_menu_stack_records[g_menu_stack_depth].panel.entry_count, &layout, &origin);
@@ -168,8 +168,8 @@ void proposition_update_returned_list_input(menu_stack_record_t* level) {
         menu_stack_store_cursor(MENU_STACK_CURSOR_SLOT_RETURNED);
         g_text_substitution_values[0] = g_menu_stack_entry_values[g_window_panel_render_state.selected_index];
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_HEAR_ABOUT_JOB, 0);
-        origin.x = 0x48;
-        origin.y = 0x20;
+        origin.x = 72;
+        origin.y = 32;
         window_build_yes_no_panel(origin);
         depth = g_menu_stack_depth;
         g_menu_stack_types[depth] = MENU_STACK_LEVEL_PROPOSITION_REPORT_CONFIRM;
@@ -492,9 +492,9 @@ void proposition_update_report(menu_stack_record_t* level) {
 
                 record = display_object_append_image(g_display_object_queue, &g_display_object_queue_count);
                 bounds.x = 0;
-                bounds.y = 0x70;
-                bounds.w = 0x8C;
-                bounds.h = 0x8C;
+                bounds.y = 112;
+                bounds.w = 140;
+                bounds.h = 140;
                 window_init_text_record(record, bounds, 0, 0, g_window_image_buffer);
                 g_display_object_gs_image_pool[record].priority = 9;
                 {
@@ -528,9 +528,9 @@ void proposition_update_report(menu_stack_record_t* level) {
 
                 record = display_object_append_image(g_display_object_queue, &g_display_object_queue_count);
                 bounds.x = 0;
-                bounds.y = 0x80;
-                bounds.w = 0x88;
-                bounds.h = 0x5A;
+                bounds.y = 128;
+                bounds.w = 136;
+                bounds.h = 90;
                 window_init_text_record(record, bounds, 0, 0, g_window_image_buffer);
                 g_display_object_gs_image_pool[record].priority = 9;
                 {
@@ -646,8 +646,8 @@ static void open_result(s32 proposition) {
     text_measure_pixels(
         &text_width, &text_rows, text_find_entry(*panel_text + (TEXT_ID_PROPOSITION_JOB_CONTENTS_BASE - 1)));
     bounds.x = 0;
-    bounds.y = 0x60;
-    bounds.w = 0xF4;
+    bounds.y = 96;
+    bounds.w = 244;
     rows = text_rows + 2;
     bounds.h = (count + rows) * 0x10 + 0x10;
     window_build_render_record_image(index, bounds, 0, g_window_image_buffer);
@@ -657,7 +657,7 @@ static void open_result(s32 proposition) {
     point.x = 8;
     point.y = 8;
     window_display_text_entry(index, TEXT_ID_JOB_CONTENTS_LABEL, point, g_window_image_buffer);
-    point.x = 0x44;
+    point.x = 68;
     point.y = 8;
     window_display_text_entry(
         index, *panel_text + (TEXT_ID_PROPOSITION_JOB_CONTENTS_BASE - 1), point, g_window_image_buffer);
@@ -675,7 +675,7 @@ static void open_result(s32 proposition) {
     for (i = 0; i < count; i++) {
         s32 row = i + 2;
 
-        point.x = 0xA0;
+        point.x = 160;
         point.y = (text_rows + row) * 0x10 + 8;
         g_text_substitution_values[0] = g_proposition_report.participant_jp[i];
         window_display_text_entry(index, TEXT_ID_FOUR_DIGIT_VALUE, point, g_window_image_buffer);

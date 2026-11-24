@@ -47,9 +47,9 @@ void brave_story_open_fact_list(void) {
         i = 8;
     }
     layout.text_width = 0x8C;
-    origin.x = 0x58;
+    origin.x = 88;
     layout.visible_rows = i;
-    origin.y = 0x50;
+    origin.y = 80;
     menu_stack_restore_cursor(MENU_STACK_CURSOR_SLOT_FACTS, count, i);
     window_start_panel_thread(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL,
         g_menu_stack_records[g_menu_stack_depth].panel.entry_count, &layout, &origin);
@@ -134,11 +134,11 @@ static void open_fact_detail(s32 value) {
     switch (coordinate_mode) {
     case 0:
         g_text_window.image_position.x = 0;
-        g_text_window.image_position.y = 0x60;
+        g_text_window.image_position.y = 96;
         break;
     case 1:
         g_text_window.image_position.x = 0;
-        g_text_window.image_position.y = 0x70;
+        g_text_window.image_position.y = 112;
         break;
     }
     g_text_window.base.x = -122;

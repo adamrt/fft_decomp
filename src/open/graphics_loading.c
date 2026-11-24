@@ -49,10 +49,10 @@ void ending_load_graphics(void) {
     file_request_opnbk_image(6, g_gfx_opntex_data);
     file_wait_pending();
 
-    frame.x = 0x200;
-    frame.y = 0x100;
-    frame.w = 0x200;
-    frame.h = 0xf0;
+    frame.x = 512;
+    frame.y = 256;
+    frame.w = 512;
+    frame.h = 240;
     LoadImage(&frame, g_gfx_opntex_data);
     DrawSync(0);
 

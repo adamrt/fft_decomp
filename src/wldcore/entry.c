@@ -381,8 +381,8 @@ static void init_map_state(void) {
     g_hud_color.r = 0x80;
     g_hud_color.g = 0x80;
     g_hud_color.b = 0x80;
-    g_calendar_display_position.x = -0x78;
-    g_calendar_display_position.y = -0x64;
+    g_calendar_display_position.x = -120;
+    g_calendar_display_position.y = -100;
     g_location_label_shade = 0x80;
     g_location_selected = 0;
 
@@ -391,8 +391,8 @@ static void init_map_state(void) {
     }
 
     g_music_queue.volume = 0x7f;
-    g_hud_value_position.x = 0x30;
-    g_hud_value_position.y = 0x54;
+    g_hud_value_position.x = 48;
+    g_hud_value_position.y = 84;
     g_hud_ot_priority = 4;
     g_music_queue.count = 0;
     g_music_queue.music.flags = 0;

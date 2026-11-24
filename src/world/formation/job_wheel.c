@@ -430,8 +430,8 @@ static void draw_wheel_sprites(s32 angle, s32 radius_x, s32 radius_y) {
     g_formation_job_wheel_animation_counter++;
     ot_index = 30;
     index = g_formation_job_wheel_cursor_index;
-    sprite.w = sprite.source.w = 0x18;
-    sprite.h = sprite.source.h = 0x28;
+    sprite.w = sprite.source.w = 24;
+    sprite.h = sprite.source.h = 40;
     g_formation_job_wheel_animation_counter = g_formation_job_wheel_animation_counter % 102;
     scaled_x = (radius_x * 100) >> 12;
     scaled_y = (radius_y * 60) >> 12;
@@ -756,16 +756,16 @@ static void build_wheel_name(void) {
         s_formation_job_wheel_name_text[0] = g_formation_job_wheel_jobs[g_formation_job_wheel_cursor_index];
     }
     text_ids = s_formation_job_wheel_name_text;
-    destination_rect.x = 0x24C;
-    destination_rect.y = 0x130;
-    destination_rect.w = 0x14;
-    destination_rect.h = 0x10;
+    destination_rect.x = 588;
+    destination_rect.y = 304;
+    destination_rect.w = 20;
+    destination_rect.h = 16;
     text_render_id_rows_to_vram(text_table, text_ids, &destination_rect, 0);
     pixel_width = menu_screen_text_measure_width(menu_text_find_entry_by_index(text_table, *text_ids & 0x3FF, 2));
     g_formation_job_wheel_name_rect.x = ((0x50 - pixel_width) >> 1) + 0x58;
-    g_formation_job_wheel_name_rect.y = 0xD7;
+    g_formation_job_wheel_name_rect.y = 215;
     g_formation_job_wheel_name_rect.w = pixel_width;
-    g_formation_job_wheel_name_rect.h = 0xE;
+    g_formation_job_wheel_name_rect.h = 14;
 }
 
 /*

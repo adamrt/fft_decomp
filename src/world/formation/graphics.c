@@ -39,8 +39,8 @@ void zodiac_backdrop_thread(void) {
         s_zodiac_backdrop.offset.position.x = 0;
         s_zodiac_backdrop.offset.position.y = 8;
     } else {
-        s_zodiac_backdrop.offset.position.x = 0x100;
-        s_zodiac_backdrop.offset.position.y = 0x80;
+        s_zodiac_backdrop.offset.position.x = 256;
+        s_zodiac_backdrop.offset.position.y = 128;
     }
     if (thread_current_get_parameter_1() == 0) {
         s_zodiac_backdrop.scale_x = 0x2000;

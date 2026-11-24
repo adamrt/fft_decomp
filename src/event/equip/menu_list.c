@@ -99,17 +99,17 @@ menu_instruction_t* menu_opcode_0d_draw_formatted_number(menu_instruction_t* dat
         glyph.u = 0x78;
         glyph.v = 1;
         glyph.w = 8;
-        glyph.h = 0xE;
+        glyph.h = 14;
     } else if (data->number.style == 0) {
         glyph.u = 0x78;
         glyph.v = 0x10;
         glyph.w = 6;
-        glyph.h = 0xB;
+        glyph.h = 11;
     } else {
         glyph.u = 0x20;
         glyph.v = 0;
-        glyph.w = 0xA;
-        glyph.h = 0x10;
+        glyph.w = 10;
+        glyph.h = 16;
     }
     if (value & MENU_NUMBER_VALUE_DASHES) {
         value = data->number.width;
@@ -138,7 +138,7 @@ menu_instruction_t* menu_opcode_0d_draw_formatted_number(menu_instruction_t* dat
             minus_rect.x = cell_x - 6;
             minus_rect.y = y + 2;
             minus_rect.w = 6;
-            minus_rect.h = 0xB;
+            minus_rect.h = 11;
             menu_gfx_enqueue_textured_quad(&minus_rect, 0xBA, 0x10, 0, g_menu_gfx_semitransparency,
                 g_menu_atlas_texture_page, clut, g_menu_gfx_otag_index);
             negative = 0;
@@ -199,7 +199,7 @@ menu_instruction_t* menu_opcode_17_draw_right_aligned_number(menu_instruction_t*
     glyph_rect.x = x;
     glyph_rect.y = y;
     glyph_rect.w = 8;
-    glyph_rect.h = 0x10;
+    glyph_rect.h = 16;
     for (j = 0; j < count; j++) {
         menu_gfx_enqueue_textured_quad(&glyph_rect, (digits[j] - '0') * 8 + 0xA8, 0x30, 0, 0,
             g_menu_cursor_texture_page, g_menu_text_clut_1_mode0, g_menu_gfx_otag_index);
@@ -281,8 +281,8 @@ void menu_draw_sliding_cursor(const point16_t* anchor, u16* state, s32 mode) {
 
     rect.x = x_offset + anchor->x - 2;
     rect.y = anchor->y;
-    rect.w = 0x10;
-    rect.h = 0x10;
+    rect.w = 16;
+    rect.h = 16;
     menu_gfx_enqueue_textured_quad(&rect, 0xA8, 0, 0, 0, g_menu_cursor_texture_page, clut, g_menu_gfx_otag_index);
     rect.x += 2;
     rect.y += 2;
@@ -362,8 +362,8 @@ void menu_scrollable_list_refresh(const menu_instruction_t* script) {
     }
 
     if (g_menu_list_text_table != 0) {
-        rect.x = 0x100;
-        rect.y = 0x30;
+        rect.x = 256;
+        rect.y = 48;
         rect.w = g_menu_list_vram_width;
         rect.h = g_menu_list_visible_rows * 16;
         ClearImage(&rect, 0, 0, 0);
@@ -371,8 +371,8 @@ void menu_scrollable_list_refresh(const menu_instruction_t* script) {
             row_ids[i] = g_menu_list_entries[i + g_menu_scroll_base_index];
         }
         row_ids[i] = -1;
-        rect.x = 0x100;
-        rect.y = 0x30;
+        rect.x = 256;
+        rect.y = 48;
         rect.w = g_menu_list_vram_width;
         rect.h = g_menu_list_row_height;
         text_render_id_rows_to_vram(g_menu_list_text_table, row_ids, &rect, 0);
@@ -451,8 +451,8 @@ menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* comm
                         if (g_menu_list_text_table != 0) {
                             row_ids = &g_menu_list_row_text_ids[0];
                             text_id = g_menu_list_entries[scroll_base - 1];
-                            rect.x = 0x100;
-                            rect.y = 0x20;
+                            rect.x = 256;
+                            rect.y = 32;
                             rect.w = g_menu_list_vram_width;
                             rect.h = g_menu_list_row_height;
                             *row_ids = text_id;
@@ -472,7 +472,7 @@ menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* comm
                             j = g_menu_scroll_base_index + g_menu_list_visible_rows - 1;
                             entry_ids = &g_menu_list_row_text_ids[0];
                             *entry_ids = g_menu_list_entries[j + 1];
-                            rect.x = 0x100;
+                            rect.x = 256;
                             rect.y = g_menu_list_visible_rows * g_menu_list_row_height + 0x30;
                             rect.w = g_menu_list_vram_width;
                             rect.h = g_menu_list_row_height;
@@ -502,7 +502,7 @@ menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* comm
             if (g_menu_list_text_table != 0) {
                 for (j = 0; j < g_menu_list_visible_rows; j++) {
                     height = g_menu_list_row_height;
-                    rect.x = 0x100;
+                    rect.x = 256;
                     rect.w = g_menu_list_vram_width;
                     rect.h = height;
                     rect.y = (j - 1) * height + 0x30;
@@ -523,7 +523,7 @@ menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* comm
             g_menu_scroll_base_index++;
             g_menu_list_selected_index++;
             if (g_menu_list_text_table != 0) {
-                rect.x = 0x100;
+                rect.x = 256;
                 rect.y = g_menu_list_row_height + 0x30;
                 rect.w = g_menu_list_vram_width;
                 rect.h = g_menu_list_row_height * g_menu_list_visible_rows;
@@ -553,7 +553,7 @@ menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* comm
             rect.x = g_menu_window_right_x;
             rect.y = command->list.arrow_up_y;
             rect.w = 8;
-            rect.h = 0x10;
+            rect.h = 16;
             menu_gfx_enqueue_textured_quad(&rect, 0xd8, 0, 0, g_menu_gfx_semitransparency, g_menu_cursor_texture_page,
                 g_menu_cursor_mode0_foreground_clut, g_menu_gfx_otag_index);
         }
@@ -561,7 +561,7 @@ menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* comm
             rect.x = g_menu_window_right_x;
             rect.y = command->list.arrow_down_y;
             rect.w = 8;
-            rect.h = 0x10;
+            rect.h = 16;
             menu_gfx_enqueue_textured_quad(&rect, 0xe0, 0, 0, g_menu_gfx_semitransparency, g_menu_cursor_texture_page,
                 g_menu_cursor_mode0_foreground_clut, g_menu_gfx_otag_index);
         }

@@ -2086,7 +2086,7 @@ static void load_vram_sheet(
         }
         data += sizeof(source->clut);
         rect.x = column * 64 + 0x100;
-        rect.y = 0x100;
+        rect.y = 256;
         LoadTPage((u32*)data, 0, 0, rect.x, 0x100, 0x100, 0x100);
         rect.x = (column / 8) * SPRITE_SHEET_STRIP_WIDTH + SPRITE_SHEET_STRIP_VRAM_X;
         rect.y = (column % 8) * SPRITE_SHEET_STRIP_HEIGHT + SPRITE_SHEET_STRIP_VRAM_Y;
@@ -2373,8 +2373,8 @@ void sprite_reset_load_state(void) {
         g_sprite_evtchr_slots[i].image_buffer_state = SPRITE_EVTCHR_SLOT_BUFFER_FREE;
         g_sprite_evtchr_slots[i].evtchr_load_state = 0;
     }
-    setRECT(&g_sprite_evtchr_slots[0].image_rect, 0x100, 0, 0x40, 0xc8);
-    setRECT(&g_sprite_evtchr_slots[1].image_rect, 0x140, 0, 0x40, 0xc8);
+    setRECT(&g_sprite_evtchr_slots[0].image_rect, 256, 0, 64, 200);
+    setRECT(&g_sprite_evtchr_slots[1].image_rect, 320, 0, 64, 200);
     g_sprite_seq_data_cursor = g_sprite_seq_data_buffer;
     g_sprite_load_state.file_kind = SPRITE_LOAD_KIND_FIRST;
     g_sprite_load_state.phase = SPRITE_LOAD_PHASE_START_READ;

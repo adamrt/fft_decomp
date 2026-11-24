@@ -57,7 +57,7 @@ void world_map_draw_hud_value(GsOT* ot) {
     case HUD_VALUE_PLAY_TIME:
         sprite.u = 0x60;
         sprite.v = 0x10;
-        sprite.w = 0x14;
+        sprite.w = 20;
         sprite.h = 8;
         sprite.cx = 0x20;
         GsSortFastSprite(&sprite, ot, g_hud_ot_priority);
@@ -85,7 +85,7 @@ void world_map_draw_hud_value(GsOT* ot) {
     case HUD_VALUE_LABELED:
         sprite.u = 0xA8;
         sprite.v = 0x20;
-        sprite.w = 0xD;
+        sprite.w = 13;
         sprite.h = 9;
         sprite.cx = 0x20;
         GsSortFastSprite(&sprite, ot, g_hud_ot_priority);
@@ -97,7 +97,7 @@ void world_map_draw_hud_value(GsOT* ot) {
         break;
     case HUD_VALUE_COST_AND_FUNDS:
         sprite.u = 0x60;
-        sprite.w = 0x18;
+        sprite.w = 24;
         sprite.h = 8;
         sprite.v = 0;
         sprite.cx = 0x20;

@@ -60,10 +60,10 @@ void ending_init(void) {
     music_unload_all();
     init_runtime_state();
 
-    source.x = 0x3c0;
-    source.y = 0x100;
-    source.w = 0x40;
-    source.h = 0x100;
+    source.x = 960;
+    source.y = 256;
+    source.w = 64;
+    source.h = 256;
     MoveImage(&source, 0x3c0, 0);
     DrawSync(0);
 
@@ -80,10 +80,10 @@ void ending_init(void) {
 void gfx_restore_frame_bin_page(void) {
     RECT source;
 
-    source.x = 0x3c0;
+    source.x = 960;
     source.y = 0;
-    source.w = 0x40;
-    source.h = 0x100;
+    source.w = 64;
+    source.h = 256;
     MoveImage(&source, 0x3c0, 0x100);
     DrawSync(0);
 }
@@ -119,24 +119,24 @@ void gfx_init_screen_environments(s32 clear_first) {
         g_gfx_screen_environments[1].draw.ofs[1] = 0x168;
         g_gfx_screen_environments[0].draw.isbg = g_gfx_screen_environments[1].draw.isbg = 0;
         g_gfx_screen_environments[0].draw.dfe = g_gfx_screen_environments[1].draw.dfe = 1;
-        g_fade_tile.rect.x = -0xa0;
-        g_fade_tile.rect.y = -0x78;
+        g_fade_tile.rect.x = -160;
+        g_fade_tile.rect.y = -120;
         g_gfx_screen_environments[0].draw.ofs[0] = center_x;
         g_gfx_screen_environments[1].draw.ofs[0] = center_x;
-        g_fade_tile.rect.w = 0x140;
-        g_fade_tile.rect.h = 0xf0;
+        g_fade_tile.rect.w = 320;
+        g_fade_tile.rect.h = 240;
         if (g_system_runtime_flags & SYSTEM_RUNTIME_FLAG_RGB24) {
             g_gfx_screen_environments[0].disp.isrgb24 = g_gfx_screen_environments[1].disp.isrgb24 = 1;
             rect.x = 0;
             rect.y = 0;
-            rect.w = 0x1e0;
-            rect.h = 0x1e0;
+            rect.w = 480;
+            rect.h = 480;
         } else {
             g_gfx_screen_environments[0].disp.isrgb24 = g_gfx_screen_environments[1].disp.isrgb24 = 0;
             rect.x = 0;
             rect.y = 0;
-            rect.w = 0x140;
-            rect.h = 0x1e0;
+            rect.w = 320;
+            rect.h = 480;
         }
     } else {
         SetDefDrawEnv(&g_gfx_screen_environments[0].draw, 0, 0, 0x100, 0xf0);
@@ -147,24 +147,24 @@ void gfx_init_screen_environments(s32 clear_first) {
         g_gfx_screen_environments[0].draw.ofs[1] = 0x78;
         g_gfx_screen_environments[1].draw.ofs[1] = 0x168;
         g_gfx_screen_environments[0].draw.isbg = g_gfx_screen_environments[1].draw.isbg = 0;
-        g_fade_tile.rect.x = -0x80;
-        g_fade_tile.rect.y = -0x78;
+        g_fade_tile.rect.x = -128;
+        g_fade_tile.rect.y = -120;
         g_gfx_screen_environments[0].draw.ofs[0] = center_x;
         g_gfx_screen_environments[1].draw.ofs[0] = center_x;
-        g_fade_tile.rect.w = 0x100;
-        g_fade_tile.rect.h = 0xf0;
+        g_fade_tile.rect.w = 256;
+        g_fade_tile.rect.h = 240;
         if (g_system_runtime_flags & SYSTEM_RUNTIME_FLAG_RGB24) {
             g_gfx_screen_environments[0].disp.isrgb24 = g_gfx_screen_environments[1].disp.isrgb24 = 1;
             rect.x = 0;
             rect.y = 0;
-            rect.w = 0x180;
-            rect.h = 0x1e0;
+            rect.w = 384;
+            rect.h = 480;
         } else {
             g_gfx_screen_environments[0].disp.isrgb24 = g_gfx_screen_environments[1].disp.isrgb24 = 0;
             rect.x = 0;
             rect.y = 0;
-            rect.w = 0x100;
-            rect.h = 0x1e0;
+            rect.w = 256;
+            rect.h = 480;
         }
     }
 

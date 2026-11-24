@@ -1876,8 +1876,8 @@ void gfx_init_render_buffers(void) {
     g_map_current_darkness_color.cd = prototype.code;
     SetPolyG4(&g_render_buffers[0].overlay);
     SetPolyG4(&g_render_buffers[1].overlay);
-    setXY4(&g_render_buffers[0].overlay, 0, 0, 0x180, 0, 0, 0xF0, 0x180, 0xF0);
-    setXY4(&g_render_buffers[1].overlay, 0, 0, 0x180, 0, 0, 0xF0, 0x180, 0xF0);
+    setXY4(&g_render_buffers[0].overlay, 0, 0, 384, 0, 0, 240, 384, 240);
+    setXY4(&g_render_buffers[1].overlay, 0, 0, 384, 0, 0, 240, 384, 240);
     SetDrawMode(&g_render_buffers[0].overlay_modes[1], 0, 1, 0, 0);
     SetDrawMode(&g_render_buffers[1].overlay_modes[1], 0, 1, 0, 0);
     SetDrawMode(&g_render_buffers[0].overlay_modes[0], 0, 1, 0, 0);
@@ -2241,7 +2241,7 @@ static void init_weather_particles(weather_command_e command) {
                 g_render_buffers[j].ft3[i].clut = GetClut(0, MAP_CLUT_ROWS_Y + MAP_CLUT_ROW_SPRITES);
                 g_render_buffers[j].ft3[i].tpage = GetTPage(0, 3, 0x3c0, 0x100);
                 prim = (POLY_FT3*)((u8*)g_render_buffers[0].ft3 + (j * sizeof(render_buffer_t) + i * sizeof(POLY_FT3)));
-                setUV3(prim, 0xd8, 0xaf, 0xf7, 0xaf, 0xd8, 0xaf);
+                setUV3(prim, 216, 175, 247, 175, 216, 175);
                 SetSemiTrans(&g_render_buffers[j].ft3[i + 32], 1);
                 g_render_buffers[j].ft3[i + 32].r0 = 0x80;
                 g_render_buffers[j].ft3[i + 32].g0 = 0x80;
@@ -3317,7 +3317,7 @@ s32 map_gns_dispatch_resource(u8 resource_type, map_resource_t* data) {
         break;
     case MAP_RESOURCE_APPLY_PALETTES:
         g_map_vram_load_rect.y = MAP_CLUT_ROWS_Y + MAP_CLUT_ROW_MAP;
-        g_map_vram_load_rect.w = 0x100;
+        g_map_vram_load_rect.w = 256;
         g_map_palette_pending = 0;
         g_map_vram_load_rect.x = 0;
         g_map_vram_load_rect.h = 1;
@@ -3325,7 +3325,7 @@ s32 map_gns_dispatch_resource(u8 resource_type, map_resource_t* data) {
         break;
     case MAP_RESOURCE_MARKED_TILE_PALETTES:
         g_map_vram_load_rect.y = MAP_CLUT_ROWS_Y + MAP_CLUT_ROW_MARKED_TILES;
-        g_map_vram_load_rect.w = 0x100;
+        g_map_vram_load_rect.w = 256;
         g_map_vram_load_rect.x = 0;
         g_map_vram_load_rect.h = 1;
         map_palette_load_data(data->clut, MAP_CLUT_ROW_MARKED_TILES, 0, 1);
@@ -3334,34 +3334,34 @@ s32 map_gns_dispatch_resource(u8 resource_type, map_resource_t* data) {
         system_report_error(2, 0x3ca);
         break;
     case MAP_RESOURCE_TEXTURE_QUARTER_0:
-        g_map_vram_load_rect.x = 0x300;
-        g_map_vram_load_rect.w = 0x40;
+        g_map_vram_load_rect.x = 768;
+        g_map_vram_load_rect.w = 64;
         g_map_vram_load_rect.y = 0;
-        g_map_vram_load_rect.h = 0x100;
+        g_map_vram_load_rect.h = 256;
         LoadImage(&g_map_vram_load_rect, data->texture_words);
         while (DrawSync(1)) { }
         break;
     case MAP_RESOURCE_TEXTURE_QUARTER_1:
-        g_map_vram_load_rect.x = 0x340;
-        g_map_vram_load_rect.w = 0x40;
+        g_map_vram_load_rect.x = 832;
+        g_map_vram_load_rect.w = 64;
         g_map_vram_load_rect.y = 0;
-        g_map_vram_load_rect.h = 0x100;
+        g_map_vram_load_rect.h = 256;
         LoadImage(&g_map_vram_load_rect, data->texture_words);
         while (DrawSync(1)) { }
         break;
     case MAP_RESOURCE_TEXTURE_QUARTER_2:
-        g_map_vram_load_rect.x = 0x380;
-        g_map_vram_load_rect.w = 0x40;
+        g_map_vram_load_rect.x = 896;
+        g_map_vram_load_rect.w = 64;
         g_map_vram_load_rect.y = 0;
-        g_map_vram_load_rect.h = 0x100;
+        g_map_vram_load_rect.h = 256;
         LoadImage(&g_map_vram_load_rect, data->texture_words);
         while (DrawSync(1)) { }
         break;
     case MAP_RESOURCE_TEXTURE_QUARTER_3:
-        g_map_vram_load_rect.x = 0x3c0;
-        g_map_vram_load_rect.w = 0x40;
+        g_map_vram_load_rect.x = 960;
+        g_map_vram_load_rect.w = 64;
         g_map_vram_load_rect.y = 0;
-        g_map_vram_load_rect.h = 0x100;
+        g_map_vram_load_rect.h = 256;
         LoadImage(&g_map_vram_load_rect, data->texture_words);
         while (DrawSync(1)) { }
         break;

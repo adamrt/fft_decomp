@@ -99,7 +99,7 @@ void option_choice_thread(void) {
     param->vram_origin.x = VARIANT_MENU_CHOICE_VRAM_X;
     param->vram_origin.y = VARIANT_MENU_CHOICE_VRAM_BOTTOM_Y - height;
     if (kind == GAME_OPTION_FINGER_CURSOR_REPEAT_SPEED) {
-        param->vram_origin.x = 0x1AE;
+        param->vram_origin.x = 430;
     }
     param->text_image.source.w -= 4;
 

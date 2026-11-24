@@ -26,7 +26,7 @@ void menu_gfx_enqueue_textured_quad_rect(
     }
     SetSemiTrans(poly, semitrans);
 
-    setXYWH(poly, rect->x + 0x80, rect->y, rect->w, rect->h);
+    setXYWH(poly, rect->x + 128, rect->y, rect->w, rect->h);
     setUVWH(poly, tex->u, tex->v, tex->w, tex->h);
     poly->clut = tex->clut;
     poly->tpage = tex->tpage;
@@ -54,8 +54,8 @@ void menu_gfx_enqueue_textured_quad_list(const menu_sprite_cell_t* quads, const 
         }
         SetSemiTrans(poly, semitrans);
 
-        setXY4(poly, quads->x + 0x80, quads->y, quads->w + (quads->x + 0x80), quads->y, quads->x + 0x80,
-            quads->y + quads->h, quads->w + (quads->x + 0x80), quads->y + quads->h);
+        setXY4(poly, quads->x + 128, quads->y, quads->w + (quads->x + 128), quads->y, quads->x + 128,
+            quads->y + quads->h, quads->w + (quads->x + 128), quads->y + quads->h);
         setUV4(poly, quads->u, quads->v, quads->u + quads->w, quads->v, quads->u, quads->v + quads->h,
             quads->u + quads->w, quads->v + quads->h);
         poly->clut = clut;
@@ -82,7 +82,7 @@ void menu_gfx_enqueue_textured_quad(
     }
     SetSemiTrans(poly, semitrans);
 
-    setXYWH(poly, rect->x + 0x80, rect->y, rect->w, rect->h);
+    setXYWH(poly, rect->x + 128, rect->y, rect->w, rect->h);
     setUVWH(poly, u, v, rect->w, rect->h);
     poly->clut = clut;
     poly->tpage = texture_page;

@@ -90,7 +90,7 @@ u8* ability_list_update_page_scroll(menu_entry_t* entry, s32* row_offset, s32* r
     pressed = script_get_controller_input_pointer(0);
     held = script_get_controller_input_pointer(1);
     rect.x = (area->x / 4) + entry->vram_origin.x;
-    rect.y = 0x80;
+    rect.y = 128;
     rect.w = area->w / 4;
     rect.h = area->h;
     changed = 0;

@@ -546,7 +546,7 @@ void world_map_draw_routes(GsOT* ot) {
     table = s_world_map_route_polylines;
     SetPolyFT4(&poly);
     SetSemiTrans(&poly, 1);
-    setUV4(&poly, 0x88, 0xE0, 0x97, 0xE0, 0x88, 0xEF, 0x97, 0xEF);
+    setUV4(&poly, 136, 224, 151, 224, 136, 239, 151, 239);
     setRGB0(&poly, g_world_map_brightness_rgb.r, g_world_map_brightness_rgb.g, g_world_map_brightness_rgb.b);
     poly.tpage = GetTPage(0, 0, 0x1C0, 0x100);
     poly.clut = GetClut(0x10, 0x1E8);
@@ -757,7 +757,7 @@ void world_map_draw_path_animation(GsOT* ot) {
 
     SetPolyFT4(&poly);
     SetSemiTrans(&poly, 1);
-    setUV4(&poly, 0x88, 0xE0, 0x97, 0xE0, 0x88, 0xEF, 0x97, 0xEF);
+    setUV4(&poly, 136, 224, 151, 224, 136, 239, 151, 239);
     setRGB0(&poly, g_world_map_brightness_rgb.r, g_world_map_brightness_rgb.g, g_world_map_brightness_rgb.b);
     poly.tpage = GetTPage(0, 0, 0x1C0, 0x100);
     poly.clut = GetClut(0x10, 0x1E8);

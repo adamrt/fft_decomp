@@ -210,7 +210,8 @@ preserving every original byte.
 - Use snake_case; `_t` for struct typedefs and `_e` for enum typedefs (the tag
   repeats the typedef name without its suffix); uppercase enumerators. A size
   assert is named after its type (`unit_size_must_be_N`). Decimal for counts
-  and ordinary enum values, hex for flags and encoded values.
+  and screen or VRAM coordinates and sizes; hex for flags and encoded values;
+  enum values in whichever base reads better (hex for id ranges and codes).
 - Unknown members are `_unknown_XX`; `_unread_XX` means written by name but never
   read (by C, hand-written code or DMA); `_unused_XX` means no named access;
   `_padding_XX` means proven alignment or size filler. Offsets are relative to

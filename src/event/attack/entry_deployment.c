@@ -332,7 +332,7 @@ void attack_deployment_entrypoint(void) {
     g_deploy_selected_roster_index = 0;
     s_deploy_menu_state = DEPLOY_MENU_EMPTY_TILE;
     s_deploy_active_cursor = 0;
-    s_deploy_status_display_thread_params.position.y = -0x9c;
+    s_deploy_status_display_thread_params.position.y = -156;
     /* Prompt icon states (see unit_panel_build_button_prompts): 0xff hidden,
      * 0 lit, 1 dimmed; 7 shows a press then lights, 0x11 a press then dims, 0xc0 fades in. */
     for (i = 0; i < 5; i++) {
@@ -1280,8 +1280,8 @@ static void build_banner_arrow(void) {
     SetSemiTrans(&g_deploy_render_buffers[0].screen_arrow.poly, 1);
     SetShadeTex(&g_deploy_render_buffers[0].screen_arrow.poly, 0);
     setRGB0(&g_deploy_render_buffers[0].screen_arrow.poly, 0x80, 0x80, 0x80);
-    setXY4(&g_deploy_render_buffers[0].screen_arrow.poly, 0xAF, 0xB6, 0xEF, 0xB6, 0xAF, 0xDE, 0xEF, 0xDE);
-    setUV4(&g_deploy_render_buffers[0].screen_arrow.poly, 0x58, 0xB8, 0x98, 0xB8, 0x58, 0xE0, 0x98, 0xE0);
+    setXY4(&g_deploy_render_buffers[0].screen_arrow.poly, 175, 182, 239, 182, 175, 222, 239, 222);
+    setUV4(&g_deploy_render_buffers[0].screen_arrow.poly, 88, 184, 152, 184, 88, 224, 152, 224);
     g_deploy_render_buffers[0].screen_arrow.poly.tpage = GetTPage(0, 1, 0x100, 0);
     g_deploy_render_buffers[0].screen_arrow.poly.clut = GetClut(g_deploy_arrow_clut_rect.x, g_deploy_arrow_clut_rect.y);
 
@@ -1290,19 +1290,19 @@ static void build_banner_arrow(void) {
     SetShadeTex(&g_deploy_render_buffers[0].screen_arrow.tri[0], 1);
     setRGB0(&g_deploy_render_buffers[0].screen_arrow.tri[0], 0xFF, 0xFF, 0xFF);
     if (g_deploy_tiles_only_mode != 0) {
-        g_deploy_render_buffers[0].screen_arrow.tri[0].x0 = 0x99;
-        g_deploy_render_buffers[0].screen_arrow.tri[0].x1 = 0xC0;
-        g_deploy_render_buffers[0].screen_arrow.tri[0].x2 = 0xA2;
-        g_deploy_render_buffers[0].screen_arrow.tri[0].y0 = 0x9E;
-        g_deploy_render_buffers[0].screen_arrow.tri[0].y1 = 0xB1;
-        g_deploy_render_buffers[0].screen_arrow.tri[0].y2 = 0xB0;
+        g_deploy_render_buffers[0].screen_arrow.tri[0].x0 = 153;
+        g_deploy_render_buffers[0].screen_arrow.tri[0].x1 = 192;
+        g_deploy_render_buffers[0].screen_arrow.tri[0].x2 = 162;
+        g_deploy_render_buffers[0].screen_arrow.tri[0].y0 = 158;
+        g_deploy_render_buffers[0].screen_arrow.tri[0].y1 = 177;
+        g_deploy_render_buffers[0].screen_arrow.tri[0].y2 = 176;
     } else {
-        g_deploy_render_buffers[0].screen_arrow.tri[0].x0 = 0xB9;
-        g_deploy_render_buffers[0].screen_arrow.tri[0].x1 = 0xE0;
-        g_deploy_render_buffers[0].screen_arrow.tri[0].x2 = 0xC2;
-        g_deploy_render_buffers[0].screen_arrow.tri[0].y0 = 0xBE;
-        g_deploy_render_buffers[0].screen_arrow.tri[0].y1 = 0xD1;
-        g_deploy_render_buffers[0].screen_arrow.tri[0].y2 = 0xD0;
+        g_deploy_render_buffers[0].screen_arrow.tri[0].x0 = 185;
+        g_deploy_render_buffers[0].screen_arrow.tri[0].x1 = 224;
+        g_deploy_render_buffers[0].screen_arrow.tri[0].x2 = 194;
+        g_deploy_render_buffers[0].screen_arrow.tri[0].y0 = 190;
+        g_deploy_render_buffers[0].screen_arrow.tri[0].y1 = 209;
+        g_deploy_render_buffers[0].screen_arrow.tri[0].y2 = 208;
     }
 
     SetPolyF3(&g_deploy_render_buffers[0].screen_arrow.tri[1]);
@@ -1463,33 +1463,33 @@ static void render_thread(void) {
 
         if (g_deploy_tiles_only_mode != 0) {
             if (s_deploy_arrow_position_mode == 0) {
-                g_deploy_render_buffers[frame & 1].screen_arrow.tri[0].x0 = 0xb9;
-                g_deploy_render_buffers[frame & 1].screen_arrow.tri[0].x1 = 0xe0;
-                g_deploy_render_buffers[frame & 1].screen_arrow.tri[0].x2 = 0xc2;
-                g_deploy_render_buffers[frame & 1].screen_arrow.tri[0].y0 = 0x7e;
-                g_deploy_render_buffers[frame & 1].screen_arrow.tri[0].y1 = 0x91;
-                g_deploy_render_buffers[frame & 1].screen_arrow.tri[0].y2 = 0x90;
+                g_deploy_render_buffers[frame & 1].screen_arrow.tri[0].x0 = 185;
+                g_deploy_render_buffers[frame & 1].screen_arrow.tri[0].x1 = 224;
+                g_deploy_render_buffers[frame & 1].screen_arrow.tri[0].x2 = 194;
+                g_deploy_render_buffers[frame & 1].screen_arrow.tri[0].y0 = 126;
+                g_deploy_render_buffers[frame & 1].screen_arrow.tri[0].y1 = 145;
+                g_deploy_render_buffers[frame & 1].screen_arrow.tri[0].y2 = 144;
             } else if (s_deploy_arrow_position_mode == 1) {
-                g_deploy_render_buffers[frame & 1].screen_arrow.tri[0].x0 = 0x140;
-                g_deploy_render_buffers[frame & 1].screen_arrow.tri[0].x1 = 0x119;
-                g_deploy_render_buffers[frame & 1].screen_arrow.tri[0].x2 = 0x137;
-                g_deploy_render_buffers[frame & 1].screen_arrow.tri[0].y0 = 0x7e;
-                g_deploy_render_buffers[frame & 1].screen_arrow.tri[0].y1 = 0x91;
-                g_deploy_render_buffers[frame & 1].screen_arrow.tri[0].y2 = 0x90;
+                g_deploy_render_buffers[frame & 1].screen_arrow.tri[0].x0 = 320;
+                g_deploy_render_buffers[frame & 1].screen_arrow.tri[0].x1 = 281;
+                g_deploy_render_buffers[frame & 1].screen_arrow.tri[0].x2 = 311;
+                g_deploy_render_buffers[frame & 1].screen_arrow.tri[0].y0 = 126;
+                g_deploy_render_buffers[frame & 1].screen_arrow.tri[0].y1 = 145;
+                g_deploy_render_buffers[frame & 1].screen_arrow.tri[0].y2 = 144;
             } else if (s_deploy_arrow_position_mode == 2) {
-                g_deploy_render_buffers[frame & 1].screen_arrow.tri[0].x0 = 0x140;
-                g_deploy_render_buffers[frame & 1].screen_arrow.tri[0].x1 = 0x119;
-                g_deploy_render_buffers[frame & 1].screen_arrow.tri[0].x2 = 0x137;
-                g_deploy_render_buffers[frame & 1].screen_arrow.tri[0].y0 = 0x5e;
-                g_deploy_render_buffers[frame & 1].screen_arrow.tri[0].y1 = 0x4b;
-                g_deploy_render_buffers[frame & 1].screen_arrow.tri[0].y2 = 0x4c;
+                g_deploy_render_buffers[frame & 1].screen_arrow.tri[0].x0 = 320;
+                g_deploy_render_buffers[frame & 1].screen_arrow.tri[0].x1 = 281;
+                g_deploy_render_buffers[frame & 1].screen_arrow.tri[0].x2 = 311;
+                g_deploy_render_buffers[frame & 1].screen_arrow.tri[0].y0 = 94;
+                g_deploy_render_buffers[frame & 1].screen_arrow.tri[0].y1 = 75;
+                g_deploy_render_buffers[frame & 1].screen_arrow.tri[0].y2 = 76;
             } else {
-                g_deploy_render_buffers[frame & 1].screen_arrow.tri[0].x0 = 0xb9;
-                g_deploy_render_buffers[frame & 1].screen_arrow.tri[0].x1 = 0xe0;
-                g_deploy_render_buffers[frame & 1].screen_arrow.tri[0].x2 = 0xc2;
-                g_deploy_render_buffers[frame & 1].screen_arrow.tri[0].y0 = 0x5c;
-                g_deploy_render_buffers[frame & 1].screen_arrow.tri[0].y1 = 0x49;
-                g_deploy_render_buffers[frame & 1].screen_arrow.tri[0].y2 = 0x4a;
+                g_deploy_render_buffers[frame & 1].screen_arrow.tri[0].x0 = 185;
+                g_deploy_render_buffers[frame & 1].screen_arrow.tri[0].x1 = 224;
+                g_deploy_render_buffers[frame & 1].screen_arrow.tri[0].x2 = 194;
+                g_deploy_render_buffers[frame & 1].screen_arrow.tri[0].y0 = 92;
+                g_deploy_render_buffers[frame & 1].screen_arrow.tri[0].y1 = 73;
+                g_deploy_render_buffers[frame & 1].screen_arrow.tri[0].y2 = 74;
             }
             build_valid_tiles(g_deploy_render_buffers[frame & 1].tiles[0]);
             offset_y = g_gfx_screen_polarity == 0 ? 0xf0 : 0;
@@ -1502,7 +1502,7 @@ static void render_thread(void) {
         g_deploy_render_buffers[frame & 1].world_position.y = s_deploy_grid_slide_y + offset_y;
         SetDrawOffset(
             &g_deploy_render_buffers[frame & 1].world_offset, (u16*)&g_deploy_render_buffers[frame & 1].world_position);
-        g_deploy_render_buffers[frame & 1].screen_position.x = -0x80;
+        g_deploy_render_buffers[frame & 1].screen_position.x = -128;
         g_deploy_render_buffers[frame & 1].screen_position.y = offset_y;
         SetDrawOffset(&g_deploy_render_buffers[frame & 1].screen_offset,
             (u16*)&g_deploy_render_buffers[frame & 1].screen_position);
@@ -1685,8 +1685,8 @@ static void build_valid_tiles(SPRT* sprites) {
             } else {
                 sprites[index].y0 = 0xc4 - x * 10 - y * 10 + lift;
             }
-            sprites[index].w = 0x28;
-            sprites[index].h = 0x1c;
+            sprites[index].w = 40;
+            sprites[index].h = 28;
             sprites[index].x0 -= 0x14;
             index++;
         }
@@ -1709,8 +1709,8 @@ static void init_cursors(void) {
         POLY_FT4* marker = &g_deploy_render_buffers[0].cursor[i][0];
         POLY_FT4* highlight = &g_deploy_render_buffers[0].cursor[i][1];
 
-        setUV4(marker, 0x40, 0x80, 0x50, 0x80, 0x40, 0x98, 0x50, 0x98);
-        setUV4(highlight, 0, 0xa0, 0xe, 0xa0, 0, 0xae, 0xe, 0xae);
+        setUV4(marker, 64, 128, 80, 128, 64, 152, 80, 152);
+        setUV4(highlight, 0, 160, 14, 160, 0, 174, 14, 174);
         SetSemiTrans(marker, 1);
         SetSemiTrans(highlight, 1);
         g_deploy_render_buffers[0].cursor[i][0].tpage = GetTPage(0, 2, 0x3c0, 0x100);
@@ -1760,7 +1760,7 @@ static void update_cursors(s32 frame, placement_buffer_t* buffer) {
             - i * 3;
         top = y + offset;
 
-        setXY4(&buffer->cursor[i][0], x - 8, top, x + 8, top, x - 8, top + 0x18, x + 8, top + 0x18);
+        setXY4(&buffer->cursor[i][0], x - 8, top, x + 8, top, x - 8, top + 24, x + 8, top + 24);
         setXY4(&buffer->cursor[i][1], x, y - 10, x + 20, y, x - 20, y, x, y + 10);
     }
 }
@@ -1799,7 +1799,7 @@ static void build_unit_quads(s32 column, s32 row, s32 index, POLY_FT4* poly) {
     s32 x0;
     s32 y0;
 
-    setUV4(poly, u, v, u + 0x30, v, u, v + 0x30, u + 0x30, v + 0x30);
+    setUV4(poly, u, v, u + 48, v, u, v + 48, u + 48, v + 48);
     x = row * 20 + 0x100 - column * 20;
     y = 0xc4 - row * 10 - column * 10;
     marker_y = y + 2;
@@ -1807,15 +1807,15 @@ static void build_unit_quads(s32 column, s32 row, s32 index, POLY_FT4* poly) {
     if (g_formation_sprite_tall_cell[index] != 0) {
         x0 = x - 0x17;
         y0 = y - 0x21;
-        setXY4(poly, x0, y0, x0 + 0x30, y0, x0, y0 + 0x30, x0 + 0x30, y0 + 0x30);
+        setXY4(poly, x0, y0, x0 + 48, y0, x0, y0 + 48, x0 + 48, y0 + 48);
     } else {
         x0 = x - 0x17;
         y0 = y - 0x25;
-        setXY4(poly, x0, y0, x0 + 0x30, y0, x0, y0 + 0x30, x0 + 0x30, y0 + 0x30);
+        setXY4(poly, x0, y0, x0 + 48, y0, x0, y0 + 48, x0 + 48, y0 + 48);
     }
     poly++;
     setXY4(poly, x - 10, marker_y - 1, x + 10, marker_y - 1, x - 10, marker_y + 9, x + 10, marker_y + 9);
-    setUV4(poly, 0x90, 0x40, 0xa4, 0x40, 0x90, 0x54, 0xa4, 0x54);
+    setUV4(poly, 144, 64, 164, 64, 144, 84, 164, 84);
     poly->clut = GetClut(0x140, 0xf8);
 }
 
@@ -1851,11 +1851,11 @@ static void labels_draw_thread(void) {
             squad--;
         }
         if (squad == 0) {
-            g_deploy_text_graphic_params[1].source.x = 0xc0;
-            g_deploy_text_graphic_params[1].source.y = 0x18;
+            g_deploy_text_graphic_params[1].source.x = 192;
+            g_deploy_text_graphic_params[1].source.y = 24;
         } else {
-            g_deploy_text_graphic_params[1].source.x = 0xe8;
-            g_deploy_text_graphic_params[1].source.y = 0xc;
+            g_deploy_text_graphic_params[1].source.x = 232;
+            g_deploy_text_graphic_params[1].source.y = 12;
         }
         g_deploy_text_graphic_params[4].source.x = g_deploy_current_squad_data->unit_limit * 8 + 0xc8;
         g_deploy_text_graphic_params[7].source.x
@@ -1865,7 +1865,7 @@ static void labels_draw_thread(void) {
             if ((g_deploy_current_squad_data->unit_limit - g_deploy_deployed_unit_count - 1 < 0 && i >= 6)
                 || thread_current_get_parameter_3() != 0) {
                 if (g_deploy_current_squad_data->unit_limit - g_deploy_deployed_unit_count - 1 < 0) {
-                    g_deploy_text_graphic_params[7].source.x = 0xd0;
+                    g_deploy_text_graphic_params[7].source.x = 208;
                 }
                 g_deploy_text_reveal_steps[6] = -1;
                 g_deploy_text_reveal_steps[7] = -1;

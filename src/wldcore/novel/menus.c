@@ -101,12 +101,12 @@ void novel_open_reader(s32 argument) {
 
     index = display_object_append_image(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].novel.brightness_image = index;
-    bounds.x = 0x1E4;
-    bounds.y = 0x1E8;
-    bounds.w = 0x20;
+    bounds.x = 484;
+    bounds.y = 488;
+    bounds.w = 32;
     bounds.h = 8;
-    origin.x = 0x20;
-    origin.y = 0x1E8;
+    origin.x = 32;
+    origin.y = 488;
     display_object_init_image(index, bounds, origin, 0);
     pos3 = (point32_t*)((u8*)render_pos + index * sizeof(display_object_gs_image_t));
     pos3->x = 0x34;
@@ -342,9 +342,9 @@ static void open_quit_menu(void) {
     g_display_object_animated_pool[index].frame_index = 0;
     index = display_object_append_image(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].novel_quit.render_index = index;
-    bounds.x = 0x80;
-    bounds.w = 0x3C;
-    bounds.h = 0x30;
+    bounds.x = 128;
+    bounds.w = 60;
+    bounds.h = 48;
     bounds.y = 0;
     window_init_text_record(index, bounds, 0, TEXT_ID_QUIT_CONTINUE, g_window_image_buffer);
     base = &g_display_object_gs_image_pool[index].position;
@@ -627,7 +627,7 @@ static void open_history(void) {
     g_display_object_animated_pool[index].anim_counter = 0;
     g_display_object_animated_pool[index].frame_index = 0;
     positions[index].x = 0;
-    positions[index].y = -0x6A;
+    positions[index].y = -106;
 
     index = display_object_append_animated(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].novel_history.lower_window = index;
@@ -637,12 +637,12 @@ static void open_history(void) {
     g_display_object_animated_pool[index].frame_index = 0;
     g_display_object_animated_pool[index].flags |= DISPLAY_OBJECT_HIDDEN;
     positions[index].x = 0;
-    positions[index].y = 0x5E;
+    positions[index].y = 94;
 
     index = display_object_append_image(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].novel_history.render_index = index;
-    bounds.w = 0xF8;
-    bounds.h = 0xB0;
+    bounds.w = 248;
+    bounds.h = 176;
     bounds.x = 0;
     bounds.y = 0;
     window_build_render_record_image(index, bounds, 1, g_window_image_buffer);
@@ -651,8 +651,8 @@ static void open_history(void) {
     g_display_object_gs_image_pool[index].priority = g_menu_stack_ot_offset;
     position->x = -0x80;
     position->y = -0x64;
-    g_display_object_gs_image_pool[index].clut.x = 0x3C0;
-    g_display_object_gs_image_pool[index].clut.y = 0x1F2;
+    g_display_object_gs_image_pool[index].clut.x = 960;
+    g_display_object_gs_image_pool[index].clut.y = 498;
     window_draw_centered_text(index, *newest + TEXT_ID_WORLD_MESSAGE_BASE);
 
     g_display_object_animated_pool[g_menu_stack_records[g_menu_stack_depth - 1].novel.quit_prompt_window].palette = 0xA;

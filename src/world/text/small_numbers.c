@@ -23,15 +23,15 @@ void text_draw_small_number_glyphs(s32 value, s32 format, u8* pixels, glyph_blit
     s32 i;
 
     if (work == SMALL_NUMBER_PLACEHOLDER_DASHES || work == SMALL_NUMBER_PLACEHOLDER_QUESTIONS) {
-        g_text_small_number_glyph_rect.rect.y = 0x10;
+        g_text_small_number_glyph_rect.rect.y = 16;
         if (format & SMALL_NUMBER_PLACEHOLDER_SLASH) {
-            src->rect.x = 0xB4;
+            src->rect.x = 180;
             text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, src, pos);
             pos->rect.x += 5;
         }
-        src->rect.x = 0xBA;
+        src->rect.x = 186;
         if (work == SMALL_NUMBER_PLACEHOLDER_QUESTIONS) {
-            src->rect.x = 0xD0;
+            src->rect.x = 208;
         }
         for (i = 0; i < 3; i++) {
             text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &g_text_small_number_glyph_rect, pos);
@@ -49,33 +49,33 @@ void text_draw_small_number_glyphs(s32 value, s32 format, u8* pixels, glyph_blit
         }
     }
     if (format & SMALL_NUMBER_SLASH_PREFIX) {
-        src->rect.x = 0xB4;
+        src->rect.x = 180;
         text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &g_text_small_number_glyph_rect, pos);
         pos->rect.x += 5;
     }
     if (format & SMALL_NUMBER_SLASH_PREFIX_LEFT) {
         pos->rect.x -= 2;
-        src->rect.x = 0xB4;
+        src->rect.x = 180;
         text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &g_text_small_number_glyph_rect, pos);
         pos->rect.x += 7;
     }
     if (format & SMALL_NUMBER_DOTS_PREFIX) {
-        src->rect.x = 0x78;
-        src->rect.y = 0x1A;
+        src->rect.x = 120;
+        src->rect.y = 26;
         src->rect.h = 4;
         pos->rect.y += 3;
         text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &g_text_small_number_glyph_rect, pos);
         pos->rect.x += 7;
         pos->rect.y -= 3;
-        src->rect.y = 0x10;
-        src->rect.h = 0xA;
+        src->rect.y = 16;
+        src->rect.h = 10;
     }
     pos->rect.x += ((format & SMALL_NUMBER_DIGIT_COUNT_MASK) - 1) * 5;
     work = pos->rect.x + 5;
     for (i = 0; i < (format & SMALL_NUMBER_DIGIT_COUNT_MASK); i++) {
         src->rect.x = value % 10 * 6 + 0x78;
         if (format & SMALL_NUMBER_DASH) {
-            src->rect.x = 0xBA;
+            src->rect.x = 186;
         }
         text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &g_text_small_number_glyph_rect, pos);
         value /= 10;
@@ -83,7 +83,7 @@ void text_draw_small_number_glyphs(s32 value, s32 format, u8* pixels, glyph_blit
     }
     pos->rect.x = work;
     if (format & SMALL_NUMBER_PERCENT_SUFFIX) {
-        src->rect.x = 0xC0;
+        src->rect.x = 192;
         text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &g_text_small_number_glyph_rect, pos);
         pos->rect.x += 5;
     }

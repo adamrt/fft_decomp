@@ -39,38 +39,38 @@ void loading_message_build(u32 visible, s32 x, s32 y) {
     poly = prims;
 
     poly = &g_loading_primitives[0][0];
-    setXY4(poly, x + 0xA0, y + 0xC8, x + 0xAC, y + 0xC8, x + 0xA0, y + 0xD0, x + 0xAC, y + 0xD0);
-    setUV4(poly, 0xE4, 0x9B, 0xF0, 0x9B, 0xE4, 0xA3, 0xF0, 0xA3);
+    setXY4(poly, x + 160, y + 200, x + 172, y + 200, x + 160, y + 208, x + 172, y + 208);
+    setUV4(poly, 228, 155, 240, 155, 228, 163, 240, 163);
     g_loading_primitives[1][0] = *poly;
 
     poly = &g_loading_primitives[0][1];
-    setXY4(poly, x + 0xAB, y + 0xC8, x + 0xB2, y + 0xC8, x + 0xAB, y + 0xD0, x + 0xB2, y + 0xD0);
-    setUV4(poly, 0xE4, 0xA3, 0xEB, 0xA3, 0xE4, 0xAB, 0xEB, 0xAB);
+    setXY4(poly, x + 171, y + 200, x + 178, y + 200, x + 171, y + 208, x + 178, y + 208);
+    setUV4(poly, 228, 163, 235, 163, 228, 171, 235, 171);
     g_loading_primitives[1][1] = *poly;
 
     poly = &g_loading_primitives[0][2];
-    setXY4(poly, x + 0xB7, y + 0xC8, x + 0xC3, y + 0xC8, x + 0xB7, y + 0xD0, x + 0xC3, y + 0xD0);
-    setUV4(poly, 0xAD, 0x55, 0xB9, 0x55, 0xAD, 0x5D, 0xB9, 0x5D);
+    setXY4(poly, x + 183, y + 200, x + 195, y + 200, x + 183, y + 208, x + 195, y + 208);
+    setUV4(poly, 173, 85, 185, 85, 173, 93, 185, 93);
     g_loading_primitives[1][2] = *poly;
 
     poly = &g_loading_primitives[0][3];
-    setXY4(poly, x + 0xC3, y + 0xC8, x + 0xC8, y + 0xC8, x + 0xC3, y + 0xD0, x + 0xC8, y + 0xD0);
-    setUV4(poly, 0xD1, 0x60, 0xD6, 0x60, 0xD1, 0x68, 0xD6, 0x68);
+    setXY4(poly, x + 195, y + 200, x + 200, y + 200, x + 195, y + 208, x + 200, y + 208);
+    setUV4(poly, 209, 96, 214, 96, 209, 104, 214, 104);
     g_loading_primitives[1][3] = *poly;
 
     poly = &g_loading_primitives[0][4];
-    setXY4(poly, x + 0xC7, y + 0xC8, x + 0xCA, y + 0xC8, x + 0xC7, y + 0xD0, x + 0xCA, y + 0xD0);
-    setUV4(poly, 0x7C, 0x52, 0x7F, 0x52, 0x7C, 0x5A, 0x7F, 0x5A);
+    setXY4(poly, x + 199, y + 200, x + 202, y + 200, x + 199, y + 208, x + 202, y + 208);
+    setUV4(poly, 124, 82, 127, 82, 124, 90, 127, 90);
     g_loading_primitives[1][4] = *poly;
 
     poly = &g_loading_primitives[0][5];
-    setXY4(poly, x + 0xC9, y + 0xC8, x + 0xCE, y + 0xC8, x + 0xC9, y + 0xD0, x + 0xCE, y + 0xD0);
-    setUV4(poly, 0xCE, 0xCC, 0xD3, 0xCC, 0xCE, 0xD4, 0xD3, 0xD4);
+    setXY4(poly, x + 201, y + 200, x + 206, y + 200, x + 201, y + 208, x + 206, y + 208);
+    setUV4(poly, 206, 204, 211, 204, 206, 212, 211, 212);
     g_loading_primitives[1][5] = *poly;
 
     poly = &g_loading_primitives[0][6];
-    setXY4(poly, x + 0xCD, y + 0xCA, x + 0xD2, y + 0xCA, x + 0xCD, y + 0xD2, x + 0xD2, y + 0xD2);
-    setUV4(poly, 0xEB, 0xA4, 0xF0, 0xA4, 0xEB, 0xAC, 0xF0, 0xAC);
+    setXY4(poly, x + 205, y + 202, x + 210, y + 202, x + 205, y + 210, x + 210, y + 210);
+    setUV4(poly, 235, 164, 240, 164, 235, 172, 240, 172);
     g_loading_primitives[1][6] = *poly;
 
     /* 16-color palette of the NOW LOADING glyph sheet, loaded to VRAM (0x70, 0x1e2). */

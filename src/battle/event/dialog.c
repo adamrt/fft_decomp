@@ -204,7 +204,7 @@ void message_dialog_thread(void) {
          * offset absorbs each shift so the tail still points at the speaker. */
         if (rec.x < 0x88) {
             rec.tail_offset = rec.x - 0x88;
-            rec.x = 0x88;
+            rec.x = 136;
         } else if (rec.x + rec.width > 0x180) {
             rec.tail_offset = rec.x + rec.width - 0x180;
             rec.x = 0x180 - rec.width;
@@ -214,7 +214,7 @@ void message_dialog_thread(void) {
         rec.y += rec.y_offset;
         if (rec.x < 0x88) {
             rec.tail_offset += rec.x - 0x88;
-            rec.x = 0x88;
+            rec.x = 136;
         } else if (rec.x + rec.width > 0x180) {
             rec.tail_offset += rec.x + rec.width - 0x180;
             rec.x = 0x180 - rec.width;
@@ -222,7 +222,7 @@ void message_dialog_thread(void) {
 
         rec.tail_offset += rec.arrow_offset;
         if (rec.y < 0x16) {
-            rec.y = 0x16;
+            rec.y = 22;
         } else if (rec.y + rec.height > 0xE4) {
             rec.y = 0xE4 - rec.height;
         }
@@ -249,7 +249,7 @@ void message_dialog_thread(void) {
         rec.x = (0x100 - half_w) & 0xFFFE;
         half_h = rec.height >> 1;
         if (rec.position == DIALOG_POSITION_TOP) {
-            rec.y = 0x16;
+            rec.y = 22;
         }
         if (rec.position == DIALOG_POSITION_BOTTOM) {
             rec.y = 0xE4 - rec.height;
@@ -339,8 +339,8 @@ void message_dialog_thread(void) {
         if (rec.options == DIALOG_OPTIONS_ALTERNATE_TAIL) {
             rec.arrow_y -= 8;
         }
-        to.w = 0x1F;
-        to.h = 0x30;
+        to.w = 31;
+        to.h = 48;
         if (rec.tail_offset < 0) {
             win[1].portrait_flipped = 1;
             win[0].portrait_flipped = 1;
@@ -356,7 +356,7 @@ void message_dialog_thread(void) {
         win->sprites[3].v0 = 0x20;
         win->sprites[3].x0 = from.x + 3;
         win->sprites[3].y0 = from.y - 2;
-        win->sprites[3].w = 0x14;
+        win->sprites[3].w = 20;
         win->sprites[3].h = 9;
         win->sprites[3].clut = 0x7CBC;
     }
@@ -366,7 +366,7 @@ void message_dialog_thread(void) {
         win->sprites[3].v0 = 0x78;
         win->sprites[3].x0 = from.x + 3;
         win->sprites[3].y0 = from.y - 2;
-        win->sprites[3].w = 0x1C;
+        win->sprites[3].w = 28;
         win->sprites[3].h = 8;
         win->sprites[3].clut = 0x7CBC;
     }
@@ -533,7 +533,7 @@ void message_dialog_thread(void) {
                                     }
                                     if ((g_script_event_input & PSX_PAD_UP) && rec.first_line != 0) {
                                         g_sound_pending_sfx_id = SOUND_SFX_CURSOR_MOVE;
-                                        WINDOW_AT(g_menu_packet_buffer_index)->sprites[2].x0 = 0x200;
+                                        WINDOW_AT(g_menu_packet_buffer_index)->sprites[2].x0 = 512;
                                         rec.first_line += no_value;
                                         rec.last_line = rec.first_line + rec.lines;
                                         message_render_record_image(&rec);
@@ -541,7 +541,7 @@ void message_dialog_thread(void) {
                                     if ((g_script_event_input & PSX_PAD_DOWN)
                                         && rec.first_line != rec.line - rec.lines) {
                                         g_sound_pending_sfx_id = SOUND_SFX_CURSOR_MOVE;
-                                        WINDOW_AT(g_menu_packet_buffer_index)->sprites[2].x0 = 0x200;
+                                        WINDOW_AT(g_menu_packet_buffer_index)->sprites[2].x0 = 512;
                                         rec.first_line++;
                                         rec.last_line = rec.first_line + rec.lines;
                                         message_render_record_image(&rec);
@@ -550,7 +550,7 @@ void message_dialog_thread(void) {
                                         break;
                                     }
                                     CHECK_ABORT();
-                                    WINDOW_AT(g_menu_packet_buffer_index)->sprites[2].x0 = 0x200;
+                                    WINDOW_AT(g_menu_packet_buffer_index)->sprites[2].x0 = 512;
                                     thread_yield();
                                 }
                                 win[0].icon_flags = 0;
@@ -560,7 +560,7 @@ void message_dialog_thread(void) {
                             /* Scroll forward to the newest lines again. */
                             for (;;) {
                                 if (rec.line - rec.lines != rec.first_line) {
-                                    WINDOW_AT(g_menu_packet_buffer_index)->sprites[2].x0 = 0x200;
+                                    WINDOW_AT(g_menu_packet_buffer_index)->sprites[2].x0 = 512;
                                     rec.first_line++;
                                     rec.last_line = rec.first_line + rec.lines;
                                     message_render_record_image(&rec);
@@ -575,15 +575,15 @@ void message_dialog_thread(void) {
                 g_text_awaiting_input = 0;
                 /* Hide the cursor, arrow and scroll icons in both packet buffers, a frame apart. */
                 hidden_window = WINDOW_AT(g_menu_packet_buffer_index);
-                hidden_window->sprites[0].x0 = 0x200;
-                hidden_window->sprites[1].x0 = 0x200;
-                hidden_window->sprites[2].x0 = 0x200;
+                hidden_window->sprites[0].x0 = 512;
+                hidden_window->sprites[1].x0 = 512;
+                hidden_window->sprites[2].x0 = 512;
                 hidden_window->icon_flags = 0;
                 thread_yield();
                 hidden_window_next = WINDOW_AT(g_menu_packet_buffer_index);
-                hidden_window_next->sprites[0].x0 = 0x200;
-                hidden_window_next->sprites[1].x0 = 0x200;
-                hidden_window_next->sprites[2].x0 = 0x200;
+                hidden_window_next->sprites[0].x0 = 512;
+                hidden_window_next->sprites[1].x0 = 512;
+                hidden_window_next->sprites[2].x0 = 512;
                 hidden_window_next->icon_flags = 0;
 
                 if (character == TEXT_END_WAIT_FOR_CONFIRM) {
@@ -719,12 +719,12 @@ void message_dialog_thread(void) {
                 }
 
                 select_hidden_window = WINDOW_AT(g_menu_packet_buffer_index);
-                select_hidden_window->sprites[0].x0 = 0x200;
-                select_hidden_window->sprites[1].x0 = 0x200;
+                select_hidden_window->sprites[0].x0 = 512;
+                select_hidden_window->sprites[1].x0 = 512;
                 thread_yield();
                 select_hidden_window_next = WINDOW_AT(g_menu_packet_buffer_index);
-                select_hidden_window_next->sprites[0].x0 = 0x200;
-                select_hidden_window_next->sprites[1].x0 = 0x200;
+                select_hidden_window_next->sprites[0].x0 = 512;
+                select_hidden_window_next->sprites[1].x0 = 512;
 
                 g_script_variables[EVENT_SCRIPT_VAR_SELECTED_DIALOG_OPTION] = selection - rec.mark;
             }

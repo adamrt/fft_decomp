@@ -24,26 +24,26 @@ void menu_init_panel_fade_tiles(void) {
     SetTile(&frame->center);
     setRGB0(&frame->center, 0, 0, 0);
     SetSemiTrans(&frame->center, 1);
-    frame->center.x0 = 0x80;
-    frame->center.y0 = 0xac;
-    frame->center.w = 0x100;
-    frame->center.h = 0x32;
+    frame->center.x0 = 128;
+    frame->center.y0 = 172;
+    frame->center.w = 256;
+    frame->center.h = 50;
 
     for (i = 0; i < 9; i++) {
         SetTile(&frame->top[i]);
         setRGB0(&frame->top[i], 0, 0, 0);
         SetSemiTrans(&frame->top[i], 1);
-        frame->top[i].w = 0x100;
+        frame->top[i].w = 256;
         frame->top[i].h = 1;
-        frame->top[i].x0 = 0x80;
+        frame->top[i].x0 = 128;
         frame->top[i].y0 = i + 0xa3;
 
         SetTile(&frame->bottom[i]);
         setRGB0(&frame->bottom[i], 0, 0, 0);
         SetSemiTrans(&frame->bottom[i], 1);
-        frame->bottom[i].w = 0x100;
+        frame->bottom[i].w = 256;
         frame->bottom[i].h = 1;
-        frame->bottom[i].x0 = 0x80;
+        frame->bottom[i].x0 = 128;
         frame->bottom[i].y0 = i + 0xde;
     }
 

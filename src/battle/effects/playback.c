@@ -662,16 +662,16 @@ static void init_palette(s16 index) {
     size = height;
     if (data->wide_image) {
         height = size / 0x100;
-        rect.x = 0x180;
+        rect.x = 384;
         rect.y = 0;
-        rect.w = 0x80;
+        rect.w = 128;
         rect.h = height;
         LoadImage(&rect, data->pixels);
     } else {
         height = size / 0x80;
-        rect.x = 0x180;
+        rect.x = 384;
         rect.y = 0;
-        rect.w = 0x40;
+        rect.w = 64;
         rect.h = height;
         LoadImage(&rect, data->pixels);
     }

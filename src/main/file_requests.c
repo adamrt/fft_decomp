@@ -40,8 +40,8 @@ s32 file_request_read(file_load_descriptor_t* header, s32 lba, s32 sector_count,
         loading_message_build(1, 0, 0);
         rect.x = 0;
         rect.y = 0;
-        rect.w = 0x100;
-        rect.h = 0x1e0;
+        rect.w = 256;
+        rect.h = 480;
         ClearImage(&rect, 0, 0, 0);
         DrawSync(0);
         SetDefDrawEnv(&g_gfx_draw_envs[0], 0, 0, 0x100, 0xf0);

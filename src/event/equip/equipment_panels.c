@@ -154,7 +154,7 @@ void unit_panel_equipment_thread(void) {
         g_gfx_draw_offset_y = g_gfx_screen_polarity * 0xf0 != 0xf0 ? 0xf0 : 0;
         screen->draw_offsets[0].position.y = thread->position.y + g_gfx_draw_offset_y;
         SetDrawOffset(&screen->draw_offsets[0].packet, (u16*)&screen->draw_offsets[0].position);
-        screen->draw_offsets[1].position.x = -0x80;
+        screen->draw_offsets[1].position.x = -128;
         screen->draw_offsets[1].position.y = g_gfx_draw_offset_y;
         SetDrawOffset(&screen->draw_offsets[1].packet, (u16*)&screen->draw_offsets[1].position);
         menu_build_scaled_draw_area_packets(&screen->portrait, &g_unit_panel_equipment_frame_rects[1], frame,
@@ -317,7 +317,7 @@ void unit_panel_ability_thread(void) {
         g_gfx_draw_offset_y = g_gfx_screen_polarity * 0xf0 != 0xf0 ? 0xf0 : 0;
         screen->draw_offsets[0].position.y = thread->position.y + g_gfx_draw_offset_y;
         SetDrawOffset(&screen->draw_offsets[0].packet, (u16*)&screen->draw_offsets[0].position);
-        screen->draw_offsets[1].position.x = -0x80;
+        screen->draw_offsets[1].position.x = -128;
         screen->draw_offsets[1].position.y = g_gfx_draw_offset_y;
         SetDrawOffset(&screen->draw_offsets[1].packet, (u16*)&screen->draw_offsets[1].position);
         offset.position.x = thread->position.x - 0x73;

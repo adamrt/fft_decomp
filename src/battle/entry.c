@@ -89,7 +89,7 @@ static void run_map_load(void) {
 
     SetPolyF4(&g_fade_battle_polygons[0]);
     setRGB0(&g_fade_battle_polygons[0], 0, 0, 0);
-    setXY4(&g_fade_battle_polygons[0], 0x80, 0, 0x180, 0, 0, 0x100, 0x180, 0x100);
+    setXY4(&g_fade_battle_polygons[0], 128, 0, 384, 0, 0, 256, 384, 256);
     SetSemiTrans(&g_fade_battle_polygons[0], 1);
     g_fade_battle_polygons[1] = g_fade_battle_polygons[0];
     g_fade_tint_polygons[0] = g_fade_battle_polygons[0];
@@ -101,8 +101,8 @@ static void run_map_load(void) {
 
     setPolyFT4(&banner[0]);
     setRGB0(&banner[0], 0x80, 0x80, 0x80);
-    setXY4(&banner[0], 0x80, 0x74, 0x17f, 0x74, 0x80, 0x8c, 0x17f, 0x8c);
-    setUV4(&banner[0], 0, 0, 0xff, 0, 0, 0x18, 0xff, 0x18);
+    setXY4(&banner[0], 128, 116, 383, 116, 128, 140, 383, 140);
+    setUV4(&banner[0], 0, 0, 255, 0, 0, 24, 255, 24);
     SetSemiTrans(&banner[0], 0);
     banner[0].tpage = GetTPage(0, 0, 0x380, 0x100);
     banner[0].clut = GetClut(0x380, 0x11f);

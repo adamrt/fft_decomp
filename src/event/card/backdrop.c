@@ -37,8 +37,8 @@ void zodiac_backdrop_thread(void) {
         g_save_backdrop_draw_context.offset.position.x = 0;
         g_save_backdrop_draw_context.offset.position.y = 8;
     } else {
-        g_save_backdrop_draw_context.offset.position.x = 0x100;
-        g_save_backdrop_draw_context.offset.position.y = 0x80;
+        g_save_backdrop_draw_context.offset.position.x = 256;
+        g_save_backdrop_draw_context.offset.position.y = 128;
     }
 
     if (thread_current_get_parameter_1() != 0) {

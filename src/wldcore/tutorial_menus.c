@@ -113,7 +113,7 @@ void tutorial_build_menu_panel(tutorial_menu_level_t* panel) {
 
     bounds.x = 0;
     bounds.y = 0;
-    bounds.w = 0x44;
+    bounds.w = 68;
     bounds.h = panel->entry_count * 0x10 + 0x10;
     window_build_render_record_image(index, bounds, 0, g_window_image_buffer);
     g_display_object_gs_image_pool[index].priority = 0xA;
@@ -333,9 +333,9 @@ void tutorial_open_formation_list(void) {
         i = 8;
     }
     layout.text_width = 0x8C;
-    origin.x = 0x54;
+    origin.x = 84;
     layout.visible_rows = i;
-    origin.y = 0x50;
+    origin.y = 80;
     menu_stack_restore_cursor(MENU_STACK_CURSOR_SLOT_FORMATION_TUTORIALS, count, i);
     window_start_panel_thread(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL,
         g_menu_stack_records[g_menu_stack_depth].panel.entry_count, &layout, &origin);
@@ -448,9 +448,9 @@ void tutorial_open_battle_list(void) {
         i = 8;
     }
     layout.text_width = 0x8C;
-    origin.x = 0x54;
+    origin.x = 84;
     layout.visible_rows = i;
-    origin.y = 0x50;
+    origin.y = 80;
     menu_stack_restore_cursor(MENU_STACK_CURSOR_SLOT_BATTLE_TUTORIALS, count, i);
     window_start_panel_thread(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL,
         g_menu_stack_records[g_menu_stack_depth].panel.entry_count, &layout, &origin);

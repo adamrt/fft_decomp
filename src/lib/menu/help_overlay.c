@@ -5004,20 +5004,18 @@ void helpmenu_battle_entrypoint(void) {
             shadow_quads[buffer_index].v2 = 0;
             shadow_quads[buffer_index].v3 = 0x10;
 
-            setXY4(&cursor_quads[buffer_index], x, y + bob, x + 0x10, y + bob, x, y + bob + 0x10, x + 0x10,
-                y + bob + 0x10);
-            setXY4(&shadow_quads[buffer_index], x + 2, y + bob + 2, x + 0x12, y + bob + 2, x + 2, y + bob + 0x12,
-                x + 0x12, y + bob + 0x12);
+            setXY4(&cursor_quads[buffer_index], x, y + bob, x + 16, y + bob, x, y + bob + 16, x + 16, y + bob + 16);
+            setXY4(&shadow_quads[buffer_index], x + 2, y + bob + 2, x + 18, y + bob + 2, x + 2, y + bob + 18, x + 18,
+                y + bob + 18);
         } else {
             u = 0xA8;
-            setUV4(&cursor_quads[buffer_index], u, 0, u_mid, 0, 0xA8, 0x10, u_mid, 0x10);
+            setUV4(&cursor_quads[buffer_index], u, 0, u_mid, 0, 168, 16, u_mid, 16);
             u = 0xB8;
-            setUV4(&shadow_quads[buffer_index], u, 0, 0xC8, 0, u_mid, 0x10, 0xC8, 0x10);
-            setXY4(&cursor_quads[buffer_index], x + bob, y, x + bob + 0x10, y, x + bob, y + 0x10, x + bob + 0x10,
-                y + 0x10);
+            setUV4(&shadow_quads[buffer_index], u, 0, 200, 0, u_mid, 16, 200, 16);
+            setXY4(&cursor_quads[buffer_index], x + bob, y, x + bob + 16, y, x + bob, y + 16, x + bob + 16, y + 16);
             shadow_offset = bob + 2;
-            setXY4(&shadow_quads[buffer_index], x + shadow_offset, y + 2, x + shadow_offset + 0x10, y + 2,
-                x + shadow_offset, y + 0x12, x + shadow_offset + 0x10, y + 0x12);
+            setXY4(&shadow_quads[buffer_index], x + shadow_offset, y + 2, x + shadow_offset + 16, y + 2,
+                x + shadow_offset, y + 18, x + shadow_offset + 16, y + 18);
         }
 
         /* The cursor and its shade switch palettes while the help text is open. */
@@ -5123,8 +5121,8 @@ void helpmenu_after_battle_entrypoint(void) {
     menu_index = 0;
 
     /* Fit the navigation table, which battle help also uses, to the REQUIRE screen. */
-    g_help_after_battle_navigation[0].x = 0xC4;
-    g_help_after_battle_navigation[2].x = 0xE0;
+    g_help_after_battle_navigation[0].x = 196;
+    g_help_after_battle_navigation[2].x = 224;
     g_help_after_battle_navigation[0].destination[3] = 0;
     g_help_after_battle_navigation[3].destination[0] = 0;
 
@@ -5267,9 +5265,9 @@ void helpmenu_after_battle_entrypoint(void) {
             /* Retail loads each quad's third u from its own constant, not from `u`. */
             u = 0xA8;
             quads = cursor;
-            setUV4(&quads[buffer_index], u, 0, u + 16, 0, 0xA8, 16, u + 16, 16);
+            setUV4(&quads[buffer_index], u, 0, u + 16, 0, 168, 16, u + 16, 16);
             u += 16;
-            setUV4(&shadow[buffer_index], u, 0, u + 16, 0, 0xB8, 16, u + 16, 16);
+            setUV4(&shadow[buffer_index], u, 0, u + 16, 0, 184, 16, u + 16, 16);
             setXYWH(&quads[buffer_index], x + bob, y, 16, 16);
             shadow_x = x + 2 + bob;
             setXYWH(&shadow[buffer_index], shadow_x, y + 2, 16, 16);

@@ -243,12 +243,12 @@ void text_draw_large_number_glyphs(s32 value, s32 format, u8* pixels, glyph_blit
     /* One variable holds the sign-glyph selector first and the x to leave the
      * cursor at afterwards; the target keeps both roles in $s6. */
     src = &g_menu_large_number_glyph;
-    g_menu_large_number_glyph.rect.h = 0xF;
+    g_menu_large_number_glyph.rect.h = 15;
     cursor = format & 0xFF00;
     if (cursor == 0xC00) {
         pos->rect.x += 2;
-        src->rect.x = 0xBA;
-        g_menu_large_number_glyph.rect.y = 0xD;
+        src->rect.x = 186;
+        g_menu_large_number_glyph.rect.y = 13;
         g_menu_large_number_glyph.rect.w = 6;
         text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, src, pos);
         pos->rect.x += 7;
@@ -258,18 +258,18 @@ void text_draw_large_number_glyphs(s32 value, s32 format, u8* pixels, glyph_blit
         return;
     }
     if (format & 0x1000) {
-        src->rect.x = 0xC8;
+        src->rect.x = 200;
         g_menu_large_number_glyph.rect.y = 0;
         text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, src, pos);
         pos->rect.x += 7;
     }
     if ((format & MENU_DECIMAL_SIGN_MINUS) || (format & MENU_DECIMAL_SIGN_PLUS)) {
         if (format & MENU_DECIMAL_SIGN_PLUS) {
-            src->rect.x = 0xC8;
+            src->rect.x = 200;
         } else {
-            src->rect.x = 0xBA;
+            src->rect.x = 186;
         }
-        src->rect.y = 0xD;
+        src->rect.y = 13;
         src->rect.w = 6;
         pos->rect.x -= 6;
         text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &g_menu_large_number_glyph, pos);
@@ -284,8 +284,8 @@ void text_draw_large_number_glyphs(s32 value, s32 format, u8* pixels, glyph_blit
         src->rect.y = 0;
         src->rect.x = (value % 10) * 8 + 0x78;
         if (g_unit_panel_hide_numeric_values != 0) {
-            src->rect.x = 0x48;
-            src->rect.y = 0x10;
+            src->rect.x = 72;
+            src->rect.y = 16;
         }
         text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &g_menu_large_number_glyph, pos);
         /* After the call: the quotient stays live past the argument setup, so

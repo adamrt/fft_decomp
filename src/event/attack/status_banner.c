@@ -290,7 +290,7 @@ void unit_panel_banner_thread(void) {
         panel->draw_offset_a.position.y = panel_shake_y + panel_y_a;
         SetDrawOffset(&panel->draw_offset_a.packet, (u16*)&panel->draw_offset_a.position);
         panel_y_b = g_gfx_draw_offset_y;
-        panel->draw_offset_b.position.x = -0x80;
+        panel->draw_offset_b.position.x = -128;
         panel->draw_offset_b.position.y = panel_y_b;
         SetDrawOffset(&panel->draw_offset_b.packet, (u16*)&panel->draw_offset_b.position);
 
@@ -301,7 +301,7 @@ void unit_panel_banner_thread(void) {
         editor->draw_offset_a.position.y = editor_shake_y + editor_y_a;
         SetDrawOffset(&editor->draw_offset_a.packet, (u16*)&editor->draw_offset_a.position);
         editor_y_b = g_gfx_draw_offset_y;
-        editor->draw_offset_b.position.x = -0x80;
+        editor->draw_offset_b.position.x = -128;
         editor->draw_offset_b.position.y = editor_y_b;
         SetDrawOffset(&editor->draw_offset_b.packet, (u16*)&editor->draw_offset_b.position);
 
@@ -385,8 +385,8 @@ void unit_panel_banner_thread(void) {
         /* The zodiac sign cell: 24x20 cells in rows of seven, starting at v 0x2A. */
         panel->sprites[6].u0 = (unit_info->zodiac % 7) * 0x18;
         zodiac = unit_info->zodiac;
-        panel->sprites[6].w = 0x18;
-        panel->sprites[6].h = 0x14;
+        panel->sprites[6].w = 24;
+        panel->sprites[6].h = 20;
         panel->sprites[6].v0 = (zodiac / 7) * 0x14 + 0x2A;
 
         /* Rebuild the text images only on the first frame and on redraw requests; VRAM keeps them in between. */

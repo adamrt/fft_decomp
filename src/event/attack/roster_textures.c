@@ -121,7 +121,7 @@ void portrait_party_prepare_textures(void) {
         s_portrait_upload_rect.x = (i % 7) * 8 + 0x100;
         s_portrait_upload_rect.y = (i / 7) * 0x30 + 0x28;
         s_portrait_upload_rect.w = 8;
-        s_portrait_upload_rect.h = 0x30;
+        s_portrait_upload_rect.h = 48;
         j = 0;
         offset = row * 2;
         offset += row;
@@ -146,7 +146,7 @@ void portrait_party_prepare_textures(void) {
          * from WLDFACE_MONSTER_PALETTE_ROW, at the palette number's column. */
         s_portrait_palette_upload_rect.x = (i % 3) * 0x10 + 0x100;
         s_portrait_palette_upload_rect.y = i / 3;
-        s_portrait_palette_upload_rect.w = 0x10;
+        s_portrait_palette_upload_rect.w = 16;
         s_portrait_palette_upload_rect.h = 1;
         sheet = cell / WLDFACE_PORTRAITS_PER_SHEET;
         value = cell - sheet * WLDFACE_PORTRAITS_PER_SHEET;
@@ -322,8 +322,8 @@ void deploy_prepare_sprites(void) {
             source = (s32)buffer + palette_base;
             s_portrait_upload_rect.x = (i % 5) * 0xC + 0x180;
             s_portrait_upload_rect.y = (i / 5) * 0x30;
-            s_portrait_upload_rect.w = 0xC;
-            s_portrait_upload_rect.h = 0x30;
+            s_portrait_upload_rect.w = 12;
+            s_portrait_upload_rect.h = 48;
             for (; y < 0x30; y++) {
                 for (x = 0; x < 0x18; x++) {
                     s_formation_sprite_staging[y * 0x18 + x] = *(u8*)(y * 0x80 + (source + x));
@@ -337,8 +337,8 @@ void deploy_prepare_sprites(void) {
             source = (s32)buffer + palette_base;
             s_portrait_upload_rect.x = (i % 5) * 0xC + 0x180;
             s_portrait_upload_rect.y = (i / 5) * 0x30;
-            s_portrait_upload_rect.w = 0xC;
-            s_portrait_upload_rect.h = 0x30;
+            s_portrait_upload_rect.w = 12;
+            s_portrait_upload_rect.h = 48;
             for (; y < 0x30; y++) {
                 for (x = 6; x < 0x12; x++) {
                     s_formation_sprite_staging[y * 0x18 + x] = *(u8*)(x + source + ((y - 8) * 0x80 - 6));
@@ -364,7 +364,7 @@ void deploy_prepare_sprites(void) {
         offset = (row * 0x100 + column * 0x40) / 2 + 0xF000;
         s_portrait_palette_upload_rect.x = (i % 4) * 0x10 + 0x180;
         s_portrait_palette_upload_rect.y = i / 4 + 0xE0;
-        s_portrait_palette_upload_rect.w = 0x10;
+        s_portrait_palette_upload_rect.w = 16;
         s_portrait_palette_upload_rect.h = 1;
         LoadImage(&s_portrait_palette_upload_rect, (u32*)(buffer + offset));
 

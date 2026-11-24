@@ -365,7 +365,7 @@ void unit_list_init(s32 unused_selected_index) {
     g_unit_list_status_banner_at_bottom = ret;
     g_unit_list_status_banner_at_bottom_latch = ret;
     if (g_unit_list_status_banner_at_bottom != 0) {
-        g_unit_panel_status_display_thread_params.position.y = 0x90;
+        g_unit_panel_status_display_thread_params.position.y = 144;
     } else {
         g_unit_panel_status_display_thread_params.position.y = 0;
     }
@@ -550,8 +550,8 @@ s32 unit_grid_update(s16 allow_banner_toggle, s16 allow_browse, s16 show_stat_pa
     row = 0;
     g_unit_list_status_banner_at_bottom = check_banner_at_bottom(g_unit_list_page_offset);
     y = 0x24 + g_unit_list_page_offset + g_unit_list_scroll_step;
-    cell.w = 0x38;
-    cell.h = 0x30;
+    cell.w = 56;
+    cell.h = 48;
     gfx_set_otag_index(8);
     unit = 0;
     color = menu_gfx_get_draw_color();
@@ -623,7 +623,7 @@ s32 unit_grid_update(s16 allow_banner_toggle, s16 allow_browse, s16 show_stat_pa
                     }
                     rect.x = cell.x;
                     rect.y = top + 8;
-                    rect.w = 0x25;
+                    rect.w = 37;
                     rect.h = 3;
                     menu_gfx_enqueue_textured_quad(&rect, 0xD8, 0xCA, color, 0, g_menu_cursor_texture_page, clut, 7);
                     bar_points[0].x = g_unit_list_grid_gauge_offsets.top_x + cell.x;
@@ -781,9 +781,9 @@ void unit_grid_draw_background(s32 y) {
     s32 i;
 
     row = 0;
-    rect.w = 0x40;
+    rect.w = 64;
     rect.clut = 0x40;
-    rect.h = 0x20;
+    rect.h = 32;
     rect.tpage = 0x20;
     rect.v = 0xD8;
     rect.y = y;
@@ -886,7 +886,7 @@ static void update_cursor_trail(point16_t* target) {
         }
         g_unit_list_cursor_sprite.position.x = g_unit_list_cursor_shadow_sprite.position.x = x;
         g_unit_list_cursor_sprite.h = g_unit_list_cursor_sprite.source.h = g_unit_list_cursor_shadow_sprite.h
-            = g_unit_list_cursor_shadow_sprite.source.h = 0x10;
+            = g_unit_list_cursor_shadow_sprite.source.h = 16;
         g_unit_list_cursor_shadow_sprite.position.y = g_unit_list_cursor_trail_points[i].y;
         g_unit_list_cursor_sprite.position.y = g_unit_list_cursor_trail_points[i].y - 1;
         menu_gfx_enqueue_oriented_textured_quad(&g_unit_list_cursor_shadow_sprite, color, TEXTURE_UV_FLIP_NONE, 1, 3);
@@ -897,7 +897,7 @@ static void update_cursor_trail(point16_t* target) {
         menu_gfx_enqueue_oriented_textured_quad(&g_unit_list_cursor_sprite, color, TEXTURE_UV_FLIP_X, 1, 4);
         x2 = g_unit_list_cursor_trail_points[i].x;
         g_unit_list_cursor_sprite.h = g_unit_list_cursor_sprite.source.h = g_unit_list_cursor_shadow_sprite.h
-            = g_unit_list_cursor_shadow_sprite.source.h = 0xF;
+            = g_unit_list_cursor_shadow_sprite.source.h = 15;
         g_unit_list_cursor_sprite.position.x = g_unit_list_cursor_shadow_sprite.position.x = x2;
         g_unit_list_cursor_shadow_sprite.position.y = g_unit_list_cursor_trail_points[i].y + 0x10;
         g_unit_list_cursor_sprite.position.y = g_unit_list_cursor_trail_points[i].y + 0xF;

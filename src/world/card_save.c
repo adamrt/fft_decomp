@@ -949,10 +949,10 @@ static void update_card_scan(void) {
          * start the checking message, then one idle call. */
         if (g_save_scan_start_frame < 3) {
             if (g_save_scan_start_frame == 0) {
-                rect.x = 0x180;
+                rect.x = 384;
                 rect.y = 0;
-                rect.w = 0x40;
-                rect.h = 0xf0;
+                rect.w = 64;
+                rect.h = 240;
                 ClearImage(&rect, 0, 0, 0);
             }
             if (g_save_scan_start_frame == 1) {
@@ -1183,20 +1183,20 @@ static void render_slot_text(s32 save_slot_index) {
     RECT destination_rect;
 
     if (save_slot_index < 6) {
-        destination_rect.x = 0x240;
+        destination_rect.x = 576;
         destination_rect.y = (save_slot_index << 5) + 0x130;
-        destination_rect.w = 0x32;
-        destination_rect.h = 0x20;
+        destination_rect.w = 50;
+        destination_rect.h = 32;
     } else if (save_slot_index < 11) {
-        destination_rect.x = 0x1C0;
+        destination_rect.x = 448;
         destination_rect.y = (save_slot_index << 5) - 0x80;
-        destination_rect.w = 0x32;
-        destination_rect.h = 0x20;
+        destination_rect.w = 50;
+        destination_rect.h = 32;
     } else {
-        destination_rect.x = 0x180;
+        destination_rect.x = 384;
         destination_rect.y = (save_slot_index << 5) - 0x100;
-        destination_rect.w = 0x32;
-        destination_rect.h = 0x20;
+        destination_rect.w = 50;
+        destination_rect.h = 32;
     }
     text_render_id_rows_to_vram(
         g_save_slot_descriptions[save_slot_index], g_save_slot_description_row_ids, &destination_rect, 0);
@@ -1450,15 +1450,15 @@ static void update_slot_list(s32 input) {
         }
 
         if (g_save_slot_file_states[i] == SAVE_SLOT_AVAILABLE) {
-            rect.x = 0x74;
+            rect.x = 116;
             rect.y = g_save_slot_window.rect.y + 5;
-            rect.w = 0x28;
-            rect.h = 0x10;
+            rect.w = 40;
+            rect.h = 16;
         } else {
-            rect.x = 0x1c;
+            rect.x = 28;
             rect.y = g_save_slot_window.rect.y - 3;
-            rect.w = 0xc8;
-            rect.h = 0x1f;
+            rect.w = 200;
+            rect.h = 31;
         }
 
         /* Read the slot's text strip from where render_slot_text put it. */
@@ -1489,18 +1489,18 @@ static void update_slot_list(s32 input) {
 
     /* Scroll arrows: up once the list has scrolled, down while rows remain below the visible four. */
     if (g_save_list_first_visible_row != 0) {
-        rect.x = 0xe3;
-        rect.y = 0x20;
+        rect.x = 227;
+        rect.y = 32;
         rect.w = 8;
-        rect.h = 0x10;
+        rect.h = 16;
         menu_gfx_enqueue_textured_quad(
             &rect, 0xd8, 0, 0, 0, g_menu_cursor_texture_page, g_menu_cursor_mode0_foreground_clut, 15);
     }
     if (g_save_selectable_slot_count - g_save_list_first_visible_row >= 5) {
-        rect.x = 0xe3;
-        rect.y = 0xba;
+        rect.x = 227;
+        rect.y = 186;
         rect.w = 8;
-        rect.h = 0x10;
+        rect.h = 16;
         menu_gfx_enqueue_textured_quad(
             &rect, 0xe0, 0, 0, 0, g_menu_cursor_texture_page, g_menu_cursor_mode0_foreground_clut, 15);
     }

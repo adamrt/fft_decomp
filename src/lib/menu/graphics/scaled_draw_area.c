@@ -48,7 +48,7 @@ void menu_build_scaled_draw_area_packets(
     if (upper_half != 0) {
         packet->rects[1].y = 0;
     } else {
-        packet->rects[1].y = 0xF0;
+        packet->rects[1].y = 240;
         packet->rects[0].y += 0xF0;
     }
 #ifdef FFT_EVENT_REQUIRE
