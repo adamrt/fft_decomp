@@ -25,7 +25,7 @@ void file_request_pending_read(file_load_descriptor_t* header, s32 sector, s32 s
 void world_map_load_texture(void) {
     s32 unused_stack_slot[2];
 
-    if ((g_world_map_flags & WORLD_MAP_FLAG_RESTART) == 0) {
+    if (!(g_world_map_flags & WORLD_MAP_FLAG_RESTART)) {
         file_request_pending_read(&g_file_cd_state, DISC_SECTOR_WORLD_WLDTEX_TM2, 0x86, g_world_map_scratch_buffer);
         while (g_file_cd_state.state != FILE_LOAD_STATE_IDLE) {
             world_map_update_texture_stream(&g_file_cd_state);

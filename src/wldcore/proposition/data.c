@@ -57,9 +57,8 @@ s32 proposition_is_available_at(s32 index, s32 location) {
         }
     }
     if (entry.condition_flags & PROPOSITION_CONDITION_STATUS) {
-        if ((script_variable_get(entry.condition_value + EVENT_SCRIPT_VAR_PROPOSITION_FIRST)
-                & PROPOSITION_VARIABLE_COMPLETED)
-            == 0) {
+        if (!(script_variable_get(entry.condition_value + EVENT_SCRIPT_VAR_PROPOSITION_FIRST)
+                & PROPOSITION_VARIABLE_COMPLETED)) {
             return 0;
         }
     }

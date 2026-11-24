@@ -72,9 +72,8 @@ s32 location_script_run(s32 location, s32 action_mask) {
             u16 op = g_location_script_state.data[ip];
             g_location_script_state.ip = ip + 1;
             s_location_script_opcodes[op]();
-        } while ((g_location_script_state.flags
-                     & (LOCATION_SCRIPT_RESULT_ACTION_REACHED | LOCATION_SCRIPT_RESULT_CONDITION_FAILED))
-            == 0);
+        } while (!(g_location_script_state.flags
+            & (LOCATION_SCRIPT_RESULT_ACTION_REACHED | LOCATION_SCRIPT_RESULT_CONDITION_FAILED)));
         flags = g_location_script_state.flags;
         if ((flags & LOCATION_SCRIPT_RESULT_ACTION_REACHED) && (flags & action_mask)) {
             return 1;
@@ -127,7 +126,7 @@ static void read_operand_pair(s32* out1, s32* out2) {
     next_ip = *ip + 1;
     *ip = next_ip;
     *out2 = g_location_script_state.data[next_ip];
-    *ip = *ip + 1;
+    (*ip)++;
 }
 
 /* Reject the Var>= condition when the script variable is below the operand. */
@@ -217,7 +216,7 @@ static void location_script_opcode_10_check_date_on_or_after(void) {
     s32 month, day, current_month, current_day;
 
     read_operand_dates(&month, &day, &current_month, &current_day);
-    if ((current_month < month) || ((current_month == month) && (current_day < day))) {
+    if (current_month < month || (current_month == month && current_day < day)) {
         g_location_script_state.flags |= LOCATION_SCRIPT_RESULT_CONDITION_FAILED;
     }
 }
@@ -233,7 +232,7 @@ static void read_operand_dates(s32* out_month, s32* out_day, s32* out_current_mo
     ip = *ipp + 1;
     *ipp = ip;
     *out_day = g_location_script_state.data[ip];
-    *ipp = *ipp + 1;
+    (*ipp)++;
     *out_current_month = script_variable_get(EVENT_SCRIPT_VAR_MONTH);
     *out_current_day = script_variable_get(EVENT_SCRIPT_VAR_DAY);
 }
@@ -243,7 +242,7 @@ static void location_script_opcode_11_check_date_on_or_before(void) {
     s32 month, day, current_month, current_day;
 
     read_operand_dates(&month, &day, &current_month, &current_day);
-    if ((current_month > month) || ((current_month == month) && (current_day > day))) {
+    if (current_month > month || (current_month == month && current_day > day)) {
         g_location_script_state.flags |= LOCATION_SCRIPT_RESULT_CONDITION_FAILED;
     }
 }
@@ -385,12 +384,11 @@ static void location_script_opcode_24_focus_location(void) {
     g_location_script_state.args[0] = entry;
     if (entry == 0xff) {
         index = g_world_map_marker_state.marker.location_id;
-        g_location_selected = index + 1;
     } else {
         index = entry;
-        g_location_selected = index + 1;
     }
-    if (world_map_point_needs_pan(&g_world_map_dots[index].render.position) != 0) {
+    g_location_selected = index + 1;
+    if (world_map_point_needs_pan(&g_world_map_dots[index].render.position)) {
         g_location_script_state.flags |= LOCATION_SCRIPT_ACTION_FOCUS_LOCATION;
     }
     g_location_script_state.flags |= LOCATION_SCRIPT_RESULT_ACTION_REACHED;
@@ -400,12 +398,12 @@ static void location_script_opcode_24_focus_location(void) {
 static void location_script_opcode_25_check_ramza_brave_at_least(void) {
     party_unit_t* party = party_get_roster_unit(find_ramza_slot());
     u16 ip;
-    s32 val;
+    s32 threshold;
 
     ip = g_location_script_state.ip;
-    val = g_location_script_state.data[ip];
+    threshold = g_location_script_state.data[ip];
     g_location_script_state.ip = ip + 1;
-    if (party->brave < val) {
+    if (party->brave < threshold) {
         g_location_script_state.flags |= LOCATION_SCRIPT_RESULT_CONDITION_FAILED;
     }
 }
@@ -430,12 +428,12 @@ static s32 find_ramza_slot(void) {
 static void location_script_opcode_26_check_ramza_brave_at_most(void) {
     party_unit_t* party = party_get_roster_unit(find_ramza_slot());
     u16 ip;
-    s32 val;
+    s32 threshold;
 
     ip = g_location_script_state.ip;
-    val = g_location_script_state.data[ip];
+    threshold = g_location_script_state.data[ip];
     g_location_script_state.ip = ip + 1;
-    if (val < party->brave) {
+    if (threshold < party->brave) {
         g_location_script_state.flags |= LOCATION_SCRIPT_RESULT_CONDITION_FAILED;
     }
 }
@@ -444,12 +442,12 @@ static void location_script_opcode_26_check_ramza_brave_at_most(void) {
 static void location_script_opcode_27_check_ramza_faith_at_least(void) {
     party_unit_t* party = party_get_roster_unit(find_ramza_slot());
     u16 ip;
-    s32 val;
+    s32 threshold;
 
     ip = g_location_script_state.ip;
-    val = g_location_script_state.data[ip];
+    threshold = g_location_script_state.data[ip];
     g_location_script_state.ip = ip + 1;
-    if (party->faith < val) {
+    if (party->faith < threshold) {
         g_location_script_state.flags |= LOCATION_SCRIPT_RESULT_CONDITION_FAILED;
     }
 }
@@ -458,12 +456,12 @@ static void location_script_opcode_27_check_ramza_faith_at_least(void) {
 static void location_script_opcode_28_check_ramza_faith_at_most(void) {
     party_unit_t* party = party_get_roster_unit(find_ramza_slot());
     u16 ip;
-    s32 val;
+    s32 threshold;
 
     ip = g_location_script_state.ip;
-    val = g_location_script_state.data[ip];
+    threshold = g_location_script_state.data[ip];
     g_location_script_state.ip = ip + 1;
-    if (val < party->faith) {
+    if (threshold < party->faith) {
         g_location_script_state.flags |= LOCATION_SCRIPT_RESULT_CONDITION_FAILED;
     }
 }

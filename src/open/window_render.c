@@ -15,8 +15,8 @@
 void window_build_render_record_image(s32 index, RECT quad, s32 image_page_offset, u32* image) {
     point32_t* clut;
     CVECTOR* color;
-    s32 half;
-    s32 scaled;
+    s32 halfword_x;
+    s32 page_x;
 
     g_display_object_gpu_image_pool[index].flags
         &= ~(DISPLAY_OBJECT_8BIT_CLUT | DISPLAY_OBJECT_BLANK | DISPLAY_OBJECT_HIDDEN);
@@ -27,9 +27,9 @@ void window_build_render_record_image(s32 index, RECT quad, s32 image_page_offse
     clut->y = 0x1E0;
     clut->x = 0;
     g_display_object_gpu_image_pool[index].bounds = quad;
-    half = quad.x / 4;
-    scaled = image_page_offset * 64 + 0x180;
-    g_display_object_gpu_image_pool[index].vram_position.x = half + scaled;
+    halfword_x = quad.x / 4;
+    page_x = image_page_offset * 64 + 0x180;
+    g_display_object_gpu_image_pool[index].vram_position.x = halfword_x + page_x;
     g_display_object_gpu_image_pool[index].vram_position.y = quad.y;
     color = &g_display_object_gpu_image_pool[index].color;
     color->b = color->g = color->r = 0x80;
@@ -44,14 +44,14 @@ void window_build_render_record_image(s32 index, RECT quad, s32 image_page_offse
  * (texture page 6 + image_page_offset) with width quad.w / 4. */
 void window_load_render_record_image(s32 record_index, u32* image) {
     RECT destination;
-    s32 x;
+    s32 halfword_x;
     s32 image_page_offset;
-    s32 scaled;
+    s32 page_x;
 
-    x = g_display_object_gpu_image_pool[record_index].bounds.x / 4;
+    halfword_x = g_display_object_gpu_image_pool[record_index].bounds.x / 4;
     image_page_offset = g_display_object_gpu_image_pool[record_index].image_page_offset;
-    scaled = (image_page_offset << 6) + 0x180;
-    destination.x = x + scaled;
+    page_x = (image_page_offset << 6) + 0x180;
+    destination.x = halfword_x + page_x;
     destination.y = g_display_object_gpu_image_pool[record_index].bounds.y;
     destination.w = g_display_object_gpu_image_pool[record_index].bounds.w / 4;
     destination.h = g_display_object_gpu_image_pool[record_index].bounds.h;

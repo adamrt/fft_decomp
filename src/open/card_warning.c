@@ -74,7 +74,7 @@ void title_update_card_warning(controller_record_t* record) {
     s32 state;
     u32 buttons;
 
-    if ((g_fade_tile.flags & FADE_TILE_ACTIVE) != 0) {
+    if (g_fade_tile.flags & FADE_TILE_ACTIVE) {
         return;
     }
 
@@ -103,11 +103,11 @@ void title_update_card_warning(controller_record_t* record) {
     }
 
     buttons = g_input_new_button_presses;
-    if ((buttons & PSX_PAD_CROSS) != 0) {
+    if (buttons & PSX_PAD_CROSS) {
         sound_play_sfx(SOUND_SFX_CANCEL);
         fade_tile_start_in(0x20);
         record->card_warning.state = TITLE_CARD_WARNING_CANCEL;
-    } else if ((buttons & (PSX_PAD_CIRCLE | PSX_PAD_START)) != 0) {
+    } else if (buttons & (PSX_PAD_CIRCLE | PSX_PAD_START)) {
         sound_play_sfx(SOUND_SFX_CONFIRM);
         fade_tile_start_in(0x20);
         record->card_warning.state = TITLE_CARD_WARNING_CONFIRM;

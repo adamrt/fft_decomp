@@ -17,7 +17,7 @@ void* heap_smd_alloc(u32 size) {
     u32 index;
     u32 start;
 
-    if ((size & (HEAP_PAGE_SIZE - 1)) != 0) {
+    if (size & (HEAP_PAGE_SIZE - 1)) {
         needed++;
     }
     for (index = 0; index < HEAP_SMD_PAGE_COUNT; index++) {
@@ -89,7 +89,7 @@ void* heap_alloc(u32 size) {
     u32 index;
     u32 start;
 
-    if ((size & (HEAP_PAGE_SIZE - 1)) != 0) {
+    if (size & (HEAP_PAGE_SIZE - 1)) {
         needed++;
     }
     for (index = 0; index < HEAP_GAME_PAGE_COUNT; index++) {
@@ -133,7 +133,7 @@ void* heap_reserve_at(void* allocation, u32 size) {
 
     start = ((u8*)allocation - g_heap_high_overlay_load_address) / HEAP_PAGE_SIZE;
     nblocks = size >> HEAP_PAGE_SHIFT;
-    if ((size & (HEAP_PAGE_SIZE - 1)) != 0) {
+    if (size & (HEAP_PAGE_SIZE - 1)) {
         nblocks += 1;
     }
     if (addr < base) {

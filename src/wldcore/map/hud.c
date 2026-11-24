@@ -182,16 +182,16 @@ static void draw_digits(s32 value, s32 digits, GsSPRITE* sprite, GsOT* ot) {
             if (digit < 6) {
                 sprite->v = 0x34;
                 sprite->h = 0xc;
-                sprite->y = sprite->y + 4;
+                sprite->y += 4;
             } else {
                 sprite->v = 0x31;
                 sprite->h = 0xf;
-                sprite->y = sprite->y + 1;
+                sprite->y++;
             }
             GsSortFastSprite(sprite, ot, g_hud_ot_priority);
             sprite->y = saved_y;
         }
-        sprite->x = sprite->x + 8;
+        sprite->x += 8;
         divisor = divisor / 10;
         i++;
     }

@@ -52,8 +52,8 @@ u32 input_update_repeat(u32 buttons) {
         return pressed;
     }
 
-    if ((buttons & PSX_PAD_UP) != 0) {
-        if ((g_input_current_buttons & PSX_PAD_UP) != 0) {
+    if (buttons & PSX_PAD_UP) {
+        if (g_input_current_buttons & PSX_PAD_UP) {
             s32* up_counter = &s_input_directional_repeat.counter_up;
 
             next = *up_counter + 1;
@@ -67,8 +67,8 @@ u32 input_update_repeat(u32 buttons) {
         }
     }
 
-    if ((buttons & PSX_PAD_DOWN) != 0) {
-        if ((g_input_current_buttons & PSX_PAD_DOWN) != 0) {
+    if (buttons & PSX_PAD_DOWN) {
+        if (g_input_current_buttons & PSX_PAD_DOWN) {
             s32* down_counter = &s_input_directional_repeat.counter_down;
             s32 old_counter;
             s32 down_next;

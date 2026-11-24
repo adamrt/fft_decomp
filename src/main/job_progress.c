@@ -118,7 +118,7 @@ s32 job_add_proposition_jp(u32 party_index, s32 jp) {
 
     levels = party->career.job_levels[slot / 2];
     level_byte = level;
-    if ((slot & 1) != 0) {
+    if (slot & 1) {
         levels = level + (levels & 0xF0);
     } else {
         levels = (levels & 0xF) | (level_byte << 4);

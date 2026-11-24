@@ -59,15 +59,12 @@ void thread_current_exit(void) {
 /* Zeroes the first 16 thread records (16 * 0x400 bytes), makes thread 0 the current
  * thread and marks it running. */
 void thread_reset_scheduler(void) {
-    u32* word;
-    s32 index = (THREAD_ID_COUNT * sizeof(thread_t) / sizeof(u32)) - 1;
+    u32* word = (u32*)(g_threads + THREAD_ID_COUNT) - 1;
+    s32 index;
 
-    word = (u32*)(g_threads + THREAD_ID_COUNT) - 1;
-    do {
-        *word = 0;
-        index -= 1;
-        word -= 1;
-    } while (index >= 0);
+    for (index = THREAD_ID_COUNT * sizeof(thread_t) / sizeof(u32) - 1; index >= 0; index--) {
+        *word-- = 0;
+    }
     g_thread_current_id = THREAD_SLOT_MAIN;
     g_threads[THREAD_SLOT_MAIN].is_running = 1;
 }
@@ -76,7 +73,7 @@ void thread_reset_scheduler(void) {
 void thread_wait_inactive(s32 thread_id) {
     do {
         thread_yield();
-    } while (g_threads[thread_id].is_running != 0);
+    } while (g_threads[thread_id].is_running);
 }
 
 /* Return the running flag of a scheduler slot. */

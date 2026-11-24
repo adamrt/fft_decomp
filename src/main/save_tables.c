@@ -18,9 +18,10 @@ extern u8* g_brave_story_ages_source;
  * records 2 and 3), the Brave Story character ages from their template, the
  * saved data bits, the proposition states and count, and the system flags.
  *
- * Assembled with ASPSX < 2.30: the slot loop keeps five 4-instruction
- * `lui $at / addiu $at / addu $at,idx / sh 0($at)` forms, so this function
- * carries the per-function gcc-2.6.3_O2_aspsx-2.21 profile. */
+ * Assembled with ASPSX < 2.30: the five stores that index
+ * g_novel_saved_readings[i] instead of going through record are the target's
+ * 4-instruction `lui $at / addiu $at / addu $at,idx / store 0($at)` forms, so
+ * this function carries the per-function gcc-2.6.3_O2_aspsx-2.21 profile. */
 void save_init_data_tables(void) {
     s32 i;
     novel_reading_t* record;

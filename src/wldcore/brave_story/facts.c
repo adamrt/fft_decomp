@@ -26,7 +26,7 @@ void brave_story_open_fact_list(void) {
     s16* values;
     s16* colors;
     s32 count = 0;
-    s32 i = 0;
+    s32 i = 0; /* zeroed ahead of the row pointers, as the target schedules it */
     s32 record_index;
 
     colors = g_menu_stack_row_text_colors;
@@ -80,8 +80,7 @@ void brave_story_suspend_fact_list(menu_stack_record_t* unused_level) {
  * with help message 0x108f, handing a confirmed entry's value to
  * open_fact_detail. */
 void brave_story_update_fact_list_input(menu_stack_record_t* level) {
-    if ((g_world_map_flags & WORLD_MAP_FLAG_INPUT_BLOCKED)
-        && thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL) == 0) {
+    if ((g_world_map_flags & WORLD_MAP_FLAG_INPUT_BLOCKED) && !thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL)) {
         g_menu_blocked_buttons = 0;
         g_menu_stack_ot_offset = 1;
         g_world_map_flags ^= WORLD_MAP_FLAG_INPUT_BLOCKED;
@@ -165,7 +164,7 @@ static void open_fact_detail(s32 value) {
     g_text_substitution_values[0] = value + TEXT_ID_FACT_NAME_BASE;
     thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_BRAVE_STORY_ENTRY_INFO, 0);
     g_menu_stack_types[g_menu_stack_depth] = MENU_STACK_LEVEL_BRAVE_STORY_FACT;
-    g_menu_stack_depth = g_menu_stack_depth + 1;
+    g_menu_stack_depth++;
 }
 
 /* Steps a fact's text window until window_update_paged_text reports it

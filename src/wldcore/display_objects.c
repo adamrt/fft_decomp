@@ -66,11 +66,9 @@ void display_object_draw_list(GsOT* otag, void** list, s32 count) {
             continue;
         }
         if (*flags & DISPLAY_OBJECT_ANIMATED) {
-            display_object_animated_t* animated = object;
-            display_object_draw_animated(animated, otag);
+            display_object_draw_animated(object, otag);
         } else if (*flags & DISPLAY_OBJECT_IMAGE) {
-            display_object_gs_image_t* image = object;
-            draw_image(image, otag);
+            draw_image(object, otag);
         }
     }
 }
@@ -314,17 +312,14 @@ static void draw_image(display_object_gs_image_t* object, GsOT* ot) {
 
 /* Attach the current window record to the caller's list and reset its color. */
 s32 display_object_append_animated(void** queue, s32* count) {
-    CVECTOR* color;
-
     queue[*count] = &g_display_object_animated_pool[g_display_object_animated_count];
-    /* Direct record.color access changes the column base and instruction scheduling. */
-    color = &g_display_object_animated_pool->color;
     g_display_object_animated_pool[g_display_object_animated_count].palette = 0;
     g_display_object_animated_pool[g_display_object_animated_count].flags
         &= ~(DISPLAY_OBJECT_BLANK | DISPLAY_OBJECT_HIDDEN | DISPLAY_OBJECT_UNTINTED);
-    ((CVECTOR*)((u8*)color + g_display_object_animated_count * sizeof(g_display_object_animated_pool[0])))->r = 0x80;
-    ((CVECTOR*)((u8*)color + g_display_object_animated_count * sizeof(g_display_object_animated_pool[0])))->g = 0x80;
-    ((CVECTOR*)((u8*)color + g_display_object_animated_count * sizeof(g_display_object_animated_pool[0])))->b = 0x80;
+    /* Direct color members add four instructions. */
+    (&g_display_object_animated_pool[g_display_object_animated_count].color)->r = 0x80;
+    (&g_display_object_animated_pool[g_display_object_animated_count].color)->g = 0x80;
+    (&g_display_object_animated_pool[g_display_object_animated_count].color)->b = 0x80;
     (*count)++;
     return g_display_object_animated_count++;
 }
@@ -334,16 +329,13 @@ s32 display_object_append_animated(void** queue, s32* count) {
  * Sibling of display_object_append_animated, which performs the same append for the 36-byte
  * window records. */
 s32 display_object_append_image(void** queue, s32* count) {
-    CVECTOR* color;
-
     queue[*count] = &g_display_object_gs_image_pool[g_display_object_image_count];
-    /* Direct record.color access changes the column base and instruction scheduling. */
-    color = &g_display_object_gs_image_pool->color;
     g_display_object_gs_image_pool[g_display_object_image_count].flags
         &= ~(DISPLAY_OBJECT_BLANK | DISPLAY_OBJECT_HIDDEN | DISPLAY_OBJECT_UNTINTED);
-    ((CVECTOR*)((u8*)color + g_display_object_image_count * sizeof(g_display_object_gs_image_pool[0])))->r = 0x80;
-    ((CVECTOR*)((u8*)color + g_display_object_image_count * sizeof(g_display_object_gs_image_pool[0])))->g = 0x80;
-    ((CVECTOR*)((u8*)color + g_display_object_image_count * sizeof(g_display_object_gs_image_pool[0])))->b = 0x80;
+    /* Direct color members add four instructions. */
+    (&g_display_object_gs_image_pool[g_display_object_image_count].color)->r = 0x80;
+    (&g_display_object_gs_image_pool[g_display_object_image_count].color)->g = 0x80;
+    (&g_display_object_gs_image_pool[g_display_object_image_count].color)->b = 0x80;
     g_display_object_gs_image_pool[g_display_object_image_count].palette = 0;
     g_display_object_gs_image_pool[g_display_object_image_count].pop_in_step = 0;
     (*count)++;

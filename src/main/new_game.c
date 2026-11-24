@@ -13,6 +13,7 @@ void item_init_new_game_inventory(void) {
     s32 remaining;
     u8* quantity;
 
+    /* The bytes need both counters; an indexed loop is 4 bytes shorter. */
     for (remaining = ITEM_ID_COUNT - 1, quantity = &g_item_quantities[ITEM_ID_COUNT - 1]; remaining >= 0;
         remaining--, quantity--) {
         *quantity = 0;

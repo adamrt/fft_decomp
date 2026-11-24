@@ -84,11 +84,9 @@ void display_object_draw_list(u32* otag, void** list, s32 count) {
             continue;
         }
         if (*flags & DISPLAY_OBJECT_ANIMATED) {
-            display_object_animated_t* animated = object;
-            draw_animated(animated, otag);
+            draw_animated(object, otag);
         } else if (*flags & DISPLAY_OBJECT_IMAGE) {
-            display_object_gpu_image_t* image = object;
-            draw_image(image, otag);
+            draw_image(object, otag);
         }
     }
 }

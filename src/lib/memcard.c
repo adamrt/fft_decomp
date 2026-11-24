@@ -47,16 +47,18 @@ void memcard_clear_events(void) {
  * fired. A result clears all four events. */
 memcard_result_e memcard_poll_bios_event(void) {
     memcard_result_e result = MEMCARD_RESULT_PENDING;
-    if (TestEvent(g_memcard_bios_events[MEMCARD_EVENT_BIOS_DONE]) == 1)
+    if (TestEvent(g_memcard_bios_events[MEMCARD_EVENT_BIOS_DONE]) == 1) {
         result = MEMCARD_RESULT_COMPLETE;
-    else if (TestEvent(g_memcard_bios_events[MEMCARD_EVENT_BIOS_ERROR]) == 1)
+    } else if (TestEvent(g_memcard_bios_events[MEMCARD_EVENT_BIOS_ERROR]) == 1) {
         result = MEMCARD_RESULT_ERROR;
-    else if (TestEvent(g_memcard_bios_events[MEMCARD_EVENT_BIOS_TIMEOUT]) == 1)
+    } else if (TestEvent(g_memcard_bios_events[MEMCARD_EVENT_BIOS_TIMEOUT]) == 1) {
         result = MEMCARD_RESULT_TIMEOUT;
-    else if (TestEvent(g_memcard_bios_events[MEMCARD_EVENT_BIOS_NEW_CARD]) == 1)
+    } else if (TestEvent(g_memcard_bios_events[MEMCARD_EVENT_BIOS_NEW_CARD]) == 1) {
         result = MEMCARD_RESULT_NEW_CARD;
-    if (result != MEMCARD_RESULT_PENDING)
+    }
+    if (result != MEMCARD_RESULT_PENDING) {
         clear_bios_events();
+    }
     return result;
 }
 
@@ -70,10 +72,12 @@ memcard_result_e memcard_wait_bios_event(void) {
     while (1) {
         ready = _card_status(g_memcard_slot) & 1;
         result = memcard_poll_bios_event();
-        if (result >= MEMCARD_RESULT_COMPLETE)
+        if (result >= MEMCARD_RESULT_COMPLETE) {
             return result;
-        if (ready != 0)
+        }
+        if (ready != 0) {
             return MEMCARD_RESULT_TIMEOUT;
+        }
     }
 }
 
@@ -90,16 +94,18 @@ static void clear_bios_events(void) {
  * fired. A result clears all four events. */
 static memcard_result_e poll_hardware_event(void) {
     memcard_result_e result = MEMCARD_RESULT_PENDING;
-    if (TestEvent(g_memcard_bios_events[MEMCARD_EVENT_HARDWARE_DONE]) == 1)
+    if (TestEvent(g_memcard_bios_events[MEMCARD_EVENT_HARDWARE_DONE]) == 1) {
         result = MEMCARD_RESULT_COMPLETE;
-    else if (TestEvent(g_memcard_bios_events[MEMCARD_EVENT_HARDWARE_ERROR]) == 1)
+    } else if (TestEvent(g_memcard_bios_events[MEMCARD_EVENT_HARDWARE_ERROR]) == 1) {
         result = MEMCARD_RESULT_ERROR;
-    else if (TestEvent(g_memcard_bios_events[MEMCARD_EVENT_HARDWARE_TIMEOUT]) == 1)
+    } else if (TestEvent(g_memcard_bios_events[MEMCARD_EVENT_HARDWARE_TIMEOUT]) == 1) {
         result = MEMCARD_RESULT_TIMEOUT;
-    else if (TestEvent(g_memcard_bios_events[MEMCARD_EVENT_HARDWARE_NEW_CARD]) == 1)
+    } else if (TestEvent(g_memcard_bios_events[MEMCARD_EVENT_HARDWARE_NEW_CARD]) == 1) {
         result = MEMCARD_RESULT_NEW_CARD;
-    if (result != MEMCARD_RESULT_PENDING)
+    }
+    if (result != MEMCARD_RESULT_PENDING) {
         clear_hardware_events();
+    }
     return result;
 }
 
@@ -113,10 +119,12 @@ static memcard_result_e wait_hardware_event(void) {
     while (1) {
         ready = _card_status(g_memcard_slot) & 1;
         result = poll_hardware_event();
-        if (result >= MEMCARD_RESULT_COMPLETE)
+        if (result >= MEMCARD_RESULT_COMPLETE) {
             return result;
-        if (ready != 0)
+        }
+        if (ready != 0) {
             return MEMCARD_RESULT_TIMEOUT;
+        }
     }
 }
 
@@ -139,8 +147,9 @@ memcard_result_e memcard_info_retry(s32 port, s32 retry_limit) {
     for (i = 0; i < retry_limit; i++) {
         if (_card_info(port) == 1) {
             result = memcard_wait_bios_event();
-            if (result == MEMCARD_RESULT_COMPLETE)
+            if (result == MEMCARD_RESULT_COMPLETE) {
                 break;
+            }
         } else {
             result = MEMCARD_RESULT_TIMEOUT;
         }
@@ -158,8 +167,9 @@ static memcard_result_e load_card_retry(s32 port, s32 retry_limit) {
     for (i = 0; i < retry_limit; i++) {
         if (_card_load(port) == 1) {
             result = memcard_wait_bios_event();
-            if (result == MEMCARD_RESULT_COMPLETE)
+            if (result == MEMCARD_RESULT_COMPLETE) {
                 break;
+            }
         } else {
             result = MEMCARD_RESULT_TIMEOUT;
         }
@@ -179,10 +189,12 @@ static memcard_result_e clear_new_card_retry(s32 port, s32 retry_limit) {
     for (i = 0; i < retry_limit; i++) {
         if (_card_clear(port) == 1) {
             result = wait_hardware_event();
-            if (result >= MEMCARD_RESULT_NEW_CARD)
+            if (result >= MEMCARD_RESULT_NEW_CARD) {
                 result = MEMCARD_RESULT_ERROR;
-            if (result == MEMCARD_RESULT_COMPLETE)
+            }
+            if (result == MEMCARD_RESULT_COMPLETE) {
                 break;
+            }
             if (memcard_wait_operation(1) == MEMCARD_RESULT_COMPLETE) {
                 result = MEMCARD_RESULT_COMPLETE;
                 break;
@@ -236,8 +248,9 @@ memcard_result_e memcard_wait_operation(s32 retry_limit) {
         do {
             result = memcard_poll_operation();
         } while (result == MEMCARD_RESULT_PENDING);
-        if (result == MEMCARD_RESULT_COMPLETE)
+        if (result == MEMCARD_RESULT_COMPLETE) {
             break;
+        }
         i++;
     }
     return result;
@@ -298,15 +311,19 @@ memcard_result_e memcard_open_slot(void) {
 
     if (result == MEMCARD_RESULT_NEW_CARD) {
         result = clear_new_card_retry(g_memcard_slot << 4, 10);
-        if (result != MEMCARD_RESULT_COMPLETE)
+        if (result != MEMCARD_RESULT_COMPLETE) {
             return MEMCARD_RESULT_TIMEOUT;
+        }
     }
-    if (result == MEMCARD_RESULT_COMPLETE)
+    if (result == MEMCARD_RESULT_COMPLETE) {
         result = load_card_retry(g_memcard_slot << 4, 30);
-    if (result == MEMCARD_RESULT_NEW_CARD)
+    }
+    if (result == MEMCARD_RESULT_NEW_CARD) {
         return MEMCARD_RESULT_NEW_CARD;
-    if (result != MEMCARD_RESULT_COMPLETE)
+    }
+    if (result != MEMCARD_RESULT_COMPLETE) {
         result = MEMCARD_RESULT_TIMEOUT;
+    }
     return result;
 }
 
@@ -317,15 +334,17 @@ s32 memcard_format_slot(void) {
     char path[8];
 
     result = memcard_wait_operation(10);
-    if (result > MEMCARD_RESULT_COMPLETE)
+    if (result > MEMCARD_RESULT_COMPLETE) {
         return 0;
-    if (g_memcard_slot == 0)
-        strcpy(&path[0], "bu00:");
-    else
-        strcpy(&path[0], "bu10:");
-    result = format(&path[0]);
-    result = format(&path[0]);
-    result = format(&path[0]);
+    }
+    if (g_memcard_slot == 0) {
+        strcpy(path, "bu00:");
+    } else {
+        strcpy(path, "bu10:");
+    }
+    result = format(path);
+    result = format(path);
+    result = format(path);
     return result;
 }
 
@@ -398,11 +417,13 @@ s32 memcard_file_seek_retry(s32 descriptor, s32 offset, s32 origin) {
     s32 result;
 
     for (i = 0; i < 10; i++) {
-        if (memcard_wait_operation(10) != MEMCARD_RESULT_COMPLETE)
+        if (memcard_wait_operation(10) != MEMCARD_RESULT_COMPLETE) {
             return -1;
+        }
         result = lseek(descriptor, offset, origin);
-        if (result != -1)
+        if (result != -1) {
             break;
+        }
     }
     return result;
 }

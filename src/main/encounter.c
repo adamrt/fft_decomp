@@ -18,6 +18,7 @@ int encounter_start_file_load(void) {
     entd_file_t* entd_set;
 
     if (g_encounter_current_id != 0) {
+        /* Each branch makes its own allocation: one shared call is 56 bytes shorter. */
         if (g_encounter_current_id < ENTD2_FIRST_ENCOUNTER) {
             entd_set = heap_alloc(sizeof(entd_file_t));
             g_encounter_set = entd_set;
@@ -49,6 +50,7 @@ int encounter_start_file_load(void) {
  * index the file directly; each further range of 128 ids (the last one
  * open-ended) indexes it from its own base. */
 const entd_encounter_t* encounter_get_current(void) {
+    /* The bytes need the id read through this pointer; direct reads are 8 bytes shorter. */
     int* encounter_id = &g_encounter_current_id;
     int id;
 

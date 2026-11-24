@@ -69,8 +69,9 @@ void suzuki_smd_set_voice_update_flags_all_channels(u16 mask, suzuki_music_t* mu
     s32 count = music->channel_count;
 
     do {
-        if (channel->flags != 0)
+        if (channel->flags != 0) {
             channel->voice_update_flags |= mask;
+        }
         channel++;
     } while (--count != 0);
 }
@@ -117,29 +118,34 @@ void suzuki_smd_update_voices(suzuki_music_t* music, suzuki_music_channel_t* cha
     s32 left;
     s32 right;
 
-    if ((music->status & SUZUKI_MUSIC_STATUS_SFX) == 0)
+    if (!(music->status & SUZUKI_MUSIC_STATUS_SFX)) {
         allowed = ~(g_suzuki_sound_sfx_reserved_voices | g_suzuki_sound_sfx_key_off_voices);
-    else
+    } else {
         allowed = -1;
+    }
     key_off = 0;
     key_on = 0;
     do {
         if (channel->flags != 0 && channel->voice < 25) {
             voice_update_flags = channel->voice_update_flags;
-            if ((voice_update_flags & SUZUKI_VOICE_UPDATE_VOLUME) != 0) {
+            if (voice_update_flags & SUZUKI_VOICE_UPDATE_VOLUME) {
                 volume = (channel->volume >> 16) + channel->volume_modulation;
-                if (volume > 0x7fff)
+                if (volume > 0x7fff) {
                     volume = 0x7fff;
-                if (volume < 0)
+                }
+                if (volume < 0) {
                     volume = 0;
+                }
                 volume = (channel->velocity * volume) >> 15;
                 volume = ((music->master_volume.value >> 16) * volume) >> 16;
                 balance = channel->balance + channel->balance_modulation + (music->balance_shift.value >> 16);
-                if (balance > 0x7f00)
+                if (balance > 0x7f00) {
                     balance = 0x7f00;
-                if (balance < 0)
+                }
+                if (balance < 0) {
                     balance = 0;
-                if ((g_suzuki_sound_driver_flags & SUZUKI_SOUND_DRIVER_STEREO) != 0) {
+                }
+                if (g_suzuki_sound_driver_flags & SUZUKI_SOUND_DRIVER_STEREO) {
                     if (balance < 0x4000) {
                         right = (balance * 0x5a00) >> 14;
                         left = 0x7f00 - ((balance * 0x2500) >> 14);
@@ -158,16 +164,18 @@ void suzuki_smd_update_voices(suzuki_music_t* music, suzuki_music_channel_t* cha
                 channel->voice_attr.volume.right = right;
                 channel->voice_attr_flags |= SUZUKI_VOICE_ATTR_VOLUME;
             }
-            if ((voice_update_flags & SUZUKI_VOICE_UPDATE_PITCH) != 0) {
+            if (voice_update_flags & SUZUKI_VOICE_UPDATE_PITCH) {
                 channel->voice_attr.pitch = suzuki_smd_calculate_pitch((channel->pitch >> 16)
                                                 + channel->pitch_modulation + (music->pitch_shift.value >> 16))
                     & 0x3fff;
                 channel->voice_attr_flags |= SUZUKI_VOICE_ATTR_PITCH;
             }
-            if ((voice_update_flags & SUZUKI_VOICE_UPDATE_KEY_ON) != 0 && (channel->flags & SUZUKI_CHANNEL_MUTED) == 0)
+            if ((voice_update_flags & SUZUKI_VOICE_UPDATE_KEY_ON) && (channel->flags & SUZUKI_CHANNEL_MUTED) == 0) {
                 key_on |= channel->voice_attr.voice;
-            if ((voice_update_flags & SUZUKI_VOICE_UPDATE_KEY_OFF) != 0)
+            }
+            if (voice_update_flags & SUZUKI_VOICE_UPDATE_KEY_OFF) {
                 key_off |= channel->voice_attr.voice;
+            }
             channel->voice_update_flags = 0;
         }
         channel++;
@@ -187,10 +195,11 @@ s16 suzuki_smd_calculate_pitch(s16 key) {
 
     pitch = s_suzuki_smd_pitch_table[fine_step + (s_suzuki_smd_key_semitones[index] << 8)];
     shift = 6 - s_suzuki_smd_key_octaves[index];
-    if (shift >= 0)
+    if (shift >= 0) {
         pitch = pitch >> shift;
-    else
+    } else {
         pitch = pitch << -shift;
+    }
     return pitch;
 }
 
@@ -213,8 +222,9 @@ void suzuki_smd_update_modulators(suzuki_music_t* music, suzuki_music_channel_t*
     do {
         if (channel->flags != 0) {
             for (i = SUZUKI_MODULATOR_COUNT, modulator = channel->modulators; i != 0; modulator++, i--) {
-                if ((modulator->flags & SUZUKI_MODULATOR_ACTIVE) == 0)
+                if (!(modulator->flags & SUZUKI_MODULATOR_ACTIVE)) {
                     continue;
+                }
                 if (modulator->delay != 0) {
                     modulator->delay--;
                     continue;
@@ -280,8 +290,9 @@ s32 suzuki_smd_modulator_step_triangle(suzuki_modulator_t* modulator) {
     if (--modulator->timer == 0) {
         increment = modulator->amplitude;
         modulator->timer = modulator->timer_reset;
-        if ((modulator->flags & SUZUKI_MODULATOR_NEGATED) != 0)
+        if (modulator->flags & SUZUKI_MODULATOR_NEGATED) {
             increment = -increment;
+        }
         modulator->increment = increment;
         modulator->flags ^= SUZUKI_MODULATOR_NEGATED;
     }
@@ -304,8 +315,9 @@ s32 suzuki_smd_modulator_step_triangle_centered(suzuki_modulator_t* modulator) {
         modulator->timer *= (flags & SUZUKI_MODULATOR_HALF_PERIOD_DONE) ? 2 : 1;
         amplitude = modulator->amplitude;
         modulator->increment = amplitude;
-        if ((flags & SUZUKI_MODULATOR_NEGATED) != 0)
+        if (flags & SUZUKI_MODULATOR_NEGATED) {
             modulator->increment = -amplitude;
+        }
         flags = (flags | SUZUKI_MODULATOR_HALF_PERIOD_DONE) ^ SUZUKI_MODULATOR_NEGATED;
         modulator->flags = flags;
     }

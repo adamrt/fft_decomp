@@ -199,7 +199,7 @@ void world_map_update_screen_transition(menu_stack_record_t* level) {
             level->menu_screen_transition.phase++;
             return;
         }
-        if (thread_is_running(WORLD_MAP_THREAD_SLOT_TRANSITION) != 0) {
+        if (thread_is_running(WORLD_MAP_THREAD_SLOT_TRANSITION)) {
             return;
         }
         g_menu_stack_depth--;

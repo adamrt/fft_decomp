@@ -92,7 +92,7 @@ next:
         g_music_queue.current_command = MUSIC_QUEUE_COMMAND_NONE;
         return;
     case MUSIC_QUEUE_COMMAND_FADE_OUT:
-        if ((g_music_queue.music.flags & MUSIC_QUEUE_PLAYING) == 0) {
+        if (!(g_music_queue.music.flags & MUSIC_QUEUE_PLAYING)) {
             goto clear_command;
         }
         music_set_target_volume(0, g_music_queue.current_value << 2);

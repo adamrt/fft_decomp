@@ -82,12 +82,12 @@ s32 battle_unit_generate_random_equipment(
             continue;
         }
         type = value;
-        if ((unit->equipment_categories[EQUIPPABLE_ITEM_TYPE_BYTE_INDEX(type)] & EQUIPPABLE_ITEM_TYPE_BYTE_MASK(type))
-            == 0) {
+        if (!(unit->equipment_categories[EQUIPPABLE_ITEM_TYPE_BYTE_INDEX(type)]
+                & EQUIPPABLE_ITEM_TYPE_BYTE_MASK(type))) {
             continue;
         }
         if (weapon_flag_mask != 0) {
-            if ((weapon_flag_mask & g_item_weapon_data[item->secondary_data_id].flags) == 0) {
+            if (!(weapon_flag_mask & g_item_weapon_data[item->secondary_data_id].flags)) {
                 continue;
             }
         }
@@ -142,7 +142,7 @@ void battle_unit_learn_job_abilities(battle_unit_t* unit, s32 job_id, const entd
         i = UNIT_UNLOCKED_JOB_SQUIRE >> job_index;
         scratch = (unit->career.unlocked_jobs[0] << 16) + (unit->career.unlocked_jobs[1] << 8)
             + unit->career.unlocked_jobs[2];
-        if ((scratch & i) == 0) {
+        if (!(scratch & i)) {
             return;
         }
     }

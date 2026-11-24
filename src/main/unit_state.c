@@ -101,7 +101,7 @@ static u8 resolve_sprite_identity(const battle_unit_t* unit, u8* palette) {
     *palette = 0;
     job_id = unit->job_id;
     sprite_set = unit->character_identity;
-    if ((job_id == JOB_ID_DANCER) || (job_id == JOB_ID_MIME)) {
+    if (job_id == JOB_ID_DANCER || job_id == JOB_ID_MIME) {
         job_id--;
     }
     if (sprite_set < CHARACTER_IDENTITY_SELECTOR_FIRST) {
@@ -131,7 +131,7 @@ s32 status_has_any_in_check_set(const battle_unit_t* unit, status_check_set_e st
     status_set += status_set_index * STATUS_BYTE_COUNT;
 
     for (; index < STATUS_BYTE_COUNT; index++) {
-        if ((unit->status_sets.current[index] & status_set[index]) != 0) {
+        if (unit->status_sets.current[index] & status_set[index]) {
             return 1;
         }
     }
@@ -409,7 +409,7 @@ void status_set_action_state(battle_unit_t* unit, u8 action_state) {
     for (status_id = STATUS_HANDLER_INDEX(STATUS_ID_CHARGING); status_id <= STATUS_HANDLER_INDEX(STATUS_ID_PERFORMING);
         status_id++) {
         if (changed & mask) {
-            if ((old_status & mask) != 0) {
+            if (old_status & mask) {
                 status_queue_display_flag_change_if_executing(status_id, STATUS_DISPLAY_CHANGE_REMOVE, battle_unit_id);
             } else {
                 status_queue_display_flag_change_if_executing(status_id, STATUS_DISPLAY_CHANGE_ADD, battle_unit_id);

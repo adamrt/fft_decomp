@@ -38,12 +38,10 @@ suzuki_smd_header_t* file_load_smd(int sector, u32 size) {
         system_frame_stub();
         file_poll_load(&g_file_cd_state);
     }
-    if (g_file_cd_state.state != FILE_LOAD_STATE_IDLE) {
-        do {
-            VSync(0);
-            system_frame_stub();
-            file_poll_load(&g_file_cd_state);
-        } while (g_file_cd_state.state != FILE_LOAD_STATE_IDLE);
+    while (g_file_cd_state.state != FILE_LOAD_STATE_IDLE) {
+        VSync(0);
+        system_frame_stub();
+        file_poll_load(&g_file_cd_state);
     }
     return buffer;
 }
@@ -58,17 +56,15 @@ static void* load_into_heap(s32 sector, u32 size) {
     if (destination == 0) {
         system_handle_error(SYSTEM_ERROR_HEAP_ALLOC);
     }
-    while (file_request_read_quiet(&g_file_cd_state, sector, (size >> 11), destination) != 0) {
+    while (file_request_read_quiet(&g_file_cd_state, sector, size >> 11, destination) != 0) {
         VSync(0);
         system_frame_stub();
         file_poll_load(&g_file_cd_state);
     }
-    if (g_file_cd_state.state != FILE_LOAD_STATE_IDLE) {
-        do {
-            VSync(0);
-            system_frame_stub();
-            file_poll_load(&g_file_cd_state);
-        } while (g_file_cd_state.state != FILE_LOAD_STATE_IDLE);
+    while (g_file_cd_state.state != FILE_LOAD_STATE_IDLE) {
+        VSync(0);
+        system_frame_stub();
+        file_poll_load(&g_file_cd_state);
     }
     return destination;
 }
@@ -83,12 +79,10 @@ void* file_load_into_buffer(int sector, u32 size, void* destination) {
         system_frame_stub();
         file_poll_load(&g_file_cd_state);
     }
-    if (g_file_cd_state.state != FILE_LOAD_STATE_IDLE) {
-        do {
-            VSync(0);
-            system_frame_stub();
-            file_poll_load(&g_file_cd_state);
-        } while (g_file_cd_state.state != FILE_LOAD_STATE_IDLE);
+    while (g_file_cd_state.state != FILE_LOAD_STATE_IDLE) {
+        VSync(0);
+        system_frame_stub();
+        file_poll_load(&g_file_cd_state);
     }
     return destination;
 }

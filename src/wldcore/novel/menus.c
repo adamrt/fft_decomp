@@ -179,9 +179,7 @@ void novel_suspend_reader(menu_stack_record_t* unused_level) {
  */
 void novel_update_reader(menu_stack_record_t* level) {
     s32 unused[2];
-    u16* state_flags;
     world_map_fade_t* fade;
-    s16* brightness;
     u32 buttons;
     s32 width;
     s32 window;
@@ -221,8 +219,7 @@ void novel_update_reader(menu_stack_record_t* level) {
         }
     }
 
-    state_flags = &g_novel_reading.state_flags;
-    if (*state_flags & NOVEL_STATE_END) {
+    if (g_novel_reading.state_flags & NOVEL_STATE_END) {
         return;
     }
 
@@ -234,9 +231,8 @@ void novel_update_reader(menu_stack_record_t* level) {
                 }
             }
             if (g_input_current_buttons & PSX_PAD_R1) {
-                brightness = &g_novel_reading.brightness;
-                if (*brightness != 0) {
-                    (*brightness)--;
+                if (g_novel_reading.brightness != 0) {
+                    g_novel_reading.brightness--;
                 }
             }
             shade = g_novel_reading.brightness;
@@ -307,7 +303,7 @@ void novel_update_reader(menu_stack_record_t* level) {
         sound_stop_all_sfx();
         level->novel.phase = NOVEL_PHASE_END;
         g_world_map_flags |= WORLD_MAP_FLAG_INPUT_BLOCKED;
-        if (!(*state_flags & NOVEL_STATE_WHITE_OVERLAY)) {
+        if (!(g_novel_reading.state_flags & NOVEL_STATE_WHITE_OVERLAY)) {
             world_map_start_fade(WORLD_MAP_FADE_OUT, 0x10);
         }
     }
@@ -381,15 +377,15 @@ static void open_quit_menu(void) {
 /* Resume handler of the Quit/Continue menu: default palettes and the idle
  * cursor again. */
 void novel_resume_quit_menu(menu_stack_record_t* level) {
-    s32 first = level->novel_quit.cursor_window;
-    s32 second = level->novel_quit.second_window;
+    s32 cursor_window = level->novel_quit.cursor_window;
+    s32 second_window = level->novel_quit.second_window;
     s32 index;
     /* The original frame reserves eight unused bytes. */
     s32 scratch[2];
 
     g_display_object_gs_image_pool[level->novel_quit.render_index].palette = 0;
-    g_display_object_animated_pool[second].palette = 0;
-    g_display_object_animated_pool[first].palette = 0;
+    g_display_object_animated_pool[second_window].palette = 0;
+    g_display_object_animated_pool[cursor_window].palette = 0;
     g_display_object_animated_pool[level->novel_quit.cursor_window].sequence = DISPLAY_OBJECT_ANIM_CURSOR_IDLE;
     index = level->novel_quit.cursor_window;
     g_display_object_animated_pool[index].anim_counter = 0;
@@ -715,14 +711,13 @@ void novel_update_history(menu_stack_record_t* level) {
     point32_t point;
     u8 unused[0x20];
     u32* image;
-    s16* index1;
-    s16* index2;
+    s16* dim_picture;
+    s16* restore_picture;
     s32 shade;
     s32 i;
     s32 text_id;
     s32 step;
     s32 depth;
-    s32 render_index;
     s32 x;
     s32 y;
 
@@ -730,10 +725,10 @@ void novel_update_history(menu_stack_record_t* level) {
         switch (level->novel_history.phase) {
         case NOVEL_HISTORY_PHASE_DIM:
             shade = 0x80 - level->novel_history.step * 8;
-            index1 = &g_novel_reading.picture_render_index;
-            g_display_object_gs_image_pool[*index1].color.r = shade;
-            g_display_object_gs_image_pool[*index1].color.g = shade;
-            g_display_object_gs_image_pool[*index1].color.b = shade;
+            dim_picture = &g_novel_reading.picture_render_index;
+            g_display_object_gs_image_pool[*dim_picture].color.r = shade;
+            g_display_object_gs_image_pool[*dim_picture].color.g = shade;
+            g_display_object_gs_image_pool[*dim_picture].color.b = shade;
             g_hud_color.r = shade;
             g_hud_color.g = shade;
             g_hud_color.b = shade;
@@ -749,11 +744,11 @@ void novel_update_history(menu_stack_record_t* level) {
             }
             break;
         case NOVEL_HISTORY_PHASE_RESTORE:
-            index2 = &g_novel_reading.picture_render_index;
+            restore_picture = &g_novel_reading.picture_render_index;
             shade = level->novel_history.step * 0x10 + 0x40;
-            g_display_object_gs_image_pool[*index2].color.r = shade;
-            g_display_object_gs_image_pool[*index2].color.g = shade;
-            g_display_object_gs_image_pool[*index2].color.b = shade;
+            g_display_object_gs_image_pool[*restore_picture].color.r = shade;
+            g_display_object_gs_image_pool[*restore_picture].color.g = shade;
+            g_display_object_gs_image_pool[*restore_picture].color.b = shade;
             g_hud_color.r = shade;
             g_hud_color.g = shade;
             g_hud_color.b = shade;
@@ -773,15 +768,10 @@ void novel_update_history(menu_stack_record_t* level) {
                 image = g_window_image_buffer;
                 point.x = 8;
                 point.y = 8;
-                for (;;) {
-                    render_index = level->novel_history.render_index;
-                    if (i >= g_display_object_gs_image_pool[render_index].bounds.w
-                            * g_display_object_gs_image_pool[render_index].bounds.h / 8) {
-                        break;
-                    }
+                while (i < g_display_object_gs_image_pool[level->novel_history.render_index].bounds.w
+                        * g_display_object_gs_image_pool[level->novel_history.render_index].bounds.h / 8) {
                     i++;
-                    *image = 0;
-                    image++;
+                    *image++ = 0;
                 }
                 x = point.x;
                 y = point.y;
@@ -813,7 +803,7 @@ void novel_update_history(menu_stack_record_t* level) {
     if (input_update_repeat(PSX_PAD_UP) != 0) {
         if (level->novel_history.scroll < 3 && level->novel_history.text_ids[level->novel_history.scroll] != -1) {
             draw_history_entry(&level->novel_history, 4);
-            level->novel_history.scroll = level->novel_history.scroll + 1;
+            level->novel_history.scroll++;
             if (level->novel_history.scroll == 3 || level->novel_history.text_ids[level->novel_history.scroll] == -1) {
                 g_display_object_animated_pool[level->novel_history.upper_window].flags |= DISPLAY_OBJECT_HIDDEN;
             } else {
@@ -825,7 +815,7 @@ void novel_update_history(menu_stack_record_t* level) {
 
     if (input_update_repeat(PSX_PAD_DOWN) != 0 && level->novel_history.scroll != 0) {
         draw_history_entry(&level->novel_history, 2);
-        level->novel_history.scroll = level->novel_history.scroll - 1;
+        level->novel_history.scroll--;
         if (level->novel_history.scroll == 0) {
             g_display_object_animated_pool[level->novel_history.lower_window].flags |= DISPLAY_OBJECT_HIDDEN;
         } else {

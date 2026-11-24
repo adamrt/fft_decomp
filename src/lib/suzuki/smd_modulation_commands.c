@@ -117,10 +117,11 @@ u8* suzuki_smd_portamento(u8* note_data, suzuki_music_t* music, suzuki_music_cha
     u16 value = *note_data++;
 
     channel->portamento_ticks = value;
-    if (value != 0)
+    if (value != 0) {
         channel->ramp_flags |= SUZUKI_RAMP_PORTAMENTO;
-    else
+    } else {
         channel->ramp_flags &= ~SUZUKI_RAMP_PORTAMENTO;
+    }
     return note_data;
 }
 
@@ -491,7 +492,7 @@ u8* suzuki_smd_modulator_select(u8* note_data, suzuki_music_t* music, suzuki_mus
     param = note_data[1];
     modulator->waveform = param & SUZUKI_MODULATOR_INPUT_WAVEFORM_MASK;
     modulator->step = s_suzuki_smd_modulator_waveforms[modulator->waveform];
-    if ((param & SUZUKI_MODULATOR_INPUT_NO_KEY_ON_RESTART) == 0) {
+    if (!(param & SUZUKI_MODULATOR_INPUT_NO_KEY_ON_RESTART)) {
         modulator->flags = SUZUKI_MODULATOR_RESTART_ON_KEY_ON;
     } else {
         modulator->flags = 0;

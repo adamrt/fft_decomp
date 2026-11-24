@@ -50,6 +50,9 @@ void* suzuki_sound_alloc(u32 size) {
     u8* payload;
     u8* limit;
     u32 required = ((size + 15) & ~15) + sizeof(suzuki_heap_block_t);
+
+    /* A gap found in the loop jumps into the heap-end case; a break that
+     * re-tests block->next instead costs two instructions. */
     while (block->next != 0) {
         limit = (u8*)block->next;
         if ((limit - block->end) >= required) {

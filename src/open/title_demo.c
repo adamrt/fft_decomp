@@ -30,13 +30,13 @@ void movie_start_title_demo(s32 start_sector, s32 stream_length, s32 end_frame, 
  * controller is replaced by the FFTST.STR logo movie, which leads back to the
  * title menu. */
 void movie_update_title_demo(controller_record_t* unused_record) {
-    if ((g_system_runtime_flags & SYSTEM_RUNTIME_FLAG_MOVIE_STREAMING) == 0) {
+    if (!(g_system_runtime_flags & SYSTEM_RUNTIME_FLAG_MOVIE_STREAMING)) {
         SetDispMask(0);
         g_gfx_active_buffer_index = 1;
         g_system_runtime_flags |= SYSTEM_RUNTIME_FLAG_DISPLAY_BLANKED;
         g_controller_depth--;
         movie_start_logo(DISC_SECTOR_OPEN_FFTST_STR, 0x278a, 0x3df, 0x2de);
-    } else if ((g_input_new_button_presses & PSX_PAD_START) != 0) {
+    } else if (g_input_new_button_presses & PSX_PAD_START) {
         movie_stop_stream(1);
     }
 }

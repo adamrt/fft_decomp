@@ -518,7 +518,7 @@ void proposition_open_discovery(void) {
         g_menu_stack_records[g_menu_stack_depth].discovery.remaining = 1;
         g_menu_stack_records[g_menu_stack_depth].discovery.current += 2 + count;
     }
-    if (thread_is_running(WORLD_MAP_THREAD_SLOT_MESSAGE) == 0) {
+    if (!thread_is_running(WORLD_MAP_THREAD_SLOT_MESSAGE)) {
         thread_start(WORLD_MAP_THREAD_SLOT_MESSAGE, message_box_thread);
     }
     advance_milestone_message(&g_menu_stack_records[g_menu_stack_depth].discovery);
@@ -620,7 +620,7 @@ void proposition_update_discovery(menu_stack_record_t* discovery) {
             music_queue_add(MUSIC_QUEUE_COMMAND_FADE_IN, 0x10);
         }
     } else if (discovery->discovery.phase == PROPOSITION_DISCOVERY_PHASE_LAST_MESSAGE) {
-        if (menu_screen_is_dialog_waiting() != 0 && g_music_queue.current_command == MUSIC_QUEUE_COMMAND_NONE
+        if (menu_screen_is_dialog_waiting() && g_music_queue.current_command == MUSIC_QUEUE_COMMAND_NONE
             && g_music_queue.count == 0) {
             music_queue_add(MUSIC_QUEUE_COMMAND_PLAY_TRACK, MUSIC_QUEUE_TRACK(2, MUSIC_MILESTONE));
             music_queue_add(MUSIC_QUEUE_COMMAND_FADE_IN, 0x10);
@@ -656,9 +656,9 @@ void proposition_open_active_list(void) {
         recalled_color = 8;
         total = loaded_count;
         do {
-            if ((g_proposition_active[i].flags & PROPOSITION_PROGRESS_RETURNED) == 0) {
+            if (!(g_proposition_active[i].flags & PROPOSITION_PROGRESS_RETURNED)) {
                 g_menu_stack_entry_values[count] = g_proposition_active[i].proposition_id + entry_value_base;
-                if ((g_proposition_active[i].flags & PROPOSITION_PROGRESS_RECALLED) != 0) {
+                if (g_proposition_active[i].flags & PROPOSITION_PROGRESS_RECALLED) {
                     row_colors[count] = recalled_color;
                 } else {
                     row_colors[count] = 0;
@@ -687,8 +687,7 @@ void proposition_open_active_list(void) {
     previous = g_menu_stack_depth - 1;
     g_menu_stack_ot_offset = 9;
     g_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SELECT;
-    if ((g_display_object_gs_image_pool[g_menu_stack_records[previous].bar.rows_image].flags & DISPLAY_OBJECT_HIDDEN)
-        != 0) {
+    if (g_display_object_gs_image_pool[g_menu_stack_records[previous].bar.rows_image].flags & DISPLAY_OBJECT_HIDDEN) {
         g_display_object_animated_pool[g_menu_stack_records[previous].bar.cursor_window].flags
             &= ~DISPLAY_OBJECT_HIDDEN;
         g_display_object_animated_pool[g_menu_stack_records[previous].bar.label_window].flags &= ~DISPLAY_OBJECT_HIDDEN;
@@ -698,7 +697,7 @@ void proposition_open_active_list(void) {
 
     g_menu_stack_records[g_menu_stack_depth].panel.result = 0;
     g_menu_stack_types[g_menu_stack_depth] = MENU_STACK_LEVEL_PROPOSITION_ACTIVE_LIST;
-    g_menu_stack_depth = g_menu_stack_depth + 1;
+    g_menu_stack_depth++;
 }
 
 /* Resume handler of the active propositions list: block Circle, Cross and
@@ -728,8 +727,7 @@ void proposition_update_active_list_input(menu_stack_record_t* level) {
     u32 buttons;
     s32 unused[2]; /* 8-byte frame slot the target reserves */
 
-    if ((g_world_map_flags & WORLD_MAP_FLAG_INPUT_BLOCKED)
-        && thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL) == 0) {
+    if ((g_world_map_flags & WORLD_MAP_FLAG_INPUT_BLOCKED) && !thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL)) {
         g_menu_stack_ot_offset = 1;
         g_menu_blocked_buttons = 0;
         g_world_map_flags ^= WORLD_MAP_FLAG_INPUT_BLOCKED;
@@ -933,7 +931,7 @@ void proposition_update_recall(menu_stack_record_t* level) {
         return;
     }
 
-    if (input_update_repeat(PSX_PAD_UP) != 0 || input_update_repeat(PSX_PAD_DOWN) != 0) {
+    if (input_update_repeat(PSX_PAD_UP) || input_update_repeat(PSX_PAD_DOWN)) {
         choice = level->proposition_cancel_confirm.choice ^ 1;
         level->proposition_cancel_confirm.choice = choice;
         g_display_object_animated_pool[level->proposition_cancel_confirm.cursor_window].position.y

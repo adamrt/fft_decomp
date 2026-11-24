@@ -488,7 +488,7 @@ static void update_main_menu(controller_record_t* record) {
         return;
     }
 
-    if (input_update_repeat(PSX_PAD_UP) != 0) {
+    if (input_update_repeat(PSX_PAD_UP)) {
         state->idle_timer = 0;
         g_display_object_animated_pool[state->render_indices[state->cursor + 1]].palette = 0;
         state->cursor--;
@@ -500,7 +500,7 @@ static void update_main_menu(controller_record_t* record) {
         sound_play_sfx(SOUND_SFX_CURSOR_MOVE);
     }
 
-    if (input_update_repeat(PSX_PAD_DOWN) != 0 || (g_input_new_button_presses & PSX_PAD_SELECT)) {
+    if (input_update_repeat(PSX_PAD_DOWN) || (g_input_new_button_presses & PSX_PAD_SELECT)) {
         state->idle_timer = 0;
         g_display_object_animated_pool[state->render_indices[state->cursor + 1]].palette = 0;
         state->cursor++;
@@ -595,7 +595,7 @@ static void update_sound_menu(controller_record_t* record) {
         return;
     }
 
-    if (input_update_repeat(PSX_PAD_UP) != 0) {
+    if (input_update_repeat(PSX_PAD_UP)) {
         render_record = menu->entry_render_indices[menu->sound_mode_selection];
         g_display_object_animated_pool[render_record].palette = 0;
         menu->sound_mode_selection -= 1;
@@ -607,7 +607,7 @@ static void update_sound_menu(controller_record_t* record) {
         sound_play_sfx(SOUND_SFX_CURSOR_MOVE);
     }
 
-    if (input_update_repeat(PSX_PAD_DOWN) != 0 || (g_input_new_button_presses & PSX_PAD_SELECT) != 0) {
+    if (input_update_repeat(PSX_PAD_DOWN) || (g_input_new_button_presses & PSX_PAD_SELECT)) {
         render_record = menu->entry_render_indices[menu->sound_mode_selection];
         g_display_object_animated_pool[render_record].palette = 0;
         menu->sound_mode_selection += 1;
@@ -914,7 +914,7 @@ static void update_birthday_menu(controller_record_t* record) {
         return;
     }
 
-    if (input_update_repeat(PSX_PAD_UP) != 0) {
+    if (input_update_repeat(PSX_PAD_UP)) {
         if (menu->selecting_month == 0) {
             menu->day += 1;
             if (g_calendar_month_lengths[menu->month - 1] < menu->day) {
@@ -937,7 +937,7 @@ static void update_birthday_menu(controller_record_t* record) {
         g_display_object_image_count -= 1;
         build_birthday_text(menu);
         sound_play_sfx(SOUND_SFX_CURSOR_MOVE);
-    } else if (input_update_repeat(PSX_PAD_DOWN) != 0) {
+    } else if (input_update_repeat(PSX_PAD_DOWN)) {
         if (menu->selecting_month == 0) {
             menu->day -= 1;
             if (menu->day <= 0) {
@@ -1101,7 +1101,7 @@ static void update_birthday_confirmation(controller_record_t* record) {
         return;
     }
 
-    if (input_update_repeat(PSX_PAD_UP) != 0 || input_update_repeat(PSX_PAD_DOWN) != 0) {
+    if (input_update_repeat(PSX_PAD_UP) || input_update_repeat(PSX_PAD_DOWN)) {
         menu->selected_option ^= 1;
         /* Adding 12 before the option offset keeps the target's (option * 16 + 12) + y evaluation. */
         g_display_object_animated_pool[menu->cursor_record].position.y

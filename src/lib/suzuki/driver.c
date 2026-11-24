@@ -117,7 +117,7 @@ void suzuki_sound_quit(void) {
 /* Enable the root-counter-2 event that drives the driver tick, unless
  * SUZUKI_SOUND_DRIVER_ROOT_COUNTER_EVENT says it already is. Nothing in the tree calls it. */
 void suzuki_sound_enable_root_counter_2_event(void) {
-    if ((g_suzuki_sound_driver_flags & SUZUKI_SOUND_DRIVER_ROOT_COUNTER_EVENT) == 0) {
+    if (!(g_suzuki_sound_driver_flags & SUZUKI_SOUND_DRIVER_ROOT_COUNTER_EVENT)) {
         g_suzuki_sound_driver_flags |= SUZUKI_SOUND_DRIVER_ROOT_COUNTER_EVENT;
         EnableEvent(g_suzuki_sound_root_counter_2_event);
     }
@@ -126,7 +126,7 @@ void suzuki_sound_enable_root_counter_2_event(void) {
 /* Disable the root-counter-2 tick event if SUZUKI_SOUND_DRIVER_ROOT_COUNTER_EVENT says it is
  * enabled, and clear that flag. Nothing in the tree calls it. */
 void suzuki_sound_disable_root_counter_2_event(void) {
-    if ((g_suzuki_sound_driver_flags & SUZUKI_SOUND_DRIVER_ROOT_COUNTER_EVENT) != 0) {
+    if (g_suzuki_sound_driver_flags & SUZUKI_SOUND_DRIVER_ROOT_COUNTER_EVENT) {
         DisableEvent(g_suzuki_sound_root_counter_2_event);
         g_suzuki_sound_driver_flags &= ~SUZUKI_SOUND_DRIVER_ROOT_COUNTER_EVENT;
     }
@@ -454,7 +454,7 @@ void suzuki_sound_set_vol_balance(s32 volume, SpuVolume* volume_out, u8 mode) {
     volume_out->left = volume;
     if (g_suzuki_sound_driver_flags & (SUZUKI_SOUND_DRIVER_WIDE_OPPOSITE | SUZUKI_SOUND_DRIVER_WIDE)) {
         invert_left = mode;
-        if ((g_suzuki_sound_driver_flags & SUZUKI_SOUND_DRIVER_WIDE) == 0) {
+        if (!(g_suzuki_sound_driver_flags & SUZUKI_SOUND_DRIVER_WIDE)) {
             invert_left = invert_left != 1;
             if (invert_left) {
                 volume_out->left = -volume;

@@ -160,7 +160,7 @@ void music_test_update_menu(controller_record_t* record) {
             state->step = MUSIC_TEST_STEP_IDLE;
         }
     } else if (state->step == MUSIC_TEST_STEP_START_TRACK) {
-        if (music_is_loading() == 0) {
+        if (!music_is_loading()) {
             g_music_test_sound_handle = music_switch_track(state->music_slot, 0x7F, 0x10);
             state->step = MUSIC_TEST_STEP_IDLE;
         }
@@ -173,7 +173,7 @@ void music_test_update_menu(controller_record_t* record) {
             title_push_menu(0);
         }
     } else if (state->step == MUSIC_TEST_STEP_CLOSE) {
-        if (thread_is_running(MUSIC_TEST_THREAD_SLOT_LIST) == 0) {
+        if (!thread_is_running(MUSIC_TEST_THREAD_SLOT_LIST)) {
             state->step = MUSIC_TEST_STEP_FADE_OUT;
             fade_tile_start_in(0x20);
         }
@@ -196,7 +196,7 @@ void music_test_update_menu(controller_record_t* record) {
         }
     } else {
         /* Idle: release a track that has finished on its own, then take input. */
-        if (state->music_slot != 0 && suzuki_smd_is_music_playing(g_music_test_sound_handle) == 0) {
+        if (state->music_slot != 0 && !suzuki_smd_is_music_playing(g_music_test_sound_handle)) {
             music_unload_scenario_slot(state->music_slot);
             state->music_slot = 0;
             state->music_id = 0;
@@ -265,7 +265,7 @@ static void start_text_message(s32 parameter, s32 use_world_text) {
  * pop the controller and, with use_world_text, restore the text section pointers
  * start_text_message replaced. */
 void controller_stack_update_text_message(controller_record_t* record) {
-    if (thread_is_running(THREAD_SCREEN_SLOT_MESSAGE) != 0) {
+    if (thread_is_running(THREAD_SCREEN_SLOT_MESSAGE)) {
         return;
     }
     g_menu_blocked_buttons = record->text_message.saved_blocked_buttons;

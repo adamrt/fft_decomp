@@ -60,7 +60,7 @@ world_map_result_e wldcore_entrypoint(void) {
         init_subsystems();
         world_map_start_fade(0, 0x10);
         for (;;) {
-            if ((g_world_map_flags & WORLD_MAP_FLAG_RUNNING) == 0) {
+            if (!(g_world_map_flags & WORLD_MAP_FLAG_RUNNING)) {
                 break;
             }
             file_poll_load(&g_file_cd_state);
@@ -122,8 +122,7 @@ world_map_result_e wldcore_entrypoint(void) {
  * backdrop again (world_map_capture_backdrop) for the frames that no longer redraw the
  * map. */
 static void update_backdrop(void) {
-    if ((g_world_map_flags & WORLD_MAP_FLAG_DRAW_MAP) == 0
-        && (g_world_map_previous_flags & WORLD_MAP_FLAG_DRAW_MAP) != 0) {
+    if (!(g_world_map_flags & WORLD_MAP_FLAG_DRAW_MAP) && (g_world_map_previous_flags & WORLD_MAP_FLAG_DRAW_MAP)) {
         world_map_capture_backdrop();
     }
     g_world_map_previous_flags = g_world_map_flags;
@@ -462,7 +461,7 @@ static void finish_map_loop(void) {
     VSync(0);
     SetDispMask(0);
     music_queue_wait_until_empty();
-    if ((g_world_map_flags & WORLD_MAP_FLAG_TUTORIAL_EVENT) == 0) {
+    if (!(g_world_map_flags & WORLD_MAP_FLAG_TUTORIAL_EVENT)) {
         music_unload_all();
     }
     script_variable_set(EVENT_SCRIPT_VAR_CURRENT_MAP, g_travel_next_map_id);
@@ -509,10 +508,9 @@ static void restore_entry_level(void) {
     s32 flags = g_world_map_flags & ~WORLD_MAP_FLAG_RESTART;
 
     g_world_map_flags = flags;
-    if ((flags
+    if (!(flags
             & (WORLD_MAP_FLAG_STORY_EVENT_REPLAY | WORLD_MAP_FLAG_TITLE_TUTORIAL | WORLD_MAP_FLAG_TUTORIAL_EVENT
-                | WORLD_MAP_FLAG_TITLE_BRAVE_STORY))
-        == 0) {
+                | WORLD_MAP_FLAG_TITLE_BRAVE_STORY))) {
         if (location_script_run(g_world_map_marker_state.marker.location_id, LOCATION_SCRIPT_ACTION_TEXT) != 0) {
             world_map_suspend_cursor_level(&g_menu_stack_records[g_menu_stack_depth - 1]);
             menu_stack_open_scrollable_text(g_location_script_state.args[0] + TEXT_ID_WORLD_HELP_MESSAGE_BASE);

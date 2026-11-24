@@ -105,9 +105,8 @@ u16* ability_build_skillset_list(s32 skillset_id, s32 filters) {
         s_skillset_abilities[output_count++] = ability_id;
     }
 
-    while (output_count < SKILLSET_ABILITY_LIST_COUNT) {
+    for (; output_count < SKILLSET_ABILITY_LIST_COUNT; output_count++) {
         s_skillset_abilities[output_count] = 0;
-        output_count += 1;
     }
     return s_skillset_abilities;
 }

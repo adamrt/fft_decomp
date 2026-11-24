@@ -215,19 +215,12 @@ void menu_stack_restore_cursor(s32 index, s32 count, s32 visible) {
         g_menu_stack_cursor_states[index].selected_index = count - 1;
         g_menu_stack_cursor_states[index].scroll_offset = count - visible;
     }
-    end = g_menu_stack_cursor_states[index].scroll_offset;
-    end += visible;
+    end = g_menu_stack_cursor_states[index].scroll_offset + visible;
     if (count - end < 0) {
         g_menu_stack_cursor_states[index].scroll_offset = count - visible;
     }
-    {
-        s32 value;
-
-        value = g_menu_stack_cursor_states[index].selected_index;
-        g_window_panel_render_state.selected_index = value;
-        value = g_menu_stack_cursor_states[index].scroll_offset;
-        g_window_panel_render_state.select_text_table = value;
-    }
+    g_window_panel_render_state.selected_index = g_menu_stack_cursor_states[index].selected_index;
+    g_window_panel_render_state.select_text_table = g_menu_stack_cursor_states[index].scroll_offset;
 }
 
 /* Reset persistent cursor slot `index` to the first row. */
@@ -354,6 +347,7 @@ void window_open_paged_text(text_window_t* state) {
     g_display_object_animated_pool[state->page_prompt_record].position.y = window_y - 22;
     lower_y = window_y - 26;
     g_display_object_animated_pool[state->up_arrow_record].position.x = window_x;
+    /* The bytes need this one-pass loop: it keeps lower_y's subtraction ahead of the arrow stores. */
     do {
         g_display_object_animated_pool[state->up_arrow_record].position.y = state->base.y + 8;
     } while (0);
@@ -407,18 +401,18 @@ s32 window_update_paged_text(text_window_t* state) {
             update_page_prompt(state);
             return 1;
         }
-        state->scroll_timer += 1;
+        state->scroll_timer++;
         if (state->scroll_timer <= 0) {
             return 1;
         }
         state->scroll_timer = 0;
-        state->scroll_row += 1;
+        state->scroll_row++;
         render_page(state, state->scroll_row);
         return 1;
     }
 
     if (state->scroll_state == TEXT_WINDOW_SCROLL_MANUAL) {
-        if ((g_input_current_buttons & PSX_PAD_SQUARE) == 0) {
+        if (!(g_input_current_buttons & PSX_PAD_SQUARE)) {
             state->scroll_state = TEXT_WINDOW_SCROLL_RETURN;
             state->scroll_timer = 0;
             g_display_object_animated_pool[state->up_arrow_record].flags |= DISPLAY_OBJECT_HIDDEN;
@@ -426,7 +420,7 @@ s32 window_update_paged_text(text_window_t* state) {
             g_display_object_animated_pool[state->scroll_thumb_record].flags |= DISPLAY_OBJECT_HIDDEN;
             return 1;
         }
-        if ((input_update_repeat(PSX_PAD_UP) != 0) && (state->scroll_row != 0)) {
+        if (input_update_repeat(PSX_PAD_UP) != 0 && state->scroll_row != 0) {
             state->scroll_row--;
         } else if (input_update_repeat(PSX_PAD_DOWN) != 0) {
             if (state->page_start_row > state->scroll_row) {
@@ -449,9 +443,9 @@ s32 window_update_paged_text(text_window_t* state) {
                 state->page_start_row += state->rows_per_page;
             }
             if ((g_world_map_input_new_button_presses & PSX_PAD_CROSS)
-                || (state->page_start_row > state->last_page_row)) {
+                || state->page_start_row > state->last_page_row) {
                 g_display_object_animated_count -= 4;
-                g_display_object_image_count -= 1;
+                g_display_object_image_count--;
                 g_display_object_queue_count -= 5;
                 return 0;
             }

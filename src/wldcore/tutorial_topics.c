@@ -78,8 +78,7 @@ void tutorial_suspend_topic_list(menu_stack_record_t* unused_level) {
  * brave_story_update_treasure_list_input with help message 0x108d. A confirmed
  * topic's value is passed to open_topic. */
 void tutorial_update_topic_list_input(menu_stack_record_t* level) {
-    if ((g_world_map_flags & WORLD_MAP_FLAG_INPUT_BLOCKED)
-        && thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL) == 0) {
+    if ((g_world_map_flags & WORLD_MAP_FLAG_INPUT_BLOCKED) && !thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL)) {
         g_menu_blocked_buttons = 0;
         g_menu_stack_ot_offset = 1;
         g_world_map_flags ^= WORLD_MAP_FLAG_INPUT_BLOCKED;

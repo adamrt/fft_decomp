@@ -777,7 +777,7 @@ static void open_focus_level(s32 dot_index) {
             |= DISPLAY_OBJECT_HIDDEN;
     }
     g_menu_stack_types[g_menu_stack_depth] = MENU_STACK_LEVEL_WORLD_MAP_FOCUS;
-    g_menu_stack_depth = g_menu_stack_depth + 1;
+    g_menu_stack_depth++;
 }
 
 /* Step of the focus-location level. While the view pans it advances the pan
@@ -964,7 +964,7 @@ void world_map_open_menu_level(void) {
     g_menu_stack_records[depth].return_level.delay = 3;
     g_menu_stack_records[depth].return_level.pending = 0;
     g_world_map_flags = flags & ~WORLD_MAP_FLAG_SCREEN_CLEARED;
-    if ((flags & WORLD_MAP_FLAG_FADING) != 0) {
+    if (flags & WORLD_MAP_FLAG_FADING) {
         g_world_map_flags = (flags & ~WORLD_MAP_FLAG_SCREEN_CLEARED) | WORLD_MAP_FLAG_FREEZE_ANIMATION;
         counter = &g_world_map_fade.elapsed;
         *counter = *counter - 4;
@@ -1001,7 +1001,7 @@ static void update_map_menu_return(menu_stack_record_t* level) {
     }
 
     if (level->return_level.delay != 0) {
-        level->return_level.delay -= 1;
+        level->return_level.delay--;
         if (level->return_level.delay == 0) {
             world_map_set_backdrop_mode(1);
         }
@@ -1018,7 +1018,7 @@ static void update_map_menu_return(menu_stack_record_t* level) {
     world_map_set_backdrop_mode(0);
     cleared = g_world_map_flags & ~WORLD_MAP_FLAG_FREEZE_ANIMATION;
     g_world_map_flags = cleared;
-    g_menu_stack_depth -= 1;
+    g_menu_stack_depth--;
     if (flags & WORLD_MAP_FLAG_REQUEST_BRAVE_STORY) {
         g_world_map_flags = cleared ^ WORLD_MAP_FLAG_DRAW_MAP;
         world_map_open_screen_transition(MENU_STACK_LEVEL_BRAVE_STORY, 0, 0);
@@ -1146,7 +1146,7 @@ void menu_stack_open_text_window(s32 text, s32 reload_text) {
     g_menu_stack_records[g_menu_stack_depth].message.saved_blocked_buttons = g_menu_blocked_buttons;
     g_menu_blocked_buttons = -1;
     g_menu_stack_types[g_menu_stack_depth] = MENU_STACK_LEVEL_TEXT_WINDOW;
-    g_menu_stack_depth = g_menu_stack_depth + 1;
+    g_menu_stack_depth++;
 }
 
 /* Steps a message level: once the text window has popped in and
@@ -1162,9 +1162,9 @@ static void update_text_level(menu_stack_record_t* level) {
     }
     g_input_current_buttons = 0;
     g_menu_blocked_buttons = level->message.saved_blocked_buttons;
-    g_display_object_animated_count -= 1;
-    g_display_object_queue_count -= 1;
-    g_menu_stack_depth -= 1;
+    g_display_object_animated_count--;
+    g_display_object_queue_count--;
+    g_menu_stack_depth--;
     if (level->message.reload_text != 0) {
         text_restore_section_pointers();
     }
@@ -1214,7 +1214,7 @@ static void update_message_level(menu_stack_record_t* level) {
     }
     if (thread_is_running(THREAD_SCREEN_SLOT_MESSAGE) == 0) {
         g_menu_blocked_buttons = level->message.saved_blocked_buttons;
-        g_menu_stack_depth = g_menu_stack_depth - 1;
+        g_menu_stack_depth--;
         menu_stack_dispatch_resume();
         if (level->message.reload_text != 0) {
             text_restore_section_pointers();
@@ -1351,10 +1351,10 @@ static void update_variable_list(menu_stack_record_t* level) {
     }
 
     if (g_world_map_input_new_button_presses & PSX_PAD_CROSS) {
-        g_display_object_animated_count -= 1;
-        g_display_object_image_count -= 1;
+        g_display_object_animated_count--;
+        g_display_object_image_count--;
         g_display_object_queue_count -= 2;
-        g_menu_stack_depth -= 1;
+        g_menu_stack_depth--;
         menu_stack_dispatch_resume();
         return;
     }
@@ -1570,17 +1570,17 @@ static void update_panel_help(menu_stack_record_t* request) {
     display_object_animated_t* record;
     s32 window;
 
-    if ((g_world_map_input_new_button_presses & PSX_PAD_CROSS) != 0) {
-        g_display_object_animated_count -= 1;
-        g_display_object_queue_count -= 1;
+    if (g_world_map_input_new_button_presses & PSX_PAD_CROSS) {
+        g_display_object_animated_count--;
+        g_display_object_queue_count--;
         g_menu_stack_ot_offset = request->layout_window.saved_state;
-        g_menu_stack_depth -= 1;
+        g_menu_stack_depth--;
         menu_stack_dispatch_resume();
         sound_play_effect(SOUND_SFX_CANCEL);
         return;
     }
 
-    if ((g_world_map_input_new_button_presses & PSX_PAD_CIRCLE) != 0) {
+    if (g_world_map_input_new_button_presses & PSX_PAD_CIRCLE) {
         layout = request->layout_window.layout;
         counter = g_unit_panel_help_rows[layout].value;
         if (counter != 0) {
@@ -1991,22 +1991,22 @@ static void update_location_menu(menu_stack_record_t* level) {
 static void release_level_records(menu_stack_slot_set_t* slots, s32 restore) {
     g_menu_blocked_buttons = 0;
     if (slots->window_a != -1) {
-        g_display_object_animated_count -= 1;
-        g_display_object_queue_count -= 1;
+        g_display_object_animated_count--;
+        g_display_object_queue_count--;
     }
     if (slots->render_a != -1) {
-        g_display_object_image_count -= 1;
-        g_display_object_queue_count -= 1;
+        g_display_object_image_count--;
+        g_display_object_queue_count--;
     }
     if (slots->window_b != -1) {
-        g_display_object_animated_count -= 1;
-        g_display_object_queue_count -= 1;
+        g_display_object_animated_count--;
+        g_display_object_queue_count--;
     }
     if (slots->render_b != -1) {
-        g_display_object_image_count -= 1;
-        g_display_object_queue_count -= 1;
+        g_display_object_image_count--;
+        g_display_object_queue_count--;
     }
-    g_menu_stack_depth -= 1;
+    g_menu_stack_depth--;
     if (restore != 0) {
         menu_stack_dispatch_resume();
     }
@@ -2175,11 +2175,11 @@ static void update_party_number(menu_stack_record_t* level) {
     }
 
     buttons = g_world_map_input_new_button_presses;
-    if ((buttons & PSX_PAD_CROSS) != 0) {
+    if (buttons & PSX_PAD_CROSS) {
         sound_play_effect(SOUND_SFX_CANCEL);
         level->panel.result = -1;
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
-    } else if ((buttons & PSX_PAD_CIRCLE) != 0) {
+    } else if (buttons & PSX_PAD_CIRCLE) {
         sound_play_effect(SOUND_SFX_CONFIRM);
         level->panel.result = 1;
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);

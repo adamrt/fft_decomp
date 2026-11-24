@@ -66,6 +66,7 @@ void new_game_fade_in_orbonne_caption(void) {
     /* SetDrawMode uses this as a texture window; zero selects the full window. */
     RECT image_rect = { 0 };
     u32* current_otag;
+    /* Initialized here, not in a for loop: the bytes need the while loop over it. */
     s16 intensity = 248;
 
     set_up_caption_display(256, 240, 512, 0, 0, 0);
@@ -122,6 +123,7 @@ void new_game_fade_out_orbonne_caption(void) {
     /* SetDrawMode uses this as a texture window; zero selects the full window. */
     RECT image_rect = { 0 };
     u32* current_otag;
+    /* Initialized here, not in a for loop: the bytes need the while loop over it. */
     s16 intensity = 0;
 
     SetPolyF4(&fade_polygons[0]);

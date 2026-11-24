@@ -68,7 +68,7 @@ void proposition_open_returned_list(void) {
         g_display_object_gs_image_pool[g_menu_stack_records[previous].bar.rows_image].flags |= DISPLAY_OBJECT_POP_IN;
     }
 
-    if (thread_is_running(WORLD_MAP_THREAD_SLOT_MESSAGE) == 0) {
+    if (!thread_is_running(WORLD_MAP_THREAD_SLOT_MESSAGE)) {
         thread_start(WORLD_MAP_THREAD_SLOT_MESSAGE, message_box_thread);
     }
 
@@ -139,8 +139,7 @@ void proposition_update_returned_list_input(menu_stack_record_t* level) {
     s32 depth;
     point32_t origin;
 
-    if ((g_world_map_flags & WORLD_MAP_FLAG_INPUT_BLOCKED)
-        && thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL) == 0) {
+    if ((g_world_map_flags & WORLD_MAP_FLAG_INPUT_BLOCKED) && !thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL)) {
         g_menu_stack_ot_offset = 1;
         g_menu_blocked_buttons = 0;
         g_world_map_flags ^= WORLD_MAP_FLAG_INPUT_BLOCKED;
@@ -217,7 +216,7 @@ void proposition_update_report_confirm(menu_stack_record_t* level) {
         menu_stack_dispatch_resume();
         return;
     }
-    if (input_update_repeat(PSX_PAD_UP) != 0 || input_update_repeat(PSX_PAD_DOWN) != 0) {
+    if (input_update_repeat(PSX_PAD_UP) || input_update_repeat(PSX_PAD_DOWN)) {
         selection = level->proposition_report_confirm.selection ^ 1;
         level->proposition_report_confirm.selection = selection;
         g_display_object_animated_pool[level->proposition_report_confirm.cursor_window].position.y
@@ -585,7 +584,7 @@ void proposition_update_report(menu_stack_record_t* level) {
     case -1:
     case 18:
     case 99:
-        if (thread_is_running(WORLD_MAP_THREAD_SLOT_MESSAGE) != 0) {
+        if (thread_is_running(WORLD_MAP_THREAD_SLOT_MESSAGE)) {
             return;
         }
         level->proposition_report.state++;
@@ -688,7 +687,7 @@ static void open_result(s32 proposition) {
     base = &g_display_object_gs_image_pool[index].position;
     base->x = -0x7A;
     base->y = -0x2A;
-    if (thread_is_running(WORLD_MAP_THREAD_SLOT_MESSAGE) == 0) {
+    if (!thread_is_running(WORLD_MAP_THREAD_SLOT_MESSAGE)) {
         thread_start(WORLD_MAP_THREAD_SLOT_MESSAGE, message_box_thread);
     }
 
@@ -700,7 +699,7 @@ static void open_result(s32 proposition) {
         message = 0xA2;
     }
 
-    if (thread_is_running(WORLD_MAP_THREAD_SLOT_MESSAGE) == 0) {
+    if (!thread_is_running(WORLD_MAP_THREAD_SLOT_MESSAGE)) {
         thread_start(WORLD_MAP_THREAD_SLOT_MESSAGE, message_box_thread);
     }
 
@@ -758,7 +757,7 @@ void proposition_update_result(menu_stack_record_t* level) {
 
     if (level->proposition_result.phase == PROPOSITION_RESULT_PHASE_DONE) {
         if (g_music_queue.count == 0 && g_music_queue.current_command == MUSIC_QUEUE_COMMAND_NONE) {
-            g_menu_stack_depth = g_menu_stack_depth - 1;
+            g_menu_stack_depth--;
             if (proposition_get_milestone_rank() != 0) {
                 proposition_open_discovery();
                 return;
@@ -773,7 +772,7 @@ void proposition_update_result(menu_stack_record_t* level) {
 
     if (level->proposition_result.phase == PROPOSITION_RESULT_PHASE_CLOSING) {
         if (g_music_queue.count == 0 && g_music_queue.current_command == MUSIC_QUEUE_COMMAND_NONE
-            && thread_is_running(WORLD_MAP_THREAD_SLOT_MESSAGE) == 0) {
+            && !thread_is_running(WORLD_MAP_THREAD_SLOT_MESSAGE)) {
             if (proposition_get_milestone_rank() == 0 && g_proposition_report.recalled == 0) {
                 music_queue_add(MUSIC_QUEUE_COMMAND_PLAY_TRACK, MUSIC_QUEUE_TRACK(2, MUSIC_BAR));
             }
@@ -783,7 +782,7 @@ void proposition_update_result(menu_stack_record_t* level) {
     }
 
     if (level->proposition_result.delay != 0) {
-        level->proposition_result.delay = level->proposition_result.delay - 1;
+        level->proposition_result.delay--;
         if (level->proposition_result.delay == 0) {
             suzuki_sound_play_2_sfx(SOUND_SFX_PROPOSITION_SUCCESS_A, SOUND_SFX_PROPOSITION_SUCCESS_B);
         }
@@ -793,8 +792,8 @@ void proposition_update_result(menu_stack_record_t* level) {
         return;
     }
 
-    g_display_object_image_count = g_display_object_image_count - 1;
-    g_display_object_queue_count = g_display_object_queue_count - 1;
+    g_display_object_image_count--;
+    g_display_object_queue_count--;
     /* 0xFFFD clears PROPOSITION_VARIABLE_IN_PROGRESS from the 16-bit value. */
     proposition_flags = script_variable_get(g_proposition_active[level->proposition_result.proposition].proposition_id
                             + EVENT_SCRIPT_VAR_PROPOSITION_FIRST)

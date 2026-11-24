@@ -53,6 +53,7 @@ static void reconcile_statuses(battle_unit_t* unit) {
     }
 
     for (status = 0; status < STATUS_BYTE_COUNT; status++) {
+        /* The bytes need the immunity byte staged through a local; `&=` schedules differently. */
         immunity = unit->status_sets.immunity[status];
         immunity &= ~unit->status_sets.innate[status];
         unit->status_sets.immunity[status] = immunity;
@@ -143,7 +144,7 @@ static void refresh_stats(battle_unit_t* unit, s32 skip_status_check, s32 initia
     if (skip_status_check != 0) {
         return;
     }
-    if ((unit->max_hp / 5) >= unit->hp) {
+    if (unit->max_hp / 5 >= unit->hp) {
         unit->inflicted_status[STATUS_BYTE_INDEX(STATUS_ID_CRITICAL)] |= STATUS_BYTE_MASK(STATUS_ID_CRITICAL);
     } else {
         unit->inflicted_status[STATUS_BYTE_INDEX(STATUS_ID_CRITICAL)] &= ~STATUS_BYTE_MASK(STATUS_ID_CRITICAL);
@@ -301,13 +302,14 @@ s32 status_set_ct(battle_unit_t* unit, s32 status_id, s32 removing) {
     if (ct_index >= STATUS_TIMED_COUNT) {
         return 0;
     }
+    /* The bytes need this signed copy: indexing with the unsigned test value is 4 bytes shorter. */
     stored_index = ct_index;
     if (removing) {
         unit->status_ct[stored_index] = 0;
         return 0;
     }
-    if ((stored_index == STATUS_CT_INDEX(STATUS_ID_DEATH_SENTENCE))
-        && (unit->status_ct[STATUS_CT_INDEX(STATUS_ID_DEATH_SENTENCE)] != 0)) {
+    if (stored_index == STATUS_CT_INDEX(STATUS_ID_DEATH_SENTENCE)
+        && unit->status_ct[STATUS_CT_INDEX(STATUS_ID_DEATH_SENTENCE)] != 0) {
         return -1;
     }
     unit->status_ct[stored_index] = g_status_effect_data[status_id].ct;

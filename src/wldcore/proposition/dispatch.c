@@ -176,7 +176,7 @@ void proposition_update_dispatch_confirm(menu_stack_record_t* level) {
         return;
     }
 
-    if (input_update_repeat(PSX_PAD_UP) != 0 || input_update_repeat(PSX_PAD_DOWN) != 0) {
+    if (input_update_repeat(PSX_PAD_UP) || input_update_repeat(PSX_PAD_DOWN)) {
         row = level->dispatch_confirm.row ^ 1;
         level->dispatch_confirm.row = row;
         g_display_object_animated_pool[level->dispatch_confirm.cursor_window].position.y
@@ -464,12 +464,12 @@ void proposition_open_participants(void) {
  * Units already assigned to a proposition, absent roster entries, monsters,
  * and special-character sprite sets are excluded. */
 static s32 build_candidates(proposition_send_unit_level_t* level) {
-    s32 i = 0;
+    s32 i;
     s32 j;
     party_unit_t* unit;
 
     level->unit_count = 0;
-    for (; i < PARTY_MEMBER_SLOT_COUNT; i++) {
+    for (i = 0; i < PARTY_MEMBER_SLOT_COUNT; i++) {
         unit = party_get_roster_unit(i);
         if (unit->proposition_status != 0) {
             continue;
@@ -495,7 +495,7 @@ static s32 build_candidates(proposition_send_unit_level_t* level) {
         }
         g_menu_stack_entry_values[level->unit_count] = i + TEXT_ID_UNIT_NAME_BASE;
         g_proposition_candidate_levels[level->unit_count] = unit->level;
-        level->unit_count = level->unit_count + 1;
+        level->unit_count++;
     }
     if (level->unit_count < 6) {
         i = level->unit_count;
@@ -567,7 +567,7 @@ static void update_participant_slots(proposition_send_unit_level_t* level) {
     u32 buttons;
     s32 unit;
 
-    if ((g_display_object_gs_image_pool[level->portrait_frame].flags & DISPLAY_OBJECT_POP_IN) == 0) {
+    if (!(g_display_object_gs_image_pool[level->portrait_frame].flags & DISPLAY_OBJECT_POP_IN)) {
         unit = s_proposition_send_units[level->slot] & 0x7FF;
         if (unit != level->shown_unit) {
             level->shown_unit = unit;
@@ -576,14 +576,14 @@ static void update_participant_slots(proposition_send_unit_level_t* level) {
     }
 
     buttons = g_world_map_input_new_button_presses;
-    if ((buttons & PSX_PAD_CROSS) != 0) {
+    if (buttons & PSX_PAD_CROSS) {
         sound_play_effect(SOUND_SFX_CANCEL);
         /* Shared tail: a duplicated close path cross-jumps to the same
          * layout, but without this label the scheduler reorders its loads. */
         goto close;
     }
 
-    if ((buttons & PSX_PAD_CIRCLE) != 0) {
+    if (buttons & PSX_PAD_CIRCLE) {
         sound_play_effect(SOUND_SFX_CONFIRM);
         unit = g_menu_stack_entry_values[g_window_panel_render_state.selected_index] & TEXT_ID_ENTRY_MASK;
         s_proposition_send_units[level->slot] = unit;
@@ -602,13 +602,13 @@ static void update_participant_slots(proposition_send_unit_level_t* level) {
         return;
     }
 
-    if (input_update_repeat(PSX_PAD_UP) != 0) {
+    if (input_update_repeat(PSX_PAD_UP)) {
         if (level->slot == 0) {
             level->slot = 2;
         } else {
             level->slot--;
         }
-    } else if (input_update_repeat(PSX_PAD_DOWN) != 0) {
+    } else if (input_update_repeat(PSX_PAD_DOWN)) {
         if (level->slot == 2) {
             level->slot = 0;
         } else {
@@ -629,16 +629,16 @@ static void update_participant_slots(proposition_send_unit_level_t* level) {
  * three unit panel threads on it (status banner, numeric panel, equipment
  * and ability panel), raising WORLD_MAP_FLAG_UNIT_PANEL_THREADS. */
 static void start_participant_panels(s32 party_index) {
-    unit_panel_thread_t* thread8;
+    unit_panel_thread_t* banner;
 
     unit_panel_prepare_party_unit(party_index);
-    thread8 = &g_unit_panel_banner_params;
+    banner = &g_unit_panel_banner_params;
     g_unit_panel_numbers_params.position.y = 0;
     g_unit_panel_panel_params.position.y = 0;
     g_unit_panel_banner_params.position.y = 0;
-    thread8->position.x = 0;
+    banner->position.x = 0;
     thread_start(THREAD_SCREEN_SLOT_UNIT_STATUS, unit_panel_banner_thread);
-    thread_set_parameters(THREAD_SCREEN_SLOT_UNIT_STATUS, (s32)thread8, 0, 0);
+    thread_set_parameters(THREAD_SCREEN_SLOT_UNIT_STATUS, (s32)banner, 0, 0);
     thread_start(THREAD_SCREEN_SLOT_NUMERIC_PANEL, unit_panel_numbers_thread);
     thread_set_parameters(THREAD_SCREEN_SLOT_NUMERIC_PANEL, (s32)&g_unit_panel_panel_params, 0, 0);
     thread_start(THREAD_SCREEN_SLOT_CHARACTER_STATUS, unit_panel_equipment_ability_thread);
@@ -656,10 +656,10 @@ static void update_participant_status(proposition_send_unit_level_t* level) {
     s16* menu_selected_index;
 
     if (level->mode == PROPOSITION_SEND_UNIT_MODE_STATUS_OPEN) {
-        if (thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL) != 0) {
+        if (thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL)) {
             return;
         }
-        if (thread_is_running(WORLD_MAP_THREAD_SLOT_MESSAGE) != 0) {
+        if (thread_is_running(WORLD_MAP_THREAD_SLOT_MESSAGE)) {
             return;
         }
         g_display_object_animated_pool[level->left_arrow].flags ^= DISPLAY_OBJECT_HIDDEN;
@@ -694,7 +694,7 @@ static void update_participant_status(proposition_send_unit_level_t* level) {
                 = g_display_object_animated_pool[level->right_arrow].frame_index
                 = g_display_object_animated_pool[level->right_arrow].anim_counter = 0;
         }
-        if (input_update_repeat(PSX_PAD_R1) != 0
+        if (input_update_repeat(PSX_PAD_R1)
             && g_display_object_animated_pool[level->left_arrow].sequence != DISPLAY_OBJECT_ANIM_L1_BUTTON_PRESS) {
             g_display_object_animated_pool[level->right_arrow].sequence = DISPLAY_OBJECT_ANIM_R1_BUTTON_PRESS;
             g_display_object_animated_pool[level->right_arrow].frame_index
@@ -712,7 +712,7 @@ static void update_participant_status(proposition_send_unit_level_t* level) {
             }
             direction = 1;
         } else {
-            if (input_update_repeat(PSX_PAD_L1) == 0
+            if (!input_update_repeat(PSX_PAD_L1)
                 || g_display_object_animated_pool[level->right_arrow].sequence == DISPLAY_OBJECT_ANIM_R1_BUTTON_PRESS) {
                 return;
             }
@@ -736,13 +736,13 @@ static void update_participant_status(proposition_send_unit_level_t* level) {
     done:
         sound_play_effect(SOUND_SFX_PAGE_SWITCH);
     } else if (level->mode == PROPOSITION_SEND_UNIT_MODE_STATUS_CLOSE) {
-        if (thread_is_running(THREAD_SCREEN_SLOT_UNIT_STATUS) != 0) {
+        if (thread_is_running(THREAD_SCREEN_SLOT_UNIT_STATUS)) {
             return;
         }
-        if (thread_is_running(THREAD_SCREEN_SLOT_NUMERIC_PANEL) != 0) {
+        if (thread_is_running(THREAD_SCREEN_SLOT_NUMERIC_PANEL)) {
             return;
         }
-        if (thread_is_running(THREAD_SCREEN_SLOT_CHARACTER_STATUS) != 0) {
+        if (thread_is_running(THREAD_SCREEN_SLOT_CHARACTER_STATUS)) {
             return;
         }
         level->mode = PROPOSITION_SEND_UNIT_MODE_SELECT;
@@ -822,7 +822,7 @@ void proposition_update_participants(menu_stack_record_t* level) {
     s32 unused[4];
 
     if (level->send_unit.mode == PROPOSITION_SEND_UNIT_MODE_CANCEL) {
-        if (thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL) == 0) {
+        if (!thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL)) {
             g_menu_blocked_buttons = 0;
             g_world_map_flags &= ~WORLD_MAP_FLAG_INPUT_BLOCKED;
             g_menu_stack_depth--;
@@ -832,7 +832,7 @@ void proposition_update_participants(menu_stack_record_t* level) {
     }
 
     if (level->send_unit.mode == PROPOSITION_SEND_UNIT_MODE_ACCEPT) {
-        if (thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL) == 0) {
+        if (!thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL)) {
             g_menu_blocked_buttons = 0;
             g_world_map_flags &= ~WORLD_MAP_FLAG_INPUT_BLOCKED;
             g_menu_stack_depth--;

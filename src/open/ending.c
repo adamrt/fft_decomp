@@ -223,7 +223,7 @@ static s32 update_script_frame(void) {
             /* Keeping the cursor base live matches retail; the direct state view is four bytes shorter. */
             flags = ((ending_script_dispatch_state_t*)((u8*)cursor - offsetof(ending_script_dispatch_state_t, cursor)))
                         ->flags;
-            if ((flags & ENDING_SCRIPT_DISPATCH_RUNNING) == 0) {
+            if (!(flags & ENDING_SCRIPT_DISPATCH_RUNNING)) {
                 return 0;
             }
         } while (flags & ENDING_SCRIPT_DISPATCH_CONTINUE);
@@ -319,6 +319,7 @@ static s32 build_text_record(u8* text) {
     s32 v0;
     u8 ch;
     u16 tpage;
+    u16 clut;
 
     for (i = 0; i < 16; i++) {
         if (!(g_ending_script_state.records[i].flags & ENDING_SCRIPT_RECORD_ACTIVE)) {
@@ -391,17 +392,13 @@ static s32 build_text_record(u8* text) {
                 g_ending_script_state.records[index].glyphs[drawn].w = width;
                 g_ending_script_state.records[index].glyphs[drawn].h = height;
                 if (g_ending_script_state.dispatch.wide_glyphs == 0) {
-                    g_ending_script_state.records[index].glyphs[drawn].x
-                        = g_ending_script_state.records[index].glyphs[drawn].x * 2;
-                    g_ending_script_state.records[index].glyphs[drawn].w
-                        = g_ending_script_state.records[index].glyphs[drawn].w * 2;
+                    g_ending_script_state.records[index].glyphs[drawn].x *= 2;
+                    g_ending_script_state.records[index].glyphs[drawn].w *= 2;
                 } else {
                     g_ending_script_state.records[index].glyphs[drawn].x
-                        = g_ending_script_state.records[index].glyphs[drawn].x
-                        + g_ending_script_state.records[index].glyphs[drawn].x / 2;
+                        += g_ending_script_state.records[index].glyphs[drawn].x / 2;
                     g_ending_script_state.records[index].glyphs[drawn].w
-                        = g_ending_script_state.records[index].glyphs[drawn].w
-                        + g_ending_script_state.records[index].glyphs[drawn].w / 2;
+                        += g_ending_script_state.records[index].glyphs[drawn].w / 2;
                 }
                 front = &g_ending_script_glyph_primitives[0][slot];
                 g_ending_script_state.records[index].skew = g_ending_script_state.dispatch.skew;
@@ -410,13 +407,14 @@ static s32 build_text_record(u8* text) {
                 SetPolyFT4(back);
                 SetSemiTrans(front, 1);
                 SetSemiTrans(back, 1);
+                /* front[16 * 42] is back; the bytes need this addressing for both stores. */
                 tpage = g_ending_script_state.dispatch.tpage;
                 front[16 * 42].tpage = tpage;
                 g_ending_script_glyph_primitives[0][slot].tpage = tpage;
                 drawn++;
-                tpage = g_ending_script_state.dispatch.clut;
-                front[16 * 42].clut = tpage;
-                g_ending_script_glyph_primitives[0][slot].clut = tpage;
+                clut = g_ending_script_state.dispatch.clut;
+                front[16 * 42].clut = clut;
+                g_ending_script_glyph_primitives[0][slot].clut = clut;
                 setRGB0(front, 0x80, 0x80, 0x80);
                 setRGB0(back, 0x80, 0x80, 0x80);
                 mt2 = font + (value >> 3);
@@ -511,19 +509,15 @@ static void update_xa_audio(void) {
             g_ending_script_state.control_state++;
             break;
 
-        case 5: {
-            s32 delta = file_cd_poll_sync();
-            s32* state = &g_ending_script_state.control_state;
-            s32 value = *state;
-
-            *state = value + delta;
+        case 5:
+            g_ending_script_state.control_state += file_cd_poll_sync();
 
             /* The frame counter was cleared when the seek was issued. */
-            if (g_system_wait_frames >= 0x79 && *state == 5) {
+            if (g_system_wait_frames >= 0x79 && g_ending_script_state.control_state == 5) {
                 file_reset_cd_subsystems();
-                *state = 0;
+                g_ending_script_state.control_state = 0;
             }
-        } break;
+            break;
 
         case 6:
             filter.file = 1;
@@ -533,13 +527,9 @@ static void update_xa_audio(void) {
             break;
 
         case 1:
-        case 7: {
-            s32 delta = file_cd_poll_sync();
-            s32* state = &g_ending_script_state.control_state;
-            s32 value = *state;
-
-            *state = value + delta;
-        } break;
+        case 7:
+            g_ending_script_state.control_state += file_cd_poll_sync();
+            break;
 
         case 8:
             CdControlF(CdlReadS, 0);
@@ -562,27 +552,27 @@ static void update_xa_audio(void) {
         }
     }
 
-    {
-        u32* control = &g_ending_script_state.dispatch.flags;
+    /* Give the stream two seconds (120 frames) to settle before checking on it. */
+    if (g_ending_script_state.dispatch.flags & ENDING_SCRIPT_DISPATCH_XA_PLAYING) {
+        g_ending_script_state.xa_wait_frames++;
+        if (g_ending_script_state.xa_wait_frames < 0x78) {
+            return;
+        }
 
-        /* Give the stream two seconds (120 frames) to settle before checking on it. */
-        if (*control & ENDING_SCRIPT_DISPATCH_XA_PLAYING) {
-            g_ending_script_state.xa_wait_frames++;
-            if (g_ending_script_state.xa_wait_frames < 0x78) {
-                return;
-            }
-
-            if (!(CdStatus() & CdlStatRead)) {
-                g_ending_script_state.control_state = 0;
-                *control = (*control ^ ENDING_SCRIPT_DISPATCH_XA_PLAYING) | ENDING_SCRIPT_DISPATCH_XA_STARTING;
-                return;
-            }
-            if (CdControl(CdlGetlocL, 0, result) != 0 && CdPosToInt((CdlLOC*)result) > ENDING_XA_LAST_SECTOR) {
-                sound_set_cd_mix_and_volume(0, 1);
-                g_ending_script_state.control_state = 0;
-                *control = (*control ^ ENDING_SCRIPT_DISPATCH_XA_PLAYING) | ENDING_SCRIPT_DISPATCH_XA_STOPPING;
-                return;
-            }
+        if (!(CdStatus() & CdlStatRead)) {
+            g_ending_script_state.control_state = 0;
+            g_ending_script_state.dispatch.flags
+                = (g_ending_script_state.dispatch.flags ^ ENDING_SCRIPT_DISPATCH_XA_PLAYING)
+                | ENDING_SCRIPT_DISPATCH_XA_STARTING;
+            return;
+        }
+        if (CdControl(CdlGetlocL, 0, result) != 0 && CdPosToInt((CdlLOC*)result) > ENDING_XA_LAST_SECTOR) {
+            sound_set_cd_mix_and_volume(0, 1);
+            g_ending_script_state.control_state = 0;
+            g_ending_script_state.dispatch.flags
+                = (g_ending_script_state.dispatch.flags ^ ENDING_SCRIPT_DISPATCH_XA_PLAYING)
+                | ENDING_SCRIPT_DISPATCH_XA_STOPPING;
+            return;
         }
     }
 
@@ -600,13 +590,9 @@ static void update_xa_audio(void) {
             break;
 
         case 1:
-        case 3: {
-            s32 delta = file_cd_poll_sync();
-            s32* state = &g_ending_script_state.control_state;
-            s32 value = *state;
-
-            *state = value + delta;
-        } break;
+        case 3:
+            g_ending_script_state.control_state += file_cd_poll_sync();
+            break;
 
         case 6:
             g_ending_script_state.dispatch.flags ^= ENDING_SCRIPT_DISPATCH_XA_STOPPING;
@@ -753,7 +739,6 @@ void movie_start_ending(void) {
 static void start_fftend_movie(s32 start_sector, s32 unused, s32 end_frame) {
     s32 controller;
 
-    (void)unused;
     movie_start_stream(start_sector, end_frame, -1, 0x7e);
     g_system_runtime_flags &= ~SYSTEM_RUNTIME_FLAG_DISPLAY_BLANKED;
     controller = g_controller_depth;
@@ -765,17 +750,10 @@ static void start_fftend_movie(s32 start_sector, s32 unused, s32 end_frame) {
  * has stopped, by itself or on the update after Start, the display is blanked and
  * the controller is replaced by the ending script. */
 void movie_update_fftend(controller_record_t* unused_record) {
-    u32 flags;
-    s32 controller;
-
     if (!(g_system_runtime_flags & SYSTEM_RUNTIME_FLAG_MOVIE_STREAMING)) {
         SetDispMask(0);
-        flags = g_system_runtime_flags;
-        controller = g_controller_depth;
-        flags |= SYSTEM_RUNTIME_FLAG_DISPLAY_BLANKED;
-        controller--;
-        g_system_runtime_flags = flags;
-        g_controller_depth = controller;
+        g_system_runtime_flags |= SYSTEM_RUNTIME_FLAG_DISPLAY_BLANKED;
+        g_controller_depth--;
         start_script();
         return;
     }
@@ -916,7 +894,7 @@ static void ending_opcode_05_wait_counted(s16* entry) {
         state->wait_counter = counter;
         if (counter >= *entry) {
             state->flags = flags ^ ENDING_SCRIPT_DISPATCH_WAITING;
-            state->cursor.byte_offset = state->cursor.byte_offset + 4;
+            state->cursor.byte_offset += 4;
         } else {
             state->flags = flags ^ ENDING_SCRIPT_DISPATCH_CONTINUE;
         }
@@ -937,7 +915,7 @@ static void ending_opcode_06_wait_for_scroll(s16* entry) {
     if (flags & ENDING_SCRIPT_DISPATCH_WAITING) {
         if (state->scrolled_distance >= *entry) {
             state->flags = flags ^ ENDING_SCRIPT_DISPATCH_WAITING;
-            state->cursor.byte_offset = state->cursor.byte_offset + 4;
+            state->cursor.byte_offset += 4;
         } else {
             state->flags = flags ^ ENDING_SCRIPT_DISPATCH_CONTINUE;
         }

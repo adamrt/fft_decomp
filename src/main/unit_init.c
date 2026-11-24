@@ -82,7 +82,7 @@ s32 battle_unit_init_from_encounter(battle_unit_t* unit, const entd_unit_t* entd
     /* For a new unit, a load-formation unit and a Ramza without a birth month came whole
      * from the roster in set_encounter_data. */
     if (kind == UNIT_ENTD_INIT_NEW) {
-        if ((entd->unit_flags & UNIT_FLAG_LOAD_FORMATION) != 0) {
+        if (entd->unit_flags & UNIT_FLAG_LOAD_FORMATION) {
             return 0;
         }
         if (entd->sprite_set < CHARACTER_IDENTITY_RAMZA_END) {
@@ -1056,7 +1056,7 @@ void battle_unit_set_equipment_attributes(battle_unit_t* unit, s32 level_up_chec
     cap = UNIT_HP_MP_MAX;
     calculate_initial_stats(unit, level_up_check + 1);
     unit->equipped_flags = 0;
-    if ((unit->unit_flags & UNIT_FLAG_MONSTER) == 0) {
+    if (!(unit->unit_flags & UNIT_FLAG_MONSTER)) {
         bonus = unit->equipment_attributes;
         for (i = 0; i < UNIT_EQUIPMENT_SLOT_COUNT; i++) {
             item_id = unit->equipment[i];

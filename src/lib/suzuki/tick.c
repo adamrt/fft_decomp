@@ -26,50 +26,61 @@ void suzuki_sound_update_voice_attrs(void) {
 
     while (music != 0) {
         status = music->status;
-        if ((status & (SUZUKI_MUSIC_STATUS_FULL_VOICE_UPDATE | SUZUKI_MUSIC_STATUS_PLAYING)) != 0
+        if ((status & (SUZUKI_MUSIC_STATUS_FULL_VOICE_UPDATE | SUZUKI_MUSIC_STATUS_PLAYING))
             && (status & SUZUKI_MUSIC_STATUS_NO_VOICE_ATTRS) == 0) {
             music->status = status & ~SUZUKI_MUSIC_STATUS_FULL_VOICE_UPDATE;
             count = music->channel_count;
             channel = music->channels;
-            if ((status & SUZUKI_MUSIC_STATUS_SFX) != 0)
+            if (status & SUZUKI_MUSIC_STATUS_SFX) {
                 allowed = -1;
-            else
+            } else {
                 allowed = ~(g_suzuki_sound_sfx_reserved_voices | g_suzuki_sound_sfx_key_off_voices);
+            }
             do {
-                if ((channel->flags & SUZUKI_CHANNEL_IN_USE) != 0 && (allowed & channel->voice_attr.voice) != 0) {
+                if ((channel->flags & SUZUKI_CHANNEL_IN_USE) && (allowed & channel->voice_attr.voice)) {
                     flags = channel->voice_attr_flags;
                     if (flags != 0) {
                         voice = channel->voice;
-                        if ((flags & SUZUKI_VOICE_ATTR_VOLUME_MODE) != 0) {
+                        if (flags & SUZUKI_VOICE_ATTR_VOLUME_MODE) {
                             SpuSetVoiceVolumeAttr(voice, channel->voice_attr.volume.left,
                                 channel->voice_attr.volume.right, channel->voice_attr.volmode.left,
                                 channel->voice_attr.volmode.right);
                             flags &= ~SUZUKI_VOICE_ATTR_VOLUME;
                         }
-                        if ((flags & SUZUKI_VOICE_ATTR_VOLUME) != 0)
+                        if (flags & SUZUKI_VOICE_ATTR_VOLUME) {
                             SpuSetVoiceVolume(voice, channel->voice_attr.volume.left, channel->voice_attr.volume.right);
-                        if ((flags & SUZUKI_VOICE_ATTR_PITCH) != 0)
+                        }
+                        if (flags & SUZUKI_VOICE_ATTR_PITCH) {
                             SpuSetVoicePitch(voice, channel->voice_attr.pitch);
-                        if ((flags & SUZUKI_VOICE_ATTR_ADDRESS) != 0) {
+                        }
+                        if (flags & SUZUKI_VOICE_ATTR_ADDRESS) {
                             SpuSetVoiceStartAddr(voice, channel->voice_attr.addr);
                             SpuSetVoiceLoopStartAddr(voice, channel->voice_attr.loop_addr);
                         }
-                        if ((flags & SUZUKI_VOICE_ATTR_ATTACK) != 0)
+                        if (flags & SUZUKI_VOICE_ATTR_ATTACK) {
                             SpuSetVoiceARAttr(voice, channel->voice_attr.ar, channel->voice_attr.a_mode);
-                        if ((flags & SUZUKI_VOICE_ATTR_DECAY) != 0)
+                        }
+                        if (flags & SUZUKI_VOICE_ATTR_DECAY) {
                             SpuSetVoiceDR(voice, channel->voice_attr.dr);
-                        if ((flags & SUZUKI_VOICE_ATTR_SUSTAIN) != 0)
+                        }
+                        if (flags & SUZUKI_VOICE_ATTR_SUSTAIN) {
                             SpuSetVoiceSRAttr(voice, channel->voice_attr.sr, channel->voice_attr.s_mode);
-                        if ((flags & SUZUKI_VOICE_ATTR_RELEASE) != 0)
+                        }
+                        if (flags & SUZUKI_VOICE_ATTR_RELEASE) {
                             SpuSetVoiceRRAttr(voice, channel->voice_attr.rr, channel->voice_attr.r_mode);
-                        if ((flags & SUZUKI_VOICE_ATTR_SUSTAIN_LEVEL) != 0)
+                        }
+                        if (flags & SUZUKI_VOICE_ATTR_SUSTAIN_LEVEL) {
                             SpuSetVoiceSL(voice, channel->voice_attr.sl);
-                        if ((flags & SUZUKI_VOICE_ATTR_PITCH) != 0)
+                        }
+                        if (flags & SUZUKI_VOICE_ATTR_PITCH) {
                             g_suzuki_sound_voice_update_requests |= SUZUKI_VOICE_MASK_REQUEST_PITCH_LFO;
-                        if ((flags & SUZUKI_VOICE_ATTR_ATTACK) != 0)
+                        }
+                        if (flags & SUZUKI_VOICE_ATTR_ATTACK) {
                             g_suzuki_sound_voice_update_requests |= SUZUKI_VOICE_MASK_REQUEST_NOISE;
-                        if ((flags & SUZUKI_VOICE_ATTR_SUSTAIN) != 0)
+                        }
+                        if (flags & SUZUKI_VOICE_ATTR_SUSTAIN) {
                             g_suzuki_sound_voice_update_requests |= SUZUKI_VOICE_MASK_REQUEST_REVERB;
+                        }
                         channel->voice_attr_flags = 0;
                     }
                 }
@@ -94,17 +105,19 @@ void suzuki_sound_flush_key_on(void) {
     while (music != 0) {
         status = music->status;
         if (status < 0) {
-            if ((status & SUZUKI_MUSIC_STATUS_SFX) != 0)
+            if (status & SUZUKI_MUSIC_STATUS_SFX) {
                 voices |= music->key_on_mask;
-            else
+            } else {
                 voices |= allowed & music->key_on_mask;
+            }
             music->key_on_mask = 0;
         }
         music = music->next;
     }
 
-    if (voices != 0)
+    if (voices != 0) {
         SpuSetKey(SPU_ON, voices);
+    }
 }
 
 /* Apply the same SFX reservation filter as key-on. Stopped music and sound
@@ -124,10 +137,11 @@ void suzuki_sound_flush_key_off(void) {
     while (music != 0) {
         status = music->status;
         if (status < 0) {
-            if ((status & SUZUKI_MUSIC_STATUS_SFX) != 0)
+            if (status & SUZUKI_MUSIC_STATUS_SFX) {
                 voices |= music->key_off_mask;
-            else
+            } else {
                 voices |= allowed & music->key_off_mask;
+            }
             music->key_off_mask = 0;
         }
         music = music->next;
@@ -136,15 +150,17 @@ void suzuki_sound_flush_key_off(void) {
     pending = (allowed & g_suzuki_sound_music_key_off_voices) | g_suzuki_sound_sfx_key_off_voices;
     if (pending != 0) {
         for (voice = 23; voice >= 0; voice--) {
-            if ((pending & SPU_VOICECH(voice)) != 0)
+            if (pending & SPU_VOICECH(voice)) {
                 SpuSetVoiceRRAttr(voice, 6, SPU_VOICE_LINEARDecN);
+            }
         }
         g_suzuki_sound_sfx_key_off_voices = 0;
         g_suzuki_sound_music_key_off_voices = 0;
     }
 
-    if (voices != 0)
+    if (voices != 0) {
         SpuSetKey(SPU_OFF, voices);
+    }
 }
 
 /* Event handler of root counter 2 (g_suzuki_sound_root_counter_2_event): commits
@@ -164,12 +180,15 @@ s32 suzuki_sound_root_counter_2_handler(void) {
 
     suzuki_sound_update_voice_attrs();
     requests = g_suzuki_sound_voice_update_requests;
-    if ((requests & SUZUKI_VOICE_MASK_REQUEST_PITCH_LFO) != 0)
+    if (requests & SUZUKI_VOICE_MASK_REQUEST_PITCH_LFO) {
         suzuki_sound_calculate_pitch_lfo_voices();
-    if ((requests & SUZUKI_VOICE_MASK_REQUEST_NOISE) != 0)
+    }
+    if (requests & SUZUKI_VOICE_MASK_REQUEST_NOISE) {
         suzuki_sound_calculate_noise_voices();
-    if ((requests & SUZUKI_VOICE_MASK_REQUEST_REVERB) != 0)
+    }
+    if (requests & SUZUKI_VOICE_MASK_REQUEST_REVERB) {
         suzuki_sound_calculate_reverb_voices();
+    }
     g_suzuki_sound_voice_update_requests = 0;
     /* The original handler contains the key-on flush directly. */
     {
@@ -184,20 +203,22 @@ s32 suzuki_sound_root_counter_2_handler(void) {
         while (music != 0) {
             status = music->status;
             if (status < 0) {
-                if ((status & SUZUKI_MUSIC_STATUS_SFX) != 0)
+                if (status & SUZUKI_MUSIC_STATUS_SFX) {
                     voices |= music->key_on_mask;
-                else
+                } else {
                     voices |= allowed & music->key_on_mask;
+                }
                 music->key_on_mask = 0;
             }
             music = music->next;
         }
 
-        if (voices != 0)
+        if (voices != 0) {
             SpuSetKey(SPU_ON, voices);
+        }
     }
 
-    if ((g_suzuki_sound_tick_count++ & 1) != 0) {
+    if (g_suzuki_sound_tick_count++ & 1) {
         if (g_suzuki_sound_spu_state.music_ramp.count != 0) {
             suzuki_smd_step_ramp(&g_suzuki_sound_spu_state.music_ramp);
             g_suzuki_sound_spu_state.music_volume = g_suzuki_sound_spu_state.music_ramp.value >> 16;
@@ -222,8 +243,9 @@ s32 suzuki_sound_root_counter_2_handler(void) {
     while (music != 0) {
         /* The playing bit (15) is the sign. */
         if (music->status < 0) {
-            if (music->snapshot_restore_tick != 0 && music->sequence_ticks >= music->snapshot_restore_tick)
+            if (music->snapshot_restore_tick != 0 && music->sequence_ticks >= music->snapshot_restore_tick) {
                 suzuki_smd_restore_snapshot(music);
+            }
             if (music->tempo_scale.count != 0) {
                 suzuki_smd_step_ramp(&music->tempo_scale);
                 music->scaled_tempo = (music->tempo >> 16) * (music->tempo_scale.value >> 16);
@@ -265,8 +287,9 @@ s32 suzuki_sound_root_counter_2_handler(void) {
                         suzuki_smd_stop_music(music);
                         music->status |= (SUZUKI_MUSIC_STATUS_PAUSED | SUZUKI_MUSIC_STATUS_FULL_VOICE_UPDATE);
                     }
-                    if (music->bar == music->stop_bar)
+                    if (music->bar == music->stop_bar) {
                         suzuki_smd_stop_music(music);
+                    }
                 } else {
                     music->status &= ~SUZUKI_MUSIC_STATUS_PLAYING;
                     break;
@@ -291,10 +314,11 @@ s32 suzuki_sound_root_counter_2_handler(void) {
         while (music != 0) {
             status = music->status;
             if (status < 0) {
-                if ((status & SUZUKI_MUSIC_STATUS_SFX) != 0)
+                if (status & SUZUKI_MUSIC_STATUS_SFX) {
                     voices |= music->key_off_mask;
-                else
+                } else {
                     voices |= allowed & music->key_off_mask;
+                }
                 music->key_off_mask = 0;
             }
             music = music->next;
@@ -303,15 +327,17 @@ s32 suzuki_sound_root_counter_2_handler(void) {
         pending = (allowed & g_suzuki_sound_music_key_off_voices) | g_suzuki_sound_sfx_key_off_voices;
         if (pending != 0) {
             for (voice = 23; voice >= 0; voice--) {
-                if ((pending & SPU_VOICECH(voice)) != 0)
+                if (pending & SPU_VOICECH(voice)) {
                     SpuSetVoiceRRAttr(voice, 6, SPU_VOICE_LINEARDecN);
+                }
             }
             g_suzuki_sound_sfx_key_off_voices = 0;
             g_suzuki_sound_music_key_off_voices = 0;
         }
 
-        if (voices != 0)
+        if (voices != 0) {
             SpuSetKey(SPU_OFF, voices);
+        }
     }
     return 0;
 }
@@ -341,10 +367,11 @@ void suzuki_sound_calculate_pitch_lfo_voices(void) {
         /* The playing bit (15) is the sign. */
         status = music->status;
         if (status < 0) {
-            if ((status & SUZUKI_MUSIC_STATUS_SMD) != 0)
+            if (status & SUZUKI_MUSIC_STATUS_SMD) {
                 excludable_voices |= music->lfo_voice_mask;
-            else
+            } else {
                 forced_voices |= music->lfo_voice_mask;
+            }
         }
         music = music->next;
     }
@@ -369,10 +396,11 @@ void suzuki_sound_calculate_noise_voices(void) {
         /* The playing bit (15) is the sign. */
         status = music->status;
         if (status < 0) {
-            if ((status & SUZUKI_MUSIC_STATUS_SMD) != 0)
+            if (status & SUZUKI_MUSIC_STATUS_SMD) {
                 excludable_voices |= music->noise_voice_mask;
-            else
+            } else {
                 forced_voices |= music->noise_voice_mask;
+            }
         }
         music = music->next;
     }
@@ -397,10 +425,11 @@ void suzuki_sound_calculate_reverb_voices(void) {
         /* The playing bit (15) is the sign. */
         status = music->status;
         if (status < 0) {
-            if ((status & SUZUKI_MUSIC_STATUS_SMD) != 0)
+            if (status & SUZUKI_MUSIC_STATUS_SMD) {
                 excludable_voices |= music->reverb_voice_mask;
-            else
+            } else {
                 forced_voices |= music->reverb_voice_mask;
+            }
         }
         music = music->next;
     }
@@ -426,10 +455,11 @@ void suzuki_smd_update_channel_ramps(suzuki_music_t* music, suzuki_music_channel
     u16 flags;
 
     if (count != 0) {
-        if (--count != 0)
+        if (--count != 0) {
             music->tempo += music->tempo_step;
-        else
+        } else {
             music->tempo = music->tempo_target << 16;
+        }
         music->tempo_step_count = count;
         music->scaled_tempo = (music->tempo >> 16) * (music->tempo_scale.value >> 16);
     }
@@ -442,25 +472,28 @@ void suzuki_smd_update_channel_ramps(suzuki_music_t* music, suzuki_music_channel
                 channel->pitch_modulation = 0;
                 channel->volume_modulation = 0;
                 channel->balance_modulation = 0;
-                if ((flags & SUZUKI_RAMP_VOLUME) != 0) {
+                if (flags & SUZUKI_RAMP_VOLUME) {
                     voice_update_flags |= SUZUKI_VOICE_UPDATE_VOLUME;
-                    if (--channel->volume_step_count == 0)
+                    if (--channel->volume_step_count == 0) {
                         flags &= ~SUZUKI_RAMP_VOLUME;
+                    }
                     channel->volume += channel->volume_step;
                 }
-                if ((flags & SUZUKI_RAMP_PITCH_SLIDE) != 0) {
+                if (flags & SUZUKI_RAMP_PITCH_SLIDE) {
                     voice_update_flags |= SUZUKI_VOICE_UPDATE_PITCH;
-                    if ((flags & SUZUKI_RAMP_PITCH_SLIDE_HOLD) == 0 && --channel->pitch_slide_count == 0)
+                    if ((flags & SUZUKI_RAMP_PITCH_SLIDE_HOLD) == 0 && --channel->pitch_slide_count == 0) {
                         flags &= ~SUZUKI_RAMP_PITCH_SLIDE;
+                    }
                     channel->pitch += channel->pitch_slide_step;
                 }
-                if ((flags & SUZUKI_RAMP_BALANCE) != 0) {
+                if (flags & SUZUKI_RAMP_BALANCE) {
                     voice_update_flags |= SUZUKI_VOICE_UPDATE_VOLUME;
-                    if (--channel->balance_step_count == 0)
+                    if (--channel->balance_step_count == 0) {
                         flags &= ~SUZUKI_RAMP_BALANCE;
+                    }
                     channel->balance += channel->balance_step;
                 }
-                if (--channel->event_ticks == 1 && (active & SUZUKI_CHANNEL_NOTE_FOLLOWS) != 0) {
+                if (--channel->event_ticks == 1 && (active & SUZUKI_CHANNEL_NOTE_FOLLOWS)) {
                     channel->voice_attr.rr = 6;
                     channel->voice_attr_flags |= SUZUKI_VOICE_ATTR_RELEASE;
                 }

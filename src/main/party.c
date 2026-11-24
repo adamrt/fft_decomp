@@ -405,9 +405,9 @@ static void generate_record_raw_stats(party_unit_t* party, unit_generation_type_
 void battle_unit_generate_raw_stats(battle_unit_t* unit) {
     unit_generation_type_e unit_type;
 
-    if ((unit->unit_flags & UNIT_FLAG_MALE) != 0) {
+    if (unit->unit_flags & UNIT_FLAG_MALE) {
         unit_type = UNIT_TYPE_MALE;
-    } else if ((unit->unit_flags & UNIT_FLAG_FEMALE) != 0) {
+    } else if (unit->unit_flags & UNIT_FLAG_FEMALE) {
         unit_type = UNIT_TYPE_FEMALE;
     } else {
         unit_type = UNIT_TYPE_MONSTER;

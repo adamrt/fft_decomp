@@ -82,7 +82,7 @@ title_result_e open_title_entrypoint(s32 skip_movie) {
     u32* otag_1;
 
     title_init_sequence(skip_movie);
-    if ((g_system_runtime_flags & SYSTEM_RUNTIME_FLAG_RUNNING) != 0) {
+    if (g_system_runtime_flags & SYSTEM_RUNTIME_FLAG_RUNNING) {
         otag_0 = g_gfx_otags[0];
         otag_1 = g_gfx_otags[1];
         do {
@@ -108,7 +108,7 @@ title_result_e open_title_entrypoint(s32 skip_movie) {
             VSync(0);
             present_frame();
             system_frame_stub();
-        } while ((g_system_runtime_flags & SYSTEM_RUNTIME_FLAG_RUNNING) != 0);
+        } while (g_system_runtime_flags & SYSTEM_RUNTIME_FLAG_RUNNING);
     }
 
     SetDispMask(0);
@@ -131,7 +131,7 @@ void open_ending_entrypoint(void) {
     u32* otag_1;
 
     ending_init();
-    if ((g_system_runtime_flags & SYSTEM_RUNTIME_FLAG_RUNNING) != 0) {
+    if (g_system_runtime_flags & SYSTEM_RUNTIME_FLAG_RUNNING) {
         otag_0 = g_gfx_otags[0];
         otag_1 = g_gfx_otags[1];
         do {
@@ -153,7 +153,7 @@ void open_ending_entrypoint(void) {
             current_otag = (u32*)((g_gfx_active_buffer_index ^ 1) * CONTROLLER_OTAG_BUFFER_BYTES + (u32)otag_1);
             DrawOTag(current_otag - 1);
             system_frame_stub();
-        } while ((g_system_runtime_flags & SYSTEM_RUNTIME_FLAG_RUNNING) != 0);
+        } while (g_system_runtime_flags & SYSTEM_RUNTIME_FLAG_RUNNING);
     }
 
     gfx_restore_frame_bin_page();
@@ -209,7 +209,7 @@ static void update_stream_frame(void) {
     s16 read_sectors;
     s32 words;
 
-    if ((g_system_runtime_flags & SYSTEM_RUNTIME_FLAG_MOVIE_STREAMING) == 0) {
+    if (!(g_system_runtime_flags & SYSTEM_RUNTIME_FLAG_MOVIE_STREAMING)) {
         return;
     }
 
@@ -253,7 +253,7 @@ void movie_stop_stream(s32 pause_cd_audio) {
 /* While the CD audio plays: drop its volume to 0, pause the drive, wait four
  * vertical blanks and clear SYSTEM_RUNTIME_FLAG_CD_AUDIO_PLAYING. */
 void movie_pause_cd_audio(void) {
-    if ((g_system_runtime_flags & SYSTEM_RUNTIME_FLAG_CD_AUDIO_PLAYING) != 0) {
+    if (g_system_runtime_flags & SYSTEM_RUNTIME_FLAG_CD_AUDIO_PLAYING) {
         sound_set_cd_mix_and_volume(0, 1);
 
         while (CdControlB(CdlPause, 0, 0) == 0) { }
@@ -457,24 +457,24 @@ static void present_frame(void) {
     PutDispEnv(&g_gfx_screen_environments[display_index].disp);
 
     flags = g_system_runtime_flags;
-    if ((flags & SYSTEM_RUNTIME_FLAG_MOVIE_STREAMING) == 0) {
+    if (!(flags & SYSTEM_RUNTIME_FLAG_MOVIE_STREAMING)) {
         image_rect.h = 240;
         image_rect.x = 0;
-        if ((flags & SYSTEM_RUNTIME_FLAG_WIDE_SCREEN) != 0) {
+        if (flags & SYSTEM_RUNTIME_FLAG_WIDE_SCREEN) {
             image_rect.w = 320;
         } else {
             image_rect.w = 256;
         }
-        if ((g_gfx_active_buffer_index & 1) != 0) {
+        if (g_gfx_active_buffer_index & 1) {
             image_rect.y = 240;
         } else {
             image_rect.y = 0;
         }
 
         flags = g_system_runtime_flags;
-        if ((flags & SYSTEM_RUNTIME_FLAG_CLEAR_FRAME) != 0) {
+        if (flags & SYSTEM_RUNTIME_FLAG_CLEAR_FRAME) {
             ClearImage(&image_rect, 0, 0, 0);
-        } else if ((flags & SYSTEM_RUNTIME_FLAG_FRAME_FROM_VRAM) != 0) {
+        } else if (flags & SYSTEM_RUNTIME_FLAG_FRAME_FROM_VRAM) {
             move_rect.x = 512;
             move_rect.y = 256;
             move_rect.w = 512;

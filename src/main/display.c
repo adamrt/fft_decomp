@@ -110,6 +110,7 @@ void boot_fade_in_squaresoft_logo(void) {
     u32 otags[2][2];
     /* SetDrawMode uses this as a texture window; zero selects the full window. */
     RECT image_rect = { 0 };
+    /* Initialized here, not in a for loop: the bytes need the while loop over it. */
     s16 intensity = 248;
     int frame;
     int buffer;
@@ -162,6 +163,7 @@ void boot_fade_out_squaresoft_logo(void) {
     /* SetDrawMode uses this as a texture window; zero selects the full window. */
     RECT image_rect = { 0 };
     u32* otag_base;
+    /* Initialized here, not in a for loop: the bytes need the while loop over it. */
     s16 intensity = 0;
     int buffer;
 
@@ -173,6 +175,7 @@ void boot_fade_out_squaresoft_logo(void) {
 
     SetDrawMode(&draw_modes[0], 0, 0, PSYQ_GPU_TPAGE_ABR_SUBTRACT, &image_rect);
     draw_modes[1] = draw_modes[0];
+    /* The bytes need this base pointer; indexing otags[buffer] is 12 bytes shorter. */
     otag_base = otags[0];
 
     while (intensity < 256) {
@@ -242,7 +245,6 @@ void boot_show_sceap_logo(void) {
 
     set_up_display(320, 240, 512, 0, 0, 0);
     file_load_into_buffer_checked(DISC_SECTOR_SCEAP_DAT, 0x5000, g_heap_high_overlay_load_address);
-    frame = 0;
 
     SetPolyF4(&polygons[0]);
     setRGB0(&polygons[0], 0, 0, 0);
@@ -261,27 +263,24 @@ void boot_show_sceap_logo(void) {
     DrawSync(0);
     SetDispMask(1);
 
-    for (; frame < 15; frame++) {
+    for (frame = 0; frame < 15; frame++) {
         VSync(0);
     }
 
-    intensity = 248;
-    while (intensity >= 0) {
+    for (intensity = 248; intensity >= 0; intensity -= 8) {
         current_otag = otags[g_gfx_screen_polarity];
         ClearOTag(current_otag, 2);
         setRGB0(&g_gfx_screen_polarity[polygons], intensity, intensity, intensity);
         AddPrim(current_otag, &polygons[g_gfx_screen_polarity]);
         AddPrim(current_otag, &draw_modes[g_gfx_screen_polarity]);
         draw_sceap_logo(current_otag, (u32*)g_heap_high_overlay_load_address);
-        intensity -= 8;
     }
 
     for (frame = 0; frame < 180; frame++) {
         VSync(0);
     }
 
-    intensity = 0;
-    while (intensity < 256) {
+    for (intensity = 0; intensity < 256; intensity += 8) {
         if (intensity >= 248) {
             intensity = 255;
         }
@@ -292,7 +291,6 @@ void boot_show_sceap_logo(void) {
         AddPrim(current_otag, &polygons[g_gfx_screen_polarity]);
         AddPrim(current_otag, &draw_modes[g_gfx_screen_polarity]);
         draw_sceap_logo(current_otag, (u32*)g_heap_high_overlay_load_address);
-        intensity += 8;
     }
 
     DrawSync(0);
@@ -313,7 +311,6 @@ void boot_show_sceap_logo(void) {
 void gfx_reset_display(int width, int height, int projection, u8 red, u8 green, u8 blue) {
     RECT image_rect = { 0, 0, 1024, 512 };
     int second_y = height == 480 ? 0 : 240;
-    int font_stream;
 
     SetDispMask(0);
     ResetGraph(0);
@@ -334,8 +331,7 @@ void gfx_reset_display(int width, int height, int projection, u8 red, u8 green, 
     ClearImage(&image_rect, 0, 0, 0);
     DrawSync(0);
     FntLoad(640, 0);
-    font_stream = FntOpen(40, 16, 512, 256, 0, 512);
-    SetDumpFnt(font_stream);
+    SetDumpFnt(FntOpen(40, 16, 512, 256, 0, 512));
 
     PutDispEnv(&g_gfx_display_envs[g_gfx_screen_polarity]);
     PutDrawEnv(&g_gfx_draw_envs[g_gfx_screen_polarity]);

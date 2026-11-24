@@ -64,7 +64,7 @@ void world_map_update_scroll_axis(world_map_scroll_axis_t* axis, s32 direction) 
     switch (direction) {
     case 1:
         if (axis->value < axis->limit) {
-            axis->value = axis->value + axis->step;
+            axis->value += axis->step;
         }
         if (axis->value > axis->limit) {
             axis->value = axis->limit;
@@ -76,13 +76,13 @@ void world_map_update_scroll_axis(world_map_scroll_axis_t* axis, s32 direction) 
             break;
         }
         if (axis->value > 0) {
-            axis->value = axis->value - axis->decay;
+            axis->value -= axis->decay;
             if (axis->value <= 0) {
                 axis->value = 0;
             }
             axis->output = axis->value >> 8;
         } else {
-            axis->value = axis->value + axis->decay;
+            axis->value += axis->decay;
             if (axis->value >= 0) {
                 axis->value = 0;
             }
@@ -91,7 +91,7 @@ void world_map_update_scroll_axis(world_map_scroll_axis_t* axis, s32 direction) 
         break;
     case -1:
         if (-axis->value < axis->limit) {
-            axis->value = axis->value - axis->step;
+            axis->value -= axis->step;
         }
         if (-axis->value > axis->limit) {
             axis->value = -axis->limit;
@@ -133,8 +133,8 @@ u32 input_update_repeat(u32 buttons) {
         return pressed;
     }
 
-    if ((buttons & PSX_PAD_UP) != 0) {
-        if ((g_input_current_buttons & PSX_PAD_UP) != 0) {
+    if (buttons & PSX_PAD_UP) {
+        if (g_input_current_buttons & PSX_PAD_UP) {
             s32* counter = &s_world_map_input_repeat.counter_up;
 
             next = *counter + 1;
@@ -148,8 +148,8 @@ u32 input_update_repeat(u32 buttons) {
         }
     }
 
-    if ((buttons & PSX_PAD_DOWN) != 0) {
-        if ((g_input_current_buttons & PSX_PAD_DOWN) != 0) {
+    if (buttons & PSX_PAD_DOWN) {
+        if (g_input_current_buttons & PSX_PAD_DOWN) {
             s32* counter = &s_world_map_input_repeat.counter_down;
 
             next = *counter + 1;
@@ -163,8 +163,8 @@ u32 input_update_repeat(u32 buttons) {
         }
     }
 
-    if ((buttons & PSX_PAD_RIGHT) != 0) {
-        if ((g_input_current_buttons & PSX_PAD_RIGHT) != 0) {
+    if (buttons & PSX_PAD_RIGHT) {
+        if (g_input_current_buttons & PSX_PAD_RIGHT) {
             s32* counter = &s_world_map_input_repeat.counter_right;
 
             next = *counter + 1;
@@ -178,8 +178,8 @@ u32 input_update_repeat(u32 buttons) {
         }
     }
 
-    if ((buttons & PSX_PAD_LEFT) != 0) {
-        if ((g_input_current_buttons & PSX_PAD_LEFT) != 0) {
+    if (buttons & PSX_PAD_LEFT) {
+        if (g_input_current_buttons & PSX_PAD_LEFT) {
             s32* counter = &s_world_map_input_repeat.counter_left;
 
             next = *counter + 1;
@@ -193,8 +193,8 @@ u32 input_update_repeat(u32 buttons) {
         }
     }
 
-    if ((buttons & PSX_PAD_R1) != 0) {
-        if ((g_input_current_buttons & PSX_PAD_R1) != 0) {
+    if (buttons & PSX_PAD_R1) {
+        if (g_input_current_buttons & PSX_PAD_R1) {
             s32* counter = &s_world_map_input_repeat.counter_r1;
 
             next = *counter + 1;
@@ -208,8 +208,8 @@ u32 input_update_repeat(u32 buttons) {
         }
     }
 
-    if ((buttons & PSX_PAD_L1) != 0) {
-        if ((g_input_current_buttons & PSX_PAD_L1) != 0) {
+    if (buttons & PSX_PAD_L1) {
+        if (g_input_current_buttons & PSX_PAD_L1) {
             s32* counter = &s_world_map_input_repeat.counter_l1;
             s32 old_counter;
             s32 last_next;

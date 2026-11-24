@@ -144,10 +144,7 @@ void suzuki_smd_init_channels(suzuki_music_t* music) {
         smd = music->smd;
         offsets = smd->channel_offsets;
         waveset = g_suzuki_sound_waveset_list;
-        while (waveset != 0) {
-            if (waveset->id == music->waveset_id) {
-                break;
-            }
+        while (waveset != 0 && waveset->id != music->waveset_id) {
             waveset = waveset->next;
         }
         if (waveset == 0) {
@@ -430,13 +427,8 @@ s32 suzuki_smd_remove_music(suzuki_music_t* music) {
     suzuki_music_t* previous = 0;
     s16 status;
 
-    entry = g_suzuki_sound_active_music_list;
-    while (entry != 0) {
-        if (entry == music) {
-            break;
-        }
+    for (entry = g_suzuki_sound_active_music_list; entry != 0 && entry != music; entry = entry->next) {
         previous = entry;
-        entry = entry->next;
     }
     if (entry == 0) {
         return -1;
@@ -461,8 +453,9 @@ void suzuki_smd_set_flags_all_channels(u16 mask, suzuki_music_t* music) {
     s32 count = music->channel_count;
 
     do {
-        if (channel->flags != 0)
+        if (channel->flags != 0) {
             channel->flags |= mask;
+        }
         channel++;
     } while (--count != 0);
 }

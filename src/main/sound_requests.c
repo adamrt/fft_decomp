@@ -407,7 +407,7 @@ int music_fade_out_tune(int time) {
     int tune = g_music.slots.tune;
 
     if (tune != 0) {
-        if ((tune & MUSIC_TUNE_PENDING) != 0) {
+        if (tune & MUSIC_TUNE_PENDING) {
             g_music.slots.tune = 0;
         } else {
             suzuki_smd_set_music_volume(g_music.slots.music[1 + (tune & MUSIC_TUNE_ID_MASK)], 0, time);
@@ -428,7 +428,7 @@ s32 music_update_tunes(void) {
         suzuki_music_t** tune_handles;
         suzuki_music_t** handle;
 
-        if (suzuki_smd_is_music_playing(g_music.state.current_music) != 0) {
+        if (suzuki_smd_is_music_playing(g_music.state.current_music)) {
             return 0;
         }
         tune_index = g_music.slots.tune & MUSIC_TUNE_ID_MASK;
@@ -449,7 +449,7 @@ s32 music_update_tunes(void) {
         tune_index = tune & MUSIC_TUNE_ID_MASK;
         tune_handles = &g_music.slots.music[1];
         handle = &tune_handles[tune_index];
-        if (suzuki_smd_is_music_playing(*handle) != 0) {
+        if (suzuki_smd_is_music_playing(*handle)) {
             return 0;
         }
         suzuki_smd_stop_music(*handle);

@@ -42,7 +42,6 @@ void calendar_advance_days(s32 days) {
     s32 month;
     s32 day;
     s32 until_birthday;
-    u8* counter;
 
     birthdays = g_brave_story_birthdays;
     years = days / 365;
@@ -64,7 +63,7 @@ void calendar_advance_days(s32 days) {
          * 31 December misses those early in the new year (retail quirk). */
         until_birthday = calendar_date_to_day_index(month, day) - today;
         if (until_birthday > 0 && days >= until_birthday) {
-            g_brave_story_character_ages[i] += 1;
+            g_brave_story_character_ages[i]++;
         }
         if (g_brave_story_character_ages[i] >= 100) {
             g_brave_story_character_ages[i] = 99;
@@ -92,16 +91,15 @@ void calendar_advance_days(s32 days) {
         }
     }
 
-    counter = g_proposition_states;
-    do {
-        if (*counter & PROPOSITION_STATE_DAYS_MASK) {
-            day = (*counter & PROPOSITION_STATE_DAYS_MASK) - days;
+    for (i = 0; i < EVENT_SCRIPT_VAR_PROPOSITION_COUNT; i++) {
+        if (g_proposition_states[i] & PROPOSITION_STATE_DAYS_MASK) {
+            day = (g_proposition_states[i] & PROPOSITION_STATE_DAYS_MASK) - days;
             if (day < 0) {
                 day = 0;
             }
-            *counter = (*counter & (PROPOSITION_STATE_FAILURE | PROPOSITION_STATE_BAD_FAILURE))
+            g_proposition_states[i]
+                = (g_proposition_states[i] & (PROPOSITION_STATE_FAILURE | PROPOSITION_STATE_BAD_FAILURE))
                 | (day & PROPOSITION_STATE_DAYS_MASK);
         }
-        counter++;
-    } while ((s32)counter < (s32)(g_proposition_states + EVENT_SCRIPT_VAR_PROPOSITION_COUNT)); /* signed slt */
+    }
 }

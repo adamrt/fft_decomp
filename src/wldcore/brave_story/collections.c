@@ -91,8 +91,7 @@ void brave_story_suspend_unexplored_land_list(menu_stack_record_t* unused_level)
  * The target passes the level to brave_story_suspend_unexplored_land_list,
  * which reads no argument. */
 void brave_story_update_unexplored_land_list_input(menu_stack_record_t* level) {
-    if ((g_world_map_flags & WORLD_MAP_FLAG_INPUT_BLOCKED)
-        && thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL) == 0) {
+    if ((g_world_map_flags & WORLD_MAP_FLAG_INPUT_BLOCKED) && !thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL)) {
         g_menu_stack_ot_offset = 1;
         g_menu_blocked_buttons = 0;
         g_world_map_flags ^= WORLD_MAP_FLAG_INPUT_BLOCKED;
@@ -200,7 +199,7 @@ static void open_land_detail(s32 value) {
     thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_BRAVE_STORY_ENTRY_INFO, 0);
     g_menu_stack_records[g_menu_stack_depth].detail.phase = BRAVE_STORY_DETAIL_PHASE_LOAD;
     g_menu_stack_types[g_menu_stack_depth] = MENU_STACK_LEVEL_BRAVE_STORY_UNEXPLORED_LAND;
-    g_menu_stack_depth = g_menu_stack_depth + 1;
+    g_menu_stack_depth++;
 }
 
 /* Step of the unexplored-land detail level.
@@ -256,7 +255,7 @@ void brave_story_update_unexplored_land_detail(menu_stack_record_t* level) {
         g_text_window.extra_render_index = render;
         g_text_window.extra_base = *base;
         g_text_window.extra_bounds = g_display_object_gs_image_pool[render].bounds;
-        level->detail.phase = level->detail.phase + 1;
+        level->detail.phase++;
         break;
     case BRAVE_STORY_DETAIL_PHASE_POP_IN:
         if (!(g_display_object_gs_image_pool[level->detail.render_index].flags & DISPLAY_OBJECT_POP_IN)) {
@@ -353,8 +352,7 @@ void brave_story_suspend_treasure_list(menu_stack_record_t* unused_level) {
  * The target passes the level to brave_story_suspend_unexplored_land_list,
  * which reads no argument. */
 void brave_story_update_treasure_list_input(menu_stack_record_t* level) {
-    if ((g_world_map_flags & WORLD_MAP_FLAG_INPUT_BLOCKED)
-        && thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL) == 0) {
+    if ((g_world_map_flags & WORLD_MAP_FLAG_INPUT_BLOCKED) && !thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL)) {
         g_menu_stack_ot_offset = 1;
         g_menu_blocked_buttons = 0;
         g_world_map_flags ^= WORLD_MAP_FLAG_INPUT_BLOCKED;
@@ -458,7 +456,7 @@ void brave_story_open_treasure_detail(s32 value) {
     g_menu_stack_records[g_menu_stack_depth].detail.phase = BRAVE_STORY_DETAIL_PHASE_LOAD;
     g_menu_stack_records[g_menu_stack_depth].detail.timer = 0;
     g_menu_stack_types[g_menu_stack_depth] = MENU_STACK_LEVEL_BRAVE_STORY_TREASURE;
-    g_menu_stack_depth = g_menu_stack_depth + 1;
+    g_menu_stack_depth++;
 }
 
 /* Handler of the treasure detail level (the treasure's picture and text): the
@@ -523,10 +521,10 @@ void brave_story_update_treasure_detail(menu_stack_record_t* level) {
         g_text_window.extra_render_index = render;
         g_text_window.extra_base = *base;
         g_text_window.extra_bounds = g_display_object_gs_image_pool[render].bounds;
-        level->detail.phase = level->detail.phase + 1;
+        level->detail.phase++;
         break;
     case BRAVE_STORY_DETAIL_PHASE_POP_IN:
-        level->detail.timer = level->detail.timer + 1;
+        level->detail.timer++;
         GsGetTimInfo(g_picture_buffer + 1, &image);
         if (update_picture_dissolve(&image, level->detail.timer) == 0) {
             level->detail.phase = BRAVE_STORY_DETAIL_PHASE_SHOWN;
@@ -534,7 +532,7 @@ void brave_story_update_treasure_detail(menu_stack_record_t* level) {
         break;
     default:
         if ((g_world_map_flags & (WORLD_MAP_FLAG_INPUT_BLOCKED | WORLD_MAP_FLAG_FADING)) == WORLD_MAP_FLAG_INPUT_BLOCKED
-            && thread_is_running(WORLD_MAP_THREAD_SLOT_MESSAGE) == 0) {
+            && !thread_is_running(WORLD_MAP_THREAD_SLOT_MESSAGE)) {
             slot = level->detail.saved_record_index;
             g_world_map_flags ^= WORLD_MAP_FLAG_INPUT_BLOCKED;
             g_display_object_animated_count -= 4;
@@ -819,7 +817,7 @@ void novel_update_reading_choice(menu_stack_record_t* level) {
         return;
     }
 
-    if (input_update_repeat(PSX_PAD_UP) == 0 && input_update_repeat(PSX_PAD_DOWN) == 0) {
+    if (!input_update_repeat(PSX_PAD_UP) && !input_update_repeat(PSX_PAD_DOWN)) {
         return;
     }
 

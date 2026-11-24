@@ -68,7 +68,7 @@ void bits_primary_write(s32 value) {
     g_bits_primary_write_index = bit_index - 1;
     mask = 1 << bit_index;
     *g_bits_primary_cursor &= ~mask;
-    if ((value & 0xff) != 0) {
+    if (value & 0xff) {
         *g_bits_primary_cursor |= mask;
     }
     if (g_bits_primary_write_index < 0) {

@@ -317,7 +317,7 @@ s32 novel_run_script(void) {
 
         flags = g_novel_reading.state_flags;
         g_novel_reading.state_flags = flags & ~NOVEL_STATE_FETCHED;
-    } while ((flags & (NOVEL_STATE_YIELD | NOVEL_STATE_END)) == 0);
+    } while (!(flags & (NOVEL_STATE_YIELD | NOVEL_STATE_END)));
 
     aborted = g_novel_reading.state_flags & NOVEL_STATE_END;
     g_novel_reading.state_flags &= ~NOVEL_STATE_YIELD;
@@ -588,7 +588,7 @@ static void novel_opcode_09_wait_frames(void) {
     s32 operand;
 
     g_novel_reading.state_flags = updated;
-    if ((updated & NOVEL_STATE_FETCHED) != 0) {
+    if (updated & NOVEL_STATE_FETCHED) {
         g_novel_wait_counter = 0;
         g_novel_wait_frames = (u8)(g_novel_reading.instruction >> 8);
     }
@@ -886,7 +886,7 @@ static void change_reading_music(s32 music_id) {
     s16 packed = g_novel_reading.music_selection;
     s32 slot = packed >> 8;
 
-    if ((packed & 0xFF) != 0) {
+    if (packed & 0xFF) {
         music_stop();
     }
     if (slot != 0) {
@@ -1098,7 +1098,7 @@ static void novel_opcode_2a_set_white_screen_overlay(void) {
  * Each block takes its own pointer local so the flag address is materialized
  * twice, as in the target. */
 static void novel_opcode_2b_wait_for_circle_press(void) {
-    if ((g_world_map_input_new_button_presses & PSX_PAD_CIRCLE) != 0) {
+    if (g_world_map_input_new_button_presses & PSX_PAD_CIRCLE) {
         u16* state_flags;
 
         state_flags = &g_novel_reading.state_flags;
@@ -1229,7 +1229,7 @@ static void novel_opcode_33_add_counter_delta_if_choice(void) {
 
 /* Sound-novel opcode: yield while a screen fade is running. */
 static void novel_opcode_34_wait_for_fade(void) {
-    if ((g_world_map_flags & WORLD_MAP_FLAG_FADING) == 0) {
+    if (!(g_world_map_flags & WORLD_MAP_FLAG_FADING)) {
         g_novel_reading.state_flags |= NOVEL_STATE_FETCH;
     } else {
         g_novel_reading.state_flags |= NOVEL_STATE_YIELD;

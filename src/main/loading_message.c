@@ -89,7 +89,7 @@ void loading_message_append_to_otag(u32* otag) {
     int i;
 
     if (g_loading_visible != 0) {
-        if (((s_loading_frame_counter / 60) & 1) == 0) {
+        if (!((s_loading_frame_counter / 60) & 1)) {
             for (i = 0; i < 7; i++) {
                 AddPrim(otag, &g_loading_primitives[g_gfx_screen_polarity][i]);
             }

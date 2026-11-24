@@ -15,14 +15,14 @@ void title_prepare_new_game(s32 party_mode, s32 world_load_mode) {
     u32 flags;
     u32 party_mode_flag;
 
-    if ((g_system_runtime_flags & SYSTEM_RUNTIME_FLAG_WORLD_OVERLAY_LOADED) == 0) {
+    if (!(g_system_runtime_flags & SYSTEM_RUNTIME_FLAG_WORLD_OVERLAY_LOADED)) {
         g_system_runtime_flags |= SYSTEM_RUNTIME_FLAG_WORLD_OVERLAY_LOADED;
         overlay_load_world(world_load_mode);
     }
 
     party_mode_flag = NEW_GAME_PARTY_MODE_FLAG_BASE << party_mode;
     flags = g_system_runtime_flags;
-    if ((flags & SYSTEM_RUNTIME_FLAG_PARTY_CHOSEN) == 0 || (flags & party_mode_flag) == 0) {
+    if (!(flags & SYSTEM_RUNTIME_FLAG_PARTY_CHOSEN) || !(flags & party_mode_flag)) {
         g_system_runtime_flags
             = ((flags | SYSTEM_RUNTIME_FLAG_PARTY_CHOSEN) & ~NEW_GAME_PARTY_MODE_FLAG_MASK) | party_mode_flag;
         party_init_new_game(party_mode);

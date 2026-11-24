@@ -60,6 +60,7 @@ extern POLY_GT4 g_prologue_line_primitives[2][14];
 static void prepare_crossfade(s32 file_index);
 static void draw_text_lines(s32 intensity);
 static void update_crossfade(void);
+
 /* The new-game prologue's pictures are 210x180, at rows 43 to 222 of the
  * 256-pixel-wide frame image. */
 #define PROLOGUE_IMAGE_WIDTH      210
@@ -75,11 +76,10 @@ typedef struct prologue_crossfade {
 typedef char prologue_crossfade_size_must_be_182[sizeof(prologue_crossfade_t) == 182 ? 1 : -1];
 
 extern prologue_crossfade_t g_prologue_crossfade;
+/* Volatile: update_crossfade reloads the source pointer for every column. */
 static u16* volatile s_prologue_crossfade_new_picture;
 static u16* s_prologue_crossfade_old_picture;
 static u16* s_prologue_crossfade_frame_pixels;
-
-/* update_crossfade reloads the source pointer for every column. */
 
 /* Arm the new-game prologue sequence: start before entry 0 of entry_table with NEXT_ENTRY set, end
  * at entry target, draw its text in ordering-table entries ot_layer and ot_layer + 1, at full
@@ -166,6 +166,7 @@ s32 prologue_update(void) {
                     g_prologue_crossfade.active = 1;
                     break;
                 }
+                /* Incrementing through a pointer keeps the retail store order. */
                 {
                     s16* index = &g_prologue.current_index;
 
@@ -194,6 +195,7 @@ s32 prologue_update(void) {
                     = g_prologue.entry->line_data[i * sizeof(prologue_line_t) + offsetof(prologue_line_t, texture_row)];
             }
         }
+        /* Incrementing through a pointer keeps the retail store order. */
         {
             s16* step = &g_prologue.step;
 
@@ -456,12 +458,8 @@ static void update_crossfade(void) {
                 row++;
             } while (row < g_prologue_crossfade.band_end_row);
         }
-        {
-            u8* band_end_row = &g_prologue_crossfade.band_end_row;
-
-            if (++*band_end_row >= PROLOGUE_IMAGE_BLEND_END_ROW) {
-                g_prologue_crossfade.active = 0;
-            }
+        if (++g_prologue_crossfade.band_end_row >= PROLOGUE_IMAGE_BLEND_END_ROW) {
+            g_prologue_crossfade.active = 0;
         }
     }
 }

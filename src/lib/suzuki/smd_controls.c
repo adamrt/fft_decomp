@@ -218,7 +218,7 @@ void suzuki_smd_discard_snapshot(suzuki_music_t* music) {
     u16 status;
 
     status = music->status;
-    if ((status & SUZUKI_MUSIC_STATUS_SNAPSHOT) != 0) {
+    if (status & SUZUKI_MUSIC_STATUS_SNAPSHOT) {
         music->status = status & ~SUZUKI_MUSIC_STATUS_SNAPSHOT;
         suzuki_smd_free_snapshots(music);
     }
@@ -250,7 +250,7 @@ void suzuki_smd_save_snapshot(suzuki_music_t* music) {
 void suzuki_smd_restore_snapshot(suzuki_music_t* music) {
     s32 tick;
 
-    if (music->snapshot != 0 && (music->status & SUZUKI_MUSIC_STATUS_SNAPSHOT) != 0) {
+    if (music->snapshot != 0 && (music->status & SUZUKI_MUSIC_STATUS_SNAPSHOT)) {
         DisableEvent(g_suzuki_sound_root_counter_2_event);
         g_suzuki_sound_music_key_off_voices |= suzuki_smd_get_active_voice_mask(music);
         tick = music->sequence_ticks;
@@ -285,7 +285,7 @@ u32 suzuki_smd_retrigger_held_voices(suzuki_music_t* music) {
     voices = 0;
     do {
         if ((channel->flags & SUZUKI_CHANNEL_IN_USE) && (channel->flags & SUZUKI_CHANNEL_SOUNDING)) {
-            if ((channel->flags & (SUZUKI_CHANNEL_MUTED | SUZUKI_CHANNEL_NO_RETRIGGER)) == 0) {
+            if (!(channel->flags & (SUZUKI_CHANNEL_MUTED | SUZUKI_CHANNEL_NO_RETRIGGER))) {
                 voices |= channel->voice_attr.voice;
                 channel->voice_update_flags |= SUZUKI_VOICE_UPDATE_KEY_ON;
             }
@@ -308,7 +308,7 @@ u32 suzuki_smd_get_held_voices(suzuki_music_t* music) {
     voices = 0;
     do {
         if ((channel->flags & SUZUKI_CHANNEL_IN_USE) && (channel->flags & SUZUKI_CHANNEL_SOUNDING)) {
-            if ((channel->flags & (SUZUKI_CHANNEL_MUTED | SUZUKI_CHANNEL_NO_RETRIGGER)) == 0) {
+            if (!(channel->flags & (SUZUKI_CHANNEL_MUTED | SUZUKI_CHANNEL_NO_RETRIGGER))) {
                 voices |= channel->voice_attr.voice;
             }
         }

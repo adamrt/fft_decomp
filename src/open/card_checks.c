@@ -15,8 +15,9 @@ memcard_result_e memcard_info_retry(s32 port, s32 retry_limit) {
     for (i = 0; i < retry_limit; i++) {
         if (_card_info(port) == 1) {
             result = memcard_wait_bios_event();
-            if (result == MEMCARD_RESULT_COMPLETE)
+            if (result == MEMCARD_RESULT_COMPLETE) {
                 break;
+            }
         } else {
             result = MEMCARD_RESULT_ERROR;
         }

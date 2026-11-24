@@ -25,6 +25,7 @@ void save_init_state(void) {
         g_script_variable_storage[i] = 0;
     }
 
+    /* The bytes need one local for 4 and the options: it loads the options before the stores. */
     value = 4;
     g_input_repeat_period = value;
     g_menu_scroll_slow_step = value;

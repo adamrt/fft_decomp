@@ -349,7 +349,7 @@ s32 world_map_find_dot(point32_t point) {
         if (script_variable_get(i + EVENT_SCRIPT_VAR_LOCATION_VISIBLE_FIRST) == 0) {
             continue;
         }
-        if ((g_world_map_dots[i].render.flags & (DISPLAY_OBJECT_BLANK | DISPLAY_OBJECT_HIDDEN)) != 0) {
+        if (g_world_map_dots[i].render.flags & (DISPLAY_OBJECT_BLANK | DISPLAY_OBJECT_HIDDEN)) {
             continue;
         }
         value = g_world_map_dots[i].render.position.x;
@@ -447,8 +447,8 @@ s32 location_build_menu_entries(s32 location_id, s32* out) {
         out[1] = TEXT_ID_SHOP;
         out[2] = TEXT_ID_SOLDIER_OFFICE;
         if (script_variable_get(EVENT_SCRIPT_VAR_FUR_SHOP_ENABLED) != 0
-            && ((location_id == LOCATION_DORTER) || (location_id == LOCATION_WARJILIS)
-                || (location_id == LOCATION_ZARGHIDAS))) {
+            && (location_id == LOCATION_DORTER || location_id == LOCATION_WARJILIS
+                || location_id == LOCATION_ZARGHIDAS)) {
             out[count] = TEXT_ID_FUR_SHOP;
             count++;
         }
@@ -471,7 +471,7 @@ static s32 collect_location_choices(s32 location_id, s32* out) {
     if (script_variable_get(location_id + EVENT_SCRIPT_VAR_LOCATION_COLOR_FIRST) != 0) {
         return 0;
     }
-    if (location_script_run(g_world_map_marker_state.marker.location_id, LOCATION_SCRIPT_ACTION_CHOICE) == 0) {
+    if (!location_script_run(g_world_map_marker_state.marker.location_id, LOCATION_SCRIPT_ACTION_CHOICE)) {
         return 0;
     }
     available = 0;
@@ -903,7 +903,7 @@ static void find_path(s32 from, s32 to) {
 s32 travel_start(s32 from_location, s32 to_location) {
     s32 depth;
 
-    if (location_script_run(g_world_map_marker_state.marker.location_id, LOCATION_SCRIPT_ACTION_LOAD_EVENT) != 0) {
+    if (location_script_run(g_world_map_marker_state.marker.location_id, LOCATION_SCRIPT_ACTION_LOAD_EVENT)) {
         g_display_object_animated_pool[g_menu_stack_records[g_menu_stack_depth - 1].window_index].flags
             |= DISPLAY_OBJECT_HIDDEN;
         g_travel_next_map_id = 0;
@@ -912,7 +912,7 @@ s32 travel_start(s32 from_location, s32 to_location) {
         g_world_map_flags |= WORLD_MAP_FLAG_HIDE_LOCATION_LABEL;
         return 0;
     }
-    if (location_script_run(g_world_map_marker_state.marker.location_id, LOCATION_SCRIPT_ACTION_SET_VAR_2) != 0) {
+    if (location_script_run(g_world_map_marker_state.marker.location_id, LOCATION_SCRIPT_ACTION_SET_VAR_2)) {
         script_variable_set(g_location_script_state.args[0], g_location_script_state.args[1]);
     }
     g_travel_search_cost = 0;
@@ -933,8 +933,8 @@ s32 travel_start(s32 from_location, s32 to_location) {
     depth = g_menu_stack_depth - 1;
     g_travel.menu_level = depth;
     g_display_object_animated_pool[g_menu_stack_records[depth].window_index].flags |= DISPLAY_OBJECT_HIDDEN;
-    if (world_map_start_pan(&g_world_map_marker_state.marker.render.position, &g_world_map_marker_state.marker.position)
-        == 0) {
+    if (!world_map_start_pan(
+            &g_world_map_marker_state.marker.render.position, &g_world_map_marker_state.marker.position)) {
         g_world_map_marker_state.flags |= WORLD_MAP_MARKER_UPDATE_DIRECTION | WORLD_MAP_MARKER_ALTERNATE_DIRECTION_SET;
     }
     g_world_map_marker_state.marker.picture_id = location_load_picture(to_location);
@@ -966,7 +966,7 @@ void travel_update(void) {
     }
 
     if (g_world_map_pan.flags & WORLD_MAP_PAN_ACTIVE) {
-        if (world_map_update_pan() == 0) {
+        if (!world_map_update_pan()) {
             g_world_map_marker_state.flags
                 |= WORLD_MAP_MARKER_UPDATE_DIRECTION | WORLD_MAP_MARKER_ALTERNATE_DIRECTION_SET;
         }
@@ -982,8 +982,7 @@ void travel_update(void) {
             g_world_map_marker_state.marker.location_id = g_travel.leg_end_location;
             script_variable_set(EVENT_SCRIPT_VAR_LOCATION, g_travel.leg_end_location);
             g_travel.route_index++;
-            if (location_script_run(g_world_map_marker_state.marker.location_id, LOCATION_SCRIPT_ACTION_LOAD_EVENT)
-                != 0) {
+            if (location_script_run(g_world_map_marker_state.marker.location_id, LOCATION_SCRIPT_ACTION_LOAD_EVENT)) {
                 g_travel_next_map_id = 0;
                 script_variable_set(EVENT_SCRIPT_VAR_CURRENT_EVENT, g_location_script_state.args[0]);
                 world_map_open_event_transition(g_location_script_state.args[1]);
@@ -994,13 +993,11 @@ void travel_update(void) {
                     = g_world_map_marker_state.marker.location_id;
                 return;
             }
-            if (location_script_run(g_world_map_marker_state.marker.location_id, LOCATION_SCRIPT_ACTION_SET_VAR_2)
-                != 0) {
+            if (location_script_run(g_world_map_marker_state.marker.location_id, LOCATION_SCRIPT_ACTION_SET_VAR_2)) {
                 script_variable_set(g_location_script_state.args[0], g_location_script_state.args[1]);
             }
             if (roll_encounter(g_travel.leg_end_location,
-                    g_travel.route_path.routes[g_travel.route_index - 1] & TRAVEL_PATH_ROUTE_MASK)
-                != 0) {
+                    g_travel.route_path.routes[g_travel.route_index - 1] & TRAVEL_PATH_ROUTE_MASK)) {
                 g_world_map_flags |= WORLD_MAP_FLAG_RANDOM_BATTLE;
                 g_travel_next_map_id = s_random_battle_map_id;
                 script_variable_set(EVENT_SCRIPT_VAR_CURRENT_ENTD, g_random_battle_entd_id);
@@ -1039,6 +1036,7 @@ void travel_update(void) {
                 = g_world_map_marker_state.marker.location_id;
             result = collect_location_choices(g_world_map_marker_state.marker.location_id,
                 g_menu_stack_records[g_menu_stack_depth].location_transition.choice_text_ids);
+            /* -1 (Murond Death City) is also below 1; retail tests it separately. */
             if (result != -1 && result > 0) {
                 g_menu_stack_records[g_menu_stack_depth].location_transition.pending_result = result;
                 menu_stack_dispatch_suspend();
@@ -1075,7 +1073,7 @@ s32 world_map_start_pan(const point32_t* point, const SVECTOR* coordinates) {
     s32 dx;
     s32 dy;
 
-    if (world_map_point_needs_pan(point) == 0) {
+    if (!world_map_point_needs_pan(point)) {
         return 0;
     }
 
@@ -1214,6 +1212,7 @@ static s32 roll_encounter(s32 location, s32 route) {
 
     base = g_random_battle_roads;
     offset = location * 72;
+    /* Every loop counts in `location`: the target keeps them all in the parameter's register. */
     for (location = 0; location < 3; location++) {
         if (ENTRY_BASE(offset + location * 24)->route == route) {
             break;

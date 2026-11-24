@@ -21,7 +21,7 @@ void suzuki_sound_set_sfx_enabled(s32 enabled) {
 /* Plays a sound on SFX channels 6-7 at the default volume (0x60) and center
  * balance, with a priority suzuki_sound_find_sfx_channel never steals. */
 void suzuki_sound_play_direct_sfx(s32 sound) {
-    if ((g_suzuki_sound_driver_flags & SUZUKI_SOUND_DRIVER_SFX_ENABLED) != 0) {
+    if (g_suzuki_sound_driver_flags & SUZUKI_SOUND_DRIVER_SFX_ENABLED) {
         g_suzuki_sound_sfx_channel_count = 2;
         suzuki_sound_start_sfx(SUZUKI_SOUND_SFX_CHANNEL_ID(SUZUKI_SOUND_SFX_PRIORITY_DIRECT, 6), sound, 0x6000, 0x4000);
     }
@@ -29,7 +29,7 @@ void suzuki_sound_play_direct_sfx(s32 sound) {
 
 /* Plays a sound on SFX channels 4-5, like suzuki_sound_play_direct_sfx on 6-7. */
 void suzuki_sound_play_background_sfx(s32 sound) {
-    if ((g_suzuki_sound_driver_flags & SUZUKI_SOUND_DRIVER_SFX_ENABLED) != 0) {
+    if (g_suzuki_sound_driver_flags & SUZUKI_SOUND_DRIVER_SFX_ENABLED) {
         g_suzuki_sound_sfx_channel_count = 2;
         suzuki_sound_start_sfx(
             SUZUKI_SOUND_SFX_CHANNEL_ID(SUZUKI_SOUND_SFX_PRIORITY_BACKGROUND, 4), sound, 0x6000, 0x4000);
@@ -39,7 +39,7 @@ void suzuki_sound_play_background_sfx(s32 sound) {
 /* Plays a sound effect on a free pair of SFX voices at the default volume
  * (0x60) and center balance (0x40). */
 void suzuki_sound_play_sfx(s32 sound_id) {
-    if ((g_suzuki_sound_driver_flags & SUZUKI_SOUND_DRIVER_SFX_ENABLED) != 0) {
+    if (g_suzuki_sound_driver_flags & SUZUKI_SOUND_DRIVER_SFX_ENABLED) {
         s32 channel = suzuki_sound_find_sfx_channel(sound_id, 2);
         g_suzuki_sound_sfx_channel_count = 2;
         suzuki_sound_start_sfx(
@@ -53,7 +53,7 @@ void suzuki_sound_play_sfx_in_channel(s32 sound_id, s32 channel) {
     u16 first_channel = channel;
 
     first_channel &= ~1;
-    if ((g_suzuki_sound_driver_flags & SUZUKI_SOUND_DRIVER_SFX_ENABLED) != 0) {
+    if (g_suzuki_sound_driver_flags & SUZUKI_SOUND_DRIVER_SFX_ENABLED) {
         g_suzuki_sound_sfx_channel_count = 2;
         suzuki_sound_start_sfx(
             SUZUKI_SOUND_SFX_CHANNEL_ID(SUZUKI_SOUND_SFX_PRIORITY_STEALABLE, first_channel), sound_id, 0x6000, 0x4000);
@@ -63,7 +63,7 @@ void suzuki_sound_play_sfx_in_channel(s32 sound_id, s32 channel) {
 /* suzuki_sound_play_sfx with explicit volume and balance bytes; SMD
  * opcode 0x9C (suzuki_smd_play_sfx) passes balance 0x40 (center). */
 void suzuki_sound_play_sfx_with_settings_find_channel(s32 sound_id, s32 volume, s32 balance) {
-    if ((g_suzuki_sound_driver_flags & SUZUKI_SOUND_DRIVER_SFX_ENABLED) != 0) {
+    if (g_suzuki_sound_driver_flags & SUZUKI_SOUND_DRIVER_SFX_ENABLED) {
         s32 channel = suzuki_sound_find_sfx_channel(sound_id, 2);
         g_suzuki_sound_sfx_channel_count = 2;
         suzuki_sound_start_sfx(SUZUKI_SOUND_SFX_CHANNEL_ID(SUZUKI_SOUND_SFX_PRIORITY_STEALABLE, channel), sound_id,
@@ -76,7 +76,7 @@ void suzuki_sound_play_sfx_with_settings_in_channel(s32 sound_id, s32 channel, s
     u16 first_channel = channel;
 
     first_channel &= ~1;
-    if ((g_suzuki_sound_driver_flags & SUZUKI_SOUND_DRIVER_SFX_ENABLED) != 0) {
+    if (g_suzuki_sound_driver_flags & SUZUKI_SOUND_DRIVER_SFX_ENABLED) {
         g_suzuki_sound_sfx_channel_count = 2;
         suzuki_sound_start_sfx(SUZUKI_SOUND_SFX_CHANNEL_ID(SUZUKI_SOUND_SFX_PRIORITY_STEALABLE, first_channel),
             sound_id, volume << 8, balance << 8);
@@ -85,7 +85,7 @@ void suzuki_sound_play_sfx_with_settings_in_channel(s32 sound_id, s32 channel, s
 
 /* Plays two sound effects on the SFX voice pairs 0 and 2. */
 void suzuki_sound_play_2_sfx(s32 first, s32 second) {
-    if ((g_suzuki_sound_driver_flags & SUZUKI_SOUND_DRIVER_SFX_ENABLED) != 0) {
+    if (g_suzuki_sound_driver_flags & SUZUKI_SOUND_DRIVER_SFX_ENABLED) {
         g_suzuki_sound_sfx_channel_count = 2;
         suzuki_sound_start_sfx(
             SUZUKI_SOUND_SFX_CHANNEL_ID(SUZUKI_SOUND_SFX_PRIORITY_STEALABLE, 0), first, 0x6000, 0x4000);
@@ -96,7 +96,7 @@ void suzuki_sound_play_2_sfx(s32 first, s32 second) {
 
 /* Plays four sound effects on the SFX voice pairs 0, 2, 4 and 6. */
 void suzuki_sound_play_4_sfx(s32 first, s32 second, s32 third, s32 fourth) {
-    if ((g_suzuki_sound_driver_flags & SUZUKI_SOUND_DRIVER_SFX_ENABLED) != 0) {
+    if (g_suzuki_sound_driver_flags & SUZUKI_SOUND_DRIVER_SFX_ENABLED) {
         g_suzuki_sound_sfx_channel_count = 2;
         suzuki_sound_start_sfx(
             SUZUKI_SOUND_SFX_CHANNEL_ID(SUZUKI_SOUND_SFX_PRIORITY_STEALABLE, 0), first, 0x6000, 0x4000);

@@ -119,7 +119,7 @@ void world_map_update_event_transition(menu_stack_record_t* level) {
 
     if (level->event_transition.mode == EVENT_TRANSITION_MODE_FADE) {
         if (!(g_world_map_flags & WORLD_MAP_FLAG_FADING)) {
-            g_world_map_flags = g_world_map_flags ^ WORLD_MAP_FLAG_RUNNING;
+            g_world_map_flags ^= WORLD_MAP_FLAG_RUNNING;
         }
         return;
     }
@@ -141,8 +141,8 @@ void world_map_update_event_transition(menu_stack_record_t* level) {
     if (level->event_transition.fade_phase == EVENT_TRANSITION_FADE_WHITE_OUT) {
         red_sum = s_world_map_fade_color.r + 8;
         s_world_map_fade_color.r = red_sum;
-        s_world_map_fade_color.g = s_world_map_fade_color.g + 8;
-        s_world_map_fade_color.b = s_world_map_fade_color.b + 8;
+        s_world_map_fade_color.g += 8;
+        s_world_map_fade_color.b += 8;
         if (red_sum >= 0xF8) {
             s_world_map_fade_color.b = 0xFF;
             s_world_map_fade_color.g = 0xFF;
@@ -151,7 +151,7 @@ void world_map_update_event_transition(menu_stack_record_t* level) {
             rect.y = 0x100;
             rect.w = 0x80;
             rect.h = 0x100;
-            g_world_map_flags = g_world_map_flags ^ WORLD_MAP_FLAG_RUNNING;
+            g_world_map_flags ^= WORLD_MAP_FLAG_RUNNING;
             MoveImage(&rect, 0x100, 0);
             DrawSync(0);
         }
@@ -160,9 +160,9 @@ void world_map_update_event_transition(menu_stack_record_t* level) {
 
     /* Flash: brighten by 0x10 a frame to 0x80, then cut to black and start the white-out. */
     if (level->event_transition.fade_phase == EVENT_TRANSITION_FADE_FLASH) {
-        s_world_map_fade_color.r = s_world_map_fade_color.r + 0x10;
-        s_world_map_fade_color.g = s_world_map_fade_color.g + 0x10;
-        s_world_map_fade_color.b = s_world_map_fade_color.b + 0x10;
+        s_world_map_fade_color.r += 0x10;
+        s_world_map_fade_color.g += 0x10;
+        s_world_map_fade_color.b += 0x10;
         if (s_world_map_fade_color.g >= 0x80) {
             s_world_map_fade_color.r = 0;
             s_world_map_fade_color.g = 0;
@@ -175,14 +175,14 @@ void world_map_update_event_transition(menu_stack_record_t* level) {
     switch (level->event_transition.phase) {
     case EVENT_TRANSITION_PHASE_SPIN_IN:
         if (level->event_transition.drift_direction & EVENT_TRANSITION_DRIFT_RIGHT) {
-            s_event_transition_sprite.x = s_event_transition_sprite.x + 1;
+            s_event_transition_sprite.x++;
         } else {
-            s_event_transition_sprite.x = s_event_transition_sprite.x - 1;
+            s_event_transition_sprite.x--;
         }
         if (level->event_transition.drift_direction & EVENT_TRANSITION_DRIFT_DOWN) {
-            s_event_transition_sprite.y = s_event_transition_sprite.y + 1;
+            s_event_transition_sprite.y++;
         } else {
-            s_event_transition_sprite.y = s_event_transition_sprite.y - 1;
+            s_event_transition_sprite.y--;
         }
 
         if (level->event_transition.frame % 3 == 0) {
@@ -236,14 +236,14 @@ void world_map_update_event_transition(menu_stack_record_t* level) {
 
     case EVENT_TRANSITION_PHASE_SPIN_OUT:
         if (level->event_transition.drift_direction & EVENT_TRANSITION_DRIFT_RIGHT) {
-            s_event_transition_sprite.x = s_event_transition_sprite.x - 1;
+            s_event_transition_sprite.x--;
         } else {
-            s_event_transition_sprite.x = s_event_transition_sprite.x + 1;
+            s_event_transition_sprite.x++;
         }
         if (level->event_transition.drift_direction & EVENT_TRANSITION_DRIFT_DOWN) {
-            s_event_transition_sprite.y = s_event_transition_sprite.y - 1;
+            s_event_transition_sprite.y--;
         } else {
-            s_event_transition_sprite.y = s_event_transition_sprite.y + 1;
+            s_event_transition_sprite.y++;
         }
 
         if (level->event_transition.frame % 3 == 0) {
@@ -276,5 +276,5 @@ void world_map_update_event_transition(menu_stack_record_t* level) {
         break;
     }
 
-    level->event_transition.frame = level->event_transition.frame + 1;
+    level->event_transition.frame++;
 }

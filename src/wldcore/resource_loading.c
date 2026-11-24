@@ -453,7 +453,7 @@ void world_map_update_texture_stream(file_load_descriptor_t* stream) {
             stream->state = FILE_LOAD_STATE_SET_DOUBLE_SPEED;
             stream->error_count++;
         }
-        if (stream->wait_frames > 0x40000 || (CdStatus() & 1) != 0) {
+        if (stream->wait_frames > 0x40000 || (CdStatus() & 1)) {
             file_reset_cd_subsystems();
             CdIntToPos(stream->lba + stream->sector_index, &stream->position);
             stream->state = FILE_LOAD_STATE_SET_DOUBLE_SPEED;

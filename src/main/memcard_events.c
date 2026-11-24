@@ -17,7 +17,6 @@ void memcard_init_events(void) {
     if (g_memcard_bios_events_opened != 0) {
         return;
     }
-    i = 0;
     EnterCriticalSection();
     g_memcard_bios_events[MEMCARD_EVENT_BIOS_DONE] = OpenEvent(SwCARD, EvSpIOE, EvMdNOINTR, 0);
     g_memcard_bios_events[MEMCARD_EVENT_BIOS_ERROR] = OpenEvent(SwCARD, EvSpERROR, EvMdNOINTR, 0);

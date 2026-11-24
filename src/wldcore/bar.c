@@ -197,7 +197,7 @@ static void leave_menu(bar_menu_level_t* unused_level) {
     s32 i;
 
     display_object_set_queues_enabled(1);
-    g_menu_stack_depth = g_menu_stack_depth - 1;
+    g_menu_stack_depth--;
     g_world_map_flags &= ~(WORLD_MAP_FLAG_HIDE_CALENDAR_DATE | WORLD_MAP_FLAG_HIDE_LOCATION_LABEL);
     menu_stack_dispatch_suspend();
     g_menu_stack_records[g_menu_stack_depth].panel.entry_count = location_build_menu_entries(
@@ -227,7 +227,7 @@ void bar_update_menu(menu_stack_record_t* level) {
         return;
     }
 
-    if ((flags & WORLD_MAP_FLAG_INPUT_BLOCKED) && thread_is_running(WORLD_MAP_THREAD_SLOT_MESSAGE) == 0) {
+    if ((flags & WORLD_MAP_FLAG_INPUT_BLOCKED) && !thread_is_running(WORLD_MAP_THREAD_SLOT_MESSAGE)) {
         g_world_map_flags ^= WORLD_MAP_FLAG_INPUT_BLOCKED;
         leave_menu(&level->bar);
         return;
@@ -301,7 +301,7 @@ void bar_update_menu(menu_stack_record_t* level) {
         return;
     }
 
-    if (input_update_repeat(PSX_PAD_UP) != 0) {
+    if (input_update_repeat(PSX_PAD_UP)) {
         if (level->bar.selected_entry != 0) {
             g_display_object_animated_pool[level->bar.cursor_window].position.y -= 0x10;
             level->bar.selected_entry--;
@@ -309,7 +309,7 @@ void bar_update_menu(menu_stack_record_t* level) {
             g_display_object_animated_pool[level->bar.cursor_window].position.y += (level->bar.entry_count - 1) * 0x10;
             level->bar.selected_entry = level->bar.entry_count - 1;
         }
-    } else if (input_update_repeat(PSX_PAD_DOWN) != 0) {
+    } else if (input_update_repeat(PSX_PAD_DOWN)) {
         if (level->bar.selected_entry < level->bar.entry_count - 1) {
             g_display_object_animated_pool[level->bar.cursor_window].position.y += 0x10;
             level->bar.selected_entry++;
@@ -344,7 +344,7 @@ static void open_rumor_list(void) {
     s32 mask;
     s32 entry;
     s32 count = 0;
-    s32 i = 0;
+    s32 i = 0; /* zeroed ahead of the row pointers, as the target schedules it */
     s32 record_index;
 
     colors = g_menu_stack_row_text_colors;
@@ -435,8 +435,7 @@ static void close_rumor_list(menu_stack_panel_level_t* level) {
  * The target passes the level to close_rumor_list and
  * rumor_suspend_list even though neither reads the argument. */
 void rumor_update_list_input(menu_stack_record_t* level) {
-    if ((g_world_map_flags & WORLD_MAP_FLAG_INPUT_BLOCKED)
-        && thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL) == 0) {
+    if ((g_world_map_flags & WORLD_MAP_FLAG_INPUT_BLOCKED) && !thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL)) {
         close_rumor_list(&level->panel);
         if (level->panel.result != 0) {
             menu_stack_store_cursor(MENU_STACK_CURSOR_SLOT_RUMORS);
@@ -577,7 +576,7 @@ void proposition_open_available_list(void) {
         if (!(script_variable_get(i + EVENT_SCRIPT_VAR_PROPOSITION_FIRST)
                 & (PROPOSITION_VARIABLE_IN_PROGRESS | PROPOSITION_VARIABLE_COMPLETED))
             && !(g_proposition_states[i] & PROPOSITION_STATE_DAYS_MASK)
-            && proposition_is_available_at(i, g_world_map_marker_state.marker.location_id + 1) != 0) {
+            && proposition_is_available_at(i, g_world_map_marker_state.marker.location_id + 1)) {
             g_menu_stack_entry_values[count] = i + TEXT_ID_PROPOSITION_NAME_BASE;
             g_menu_stack_row_text_colors[count] = 0;
             count++;
@@ -647,8 +646,7 @@ static void close_available_list(menu_stack_panel_level_t* level) {
 void proposition_update_available_list_input(menu_stack_record_t* level) {
     s32 depth;
 
-    if ((g_world_map_flags & WORLD_MAP_FLAG_INPUT_BLOCKED)
-        && thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL) == 0) {
+    if ((g_world_map_flags & WORLD_MAP_FLAG_INPUT_BLOCKED) && !thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL)) {
         close_available_list(&level->panel);
         if (level->panel.result != 0) {
             menu_stack_store_cursor(MENU_STACK_CURSOR_SLOT_AVAILABLE_PROPOSITIONS);
@@ -898,7 +896,7 @@ void proposition_update_accept_panel(menu_stack_record_t* level) {
         return;
     }
 
-    if (input_update_repeat(PSX_PAD_UP) != 0 || input_update_repeat(PSX_PAD_DOWN) != 0) {
+    if (input_update_repeat(PSX_PAD_UP) || input_update_repeat(PSX_PAD_DOWN)) {
         row = level->accept_confirm.row ^ 1;
         level->accept_confirm.row = row;
         g_display_object_animated_pool[level->accept_confirm.cursor_window].position.y
@@ -984,7 +982,7 @@ void proposition_open_days_panel(void) {
  * it has, two levels are popped and result 1 goes on to the dispatch
  * confirmation, -1 back to the propositions list. */
 void proposition_update_days_panel(menu_stack_record_t* level) {
-    if (level->panel.result != 0 && thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL) == 0) {
+    if (level->panel.result != 0 && !thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL)) {
         g_menu_blocked_buttons = 0;
         g_menu_stack_ot_offset = 1;
         g_display_object_image_count--;
