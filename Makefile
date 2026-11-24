@@ -142,6 +142,10 @@ twins: image ## Group byte-equivalent functions across modules under consistent 
 order: image ## Report where modules order their shared functions differently, and same-named functions in different files, into build/analysis/order (MODULE=x, ARGS="...")
 	@$(TOOLS) order $(if $(strip $(MODULE)),--module="$(MODULE)") $(ARGS)
 
+.PHONY: naming
+naming: image ## Report public functions whose owner prefix is not their header's basename (guides renames; never fails)
+	@$(TOOLS) naming
+
 .PHONY: static
 static: image ## Make a file-private extern global static, or explain why not (ARGS="[--dry-run] NAME"; tools/static wraps it with fmt and check)
 	@$(TOOLS) static $(ARGS)

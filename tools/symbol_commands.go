@@ -39,10 +39,12 @@ func (p project) renameSymbolCommand(action string, args []string) error {
 	newName := flags.String("new", "", "replacement symbol name")
 	pairsName := flags.String("pairs", "", "old<TAB>new file renamed in one transaction")
 	dryRun := flags.Bool("dry-run", false, "validate and report without writing")
+	modules := flags.String("module", "", "rename only in these modules (comma-separated): their rows and the sources only they compile")
+	join := flags.Bool("join", false, "let the new name exist already in modules that lack the old one (a same-role join)")
 	if err := flags.Parse(args); err != nil {
 		return err
 	}
-	usage := fmt.Errorf("usage: tools symbols %s --old OLD --new NEW [--dry-run] | --pairs PAIRS.tsv [--dry-run]", action)
+	usage := fmt.Errorf("usage: tools symbols %s [--module M[,M...]] [--join] [--dry-run] --old OLD --new NEW | --pairs PAIRS.tsv", action)
 	if flags.NArg() != 0 {
 		return usage
 	}
@@ -65,9 +67,27 @@ func (p project) renameSymbolCommand(action string, args []string) error {
 	default:
 		return usage
 	}
-	result, err := p.renameSymbols(renames, action == "rename-function", *dryRun)
+	options := symbolRenameOptions{function: action == "rename-function", dryRun: *dryRun, join: *join, skipStatics: *modules == ""}
+	if *modules != "" {
+		config, err := p.loadProjectConfig()
+		if err != nil {
+			return err
+		}
+		selected, err := resolveModuleSelection(config, *modules)
+		if err != nil {
+			return err
+		}
+		options.modules = make(map[string]bool)
+		for _, m := range selected {
+			options.modules[m.ID] = true
+		}
+	}
+	result, err := p.renameSymbolsWith(renames, options)
 	if err != nil {
 		return err
+	}
+	for _, note := range result.Notes {
+		fmt.Printf("symbols: %s\n", strings.TrimPrefix(note, p.root+string(os.PathSeparator)))
 	}
 	state := "renamed"
 	if *dryRun {

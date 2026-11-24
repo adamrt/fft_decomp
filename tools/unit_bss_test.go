@@ -526,9 +526,7 @@ func TestBSSSchemaRoundTripAndOwnershipRefusals(t *testing.T) {
 		t.Fatal(err)
 	}
 	before := renderConfigFiles(after)
-	if err := p.unitSymbolsCommand([]string{"--name", "merged", "--source", "src/battle/merged.c", "battle:unit_a", "battle:unit_b"}); err == nil || !strings.Contains(err.Error(), "owns bss") {
-		t.Fatalf("BSS absorption not refused: %v", err)
-	}
+	// Merging units that own bss is TestUnitSymbolsMergesAbsorbedBSSInSourceOrder.
 	if err := p.splitSymbolsCommand([]string{"--unit", "original_a"}); err == nil || !strings.Contains(err.Error(), "bss") {
 		t.Fatalf("BSS split not refused: %v", err)
 	}

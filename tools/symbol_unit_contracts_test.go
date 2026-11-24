@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"sort"
 	"strings"
 	"testing"
 )
@@ -217,6 +218,85 @@ func TestUnitSymbolsMergedInitializersStillMatchOriginalBytes(t *testing.T) {
 			}
 			if _, problems := compareUnitSections(unit, sections); len(problems) == 0 {
 				t.Fatal("changed initializer accepted")
+			}
+		})
+	}
+}
+
+// withUnitBSS gives each contract unit one zero-backed word, A's before B's.
+func withUnitBSS(t *testing.T, p project, config *projectConfig) {
+	t.Helper()
+	m := config.byID["battle"]
+	zero := shortHash([]byte{0, 0, 0, 0})
+	m.Units[0].Bss = []rodataSpec{{Addr: 0x80067700, Size: 4, Hash: zero}}
+	m.Units[1].Bss = []rodataSpec{{Addr: 0x80067704, Size: 4, Hash: zero}}
+	m.Data = append(m.Data, symbolSpec{Addr: 0x80067700, Name: "s_zero_a"}, symbolSpec{Addr: 0x80067704, Name: "s_zero_b"})
+	for path, source := range map[string]string{
+		"src/battle/unit_a.c": "int g_values_a[2] = { 3, 7 };\nconst int g_lookup_a[2] = { 5, 9 };\nstatic int s_zero_a;\nint unit_a(int n) { return g_values_a[n & 1] + g_lookup_a[n & 1] + s_zero_a; }\n",
+		"src/battle/unit_b.c": "int g_values_b[2] = { 11, 13 };\nconst int g_lookup_b[2] = { 17, 19 };\nstatic int s_zero_b;\nint unit_b(int n) { return g_values_b[n & 1] + g_lookup_b[n & 1] + s_zero_b; }\n",
+	} {
+		if err := os.WriteFile(filepath.Join(p.root, path), []byte(source), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+}
+
+func TestUnitSymbolsMergesAbsorbedBSSInSourceOrder(t *testing.T) {
+	p, config := unitContractTestProject(t)
+	withUnitBSS(t, p, config)
+	writeUnitContractConfig(t, p, config)
+	before := config.byID["battle"]
+	wantBSS := append(append([]rodataSpec(nil), before.Units[0].Bss...), before.Units[1].Bss...)
+	if err := p.unitSymbolsCommand([]string{"--name", "merged", "--source", "src/battle/merged.c", "battle:unit_b", "battle:unit_a"}); err != nil {
+		t.Fatal(err)
+	}
+	after, err := p.loadProjectConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := after.byID["battle"].unitInstance(after, "merged"); err != nil {
+		t.Fatal(err)
+	}
+	unit := after.byID["battle"].unit("merged")
+	if unit == nil || !reflect.DeepEqual(unit.Bss, wantBSS) {
+		t.Fatalf("merged bss = %+v, want %+v", unit, wantBSS)
+	}
+	source, err := os.ReadFile(filepath.Join(p.root, unit.Source))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if a, b := strings.Index(string(source), "static int s_zero_a;"), strings.Index(string(source), "static int s_zero_b;"); a < 0 || b < a {
+		t.Fatalf("bss definitions out of order:\n%s", source)
+	}
+}
+
+func TestUnitSymbolsRefusesBSSOutOfSourceOrder(t *testing.T) {
+	for name, change := range map[string]func(*moduleSpec){
+		"bss order": func(m *moduleSpec) { m.Units[0].Bss[0].Addr, m.Units[1].Bss[0].Addr = 0x80067704, 0x80067700 },
+		"bss gap":   func(m *moduleSpec) { m.Units[1].Bss[0].Addr = 0x80067708 },
+	} {
+		t.Run(name, func(t *testing.T) {
+			p, config := unitContractTestProject(t)
+			withUnitBSS(t, p, config)
+			m := config.byID["battle"]
+			change(m)
+			for index := range m.Data {
+				switch m.Data[index].Name {
+				case "s_zero_a":
+					m.Data[index].Addr = m.Units[0].Bss[0].Addr
+				case "s_zero_b":
+					m.Data[index].Addr = m.Units[1].Bss[0].Addr
+				}
+			}
+			sort.Slice(m.Data, func(i, j int) bool { return m.Data[i].Addr < m.Data[j].Addr })
+			writeUnitContractConfig(t, p, config)
+			before := readTestFile(t, p, "target/battle.yaml")
+			err := p.unitSymbolsCommand([]string{"--name", "merged", "--source", "src/battle/merged.c", "battle:unit_a", "battle:unit_b"})
+			if err == nil || !strings.Contains(err.Error(), "bss ranges are not contiguous in source order") {
+				t.Fatalf("merge error = %v", err)
+			}
+			if readTestFile(t, p, "target/battle.yaml") != before {
+				t.Fatal("refused merge changed the target")
 			}
 		})
 	}

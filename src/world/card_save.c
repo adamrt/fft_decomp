@@ -116,10 +116,10 @@ extern u8 g_save_write_unread_flag;
  * immediately after the 15 save-file pointers at g_save_file_names. */
 extern u8 g_save_slot_text_table[248];
 extern s16 g_save_slot_description_row_ids[4];
-extern menu_draw_number_command_t g_save_slot_number_command;
-extern menu_draw_number_command_t g_save_playtime_hours_command;
-extern menu_draw_number_command_t g_save_playtime_minutes_command;
-extern menu_draw_number_command_t g_save_playtime_seconds_command;
+extern menu_draw_number_command_t s_save_slot_number_command;
+extern menu_draw_number_command_t s_save_playtime_hours_command;
+extern menu_draw_number_command_t s_save_playtime_minutes_command;
+extern menu_draw_number_command_t s_save_playtime_seconds_command;
 extern oriented_quad_t g_save_slot_quad_0;
 extern oriented_quad_t g_save_slot_quad_1;
 extern oriented_quad_t g_save_slot_quad_2;
@@ -159,7 +159,7 @@ static void build_file_header(s32 slot, s32 level, save_file_header_t* header);
 
 /* The memory card title's start in Shift-JIS: full-width "FFT FILE" and three spaces, the first
  * two of which take the save number (bytes 0x10..0x13); the play time follows. */
-static u8 g_save_title_template[0x16]
+static u8 s_save_title_template[0x16]
     = { 130, 101, 130, 101, 130, 115, 129, 64, 130, 101, 130, 104, 130, 107, 130, 100, 129, 64, 129, 64, 129, 64 };
 
 /*
@@ -1427,26 +1427,26 @@ static void update_slot_list(s32 input) {
             menu_gfx_enqueue_oriented_textured_quad(
                 &g_save_slot_quad_4, menu_gfx_get_draw_color(), TEXTURE_UV_FLIP_NONE, 0, 11);
             gfx_set_otag_index(11);
-            g_save_slot_number_command.y = g_save_slot_quad_0.position.y;
-            g_save_slot_number_command.value = i + 1;
-            menu_opcode_0d_draw_formatted_number((menu_instruction_t*)&g_save_slot_number_command);
+            s_save_slot_number_command.y = g_save_slot_quad_0.position.y;
+            s_save_slot_number_command.value = i + 1;
+            menu_opcode_0d_draw_formatted_number((menu_instruction_t*)&s_save_slot_number_command);
         }
 
         g_save_slot_quad_2.position.y = g_save_slot_quad_0.position.y;
         if (g_save_slot_quad_2.position.y >= 0 && g_save_slot_quad_2.position.y < 241) {
             menu_gfx_enqueue_oriented_textured_quad(
                 &g_save_slot_quad_2, menu_gfx_get_draw_color(), TEXTURE_UV_FLIP_NONE, 0, 11);
-            g_save_playtime_seconds_command.y = g_save_playtime_minutes_command.y = g_save_playtime_hours_command.y
+            s_save_playtime_seconds_command.y = s_save_playtime_minutes_command.y = s_save_playtime_hours_command.y
                 = g_save_slot_quad_0.position.y;
-            g_save_playtime_seconds_command.value = g_save_slot_playtimes[i].seconds;
-            g_save_playtime_minutes_command.value = g_save_slot_playtimes[i].minutes;
-            g_save_playtime_hours_command.value = g_save_slot_playtimes[i].hours;
-            if (g_save_playtime_hours_command.value >= 100) {
-                g_save_playtime_hours_command.value = 99;
+            s_save_playtime_seconds_command.value = g_save_slot_playtimes[i].seconds;
+            s_save_playtime_minutes_command.value = g_save_slot_playtimes[i].minutes;
+            s_save_playtime_hours_command.value = g_save_slot_playtimes[i].hours;
+            if (s_save_playtime_hours_command.value >= 100) {
+                s_save_playtime_hours_command.value = 99;
             }
-            menu_opcode_0d_draw_formatted_number((menu_instruction_t*)&g_save_playtime_hours_command);
-            menu_opcode_0d_draw_formatted_number((menu_instruction_t*)&g_save_playtime_minutes_command);
-            menu_opcode_0d_draw_formatted_number((menu_instruction_t*)&g_save_playtime_seconds_command);
+            menu_opcode_0d_draw_formatted_number((menu_instruction_t*)&s_save_playtime_hours_command);
+            menu_opcode_0d_draw_formatted_number((menu_instruction_t*)&s_save_playtime_minutes_command);
+            menu_opcode_0d_draw_formatted_number((menu_instruction_t*)&s_save_playtime_seconds_command);
         }
 
         if (g_save_slot_file_states[i] == SAVE_SLOT_AVAILABLE) {
@@ -1567,7 +1567,7 @@ static void build_file_header(s32 slot, s32 level, save_file_header_t* header) {
     header->block_count = SAVE_HEADER_BLOCK_COUNT_ONE;
     memset(header->reserved, 0, sizeof(header->reserved));
     slot++;
-    bcopy(g_save_title_template, header->title, 0x16);
+    bcopy(s_save_title_template, header->title, 0x16);
 
     /* Full-width digit d is Shift-JIS 0x82, 0x4F + d; 0x81 0x46 is a full-width colon. */
     value = slot / 10;

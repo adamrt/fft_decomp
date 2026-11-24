@@ -263,10 +263,11 @@ make build                       # rebuild the byte-identical disc
 make diff FUNC=f [MODULE=x]       # inspect one original-byte mismatch
 make library-diff ARGS="..."      # measure a scratch library candidate
 make compile-commands            # refresh editor metadata after source moves
-make symbols ACTION=rename-function ARGS="--pairs f.tsv"  # renames (also rename-global, unit, rename-unit)
+make symbols ACTION=rename-function ARGS="--pairs f.tsv [--module M] [--join]"  # renames (also rename-global, unit, rename-unit)
 make static ARGS="[--dry-run] NAME"  # make a file-private global static (or --own src/x.c to define it there)
 make units ARGS="--evidence=strong"  # unit map from binary evidence only
 make order                       # where programs order shared functions differently
+make naming                      # public functions whose owner is not their header
 ```
 
 `MODULE` accepts module IDs, overlay aliases, lists, `event` or `effect`.

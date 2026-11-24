@@ -97,7 +97,7 @@ func TestUnifyRenamesCopiesAcrossModulesAndKeepsOneDeclaration(t *testing.T) {
 		t.Fatalf("data collision: %v", err)
 	}
 	// A module holding both names is a real collision.
-	if err := p.symbolsCommand([]string{"unify", "--new", "main_second", "main_first"}); err == nil || !strings.Contains(err.Error(), "already exists") {
+	if err := p.symbolsCommand([]string{"unify", "--new", "main_second", "main_first"}); err == nil || !strings.Contains(err.Error(), "collide in main") {
 		t.Fatalf("collision: %v", err)
 	}
 }

@@ -198,15 +198,21 @@ func TestSymbolsCommandRejectsMalformedArguments(t *testing.T) {
 
 func TestRenameFunctionRewritesDocumentNames(t *testing.T) {
 	p := validTestProject(t)
-	writeSymbolRenameFixture(t, p.root, "QUIRKS.md", "- `main_first` and `main_first(` change; `main_first_more` and main_first in prose stay.\n")
-	writeSymbolRenameFixture(t, p.root, "ARCHAEOLOGY.md", "`main_first.rodata` once.\n")
+	writeSymbolRenameFixture(t, p.root, "QUIRKS.md", "- `main_first` and `main_first(` change; `main_first_more` stays; main_first in prose changes.\n")
+	writeSymbolRenameFixture(t, p.root, "ARCHAEOLOGY.md", "`main_first.rodata` once; src/main/main_first.c and fft/main_first.h are paths.\n")
+	writeSymbolRenameFixture(t, p.root, "README.md", "main_first starts.\n")
+	writeSymbolRenameFixture(t, p.root, "AGENTS.md", "Call `main_first()`.\n")
 	if err := p.symbolsCommand([]string{"rename-function", "--old", "main_first", "--new", "main_start"}); err != nil {
 		t.Fatal(err)
 	}
-	if got := readTestFile(t, p, "QUIRKS.md"); got != "- `main_start` and `main_start(` change; `main_first_more` and main_first in prose stay.\n" {
-		t.Fatalf("QUIRKS.md = %q", got)
-	}
-	if got := readTestFile(t, p, "ARCHAEOLOGY.md"); got != "`main_start.rodata` once.\n" {
-		t.Fatalf("ARCHAEOLOGY.md = %q", got)
+	for path, want := range map[string]string{
+		"QUIRKS.md":      "- `main_start` and `main_start(` change; `main_first_more` stays; main_start in prose changes.\n",
+		"ARCHAEOLOGY.md": "`main_start.rodata` once; src/main/main_first.c and fft/main_first.h are paths.\n",
+		"README.md":      "main_start starts.\n",
+		"AGENTS.md":      "Call `main_start()`.\n",
+	} {
+		if got := readTestFile(t, p, path); got != want {
+			t.Fatalf("%s = %q, want %q", path, got, want)
+		}
 	}
 }

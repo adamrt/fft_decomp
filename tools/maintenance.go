@@ -81,6 +81,10 @@ func (p project) checkConfig() error {
 	}
 	fmt.Printf("  declarations: no conflicting file-scope declarations\n")
 	fmt.Printf("  placeholders: no accesses to _unused_ or _padding_ members\n")
+	if err := p.checkSourceConventions(); err != nil {
+		return err
+	}
+	fmt.Printf("  conventions: header layers, storage prefixes and size asserts hold\n")
 	shards, err := p.checkWorkflowShards(config)
 	if err != nil {
 		return err

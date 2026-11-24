@@ -1896,7 +1896,7 @@ functions:
   - {addr: 0x801c864c, size: 48, name: gfx_store_image_and_wait, hash: 42b445a1713fca16, unit: gfx_image_transfer_wait}
 
 data:
-  - {addr: 0x801bf12c, name: g_save_title_template}
+  - {addr: 0x801bf12c, name: s_save_title_template}
   - {addr: 0x801bf16c, name: g_menu_text_decimal_format}
   - {addr: 0x801c867c, name: g_save_sound_queued_effect_id}
   - {addr: 0x801c8680, name: g_save_file_names}
@@ -1936,10 +1936,10 @@ data:
   - {addr: 0x801c98f0, name: g_save_slot_window_command}
   - {addr: 0x801c98f8, name: g_save_slot_window}
   - {addr: 0x801c9908, name: g_save_slot_text_row_ids}
-  - {addr: 0x801c9910, name: g_save_slot_number_command}
-  - {addr: 0x801c991c, name: g_save_playtime_hours_command}
-  - {addr: 0x801c9928, name: g_save_playtime_minutes_command}
-  - {addr: 0x801c9934, name: g_save_playtime_seconds_command}
+  - {addr: 0x801c9910, name: s_save_slot_number_command}
+  - {addr: 0x801c991c, name: s_save_playtime_hours_command}
+  - {addr: 0x801c9928, name: s_save_playtime_minutes_command}
+  - {addr: 0x801c9934, name: s_save_playtime_seconds_command}
   - {addr: 0x801c9940, name: g_save_slot_cursor_position}
   - {addr: 0x801c9944, name: g_save_slot_cursor_animation}
   - {addr: 0x801c9946, name: g_save_list_input_armed}

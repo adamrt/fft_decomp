@@ -51,7 +51,7 @@ typedef struct effect_particle_ribbon_short_work {
     s32 destroy_delay;                                                          /* 0x1d88 */
 } effect_particle_ribbon_short_work_t;
 typedef char
-    assert_effect_particle_ribbon_short_work_size[sizeof(effect_particle_ribbon_short_work_t) == 7564 ? 1 : -1];
+    effect_particle_ribbon_short_work_size_must_be_7564[sizeof(effect_particle_ribbon_short_work_t) == 7564 ? 1 : -1];
 
 /* A random value in [-|x|, |x|). */
 #define RAND_SPREAD(x) ((x) == -(x) ? (x) : (-(x) < (x) ? rand() % ((x) * 2) - (x) : rand() % (-(x) - (x)) + (x)))

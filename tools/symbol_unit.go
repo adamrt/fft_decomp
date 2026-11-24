@@ -169,17 +169,24 @@ func (p project) unitSymbolsCommand(args []string) error {
 				}
 				seen[f.Unit] = true
 				original := m.unit(f.Unit)
-				if len(original.Bss) > 0 {
-					return fmt.Errorf("%s: unit %s owns bss; regroup it by hand with its allocation contracts", m.ID, original.Name)
-				}
 				merged.Data = append(merged.Data, original.Data...)
 				merged.Rodata = append(merged.Rodata, original.Rodata...)
+				merged.Bss = append(merged.Bss, original.Bss...)
 			}
 			for i := 1; i < len(merged.Data); i++ {
 				previous := merged.Data[i-1]
 				end := previous.Addr + uint32(previous.Size)
 				if merged.Data[i].Addr < end || merged.Data[i].Addr-end >= 8 {
 					return fmt.Errorf("%s:%s: data ranges are not contiguous in source order at 0x%08x", m.ID, *name, merged.Data[i].Addr)
+				}
+			}
+			// The merged file defines each absorbed unit's zero-backed storage
+			// in that unit's order, one unit after another; the allocations
+			// must already lie that way, as one envelope without gaps.
+			for i := 1; i < len(merged.Bss); i++ {
+				previous := merged.Bss[i-1]
+				if merged.Bss[i].Addr != previous.Addr+uint32(previous.Size) {
+					return fmt.Errorf("%s:%s: bss ranges are not contiguous in source order at 0x%08x", m.ID, *name, merged.Bss[i].Addr)
 				}
 			}
 			mergedUnits[m] = merged

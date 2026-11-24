@@ -1158,7 +1158,7 @@ data:
   - {addr: 0x800e0054, name: g_menu_wait_for_file_allocation_message}
   - {addr: 0x800e0070, name: g_script_pause_message}
   - {addr: 0x800e007c, name: g_text_reading_character_message}
-  - {addr: 0x800e01e8, name: g_save_title_template}
+  - {addr: 0x800e01e8, name: s_save_title_template}
   - {addr: 0x800eda00, name: g_system_work_buffer_1}
   - {addr: 0x800feff0, name: text_blit_glyph}
   - {addr: 0x800ff284, name: text_render_glyph_to_4bpp_image}
@@ -1863,10 +1863,10 @@ data:
   - {addr: 0x80194248, name: g_save_slot_window_command}
   - {addr: 0x80194250, name: g_save_slot_window}
   - {addr: 0x80194260, name: g_save_slot_description_row_ids}
-  - {addr: 0x80194268, name: g_save_slot_number_command}
-  - {addr: 0x80194274, name: g_save_playtime_hours_command}
-  - {addr: 0x80194280, name: g_save_playtime_minutes_command}
-  - {addr: 0x8019428c, name: g_save_playtime_seconds_command}
+  - {addr: 0x80194268, name: s_save_slot_number_command}
+  - {addr: 0x80194274, name: s_save_playtime_hours_command}
+  - {addr: 0x80194280, name: s_save_playtime_minutes_command}
+  - {addr: 0x8019428c, name: s_save_playtime_seconds_command}
   - {addr: 0x80194298, name: g_save_slot_cursor_point}
   - {addr: 0x8019429c, name: g_save_slot_cursor_anim}
   - {addr: 0x8019429e, name: g_save_slot_list_input_ready}

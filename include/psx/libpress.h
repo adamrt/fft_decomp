@@ -95,14 +95,13 @@ typedef struct {
     u8 iq_y[64];
     u8 iq_c[64];
 } psyq_press_quant_table_packet_t;
+typedef char psyq_press_quant_table_packet_size_must_be_132[sizeof(psyq_press_quant_table_packet_t) == 132 ? 1 : -1];
 
 typedef struct {
     u32 command;
     s16 dct[64];
 } psyq_press_scale_table_packet_t;
-
-typedef char assert_press_quant_table_packet_size[sizeof(psyq_press_quant_table_packet_t) == 132 ? 1 : -1];
-typedef char assert_press_scale_table_packet_size[sizeof(psyq_press_scale_table_packet_t) == 132 ? 1 : -1];
+typedef char psyq_press_scale_table_packet_size_must_be_132[sizeof(psyq_press_scale_table_packet_t) == 132 ? 1 : -1];
 
 extern psyq_press_quant_table_packet_t g_psyq_press_quant_table;
 extern psyq_press_scale_table_packet_t g_psyq_press_scale_table;

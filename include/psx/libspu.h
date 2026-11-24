@@ -310,6 +310,7 @@ typedef struct psyq_spu_voice {
     u16 envelope;
     u16 loop_address;
 } psyq_spu_voice_t;
+typedef char psyq_spu_voice_size_must_be_16[(sizeof(psyq_spu_voice_t) == 16) ? 1 : -1];
 
 /* SPU 16-bit reverb configuration registers at 0x1f801dc0..0x1f801dff.
  * Addresses and APF delays use eight-byte SPU RAM units; volumes hold 1.15 signed bits. */
@@ -347,8 +348,7 @@ typedef struct psyq_spu_reverb_registers {
     u16 input_volume_left;           /* 0x3c; vLIN */
     u16 input_volume_right;          /* 0x3e; vRIN */
 } psyq_spu_reverb_registers_t;
-
-typedef char assert_psyq_spu_reverb_register_size[(sizeof(psyq_spu_reverb_registers_t) == 64) ? 1 : -1];
+typedef char psyq_spu_reverb_registers_size_must_be_64[(sizeof(psyq_spu_reverb_registers_t) == 64) ? 1 : -1];
 
 typedef struct psyq_spu_registers {
     psyq_spu_voice_t voices[24]; /* 0x000 */
@@ -386,9 +386,7 @@ typedef struct psyq_spu_registers {
     u16 _unused_1be;
     psyq_spu_reverb_registers_t reverb; /* 0x1c0 */
 } psyq_spu_registers_t;
-
-typedef char assert_psyq_spu_voice_size[(sizeof(psyq_spu_voice_t) == 16) ? 1 : -1];
-typedef char assert_psyq_spu_register_size[(sizeof(psyq_spu_registers_t) == 512) ? 1 : -1];
+typedef char psyq_spu_registers_size_must_be_512[(sizeof(psyq_spu_registers_t) == 512) ? 1 : -1];
 
 /* The library addresses the block through the named layout and as raw 16-bit registers. */
 typedef union psyq_spu_register_block {

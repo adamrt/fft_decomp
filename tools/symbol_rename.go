@@ -17,6 +17,7 @@ import (
 
 type symbolMutationResult struct {
 	ChangedFiles int
+	Notes        []string // what a rename deliberately left under the old name
 }
 
 type symbolFileChange struct {
@@ -62,6 +63,17 @@ func (transaction *symbolFileTransaction) addCreation(path string, replacement [
 		return fmt.Errorf("missing target directory: %s", filepath.Dir(path))
 	}
 	return transaction.add(symbolFileChange{path: path, replacement: replacement, replace: true, mode: mode.Perm()})
+}
+
+// addCreationOverRemoval creates path, or, when the transaction already
+// removes it (a batch moving b.c to c.c and then a.c to b.c), replaces it.
+func (transaction *symbolFileTransaction) addCreationOverRemoval(path string, replacement []byte, mode os.FileMode) error {
+	if change, exists := transaction.changes[path]; exists && change.originalExists && !change.replace {
+		change.replace, change.replacement, change.mode = true, replacement, mode.Perm()
+		transaction.changes[path] = change
+		return nil
+	}
+	return transaction.addCreation(path, replacement, mode)
 }
 
 func (transaction *symbolFileTransaction) add(change symbolFileChange) error {
@@ -241,9 +253,9 @@ func validateRenameIdentifier(value string) error {
 
 var sourceExtensions = map[string]bool{".c": true, ".h": true, ".ld": true, ".s": true}
 
-// documentFiles are the project documents whose backticked symbol names follow
-// a rename, so QUIRKS.md keeps pointing at code that exists.
-var documentFiles = []string{"QUIRKS.md", "ARCHAEOLOGY.md"}
+// documentFiles are the project documents whose symbol mentions follow a
+// rename, so the prose keeps pointing at code that exists.
+var documentFiles = []string{"README.md", "AGENTS.md", "QUIRKS.md", "ARCHAEOLOGY.md"}
 
 // renameDocumentIdentifier rewrites a symbol name inside backticks: the name
 // alone, or followed by a call, index or member suffix (`name(`, `name[`,
@@ -251,6 +263,38 @@ var documentFiles = []string{"QUIRKS.md", "ARCHAEOLOGY.md"}
 func renameDocumentIdentifier(source []byte, oldName, newName string) []byte {
 	pattern := regexp.MustCompile("`" + regexp.QuoteMeta(oldName) + "([`(\\[.])")
 	return pattern.ReplaceAll(source, []byte("`"+newName+"${1}"))
+}
+
+// proseMentionPath matches what follows a name that is part of a path:
+// a file extension or a directory separator.
+var proseMentionPath = regexp.MustCompile(`^(\.(c|h|s|ld|o|md|yaml)\b|/)`)
+
+// renameProseIdentifier rewrites whole-word mentions of a name in comments and
+// documents. Only a name with an underscore is rewritten outside backticks,
+// since load, build or main are also English words; a mention inside a path
+// (src/x/name.c, fft/name.h) is left alone.
+func renameProseIdentifier(text []byte, oldName, newName string) []byte {
+	if !strings.Contains(oldName, "_") {
+		return renameDocumentIdentifier(text, oldName, newName)
+	}
+	if !bytes.Contains(text, []byte(oldName)) {
+		return text
+	}
+	pattern := regexp.MustCompile(`\b` + regexp.QuoteMeta(oldName) + `\b`)
+	var output []byte
+	last := 0
+	for _, match := range pattern.FindAllIndex(text, -1) {
+		if match[0] > 0 && text[match[0]-1] == '/' || proseMentionPath.Match(text[match[1]:]) {
+			continue
+		}
+		output = append(output, text[last:match[0]]...)
+		output = append(output, newName...)
+		last = match[1]
+	}
+	if last == 0 {
+		return text
+	}
+	return append(output, text[last:]...)
 }
 
 type sourceTextChange struct {
@@ -263,32 +307,72 @@ type sourceIdentifierRename struct {
 	oldName, newName string
 }
 
+// sourceRenameScope limits where a rename applies. Modules, when set, names
+// the programs it covers: the sources only those programs compile, and the
+// headers once no other program's source still uses the old name.
+// SkipStatics, without modules, keeps a file's static definition of the old
+// name, and that file's references, when another file defines it publicly.
+type sourceRenameScope struct {
+	modules     map[string]bool
+	fileModules map[string]map[string]bool // absolute source path -> modules compiling it
+	skipStatics bool
+}
+
 type sourceIdentifierBatchPlan struct {
 	changes       map[string]sourceTextChange
 	references    []map[string]bool
 	oldDefinition [][]string
 	newDefinition [][]string
+	kept          []map[string]bool // per rename: sources that keep the old name
+	notes         []string          // what the plan left alone, for the report
 }
 
 func planSourceIdentifierRenames(root string, renames []sourceIdentifierRename) (sourceIdentifierBatchPlan, error) {
-	return planSourceIdentifierRenamesUnify(root, renames, false, nil)
+	return planSourceIdentifierRenamesScoped(root, renames, false, nil, nil)
 }
 
 // planSourceIdentifierRenamesUnify is planSourceIdentifierRenames that, when
 // unify is set, lets the old and new definitions coexist only in disjoint
 // program views. Views records the source bindings before any file moves.
 func planSourceIdentifierRenamesUnify(root string, renames []sourceIdentifierRename, unify bool, views map[string][]*moduleSpec) (sourceIdentifierBatchPlan, error) {
+	return planSourceIdentifierRenamesScoped(root, renames, unify, views, nil)
+}
+
+type plannedSourceFile struct {
+	path          string
+	mode          os.FileMode
+	body, current []byte
+	parsed        bool
+	defined       map[string]bool // file-scope definitions, static included
+	public        map[string]bool // the non-static ones
+}
+
+func (file *plannedSourceFile) definitions() error {
+	if file.parsed || filepath.Ext(file.path) != ".c" {
+		return nil
+	}
+	defined, public, err := sourceDefinitions(file.current)
+	if err != nil {
+		return fmt.Errorf("%s: %w", file.path, err)
+	}
+	file.defined, file.public, file.parsed = defined, public, true
+	return nil
+}
+
+// planSourceIdentifierRenamesScoped applies the renames in order, so a name
+// one pair frees may be taken by a later pair. Code is renamed outside include
+// lines, comments and literals. Comments and documents follow too, except for
+// an old name that is also a new name in the batch: its mentions may already
+// mean the new symbol.
+func planSourceIdentifierRenamesScoped(root string, renames []sourceIdentifierRename, unify bool, views map[string][]*moduleSpec, scope *sourceRenameScope) (sourceIdentifierBatchPlan, error) {
 	plan := sourceIdentifierBatchPlan{
 		changes:       make(map[string]sourceTextChange),
 		references:    make([]map[string]bool, len(renames)),
 		oldDefinition: make([][]string, len(renames)),
 		newDefinition: make([][]string, len(renames)),
+		kept:          make([]map[string]bool, len(renames)),
 	}
-	patterns := make([]*regexp.Regexp, len(renames))
-	for index, rename := range renames {
-		plan.references[index] = make(map[string]bool)
-		patterns[index] = regexp.MustCompile(`\b` + regexp.QuoteMeta(rename.oldName) + `\b`)
-	}
+	var files []*plannedSourceFile
 	for _, directory := range []string{"src", "include"} {
 		base := filepath.Join(root, directory)
 		err := filepath.WalkDir(base, func(path string, entry os.DirEntry, walkErr error) error {
@@ -305,41 +389,11 @@ func planSourceIdentifierRenamesUnify(root string, renames []sourceIdentifierRen
 				}
 				return err
 			}
-			var definitions map[string]bool
-			if filepath.Ext(path) == ".c" {
-				definitions, err = sourceDefinedIdentifiers(body)
-				if err != nil {
-					return fmt.Errorf("%s: %w", path, err)
-				}
+			file := &plannedSourceFile{path: path, mode: info.Mode(), body: body, current: body}
+			if err := file.definitions(); err != nil {
+				return err
 			}
-			current := body
-			for index, rename := range renames {
-				if definitions[rename.oldName] {
-					plan.oldDefinition[index] = append(plan.oldDefinition[index], path)
-				}
-				if definitions[rename.newName] {
-					plan.newDefinition[index] = append(plan.newDefinition[index], path)
-				}
-				if !bytes.Contains(current, []byte(rename.oldName)) {
-					continue
-				}
-				after := replaceIdentifierOutsideIncludes(patterns[index], current, []byte(rename.newName))
-				if bytes.Equal(current, after) {
-					continue
-				}
-				if filepath.Ext(path) == ".ld" {
-					updated, err := renameLinkerIdentifier(current, rename.oldName, rename.newName)
-					if err != nil {
-						return fmt.Errorf("%s: %w", path, err)
-					}
-					after = updated
-				}
-				plan.references[index][path] = true
-				current = after
-			}
-			if !bytes.Equal(body, current) {
-				plan.changes[path] = sourceTextChange{original: body, replacement: current, mode: info.Mode()}
-			}
+			files = append(files, file)
 			return nil
 		})
 		if err != nil {
@@ -347,6 +401,131 @@ func planSourceIdentifierRenamesUnify(root string, renames []sourceIdentifierRen
 				continue
 			}
 			return sourceIdentifierBatchPlan{}, err
+		}
+	}
+	newNames := make(map[string]bool)
+	for _, rename := range renames {
+		newNames[rename.newName] = true
+	}
+	scoped := scope != nil && scope.modules != nil
+	blocked := make([]bool, len(renames))
+	for index, rename := range renames {
+		plan.references[index] = make(map[string]bool)
+		plan.kept[index] = make(map[string]bool)
+		pattern := regexp.MustCompile(`\b` + regexp.QuoteMeta(rename.oldName) + `\b`)
+		code := func(text []byte) []byte { return pattern.ReplaceAll(text, []byte(rename.newName)) }
+		comment := func(text []byte) []byte { return text }
+		if !newNames[rename.oldName] {
+			comment = func(text []byte) []byte { return renameProseIdentifier(text, rename.oldName, rename.newName) }
+		}
+		usesOld := func(file *plannedSourceFile) bool {
+			if !bytes.Contains(file.current, []byte(rename.oldName)) {
+				return false
+			}
+			found := false
+			rewriteCodeOutsideIncludes(file.current, func(text []byte) []byte {
+				found = found || pattern.Match(text)
+				return text
+			})
+			return found
+		}
+		rewrite := func(file *plannedSourceFile) error {
+			if !bytes.Contains(file.current, []byte(rename.oldName)) {
+				return nil
+			}
+			var after []byte
+			if filepath.Ext(file.path) == ".ld" {
+				updated, err := renameLinkerIdentifier(file.current, rename.oldName, rename.newName)
+				if err != nil {
+					return fmt.Errorf("%s: %w", file.path, err)
+				}
+				after = updated
+			} else {
+				after = rewriteSourceText(file.current, code, comment)
+			}
+			if bytes.Equal(after, file.current) {
+				return nil
+			}
+			if filepath.Ext(file.path) == ".ld" || usesOld(file) {
+				plan.references[index][file.path] = true
+			}
+			file.current, file.parsed = after, false
+			return nil
+		}
+		publicElsewhere := false
+		for _, file := range files {
+			if err := file.definitions(); err != nil {
+				return sourceIdentifierBatchPlan{}, err
+			}
+			if file.defined[rename.newName] {
+				plan.newDefinition[index] = append(plan.newDefinition[index], file.path)
+			}
+			publicElsewhere = publicElsewhere || file.public[rename.oldName]
+		}
+		var headers []*plannedSourceFile
+		for _, file := range files {
+			if filepath.Ext(file.path) == ".h" {
+				headers = append(headers, file)
+				continue
+			}
+			keep := false
+			if scoped {
+				owners := scope.fileModules[file.path]
+				keep = len(owners) == 0
+				for module := range owners {
+					keep = keep || !scope.modules[module]
+				}
+			} else if scope != nil && scope.skipStatics && publicElsewhere && file.defined[rename.oldName] && !file.public[rename.oldName] {
+				keep = true
+				plan.notes = append(plan.notes, fmt.Sprintf("kept static %s in %s", rename.oldName, file.path))
+			}
+			if keep {
+				if !usesOld(file) {
+					continue
+				}
+				plan.kept[index][file.path] = true
+				if !scoped {
+					continue
+				}
+				var selected, others []string
+				for module := range scope.fileModules[file.path] {
+					if scope.modules[module] {
+						selected = append(selected, module)
+					} else {
+						others = append(others, module)
+					}
+				}
+				if len(selected) != 0 {
+					sort.Strings(selected)
+					sort.Strings(others)
+					return sourceIdentifierBatchPlan{}, fmt.Errorf("%s uses %s and is compiled by %s and also %s; select those modules too or edit it by hand",
+						file.path, rename.oldName, strings.Join(selected, ","), strings.Join(others, ","))
+				}
+				blocked[index] = true
+				continue
+			}
+			if file.defined[rename.oldName] {
+				plan.oldDefinition[index] = append(plan.oldDefinition[index], file.path)
+			}
+			if err := rewrite(file); err != nil {
+				return sourceIdentifierBatchPlan{}, err
+			}
+		}
+		for _, file := range headers {
+			if blocked[index] {
+				if usesOld(file) {
+					plan.notes = append(plan.notes, fmt.Sprintf("left %s in %s: unselected programs still use it", rename.oldName, file.path))
+				}
+				continue
+			}
+			if err := rewrite(file); err != nil {
+				return sourceIdentifierBatchPlan{}, err
+			}
+		}
+	}
+	for _, file := range files {
+		if !bytes.Equal(file.body, file.current) {
+			plan.changes[file.path] = sourceTextChange{original: file.body, replacement: file.current, mode: file.mode}
 		}
 	}
 	for _, name := range documentFiles {
@@ -359,8 +538,10 @@ func planSourceIdentifierRenamesUnify(root string, renames []sourceIdentifierRen
 			return sourceIdentifierBatchPlan{}, err
 		}
 		current := body
-		for _, rename := range renames {
-			current = renameDocumentIdentifier(current, rename.oldName, rename.newName)
+		for index, rename := range renames {
+			if !blocked[index] && !newNames[rename.oldName] {
+				current = renameProseIdentifier(current, rename.oldName, rename.newName)
+			}
 		}
 		if !bytes.Equal(body, current) {
 			plan.changes[path] = sourceTextChange{original: body, replacement: current, mode: info.Mode()}
@@ -376,7 +557,7 @@ func planSourceIdentifierRenamesUnify(root string, renames []sourceIdentifierRen
 			}
 			continue
 		}
-		return sourceIdentifierBatchPlan{}, fmt.Errorf("source definitions collide: %s and %s", rename.oldName, rename.newName)
+		return sourceIdentifierBatchPlan{}, fmt.Errorf("source definitions collide: %s and %s (--join gives same-role bodies of separate programs one name)", rename.oldName, rename.newName)
 	}
 	return plan, nil
 }
@@ -450,20 +631,57 @@ func validateUnifiedSourceDefinitions(rename sourceIdentifierRename, oldPaths, n
 // retaining static definitions because a rename can collide with them too.
 // Function bodies are skipped, so local names and calls cannot be definitions.
 func sourceDefinedIdentifiers(source []byte) (map[string]bool, error) {
+	definitions, _, err := sourceDefinitions(source)
+	return definitions, err
+}
+
+// sourceDefinitions is sourceDefinedIdentifiers that also returns the
+// definitions without static storage. A name both maps hold is public in at
+// least one conditional branch.
+func sourceDefinitions(source []byte) (map[string]bool, map[string]bool, error) {
+	definitions := make(map[string]bool)
+	public := make(map[string]bool)
+	err := visitSourceDefinitions(source, func(definition sourceDefinition) {
+		for _, name := range []string{definition.symbol, definition.name} {
+			if name == "" {
+				continue
+			}
+			definitions[name] = true
+			public[name] = public[name] || !definition.static
+		}
+	})
+	if err != nil {
+		return nil, nil, err
+	}
+	return definitions, public, nil
+}
+
+// sourceDefinition is one file-scope definition: a function with its body,
+// an object, or an architectural register binding.
+type sourceDefinition struct {
+	name     string // the C name
+	symbol   string // the linked symbol, which an asm label may rename; empty for a register
+	static   bool
+	function bool
+	register bool
+	offset   int
+}
+
+// visitSourceDefinitions walks a source's file-scope definitions in order.
+func visitSourceDefinitions(source []byte, visit func(sourceDefinition)) error {
 	text := string(source)
 	tokens, err := tokenizeC(text)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	definitions := make(map[string]bool)
 	for index := 0; index < len(tokens); {
 		start := index
 		if tokens[start].text == "}" {
-			return nil, fmt.Errorf("line %d: unexpected file-scope closing brace", lineOf(text, tokens[start].start))
+			return fmt.Errorf("line %d: unexpected file-scope closing brace", lineOf(text, tokens[start].start))
 		}
 		next, statement, body, err := sourceDefinitionStatement(tokens, index)
 		if err != nil {
-			return nil, fmt.Errorf("line %d: %w", lineOf(text, tokens[start].start), err)
+			return fmt.Errorf("line %d: %w", lineOf(text, tokens[start].start), err)
 		}
 		index = next
 		if len(statement) == 0 {
@@ -473,7 +691,7 @@ func sourceDefinedIdentifiers(source []byte) (map[string]bool, error) {
 				if tokens[brace].text == "{" && isTagBody(tokens, start, brace) {
 					close := matchingToken(tokens, brace)
 					if close+1 < next && tokens[close+1].text != ";" {
-						return nil, fmt.Errorf("line %d: cannot parse object declared with a tag body", lineOf(text, tokens[start].start))
+						return fmt.Errorf("line %d: cannot parse object declared with a tag body", lineOf(text, tokens[start].start))
 					}
 					break
 				}
@@ -487,10 +705,11 @@ func sourceDefinedIdentifiers(source []byte) (map[string]bool, error) {
 		// The declaration checker omits static symbols from cross-file comparisons.
 		// Strip that storage class here while preserving all declarator tokens.
 		filtered := make([]cToken, 0, len(statement))
-		external := false
+		external, static := false, false
 		depth := 0
 		for _, token := range statement {
 			if depth == 0 && token.text == "static" {
+				static = true
 				continue
 			}
 			if depth == 0 && token.text == "extern" {
@@ -505,13 +724,13 @@ func sourceDefinedIdentifiers(source []byte) (map[string]bool, error) {
 			}
 		}
 		if len(filtered) == 0 {
-			return nil, fmt.Errorf("line %d: cannot parse file-scope declaration", lineOf(text, tokens[start].start))
+			return fmt.Errorf("line %d: cannot parse file-scope declaration", lineOf(text, tokens[start].start))
 		}
 		parts := splitTopLevel(filtered, ",")
 		_, begin, _ := parseDeclarationSpecifier(parts[0])
 		for partIndex, part := range parts {
 			if len(part) == 0 {
-				return nil, fmt.Errorf("line %d: empty file-scope declarator", lineOf(text, tokens[start].start))
+				return fmt.Errorf("line %d: empty file-scope declarator", lineOf(text, tokens[start].start))
 			}
 			// An extern without a body or initializer cannot define a symbol.
 			// Its parameter types need not fit the signature comparison parser.
@@ -523,30 +742,31 @@ func sourceDefinedIdentifiers(source []byte) (map[string]bool, error) {
 				declarator = append(append([]cToken(nil), parts[0][:begin]...), part...)
 			}
 			if name, architectural, err := sourceArchitecturalRegister(declarator, body); err != nil {
-				return nil, fmt.Errorf("line %d: %w", lineOf(text, part[0].start), err)
+				return fmt.Errorf("line %d: %w", lineOf(text, part[0].start), err)
 			} else if architectural {
 				// This binds a C name, but no ELF symbol named "$N".
-				definitions[name] = true
+				visit(sourceDefinition{name: name, register: true, offset: part[0].start})
 				continue
 			}
 			declarations := parseDeclaratorList(declarator, body)
 			if len(declarations) != 1 {
-				return nil, fmt.Errorf("line %d: cannot parse file-scope declaration", lineOf(text, part[0].start))
+				return fmt.Errorf("line %d: cannot parse file-scope declaration", lineOf(text, part[0].start))
 			}
 			declaration := declarations[0]
 			if body || !functionDeclarationSignature(declaration.signature) && (!external || topLevelIndex(part, "=") >= 0) {
-				definitions[declaration.symbol] = true
 				lexical := part
 				if partIndex == 0 {
 					lexical = part[begin:]
 				}
+				definition := sourceDefinition{symbol: declaration.symbol, static: static, function: body, offset: part[0].start}
 				if name := boundIdentifier(lexical); name >= 0 {
-					definitions[lexical[name].text] = true
+					definition.name = lexical[name].text
 				}
+				visit(definition)
 			}
 		}
 	}
-	return definitions, nil
+	return nil
 }
 
 func sourceArchitecturalRegister(statement []cToken, body bool) (string, bool, error) {
@@ -714,72 +934,158 @@ type symbolRename struct {
 	oldName, newName string
 }
 
+// symbolRenameOptions selects how renameSymbolsWith applies a batch.
+type symbolRenameOptions struct {
+	function bool // functions, else data symbols
+	dryRun   bool
+	// join lets the new name exist already in modules the old name is absent
+	// from, giving same-role bodies of separate programs one name.
+	join bool
+	// modules limits the rename to these modules' rows and the sources only
+	// they compile; nil renames everywhere.
+	modules map[string]bool
+	// skipStatics keeps another program's same-named static copy when the old
+	// name is public elsewhere (modules unset).
+	skipStatics bool
+}
+
 // renameSymbols renames functions (function true) or data symbols across the
 // configuration and every source under src/ and include/. A function
 // definition rename also moves a standalone source named after the definition
 // or one of its target entries to <new>.c.
 // Concept-named sources and sources used by any merged unit keep their paths.
 func (p project) renameSymbols(renames []symbolRename, function, dryRun bool) (result symbolMutationResult, err error) {
-	return p.renameSymbolsUnify(renames, function, dryRun, false)
+	return p.renameSymbolsWith(renames, symbolRenameOptions{function: function, dryRun: dryRun})
 }
 
 // renameSymbolsUnify is renameSymbols that, when unify is set, lets the new
 // name already exist in modules the old name is absent from: the rename
 // then gives one shared name to per-module copies.
 func (p project) renameSymbolsUnify(renames []symbolRename, function, dryRun, unify bool) (result symbolMutationResult, err error) {
-	seen := make(map[string]bool)
-	for _, rename := range renames {
+	return p.renameSymbolsWith(renames, symbolRenameOptions{function: function, dryRun: dryRun, join: unify})
+}
+
+// orderSymbolRenames checks that a batch names each old and each new name
+// once and orders it so a pair whose new name another pair frees runs after
+// that pair. A cycle needs a temporary name and is refused.
+func orderSymbolRenames(renames []symbolRename) ([]symbolRename, error) {
+	byOld := make(map[string]int)
+	newSeen := make(map[string]bool)
+	for index, rename := range renames {
 		if err := validateRenameIdentifier(rename.oldName); err != nil {
-			return result, err
+			return nil, err
 		}
 		if err := validateRenameIdentifier(rename.newName); err != nil {
-			return result, err
+			return nil, err
 		}
-		if rename.oldName == rename.newName || seen[rename.oldName] || seen[rename.newName] {
-			return result, fmt.Errorf("renames must be distinct and change the name: %s -> %s", rename.oldName, rename.newName)
+		if _, ok := byOld[rename.oldName]; ok || rename.oldName == rename.newName || newSeen[rename.newName] {
+			return nil, fmt.Errorf("renames must be distinct and change the name: %s -> %s", rename.oldName, rename.newName)
 		}
-		seen[rename.oldName], seen[rename.newName] = true, true
+		byOld[rename.oldName] = index
+		newSeen[rename.newName] = true
+	}
+	ordered := make([]symbolRename, 0, len(renames))
+	state := make([]int, len(renames)) // 0 unvisited, 1 visiting, 2 done
+	var visit func(int) error
+	visit = func(index int) error {
+		switch state[index] {
+		case 1:
+			return fmt.Errorf("renames form a cycle through %s; rename through a temporary name", renames[index].oldName)
+		case 2:
+			return nil
+		}
+		state[index] = 1
+		if freed, ok := byOld[renames[index].newName]; ok {
+			if err := visit(freed); err != nil {
+				return err
+			}
+		}
+		state[index] = 2
+		ordered = append(ordered, renames[index])
+		return nil
+	}
+	for index := range renames {
+		if err := visit(index); err != nil {
+			return nil, err
+		}
+	}
+	return ordered, nil
+}
+
+// renameSymbolsWith is renameSymbols with a module scope, static skipping and
+// joins; see symbolRenameOptions.
+func (p project) renameSymbolsWith(renames []symbolRename, options symbolRenameOptions) (result symbolMutationResult, err error) {
+	renames, err = orderSymbolRenames(renames)
+	if err != nil {
+		return result, err
 	}
 	err = p.withTargetLock(func() error {
 		config, err := p.loadProjectConfig()
 		if err != nil {
 			return err
 		}
-		views := make(map[string][]*moduleSpec)
-		if unify {
-			for _, view := range declCheckViews(config) {
-				path := filepath.Join(p.root, filepath.FromSlash(view.source))
-				views[path] = append(views[path], config.byID[view.module])
+		for module := range options.modules {
+			if _, ok := config.module(module); !ok {
+				return fmt.Errorf("unknown module %q", module)
 			}
 		}
-		type move struct{ from, to string }
-		var moves []move
-		for _, rename := range renames {
-			if function {
-				from, to, err := renameConfigFunction(config, rename.oldName, rename.newName, unify)
-				if err != nil {
-					return err
+		views := make(map[string][]*moduleSpec)
+		for _, view := range declCheckViews(config) {
+			path := filepath.Join(p.root, filepath.FromSlash(view.source))
+			views[path] = append(views[path], config.byID[view.module])
+		}
+		scope := &sourceRenameScope{
+			modules:     options.modules,
+			fileModules: make(map[string]map[string]bool),
+			skipStatics: options.skipStatics,
+		}
+		for _, m := range config.Modules {
+			for index := range m.Functions {
+				source := m.sourceOf(&m.Functions[index])
+				if source == "" {
+					continue
 				}
-				if from != "" {
-					moves = append(moves, move{from, to})
+				path := filepath.Join(p.root, filepath.FromSlash(source))
+				if scope.fileModules[path] == nil {
+					scope.fileModules[path] = make(map[string]bool)
 				}
-			} else if err := renameConfigData(config, rename.oldName, rename.newName); err != nil {
-				return err
+				scope.fileModules[path][m.ID] = true
 			}
 		}
 		identifierRenames := make([]sourceIdentifierRename, len(renames))
 		for index, rename := range renames {
 			identifierRenames[index] = sourceIdentifierRename{rename.oldName, rename.newName}
 		}
-		sources, err := planSourceIdentifierRenamesUnify(p.root, identifierRenames, unify, views)
+		sources, err := planSourceIdentifierRenamesScoped(p.root, identifierRenames, options.join, views, scope)
 		if err != nil {
 			return err
 		}
-		for index := range renames {
-			if function && len(sources.newDefinition[index]) != 0 && !unify {
+		type move struct{ from, to string }
+		var moves []move
+		for index, rename := range renames {
+			kept := sources.kept[index]
+			keep := func(m *moduleSpec, source string) bool {
+				if options.modules != nil && !options.modules[m.ID] {
+					return true
+				}
+				return source != "" && kept[filepath.Join(p.root, filepath.FromSlash(source))]
+			}
+			if options.function {
+				from, to, err := renameConfigFunctionScoped(config, rename.oldName, rename.newName, options.join, keep)
+				if err != nil {
+					return err
+				}
+				if from != "" {
+					moves = append(moves, move{from, to})
+				}
+			} else if err := renameConfigDataScoped(config, rename.oldName, rename.newName, keep); err != nil {
+				return err
+			}
+			if options.function && len(sources.newDefinition[index]) != 0 && !options.join {
 				return fmt.Errorf("function definition already exists: %s", sources.newDefinition[index][0])
 			}
 		}
+		result.Notes = sources.notes
 		transaction := newSymbolFileTransaction()
 		for path, data := range renderConfigFiles(config) {
 			full := filepath.Join(p.root, filepath.FromSlash(path))
@@ -806,7 +1112,7 @@ func (p project) renameSymbolsUnify(renames []symbolRename, function, dryRun, un
 			if err := transaction.addRemovalSnapshot(fromPath, change.original, change.mode); err != nil {
 				return err
 			}
-			if err := transaction.addCreation(toPath, change.replacement, change.mode); err != nil {
+			if err := transaction.addCreationOverRemoval(toPath, change.replacement, change.mode); err != nil {
 				return err
 			}
 		}
@@ -816,7 +1122,7 @@ func (p project) renameSymbolsUnify(renames []symbolRename, function, dryRun, un
 			}
 		}
 		result.ChangedFiles = len(transaction.changes)
-		if dryRun {
+		if options.dryRun {
 			return nil
 		}
 		return transaction.commit()
@@ -828,6 +1134,15 @@ func (p project) renameSymbolsUnify(renames []symbolRename, function, dryRun, un
 // renames. A definition rename updates every owner; only standalone sources
 // named after the old definition or one of its target entries move with it.
 func renameConfigFunction(config *projectConfig, oldName, newName string, unify bool) (string, string, error) {
+	return renameConfigFunctionScoped(config, oldName, newName, unify, nil)
+}
+
+// renameConfigFunctionScoped is renameConfigFunction that leaves the rows
+// keep reports (by module and source) under the old name.
+func renameConfigFunctionScoped(config *projectConfig, oldName, newName string, unify bool, keep func(*moduleSpec, string) bool) (string, string, error) {
+	if keep == nil {
+		keep = func(*moduleSpec, string) bool { return false }
+	}
 	from, to := "", ""
 	found := false
 	unitSources := make(map[string]bool)
@@ -836,28 +1151,35 @@ func renameConfigFunction(config *projectConfig, oldName, newName string, unify 
 			unitSources[unit.Source] = true
 		}
 	}
+	renamed := func(m *moduleSpec, f *functionSpec) bool {
+		return (f.Name == oldName || f.sourceSymbol() == oldName) && !keep(m, m.sourceOf(f))
+	}
 	for _, m := range config.Modules {
+		here := false
+		for index := range m.Functions {
+			here = here || renamed(m, &m.Functions[index])
+		}
 		if existing := m.function(newName); existing != nil {
-			// Unifying lets another module already use the name; the same
+			// Joining lets another module already use the name; the same
 			// module holding both names is a real collision.
-			if !unify || m.function(oldName) != nil {
+			if !unify || here {
 				return "", "", fmt.Errorf("function already exists: %s", newName)
 			}
 		}
 		for _, symbol := range append(append([]symbolSpec(nil), m.Data...), m.Imports...) {
 			// A module may record another module's function as a data row (an
-			// overlay entry it calls by address); unifying keeps that name.
-			if symbol.Name == newName && (!unify || m.function(oldName) != nil) {
+			// overlay entry it calls by address); joining keeps that name.
+			if symbol.Name == newName && (!unify || here) {
 				return "", "", fmt.Errorf("%s already names a symbol in %s", newName, m.ID)
 			}
 		}
 		for index := range m.Functions {
 			f := &m.Functions[index]
-			if f.Name == oldName {
-				found = true
+			if !renamed(m, f) {
+				continue
 			}
+			found = true
 			if f.sourceSymbol() == oldName {
-				found = true
 				if f.Unit != "" {
 					// A unit member's file holds its siblings too; the body is
 					// renamed in place and the file keeps the unit's name.
@@ -887,21 +1209,27 @@ func renameConfigFunction(config *projectConfig, oldName, newName string, unify 
 				if m.sourceOf(f) == from && f.sourceSymbol() != oldName {
 					return "", "", fmt.Errorf("source %s has conflicting definition symbols; rename it manually", from)
 				}
+				if m.sourceOf(f) == from && !renamed(m, f) {
+					return "", "", fmt.Errorf("source %s keeps %s in %s; rename it manually", from, oldName, m.ID)
+				}
 			}
 		}
 	}
 	for _, m := range config.Modules {
+		renamedEntries := make(map[string]bool)
 		for index := range m.Functions {
 			f := &m.Functions[index]
+			if !renamed(m, f) {
+				continue
+			}
 			source := m.sourceOf(f)
-			definition := f.sourceSymbol()
-			entryRename := f.Name == oldName
-			if entryRename {
+			if f.Name == oldName {
+				renamedEntries[oldName] = true
 				f.Name = newName
 				// An alias's old default path remains owned by its definition.
 				f.Source = source
 			}
-			if definition == oldName {
+			if f.sourceSymbol() == oldName {
 				f.SourceSymbol = newName
 			}
 			if from != "" && source == from {
@@ -909,18 +1237,21 @@ func renameConfigFunction(config *projectConfig, oldName, newName string, unify 
 			}
 		}
 		for index := range m.Overrides {
-			if m.Overrides[index].Function == oldName {
+			if m.Overrides[index].Function == oldName && renamedEntries[oldName] {
 				m.Overrides[index].Function = newName
 			}
 		}
 	}
-	renameConfigReferences(config, oldName, newName)
-	return from, to, nil
+	return from, to, renameConfigReferencesScoped(config, oldName, newName, keep)
 }
 
 // renameConfigData renames data rows, imports and override bindings. A row
 // that meets an existing row of the new name at the same address merges.
 func renameConfigData(config *projectConfig, oldName, newName string) error {
+	return renameConfigDataScoped(config, oldName, newName, nil)
+}
+
+func renameConfigDataScoped(config *projectConfig, oldName, newName string, keep func(*moduleSpec, string) bool) error {
 	found := false
 	for _, m := range config.Modules {
 		if m.function(oldName) != nil {
@@ -928,6 +1259,9 @@ func renameConfigData(config *projectConfig, oldName, newName string) error {
 		}
 		if m.function(newName) != nil {
 			return fmt.Errorf("%s is a function in %s", newName, m.ID)
+		}
+		if keep != nil && keep(m, "") {
+			continue
 		}
 		for _, list := range []*[]symbolSpec{&m.Data, &m.Imports} {
 			for _, symbol := range *list {
@@ -945,11 +1279,24 @@ func renameConfigData(config *projectConfig, oldName, newName string) error {
 	if !found {
 		return fmt.Errorf("no data symbol named %s", oldName)
 	}
-	return renameConfigReferences(config, oldName, newName)
+	return renameConfigReferencesScoped(config, oldName, newName, keep)
 }
 
 func renameConfigReferences(config *projectConfig, oldName, newName string) error {
+	return renameConfigReferencesScoped(config, oldName, newName, nil)
+}
+
+// renameConfigReferencesScoped renames data rows and imports in the modules
+// keep leaves in scope, and override bindings whose function's source does
+// not keep the old name.
+func renameConfigReferencesScoped(config *projectConfig, oldName, newName string, keep func(*moduleSpec, string) bool) error {
+	if keep == nil {
+		keep = func(*moduleSpec, string) bool { return false }
+	}
 	for _, m := range config.Modules {
+		if keep(m, "") {
+			continue
+		}
 		for _, list := range []*[]symbolSpec{&m.Data, &m.Imports} {
 			existing := make(map[string]uint32)
 			for _, symbol := range *list {
@@ -971,8 +1318,16 @@ func renameConfigReferences(config *projectConfig, oldName, newName string) erro
 			*list = kept
 		}
 		for index := range m.Overrides {
-			if m.Overrides[index].Name == oldName {
-				m.Overrides[index].Name = newName
+			override := &m.Overrides[index]
+			if override.Name != oldName {
+				continue
+			}
+			source := ""
+			if f := m.function(override.Function); f != nil {
+				source = m.sourceOf(f)
+			}
+			if !keep(m, source) {
+				override.Name = newName
 			}
 		}
 	}
@@ -993,6 +1348,12 @@ func replaceIdentifierOutsideIncludes(pattern *regexp.Regexp, source, replacemen
 // rewriteCodeOutsideIncludes applies rewrite to every run of code text,
 // passing include lines, comments and literals through unchanged.
 func rewriteCodeOutsideIncludes(source []byte, rewrite func([]byte) []byte) []byte {
+	return rewriteSourceText(source, rewrite, func(text []byte) []byte { return text })
+}
+
+// rewriteSourceText applies rewrite to every run of code text and comment to
+// every comment, passing include lines and literals through unchanged.
+func rewriteSourceText(source []byte, rewrite, comment func([]byte) []byte) []byte {
 	var output []byte
 	code := make([]byte, 0, len(source))
 	flush := func() {
@@ -1018,21 +1379,21 @@ func rewriteCodeOutsideIncludes(source []byte, rewrite func([]byte) []byte) []by
 			flush()
 			stop := bytes.Index(source[index+2:], []byte("*/"))
 			if stop < 0 {
-				output = append(output, source[index:]...)
+				output = append(output, comment(source[index:])...)
 				index = len(source)
 				continue
 			}
-			output = append(output, source[index:index+2+stop+2]...)
+			output = append(output, comment(source[index:index+2+stop+2])...)
 			index += 2 + stop + 2
 		case bytes.HasPrefix(source[index:], []byte("//")):
 			flush()
 			stop := bytes.IndexByte(source[index:], '\n')
 			if stop < 0 {
-				output = append(output, source[index:]...)
+				output = append(output, comment(source[index:])...)
 				index = len(source)
 				continue
 			}
-			output = append(output, source[index:index+stop]...)
+			output = append(output, comment(source[index:index+stop])...)
 			index += stop
 		case source[index] == '"' || source[index] == '\'':
 			flush()
