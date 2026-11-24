@@ -16,8 +16,7 @@ functions:
   - {addr: 0x801d7064, size: 8, name: overlay_return_zero, hash: 207819bf4ebe3078, unit: entry}
 
 data:
-  - {addr: 0x801d706c, name: g_text_name_section_offsets}
-  - {addr: 0x801d70ec, name: g_text_name_data}
+  - {addr: 0x801d706c, name: g_name_text_bank}
 ---
 module: event-option
 file: EVENT/OPTION.OUT
@@ -271,8 +270,7 @@ data:
   - {addr: 0x801cbcd4, name: g_unit_panel_editor_numeric_descriptor_a}
   - {addr: 0x801cbd88, name: g_unit_panel_editor_numeric_descriptor_b}
   - {addr: 0x801cbe60, name: s_menu_decimal_glyph}
-  - {addr: 0x801cbe70, name: g_text_section_offsets}
-  - {addr: 0x801cbef0, name: g_text_data}
+  - {addr: 0x801cbe70, name: g_after_battle_text_bank}
   - {addr: 0x801d0000, name: g_after_battle_work}
   - {addr: 0x801d0068, name: s_conditions_banner_rect}
   - {addr: 0x801d0070, name: g_conditions_banner_palette_rect}
@@ -404,7 +402,7 @@ profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
 
 units:
-  - {name: help_overlay, source: src/lib/menu/help_overlay.c, data: [{addr: 0x801e0b30, size: 128, hash: 37edf2b26225cbea}, {addr: 0x801e0bb0, size: 92480, hash: 06855f9887b45aa9}], bss: [{addr: 0x801f74f8, size: 4, hash: df3f619804a92fdb}, {addr: 0x801f74fc, size: 4, hash: df3f619804a92fdb}]}
+  - {name: help_overlay, source: src/lib/menu/help_overlay.c, bss: [{addr: 0x801f74f8, size: 4, hash: df3f619804a92fdb}, {addr: 0x801f74fc, size: 4, hash: df3f619804a92fdb}]}
 
 functions:
   - {addr: 0x801df000, size: 80, name: close_help, hash: af74553ec4c059ff, unit: help_overlay}
@@ -423,8 +421,7 @@ data:
   - {addr: 0x801e07fc, name: g_help_unit_box_navigation}
   - {addr: 0x801e084c, name: g_help_after_battle_navigation}
   - {addr: 0x801e0ad4, name: g_help_menu_text_id_tables}
-  - {addr: 0x801e0b30, name: s_help_text_section_offsets}
-  - {addr: 0x801e0bb0, name: s_help_data_base}
+  - {addr: 0x801e0b30, name: g_help_menu_text_bank}
   - {addr: 0x801f74f8, name: s_help_controller_state_ptr}
   - {addr: 0x801f74fc, name: s_help_topic_text_ids}
   - {addr: 0x801f7504, name: g_text_saved_pointers}
@@ -748,7 +745,7 @@ units:
   - {name: menu_panel_backdrops, source: src/lib/menu/unit_view/backdrops.c, data: [{addr: 0x801ca054, size: 32, hash: 66687aadf862bd77}], bss: [{addr: 0x801d6010, size: 1264, hash: e448b18d634ce66c}]}
   - {name: deploy_panel_primitives, source: src/event/attack/deploy_panel_primitives.c}
   - {name: zodiac_primitives, source: src/lib/menu/unit_view/zodiac_primitives.c}
-  - {name: fieldable_units, source: src/event/attack/fieldable_units.c, data: [{addr: 0x801cd2b0, size: 128, hash: be9437aede4160e0}]}
+  - {name: fieldable_units, source: src/event/attack/fieldable_units.c}
   - {name: music_tracks, source: src/lib/sound/tracks.c}
   - {name: scenario_setup, source: src/event/attack/scenario_setup.c, rodata: [{addr: 0x801bf000, size: 4, hash: df3f619804a92fdb}]}
   - {name: deployment, source: src/event/attack/entry_deployment.c, data: [{addr: 0x801cd0dc, size: 368, hash: 66f4ed506159f631}, {addr: 0x801cd24c, size: 8, hash: 41d805e613efbe1a}, {addr: 0x801cd254, size: 8, hash: 41d805e613efbe1a}], bss: [{addr: 0x801cd06c, size: 4, hash: df3f619804a92fdb}, {addr: 0x801cd070, size: 4, hash: df3f619804a92fdb}, {addr: 0x801cd074, size: 4, hash: df3f619804a92fdb}, {addr: 0x801cd078, size: 4, hash: df3f619804a92fdb}, {addr: 0x801cd07c, size: 4, hash: df3f619804a92fdb}]}
@@ -931,10 +928,7 @@ data:
   - {addr: 0x801cd25c, name: g_deploy_unit_fieldable}
   - {addr: 0x801cd270, name: g_deploy_squad_data}
   - {addr: 0x801cd274, name: g_deploy_current_squad_data}
-  - {addr: 0x801cd2b0, name: s_deploy_text_section_offsets}
-  - {addr: 0x801cd2b4, name: g_deploy_text_roster_unit_names_offset}
-  - {addr: 0x801cd2b8, name: g_deploy_text_job_names_offset}
-  - {addr: 0x801cd330, name: g_text_data}
+  - {addr: 0x801cd2b0, name: g_name_text_bank}
   - {addr: 0x801cf118, name: g_unit_panel_button_prompt_frames}
   - {addr: 0x801cf4a8, name: g_unit_panel_button_prompt_frame_scales}
   - {addr: 0x801cf5d8, name: g_unit_panel_button_prompt_cell_bounds}

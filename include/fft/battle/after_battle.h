@@ -5,6 +5,7 @@
  * after-battle screens' menus, text sections and threads. The battle conditions banners are in conditions.h and the
  * war trophies in war_trophy.h. */
 
+#include "fft/text/text.h"
 #include "psx/types.h"
 
 /* party changes */
@@ -36,15 +37,17 @@ void after_battle_wait_menu_selection(void);
 /* Character identities grouped by their warning, departure and dismissal text. */
 enum { PARTY_MESSAGE_IDENTITY_GROUP_COUNT = 73, PARTY_MESSAGE_IDENTITIES_PER_GROUP = 3 };
 
-/* REQUIRE's text-file directory, with offsets relative to g_text_data. The first
- * three named sections retain these indices at runtime; job names bind to
- * TEXT_SECTION_JOB_NAMES instead. */
+/* Sections of REQUIRE's linked copy of JOIN.LZW. The first three named sections
+ * keep these indices at runtime; job names bind to TEXT_SECTION_JOB_NAMES instead.
+ * Entries past 4 are stale copies of SAMPLE.LZW's directory. */
 typedef enum after_battle_text_section {
     AFTER_BATTLE_TEXT_SECTION_BRAVE_FAITH_WARNINGS = 1,   /* a unit's Brave is low or its Faith high */
     AFTER_BATTLE_TEXT_SECTION_BRAVE_FAITH_DEPARTURES = 2, /* the unit leaves the party for it */
     AFTER_BATTLE_TEXT_SECTION_DISMISS_UNIT_REPLIES = 3,   /* what a unit turned away or dismissed says */
     AFTER_BATTLE_TEXT_SECTION_JOB_NAMES = 4
 } after_battle_text_section_e;
+
+extern text_bank_t g_after_battle_text_bank;
 
 extern u8 g_party_message_identity_groups[PARTY_MESSAGE_IDENTITY_GROUP_COUNT][PARTY_MESSAGE_IDENTITIES_PER_GROUP];
 

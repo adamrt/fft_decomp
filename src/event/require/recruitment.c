@@ -660,7 +660,7 @@ void after_battle_apply_unit_changes(void) {
     s32 text_width;
     s16 menu_x;
     s32 half_menu_x;
-    u8* text_data;
+    u8* text;
     s32* transition_c_ptr;
     s32 screen_fade_max;
 
@@ -673,18 +673,18 @@ void after_battle_apply_unit_changes(void) {
     mem_copy_bytes_nonempty(
         &s_after_battle_saved_thread, &g_threads[THREAD_SLOT_EVENT], sizeof(s_after_battle_saved_thread));
 
-    text_data = g_text_data;
+    text = g_after_battle_text_bank.text;
     g_text_section_pointers[AFTER_BATTLE_TEXT_SECTION_BRAVE_FAITH_WARNINGS]
-        = text_data + g_text_section_offsets[AFTER_BATTLE_TEXT_SECTION_BRAVE_FAITH_WARNINGS];
+        = text + g_after_battle_text_bank.section_offsets[AFTER_BATTLE_TEXT_SECTION_BRAVE_FAITH_WARNINGS];
     g_text_section_pointers[AFTER_BATTLE_TEXT_SECTION_BRAVE_FAITH_DEPARTURES]
-        = text_data + g_text_section_offsets[AFTER_BATTLE_TEXT_SECTION_BRAVE_FAITH_DEPARTURES];
+        = text + g_after_battle_text_bank.section_offsets[AFTER_BATTLE_TEXT_SECTION_BRAVE_FAITH_DEPARTURES];
     saved_menu_descriptor = g_menu_thread_menu_data;
     menu_base = g_after_battle_menu_entries;
     g_menu_thread_menu_data = menu_base;
     g_text_section_pointers[AFTER_BATTLE_TEXT_SECTION_DISMISS_UNIT_REPLIES]
-        = text_data + g_text_section_offsets[AFTER_BATTLE_TEXT_SECTION_DISMISS_UNIT_REPLIES];
+        = text + g_after_battle_text_bank.section_offsets[AFTER_BATTLE_TEXT_SECTION_DISMISS_UNIT_REPLIES];
     g_text_section_pointers[TEXT_SECTION_JOB_NAMES]
-        = text_data + g_text_section_offsets[AFTER_BATTLE_TEXT_SECTION_JOB_NAMES];
+        = text + g_after_battle_text_bank.section_offsets[AFTER_BATTLE_TEXT_SECTION_JOB_NAMES];
 
     affected_index = 0;
     text_build_battle_unit_names();

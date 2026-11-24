@@ -197,6 +197,16 @@ const u8* text_skip_to_entry(const u8* text, s32 entry_index);
 void text_bind_section_pointers(text_bank_t* bank);
 
 /* battle name text */
+/* The name bank ATTACK.OUT and SMALL.OUT each link, byte-identical in both: every unit name by name id (four
+ * pages of 256: special, generic male, generic female, monster) and the job names. The other directory entries are
+ * stale copies of SAMPLE.LZW's and point into the middle of entries. */
+typedef enum name_text_section {
+    NAME_TEXT_SECTION_UNIT_NAMES = 1, /* bound to TEXT_SECTION_ROSTER_UNIT_NAMES */
+    NAME_TEXT_SECTION_JOB_NAMES = 2   /* bound to TEXT_SECTION_JOB_NAMES */
+} name_text_section_e;
+
+extern text_bank_t g_name_text_bank;
+
 /* SMALL.OUT's entrypoint: bind its battle name text and clear the deployment unit limit. */
 void small_entrypoint(void);
 

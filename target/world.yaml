@@ -61,7 +61,7 @@ units:
   - {name: at_list_threads, source: src/lib/menu/at_list_and_pickups.c, bss: [{addr: 0x801ae334, size: 160, hash: b393978842a0fa3d}]}
   - {name: options, source: src/world/options.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
   - {name: option_choice, source: src/lib/menu/option_choice.c, data: [{addr: 0x801571a4, size: 56, hash: 363145519a4b87be}, {addr: 0x801571dc, size: 56, hash: 968d38035e40a07d}], bss: [{addr: 0x801aebb4, size: 248, hash: b3ab6982980fddf4}]}
-  - {name: help_overlay, source: src/lib/menu/help_overlay.c, data: [{addr: 0x801577e0, size: 128, hash: 37edf2b26225cbea}, {addr: 0x80157860, size: 92480, hash: 06855f9887b45aa9}], bss: [{addr: 0x801aecb4, size: 4, hash: df3f619804a92fdb}, {addr: 0x801aecb8, size: 4, hash: df3f619804a92fdb}]}
+  - {name: help_overlay, source: src/lib/menu/help_overlay.c, bss: [{addr: 0x801aecb4, size: 4, hash: df3f619804a92fdb}, {addr: 0x801aecb8, size: 4, hash: df3f619804a92fdb}]}
   - {name: menu_runtime, source: src/world/menu/menu_runtime.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x801aed64, size: 16, hash: 374708fff7719dd5}, {addr: 0x801aed74, size: 24, hash: 9d908ecfb6b256de}, {addr: 0x801aed8c, size: 66048, hash: cf1cc8dd4cd12e47}, {addr: 0x801bef8c, size: 128, hash: 38723a2e5e8a17aa}, {addr: 0x801bf00c, size: 4, hash: df3f619804a92fdb}], bss: [{addr: 0x8016e45c, size: 2, hash: 96a296d224f285c6}, {addr: 0x8016e45e, size: 2, hash: 96a296d224f285c6}, {addr: 0x8016e460, size: 2, hash: 96a296d224f285c6}, {addr: 0x8016e462, size: 2, hash: 96a296d224f285c6}, {addr: 0x8016e464, size: 2, hash: 96a296d224f285c6}, {addr: 0x8016e466, size: 2, hash: 96a296d224f285c6}, {addr: 0x8016e468, size: 4, hash: df3f619804a92fdb}, {addr: 0x8016e46c, size: 4, hash: df3f619804a92fdb}, {addr: 0x8016e470, size: 8, hash: af5570f5a1810b7a}]}
   - {name: formation_icon_list, source: src/world/formation/menu_support.c, data: [{addr: 0x80189f6c, size: 4, hash: df3f619804a92fdb}]}
   - {name: zodiac_primitives, source: src/lib/menu/unit_view/zodiac_primitives.c}
@@ -1428,8 +1428,7 @@ data:
   - {addr: 0x801574ac, name: g_help_unit_box_navigation}
   - {addr: 0x801574fc, name: g_help_after_battle_navigation}
   - {addr: 0x80157784, name: g_help_menu_text_id_tables}
-  - {addr: 0x801577e0, name: s_help_text_section_offsets}
-  - {addr: 0x80157860, name: s_help_data_base}
+  - {addr: 0x801577e0, name: g_help_menu_text_bank}
   - {addr: 0x8016e1a0, name: g_world_map_location_names}
   - {addr: 0x8016e44c, name: g_menu_screen_full_texture_window}
   - {addr: 0x8016e458, name: g_world_map_screen_request}

@@ -10,14 +10,6 @@
 #include "fft/text/text.h"
 #include "psx/types.h"
 
-/* Indices in this name file's directory, distinct from the runtime text section slots. */
-enum { NAME_TEXT_SECTION_ROSTER_UNIT_NAMES = 1, NAME_TEXT_SECTION_JOB_NAMES = 2 };
-
-/* Offsets relative to the following g_text_data. Only the two name entries are bound here. */
-static u32 s_deploy_text_section_offsets[TEXT_SECTION_COUNT]
-    = { 0, 1, 6245, 1485, 2531, 2532, 2533, 3943, 6896, 7338, 7550, 9840, 10282, 10283, 10284, 15199, 15200, 16165,
-          16470, 17883, 17884, 17885, 17886, 18989, 0, 0, 0, 0, 0, 0, 0, 0 };
-
 /* Empty and unreferenced. */
 void deploy_noop_1(void) {
 }
@@ -45,11 +37,12 @@ void deploy_init_roster(void) {
     s32 name_index;
     u8* name_cursor = g_text_section_pointers[TEXT_SECTION_PARTY_UNIT_NAMES];
     party_unit_t* party_unit;
+    u8* text = g_name_text_bank.text;
 
     g_text_section_pointers[TEXT_SECTION_ROSTER_UNIT_NAMES]
-        = g_text_data + s_deploy_text_section_offsets[NAME_TEXT_SECTION_ROSTER_UNIT_NAMES];
+        = text + g_name_text_bank.section_offsets[NAME_TEXT_SECTION_UNIT_NAMES];
     g_text_section_pointers[TEXT_SECTION_JOB_NAMES]
-        = g_text_data + s_deploy_text_section_offsets[NAME_TEXT_SECTION_JOB_NAMES];
+        = text + g_name_text_bank.section_offsets[NAME_TEXT_SECTION_JOB_NAMES];
     g_text_section_pointers[TEXT_SECTION_SKILLSET_NAMES_COPY] = g_text_section_pointers[TEXT_SECTION_SKILLSET_NAMES];
     g_deploy_fieldable_unit_count = 0;
 
