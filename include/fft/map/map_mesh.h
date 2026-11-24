@@ -105,7 +105,7 @@ typedef struct map_mesh_part {
     u8 parent;                 /* 0x86; parent part, from mesh properties byte 0 */
     u8 keyframe;               /* 0x87; 0 = fetch next */
     /* 0x88: per-part start indices and counts of its render records, written
-     * by map_mesh_append_geometry. */
+     * when its geometry is loaded. */
     u16 textured_triangle_start;
     u16 textured_quad_start;
     u16 untextured_triangle_start;
@@ -156,9 +156,6 @@ typedef enum map_mesh_tween_flags {
     MAP_MESH_TWEEN_SINE = 0x08,       /* delta * sin */
     MAP_MESH_TWEEN_RAISED_SINE = 0x10 /* delta * (sin + 1) */
 } map_mesh_tween_flags_e;
-
-extern map_mesh_part_t g_map_mesh_parts[9];
-extern const map_mesh_geometry_t* g_map_mesh_part_geometry[9];
 
 /* texture animations */
 /* map_texture_animation_t.mode: the technique of a map texture animation row and, for the
@@ -227,24 +224,8 @@ typedef struct map_texture_animation {
 } map_texture_animation_t;
 typedef char map_texture_animation_size_must_be_20[(sizeof(map_texture_animation_t) == 20) ? 1 : -1];
 
-extern s32 g_map_texture_animation_cycle_handles[MAP_TEXTURE_ANIMATION_COUNT];
-
 void map_freeze(void);
 void map_unfreeze(void);
-
-/* render records */
-extern map_mesh_triangle_positions_t g_map_textured_triangle_positions[RENDER_TEXTURED_TRIANGLE_COUNT];
-extern map_mesh_quad_positions_t g_map_textured_quad_positions[RENDER_TEXTURED_QUAD_COUNT];
-extern map_mesh_triangle_positions_t g_map_untextured_triangle_positions[RENDER_UNTEXTURED_TRIANGLE_COUNT];
-extern map_mesh_quad_positions_t g_map_untextured_quad_positions[RENDER_UNTEXTURED_QUAD_COUNT];
-extern map_mesh_triangle_normals_t g_map_textured_triangle_normals[];
-extern map_mesh_quad_normals_t g_map_textured_quad_normals[];
-extern s32 g_map_textured_quad_count;
-extern s32 g_map_textured_triangle_count;
-extern s32 g_map_untextured_quad_count;
-extern s32 g_map_untextured_triangle_count;
-
-void map_mesh_append_geometry(const map_mesh_geometry_t* geometry_data, map_mesh_part_t* metadata);
 
 /* rendering */
 /* Commands of map_set_untextured_ot_mode: the ordering-table
@@ -254,7 +235,6 @@ typedef enum map_effect_data_command {
     MAP_EFFECT_DATA_BEGIN = 0x88
 } map_effect_data_command_e;
 
-void map_reset_render_state(void);
 void map_draw(MATRIX* camera_matrix);
 s32 map_set_untextured_ot_mode(map_effect_data_command_e command);
 

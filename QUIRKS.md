@@ -53,7 +53,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
 - `unit_view_attack_caster_stats_thread`: for an item the
   secondary-data pointer stays uninitialized, yet its `flags_3` is read before
   the item test.
-- `map_gns_dispatch_resource` passes the packed lighting colors
+- `dispatch_gns_resource` passes the packed lighting colors
   (`map_light_resource_t`) as a `MATRIX` to `set_light_matrices`, which also
   copies its 32-bit translation values from the following 16-bit direction
   components, and the second matrix's uninitialized `direction.t`.
@@ -145,7 +145,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   `cursor_get_input_direction` tests `input` (`$a1`) when `source` or
   `g_cursor_input_mode` is outside 0-2; `status_set_action_state` leaves
   `status` unset for an action state other than 0 and 5-8 (its `switch` has no
-  default; no caller passes one); `map_gns_dispatch_resource` returns a
+  default; no caller passes one); `dispatch_gns_resource` returns a
   local no path assigns (`$s8`); `menu_get_cursor_bob_offset` (BATTLE and
   WORLD) walks an unset table pointer for a mode other than 0 or 1;
   `effect_secondary_summon_charge_handler` returns `result` (`$a1`)
@@ -174,7 +174,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   `select_sound_id` returns `sound` (`$a2`) for a channel mode
   above 4; `select_reporter` returns `selected` for
   a speaker mode outside 1-4 when more than one unit went;
-  `weather_stop_sfx` returns an unset `result` no caller reads.
+  `stop_weather_sfx` returns an unset `result` no caller reads.
 - `save_read_file` sets `result` to -1 when the last read was
   short and then returns `total`; the test has no effect.
 - `helpmenu_after_battle_entrypoint`: the vertical-cursor branch reaches
@@ -303,7 +303,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   `s_heap_game_allocator_table`; an allocation that reaches the last page
   reads on into `g_gfx_draw_envs` and clears its bytes while they match.
 - `map_update_load`: the four texture quarter files load at
-  `buffer + 0x8000 * (n + 1)`, while `map_gns_dispatch_resource` uploads
+  `buffer + 0x8000 * (n + 1)`, while `dispatch_gns_resource` uploads
   quarter n from `buffer + 0x8000 * n`; quarter 3 is loaded past the end of
   the 0x20000-byte buffer.
 - `toggle_tilt`: from tilt target 3 it starts a decrease toward
@@ -423,9 +423,9 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   rows (type 0x31; 1,533 in the retail GNS files, all with variable 0x22, state
   1 and comparison equal). One whose comparison holds indexes entry 49 of the
   49-entry `g_map_loaded_gns_records` and
-  `g_map_pending_gns_records`: it reads
+  `s_map_pending_gns_records`: it reads
   `g_map_saved_light_matrix` and can overwrite the first 20 bytes of
-  `g_map_local_light_matrix`.
+  `s_map_local_light_matrix`.
 - All six copies of `zodiac_build_primitives` (MAIN, WORLD, ATTACK, CARD,
   DEBUGCHR, REQUIRE): the round-to-nearest step of the sprite scale adds 1,
   not `ONE`, to the 4.12 product before dividing, so it only rounds up a
@@ -782,7 +782,7 @@ written that way.
 - `filter_unit_id` (BATTLE and WORLD) reads `in_id` as a 16-bit value; most
   callers pass the address of an `int` loop counter through a `(u16*)` cast,
   so the id is that counter's low half.
-- `map_start_gns_load` falls off its end for a map with no
+- `start_gns_load` falls off its end for a map with no
   GNS sector and returns what `bzero` left in `$v0`. `map_update_load`
   compares the result with the GNS table and, when it is not the table (also
   when the read could not start), returns 0 with its 0x20000-byte load buffer
@@ -1044,11 +1044,11 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
 - `ai_load_ability_entry`: with Throw Item the AI gives an
   item a range of the unit's Move; `target_set_range_for_action` uses
   4, and gives a Mime the same.
-- `map_gns_apply_command`: command rows 0x85, 0x86, 0x88, 0x89, 0x8a
+- `apply_gns_command`: command rows 0x85, 0x86, 0x88, 0x89, 0x8a
   and 0x8b skip the map-state comparison and are applied in file order, so the
   last of a kind wins: MAP017.GNS has one set-outdoor row followed by six
   set-indoor rows and ends indoors. Row types 0x87 (49 rows in 14 maps) and
-  0x8a (125 rows) have no case in `map_gns_dispatch_resource`, and no
+  0x8a (125 rows) have no case in `dispatch_gns_resource`, and no
   retail GNS holds a 0x83, 0x84 or 0x8b row, the three that take arguments.
 - Terrain data the code does not expect: five tiles hold a slope byte outside
   `map_slope_type_e` (0x10 in MAP017.10, MAP043.9 and MAP078.9, 0x46 in
@@ -1059,7 +1059,7 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
   in no terrain chunk, and tile byte 1 is 0 in all of them.
 - `g_map_directory_path` is the string `C:\FFTIMG\MAP\GNS\`; every map
   file load passes it as the first argument, which
-  `map_start_file_load` ignores.
+  `start_file_load` ignores.
 - The Brave Story "Fact" row never appears:
   `SCRIPT_VAR_FACTS_ENABLED` (0x92) gates it
   (`build_menu_rows`), no code sets it, and the one

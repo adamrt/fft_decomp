@@ -39,6 +39,8 @@ Division traps are another object-level fingerprint. Shared event/menu routines 
 
 GCC can reproduce some apparent global tables as constant pools for local initializers. The six action-result digit zoom curves reproduce the original stack copies when written as ordinary local arrays. Compiling the surrounding unit-presentation routines together also reproduces the following switch table's alignment; the initializer version built with the earlier file split placed that table four bytes too early. This constrains the reconstructed grouping without identifying an original filename.
 
+Shared constants mark BATTLE's map image as one object. Its 30 functions read one unbroken run of read-only data. The render-state reset, the GNS resource dispatcher and the GNS command applier all copy the same zero rotation and unit scale at `0x800e6b94`; a separately compiled file would have had its own copy. The `C:\FFTIMG\MAP\GNS\` directory string lies between the dispatcher's jump table and the loader's, which is where a definition in that same file would put it. The reconstruction therefore keeps the image in one file, [map.c](src/battle/map/map.c).
+
 OPEN and WLDCORE share both their toolchain profile and related window/file code. That supports a common build lineage; it does not identify a particular development machine or recover the original makefiles.
 
 ## Shared components and the original split

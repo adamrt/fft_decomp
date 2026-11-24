@@ -35,9 +35,7 @@ units:
   - {name: fade_tint, source: src/battle/core/screen_tint.c, bss: [{addr: 0x800961c8, size: 3, hash: 709e80c88487a241}]}
   - {name: map_palettes, source: src/battle/core/map_palettes.c, data: [{addr: 0x800956e4, size: 2016, hash: 0cd1d40758dc1bed}, {addr: 0x80095ec4, size: 504, hash: 40a6fe7cfd29ed44}], bss: [{addr: 0x800a1b10, size: 64, hash: f5a5fd42d16a2030}, {addr: 0x800a1b50, size: 32, hash: 66687aadf862bd77}, {addr: 0x800a1b70, size: 4, hash: df3f619804a92fdb}, {addr: 0x800a1b74, size: 32, hash: 66687aadf862bd77}, {addr: 0x800a1b94, size: 4, hash: df3f619804a92fdb}, {addr: 0x800a1b98, size: 80, hash: 5b6fb58e61fa4759}]}
   - {name: frame, source: src/battle/core/frame.c, rodata: [{addr: 0x800683b8, size: 8, hash: 00da4583f2609ee7}]}
-  - {name: render, source: src/battle/map/render.c, rodata: [{addr: 0x800e6b30, size: 32, hash: e31d717320f9b9f0}, {addr: 0x800e6b50, size: 24, hash: d0bbc605e5913d31}, {addr: 0x800e6b68, size: 8, hash: 90a2249a9949ea6b}, {addr: 0x800e6b94, size: 8, hash: af5570f5a1810b7a}, {addr: 0x800e6b9c, size: 20, hash: 85addd39731a2b42}], data: [{addr: 0x800f6d4c, size: 72, hash: 834a709ba2534ebe}, {addr: 0x800f6d94, size: 32, hash: 66687aadf862bd77}, {addr: 0x800f6db4, size: 768, hash: ef115a0e0c15cdc4}, {addr: 0x800f70b4, size: 2100, hash: 8dd6c05a3a7cd764}, {addr: 0x800f78e8, size: 150, hash: 1d83518b897b14e2}], bss: [{addr: 0x800f6854, size: 3, hash: 709e80c88487a241}]}
-  - {name: map_gns, source: src/battle/map/gns.c}
-  - {name: map_loading, source: src/battle/map/loading.c, data: [{addr: 0x800f7980, size: 4, hash: df3f619804a92fdb}, {addr: 0x800f7984, size: 4, hash: df3f619804a92fdb}, {addr: 0x800f7988, size: 4, hash: df3f619804a92fdb}, {addr: 0x800f798c, size: 4, hash: df3f619804a92fdb}, {addr: 0x800f7990, size: 4, hash: df3f619804a92fdb}], bss: [{addr: 0x800f5c58, size: 4, hash: df3f619804a92fdb}, {addr: 0x800f5c5c, size: 4, hash: df3f619804a92fdb}]}
+  - {name: map, source: src/battle/map/map.c, rodata: [{addr: 0x800e6b30, size: 32, hash: e31d717320f9b9f0}, {addr: 0x800e6b50, size: 24, hash: d0bbc605e5913d31}, {addr: 0x800e6b68, size: 8, hash: 90a2249a9949ea6b}, {addr: 0x800e6b94, size: 8, hash: af5570f5a1810b7a}, {addr: 0x800e6b9c, size: 20, hash: 85addd39731a2b42}, {addr: 0x800e7160, size: 24, hash: 41378ca180141d59}], data: [{addr: 0x800f6cc8, size: 1, hash: 6e340b9cffb37a98}, {addr: 0x800f6ccc, size: 128, hash: 38723a2e5e8a17aa}, {addr: 0x800f6d4c, size: 72, hash: 834a709ba2534ebe}, {addr: 0x800f6d94, size: 32, hash: 66687aadf862bd77}, {addr: 0x800f6db4, size: 768, hash: ef115a0e0c15cdc4}, {addr: 0x800f70b4, size: 2100, hash: 8dd6c05a3a7cd764}, {addr: 0x800f78e8, size: 150, hash: 1d83518b897b14e2}, {addr: 0x800f7980, size: 4, hash: df3f619804a92fdb}, {addr: 0x800f7984, size: 4, hash: df3f619804a92fdb}, {addr: 0x800f7988, size: 4, hash: df3f619804a92fdb}, {addr: 0x800f798c, size: 4, hash: df3f619804a92fdb}, {addr: 0x800f7990, size: 4, hash: df3f619804a92fdb}, {addr: 0x800f7994, size: 36, hash: 6db65fd59fd356f6}, {addr: 0x800f79b8, size: 4, hash: df3f619804a92fdb}, {addr: 0x800f79bc, size: 4, hash: df3f619804a92fdb}, {addr: 0x800f79c0, size: 148, hash: 3b18c58c739716e7}, {addr: 0x800f7a54, size: 4, hash: df3f619804a92fdb}, {addr: 0x800f7a58, size: 4, hash: df3f619804a92fdb}, {addr: 0x800f7a5c, size: 4, hash: df3f619804a92fdb}, {addr: 0x800f7a60, size: 980, hash: b4614bfba5e527b1}, {addr: 0x800f7e34, size: 32, hash: 66687aadf862bd77}, {addr: 0x800f7e54, size: 10320, hash: 0ef0db5ecdc0b431}, {addr: 0x800fa6a4, size: 1, hash: 6e340b9cffb37a98}], bss: [{addr: 0x800f6854, size: 3, hash: 709e80c88487a241}]}
   - {name: script_helpers, source: src/lib/event/scene/control.c}
   - {name: menu_primitives, source: src/lib/menu/graphics/primitive_init.c}
   - {name: window_buffers, source: src/lib/menu/graphics/window_buffers.c, bss: [{addr: 0x8016e43c, size: 1680, hash: 065cc6b2b996ca72}, {addr: 0x8016eacc, size: 24, hash: 9d908ecfb6b256de}]}
@@ -765,36 +763,36 @@ functions:
   - {addr: 0x8009386c, size: 556, name: battle_init_display, hash: cdd83879e45dc797, unit: frame}
   - {addr: 0x80093a98, size: 344, name: battle_submit_frame, hash: 1b36797b7b673151, unit: frame}
   - {addr: 0x80093bf0, size: 168, name: deploy_submit_frame, hash: ad55a2d1211cecdc, unit: frame}
-  - {addr: 0x800e72a0, size: 988, name: dispatch_polygon_flag_command, hash: e18bb92dd93af878, unit: render}
-  - {addr: 0x800e767c, size: 316, name: set_light_matrices, hash: 6dcde04983ba7065, unit: render}
-  - {addr: 0x800e77b8, size: 264, name: map_light_dispatch_back_color_command, hash: bbc1724e07a629c8, unit: render}
-  - {addr: 0x800e78c0, size: 2256, name: map_light_dispatch_matrix_command, hash: 37c482541519987f, unit: render, rodata: [{addr: 0x800e6ac0, size: 48, hash: 703df976344c80e3}]}
-  - {addr: 0x800e8190, size: 636, name: map_light_dispatch_command, hash: 7af1d67ddb0c7993, unit: render, rodata: [{addr: 0x800e6af0, size: 64, hash: 446e000b7b4b66a2}]}
-  - {addr: 0x800e840c, size: 17164, name: map_draw, hash: 28d68d300acda80d, unit: render}
-  - {addr: 0x800ec718, size: 6636, name: map_set_tile_mark_colors, hash: 915b4dbff52c8f4e, unit: render, rodata: [{addr: 0x800e6b70, size: 36, hash: 0d4d235b4acf51b8}]}
-  - {addr: 0x800ee104, size: 820, name: gfx_init_render_buffers, hash: 317ff53fdb8d7b3f, unit: render}
-  - {addr: 0x800ee438, size: 1316, name: map_reset_render_state, hash: 754fbb12f9ec340d, unit: render}
-  - {addr: 0x800ee95c, size: 412, name: camera_update_matrices, hash: 29602e281d343d33, unit: render}
-  - {addr: 0x800eeaf8, size: 980, name: weather_dispatch_command, hash: f27011429e089089, unit: render, rodata: [{addr: 0x800e6bb0, size: 232, hash: 276bee403f5f4890}]}
-  - {addr: 0x800eeecc, size: 2004, name: init_weather_particles, hash: b6c995f68f7aebfb, unit: render}
-  - {addr: 0x800ef6a0, size: 80, name: map_set_untextured_ot_mode, hash: 3e934559061008d6, unit: render}
-  - {addr: 0x800ef6f0, size: 5360, name: update_mesh_animations, hash: 15a535470e70eb67, unit: render}
-  - {addr: 0x800f0be0, size: 1572, name: map_dispatch_data_command, hash: 6112c29fb4019e23, unit: render, rodata: [{addr: 0x800e6c98, size: 208, hash: 52d89f7e859e76f3}]}
-  - {addr: 0x800f1204, size: 4240, name: update_texture_animations, hash: 3f7f6b3b16c740d6, unit: render, rodata: [{addr: 0x800e6d68, size: 520, hash: 9cb1e1fbf86e9caa}]}
-  - {addr: 0x800f2294, size: 900, name: load_mesh_animation_record, hash: 9821fba0cee8f43a, unit: render}
-  - {addr: 0x800f2618, size: 164, name: map_gns_record_matches_state, hash: 1d4012e33d448757, unit: render}
-  - {addr: 0x800f26bc, size: 3592, name: map_gns_dispatch_resource, hash: 5b5787ad477aaca4, unit: render, rodata: [{addr: 0x800e6f70, size: 496, hash: d92b411e7f4fe813}]}
-  - {addr: 0x800f34c4, size: 372, name: map_gns_apply_command, hash: 888a8328b66b7e1d, unit: map_gns, rodata: [{addr: 0x800e6b94, size: 24, hash: d40089d17817dc6f}]}
-  - {addr: 0x800f3638, size: 140, name: map_start_gns_load, hash: b558d851e0fec1a4, unit: map_gns}
-  - {addr: 0x800f36c4, size: 84, name: map_start_file_load, hash: 49d3e511ae62ee25, unit: map_gns}
-  - {addr: 0x800f3718, size: 5044, name: map_update_load, hash: 80e0c81db01af2f3, unit: map_loading, rodata: [{addr: 0x800e7178, size: 296, hash: 9789505d5f40b59f}]}
-  - {addr: 0x800f4acc, size: 776, name: map_mesh_load_palette, hash: 73bbc7bcf87038c6, unit: map_loading}
-  - {addr: 0x800f4dd4, size: 1956, name: map_mesh_append_geometry, hash: c311b7b2a36f1385, unit: map_loading}
-  - {addr: 0x800f5578, size: 1036, name: init_mesh_render_records, hash: b542a7ce19b82664, unit: map_loading}
-  - {addr: 0x800f5984, size: 108, name: map_stop_clut_cycles_and_weather_sfx, hash: bc7d2dc040adf637, unit: map_loading}
-  - {addr: 0x800f59f0, size: 60, name: weather_start_sfx, hash: 5a9461dd8939799f, unit: map_loading}
-  - {addr: 0x800f5a2c, size: 56, name: weather_start_timed_transform, hash: 0c87accc94879977, unit: map_loading}
-  - {addr: 0x800f5a64, size: 136, name: weather_stop_sfx, hash: 29ca15674c0eac0b, unit: map_loading}
+  - {addr: 0x800e72a0, size: 988, name: dispatch_polygon_flag_command, hash: e18bb92dd93af878, unit: map}
+  - {addr: 0x800e767c, size: 316, name: set_light_matrices, hash: 6dcde04983ba7065, unit: map}
+  - {addr: 0x800e77b8, size: 264, name: map_light_dispatch_back_color_command, hash: bbc1724e07a629c8, unit: map}
+  - {addr: 0x800e78c0, size: 2256, name: map_light_dispatch_matrix_command, hash: 37c482541519987f, unit: map, rodata: [{addr: 0x800e6ac0, size: 48, hash: 703df976344c80e3}]}
+  - {addr: 0x800e8190, size: 636, name: map_light_dispatch_command, hash: 7af1d67ddb0c7993, unit: map, rodata: [{addr: 0x800e6af0, size: 64, hash: 446e000b7b4b66a2}]}
+  - {addr: 0x800e840c, size: 17164, name: map_draw, hash: 28d68d300acda80d, unit: map}
+  - {addr: 0x800ec718, size: 6636, name: map_set_tile_mark_colors, hash: 915b4dbff52c8f4e, unit: map, rodata: [{addr: 0x800e6b70, size: 36, hash: 0d4d235b4acf51b8}]}
+  - {addr: 0x800ee104, size: 820, name: gfx_init_render_buffers, hash: 317ff53fdb8d7b3f, unit: map}
+  - {addr: 0x800ee438, size: 1316, name: reset_render_state, hash: 754fbb12f9ec340d, unit: map}
+  - {addr: 0x800ee95c, size: 412, name: camera_update_matrices, hash: 29602e281d343d33, unit: map}
+  - {addr: 0x800eeaf8, size: 980, name: weather_dispatch_command, hash: f27011429e089089, unit: map, rodata: [{addr: 0x800e6bb0, size: 232, hash: 276bee403f5f4890}]}
+  - {addr: 0x800eeecc, size: 2004, name: init_weather_particles, hash: b6c995f68f7aebfb, unit: map}
+  - {addr: 0x800ef6a0, size: 80, name: map_set_untextured_ot_mode, hash: 3e934559061008d6, unit: map}
+  - {addr: 0x800ef6f0, size: 5360, name: update_mesh_animations, hash: 15a535470e70eb67, unit: map}
+  - {addr: 0x800f0be0, size: 1572, name: map_dispatch_data_command, hash: 6112c29fb4019e23, unit: map, rodata: [{addr: 0x800e6c98, size: 208, hash: 52d89f7e859e76f3}]}
+  - {addr: 0x800f1204, size: 4240, name: update_texture_animations, hash: 3f7f6b3b16c740d6, unit: map, rodata: [{addr: 0x800e6d68, size: 520, hash: 9cb1e1fbf86e9caa}]}
+  - {addr: 0x800f2294, size: 900, name: load_mesh_animation_record, hash: 9821fba0cee8f43a, unit: map}
+  - {addr: 0x800f2618, size: 164, name: gns_record_matches_state, hash: 1d4012e33d448757, unit: map}
+  - {addr: 0x800f26bc, size: 3592, name: dispatch_gns_resource, hash: 5b5787ad477aaca4, unit: map, rodata: [{addr: 0x800e6f70, size: 496, hash: d92b411e7f4fe813}]}
+  - {addr: 0x800f34c4, size: 372, name: apply_gns_command, hash: 888a8328b66b7e1d, unit: map}
+  - {addr: 0x800f3638, size: 140, name: start_gns_load, hash: b558d851e0fec1a4, unit: map}
+  - {addr: 0x800f36c4, size: 84, name: start_file_load, hash: 49d3e511ae62ee25, unit: map}
+  - {addr: 0x800f3718, size: 5044, name: map_update_load, hash: 80e0c81db01af2f3, unit: map, rodata: [{addr: 0x800e7178, size: 296, hash: 9789505d5f40b59f}]}
+  - {addr: 0x800f4acc, size: 776, name: map_mesh_load_palette, hash: 73bbc7bcf87038c6, unit: map}
+  - {addr: 0x800f4dd4, size: 1956, name: append_mesh_geometry, hash: c311b7b2a36f1385, unit: map}
+  - {addr: 0x800f5578, size: 1036, name: init_mesh_render_records, hash: b542a7ce19b82664, unit: map}
+  - {addr: 0x800f5984, size: 108, name: map_stop_clut_cycles_and_weather_sfx, hash: bc7d2dc040adf637, unit: map}
+  - {addr: 0x800f59f0, size: 60, name: weather_start_sfx, hash: 5a9461dd8939799f, unit: map}
+  - {addr: 0x800f5a2c, size: 56, name: weather_start_timed_transform, hash: 0c87accc94879977, unit: map}
+  - {addr: 0x800f5a64, size: 136, name: stop_weather_sfx, hash: 29ca15674c0eac0b, unit: map}
   - {addr: 0x8012d8e4, size: 296, name: script_process_status_commands, hash: 49c7b4a5d64845fc, unit: script_helpers}
   - {addr: 0x8012da0c, size: 244, name: map_unit_set_event_animation, hash: 0f6580006d1a308f, unit: script_helpers}
   - {addr: 0x8012db00, size: 144, name: map_unit_set_event_facing, hash: 5c3eb103bc11e1c9, unit: script_helpers}
@@ -2224,7 +2222,7 @@ data:
   - {addr: 0x800e6b68, name: g_map_white_cvector}
   - {addr: 0x800e6b94, name: s_zero_svector}
   - {addr: 0x800e6b9c, name: s_unit_scale_vector}
-  - {addr: 0x800e7160, name: g_map_directory_path}
+  - {addr: 0x800e7160, name: s_map_directory_path}
   - {addr: 0x800f5af4, name: g_map_light_color_matrix}
   - {addr: 0x800f5b14, name: g_map_light_matrix}
   - {addr: 0x800f5b34, name: g_map_light_rotation}
@@ -2258,8 +2256,8 @@ data:
   - {addr: 0x800f5c50, name: g_map_polygon_flag_clear_countdown}
   - {addr: 0x800f5c52, name: g_map_light_transition_command}
   - {addr: 0x800f5c54, name: g_map_gns_dispatch_held}
-  - {addr: 0x800f5c58, name: s_map_gns_load_phase}
-  - {addr: 0x800f5c5c, name: s_map_resource_load_state}
+  - {addr: 0x800f5c58, name: g_map_gns_load_phase}
+  - {addr: 0x800f5c5c, name: g_map_resource_load_state}
   - {addr: 0x800f5c60, name: g_map_lowest_surface_y}
   - {addr: 0x800f5c64, name: g_weather_rain_sfx_id}
   - {addr: 0x800f5c68, name: g_weather_thunder_a_sfx_id}
@@ -2297,8 +2295,8 @@ data:
   - {addr: 0x800f6cbc, name: g_map_texture_quarter_0_pending}
   - {addr: 0x800f6cc0, name: g_map_texture_quarter_1_pending}
   - {addr: 0x800f6cc4, name: g_map_texture_quarter_2_pending}
-  - {addr: 0x800f6cc8, name: g_map_texture_quarter_3_pending}
-  - {addr: 0x800f6ccc, name: g_map_texture_animation_cycle_handles}
+  - {addr: 0x800f6cc8, name: s_map_texture_quarter_3_pending}
+  - {addr: 0x800f6ccc, name: s_map_texture_animation_cycle_handles}
   - {addr: 0x800f6d4c, name: s_saved_texture_modes}
   - {addr: 0x800f6d94, name: s_map_camera_matrix}
   - {addr: 0x800f6db4, name: s_texture_animation_moves}
@@ -2309,17 +2307,17 @@ data:
   - {addr: 0x800f7988, name: s_textured_quad_count}
   - {addr: 0x800f798c, name: s_untextured_triangle_count}
   - {addr: 0x800f7990, name: s_untextured_quad_count}
-  - {addr: 0x800f7994, name: g_map_mesh_part_geometry}
-  - {addr: 0x800f79b8, name: g_map_tile_mark_color_buffer}
-  - {addr: 0x800f79bc, name: g_weather_lightning_mode}
-  - {addr: 0x800f79c0, name: g_weather_lightning_state}
-  - {addr: 0x800f7a54, name: g_weather_timed_transform_frame}
-  - {addr: 0x800f7a58, name: g_map_part_untextured_triangle_positions}
-  - {addr: 0x800f7a5c, name: g_map_part_untextured_quad_positions}
-  - {addr: 0x800f7a60, name: g_map_pending_gns_records}
-  - {addr: 0x800f7e34, name: g_map_local_light_matrix}
-  - {addr: 0x800f7e54, name: g_map_mesh_animation_keyframes}
-  - {addr: 0x800fa6a4, name: g_weather_fall_speed}
+  - {addr: 0x800f7994, name: s_map_mesh_part_geometry}
+  - {addr: 0x800f79b8, name: s_map_tile_mark_color_buffer}
+  - {addr: 0x800f79bc, name: s_weather_lightning_mode}
+  - {addr: 0x800f79c0, name: s_weather_lightning_state}
+  - {addr: 0x800f7a54, name: s_weather_timed_transform_frame}
+  - {addr: 0x800f7a58, name: s_map_part_untextured_triangle_positions}
+  - {addr: 0x800f7a5c, name: s_map_part_untextured_quad_positions}
+  - {addr: 0x800f7a60, name: s_map_pending_gns_records}
+  - {addr: 0x800f7e34, name: s_map_local_light_matrix}
+  - {addr: 0x800f7e54, name: s_map_mesh_animation_keyframes}
+  - {addr: 0x800fa6a4, name: s_weather_fall_speed}
   - {addr: 0x800fa6a8, name: g_weather_primary_speed}
   - {addr: 0x800fa6ac, name: g_weather_rain_secondary_fall_speed}
   - {addr: 0x800fa6b8, name: g_map_part_textured_triangle_positions}

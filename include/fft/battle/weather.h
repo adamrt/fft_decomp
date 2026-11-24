@@ -58,7 +58,6 @@ typedef enum weather_effect_mode {
 
 /* weather_flags_e bits, with the signed palette modifier above WEATHER_MODIFIER_SHIFT. */
 extern s32 g_weather_flags;
-extern s16 g_weather_effect_mode; /* weather_effect_mode_e */
 
 s32 weather_get_effective(void);
 
@@ -66,23 +65,10 @@ s32 weather_get_effective(void);
 void weather_dispatch_command(u8 command);
 
 /* timed particle transform */
-/* Frame, duration and rotation of E458's timed particle transform
- * (WEATHER_EFFECT_TIMED_PARTICLE_TRANSFORM). */
-extern s32 g_weather_timed_transform_frame;
-extern s32 g_weather_timed_transform_duration;
-
 void weather_start_timed_transform(s32 id, s32 value);
 
 /* sound */
-/* Sound IDs remembered for weather_stop_sfx; zero means no ID is stored.
- * The rain ID is also retained while weather sounds are disabled. */
-extern s32 g_weather_rain_sfx_id;
-extern s32 g_weather_thunder_a_sfx_id;
-extern s32 g_weather_thunder_b_sfx_id;
-extern u8 g_weather_sfx_enabled;
-
 void weather_start_sfx(void);
-s32 weather_stop_sfx(void); /* the result is indeterminate; no caller reads it */
 
 /* The raw weather script variable, before indoor and snow flags apply. */
 s32 weather_get_raw(void);
