@@ -22,8 +22,7 @@ units:
   - {name: window_records, source: src/wldcore/display_objects.c, data: [{addr: 0x80092b2c, size: 8, hash: fc559ae5b7c6c78d}]}
   - {name: hud, source: src/wldcore/map/hud.c}
   - {name: menu_levels, source: src/wldcore/menu_levels.c, data: [{addr: 0x8009e690, size: 228, hash: 27c8987b677b000d}, {addr: 0x8009e774, size: 228, hash: 17ce379e6bacf734}, {addr: 0x8009e858, size: 228, hash: 7a22627279b735fa}], bss: [{addr: 0x800d4584, size: 32, hash: 66687aadf862bd77}]}
-  - {name: bar, source: src/wldcore/bar.c}
-  - {name: proposition_dispatch, source: src/wldcore/proposition/dispatch.c, data: [{addr: 0x800d09a0, size: 12, hash: 15ec7bf0b50732b4}], bss: [{addr: 0x800d457c, size: 4, hash: df3f619804a92fdb}]}
+  - {name: bar, source: src/wldcore/bar.c, data: [{addr: 0x800d09a0, size: 12, hash: 15ec7bf0b50732b4}], bss: [{addr: 0x800d457c, size: 4, hash: df3f619804a92fdb}]}
   - {name: proposition_report, source: src/wldcore/proposition/report.c}
   - {name: proposition_results, source: src/wldcore/proposition/results.c, data: [{addr: 0x8009eb34, size: 8, hash: 8fa5f1b1c1b875fa}, {addr: 0x8009eb3c, size: 8, hash: 9785aa74f03e66b7}]}
   - {name: novel_menus, source: src/wldcore/novel/menus.c, bss: [{addr: 0x800d4900, size: 8, hash: af5570f5a1810b7a}]}
@@ -166,33 +165,33 @@ functions:
   - {addr: 0x80072448, size: 464, name: rumor_update_list_input, hash: 53cfce9835b9c6ad, unit: bar}
   - {addr: 0x80072618, size: 624, name: open_rumor_detail, hash: b8ebacace76767db, unit: bar}
   - {addr: 0x80072888, size: 400, name: rumor_update_detail, hash: c2eda3582b564e63, unit: bar}
-  - {addr: 0x80072a18, size: 1168, name: proposition_open_available_list, hash: c83798798d18675d, unit: bar}
+  - {addr: 0x80072a18, size: 1168, name: open_available_list, hash: c83798798d18675d, unit: bar}
   - {addr: 0x80072ea8, size: 56, name: proposition_resume_available_list, hash: 58115917b548d1ae, unit: bar}
   - {addr: 0x80072ee0, size: 20, name: proposition_suspend_available_list, hash: 11034aa27eaa3095, unit: bar}
   - {addr: 0x80072ef4, size: 68, name: close_available_list, hash: 12816d7d95d26605, unit: bar}
   - {addr: 0x80072f38, size: 896, name: proposition_update_available_list_input, hash: 37339e7e25c99383, unit: bar}
-  - {addr: 0x800732b8, size: 732, name: proposition_open_detail, hash: 19dceafa5ab8cf80, unit: bar}
+  - {addr: 0x800732b8, size: 732, name: open_proposition_detail, hash: 19dceafa5ab8cf80, unit: bar}
   - {addr: 0x80073594, size: 52, name: proposition_resume_detail, hash: 2b59627b9d412f6c, unit: bar}
   - {addr: 0x800735c8, size: 56, name: proposition_suspend_detail, hash: e431f3e0f46c12c5, unit: bar}
   - {addr: 0x80073600, size: 376, name: proposition_update_detail, hash: 0fe7fa0826684fbc, unit: bar}
   - {addr: 0x80073778, size: 948, name: window_build_yes_no_panel, hash: c841fa104d3e8cc2, unit: bar}
   - {addr: 0x80073b2c, size: 972, name: proposition_update_accept_panel, hash: 71bf0da24cf8ba22, unit: bar}
-  - {addr: 0x80073ef8, size: 248, name: proposition_open_days_panel, hash: 2c7c0fe19fe5cc44, unit: bar}
+  - {addr: 0x80073ef8, size: 248, name: open_days_panel, hash: 2c7c0fe19fe5cc44, unit: bar}
   - {addr: 0x80073ff0, size: 324, name: proposition_update_days_panel, hash: 8df00d2ef4888cf8, unit: bar}
-  - {addr: 0x80074134, size: 1620, name: proposition_open_dispatch_confirm, hash: 47106833c249f4b5, unit: proposition_dispatch}
-  - {addr: 0x80074788, size: 936, name: proposition_update_dispatch_confirm, hash: 2c4bfafc1c4ee158, unit: proposition_dispatch}
-  - {addr: 0x80074b30, size: 272, name: proposition_advance_day, hash: c1fc1299f41ccd9d, unit: proposition_dispatch}
-  - {addr: 0x80074c40, size: 144, name: proposition_count_returned, hash: df8dd28acf91d0b1, unit: proposition_dispatch}
-  - {addr: 0x80074cd0, size: 2792, name: proposition_open_participants, hash: ae9b7ca2cbe27dc7, unit: proposition_dispatch}
-  - {addr: 0x800757b8, size: 408, name: build_candidates, hash: 367e06355e25ae5b, unit: proposition_dispatch}
-  - {addr: 0x80075950, size: 248, name: draw_participant_names, hash: f0645630c918641c, unit: proposition_dispatch}
-  - {addr: 0x80075a48, size: 400, name: show_candidate_portrait, hash: bfa0efbfc4651b1f, unit: proposition_dispatch}
-  - {addr: 0x80075bd8, size: 888, name: update_replace_mode, hash: b3fe4404c27224e7, unit: proposition_dispatch}
-  - {addr: 0x80075f50, size: 228, name: start_candidate_panels, hash: f2e421b177035135, unit: proposition_dispatch}
-  - {addr: 0x80076034, size: 1808, name: update_status_mode, hash: a0abc061e713bac1, unit: proposition_dispatch}
-  - {addr: 0x80076744, size: 328, name: proposition_resume_participants, hash: ea45271dfaf3e099, unit: proposition_dispatch}
-  - {addr: 0x8007688c, size: 324, name: proposition_suspend_participants, hash: 0caaf7b1601583ee, unit: proposition_dispatch}
-  - {addr: 0x800769d0, size: 1956, name: proposition_update_participants, hash: 0acd40dafba7b3a6, unit: proposition_dispatch}
+  - {addr: 0x80074134, size: 1620, name: open_dispatch_confirm, hash: 47106833c249f4b5, unit: bar}
+  - {addr: 0x80074788, size: 936, name: proposition_update_dispatch_confirm, hash: 2c4bfafc1c4ee158, unit: bar}
+  - {addr: 0x80074b30, size: 272, name: proposition_advance_day, hash: c1fc1299f41ccd9d, unit: bar}
+  - {addr: 0x80074c40, size: 144, name: count_returned_propositions, hash: df8dd28acf91d0b1, unit: bar}
+  - {addr: 0x80074cd0, size: 2792, name: open_participants, hash: ae9b7ca2cbe27dc7, unit: bar}
+  - {addr: 0x800757b8, size: 408, name: build_candidates, hash: 367e06355e25ae5b, unit: bar}
+  - {addr: 0x80075950, size: 248, name: draw_participant_names, hash: f0645630c918641c, unit: bar}
+  - {addr: 0x80075a48, size: 400, name: show_candidate_portrait, hash: bfa0efbfc4651b1f, unit: bar}
+  - {addr: 0x80075bd8, size: 888, name: update_replace_mode, hash: b3fe4404c27224e7, unit: bar}
+  - {addr: 0x80075f50, size: 228, name: start_candidate_panels, hash: f2e421b177035135, unit: bar}
+  - {addr: 0x80076034, size: 1808, name: update_status_mode, hash: a0abc061e713bac1, unit: bar}
+  - {addr: 0x80076744, size: 328, name: proposition_resume_participants, hash: ea45271dfaf3e099, unit: bar}
+  - {addr: 0x8007688c, size: 324, name: proposition_suspend_participants, hash: 0caaf7b1601583ee, unit: bar}
+  - {addr: 0x800769d0, size: 1956, name: proposition_update_participants, hash: 0acd40dafba7b3a6, unit: bar}
   - {addr: 0x80077174, size: 1016, name: proposition_open_returned_list, hash: c20b2597caaa9cdf, unit: proposition_report}
   - {addr: 0x8007756c, size: 56, name: proposition_resume_returned_list, hash: a8fc925d11479518, unit: proposition_report}
   - {addr: 0x800775a4, size: 20, name: proposition_suspend_returned_list, hash: 11034aa27eaa3095, unit: proposition_report}

@@ -20,7 +20,7 @@ typedef enum proposition_progress_flag {
  * proposition_advance_day advances elapsed_days and sets the
  * returned flag; proposition_update_dispatch_confirm stores the
  * current world-map location and the participants, and
- * proposition_count_returned filters returned records by location. */
+ * count_returned_propositions filters returned records by location. */
 typedef struct proposition_progress {
     u8 flags;          /* 0x00; proposition_progress_flag_e */
     u8 proposition_id; /* 0x01; text 0xd000 | id names it */
@@ -59,7 +59,6 @@ extern u8 g_proposition_states[96]; /* proposition_state_e */
 extern u32 g_proposition_last_attempt_date_bits[27]; /* written only for a successful result */
 
 void proposition_advance_day(void);
-s32 proposition_count_returned(s32 location);
 
 /* proposition data */
 /* Records of the proposition data file (proposition_get_data). */
@@ -138,7 +137,6 @@ s32 proposition_is_available_at(s32 index, s32 location);
 void* proposition_get_data(proposition_data_record_e record);
 
 /* lists */
-void proposition_open_available_list(void);
 void proposition_update_available_list_input(menu_stack_record_t* level);
 void proposition_resume_available_list(menu_stack_record_t* level);
 void proposition_suspend_available_list(menu_stack_record_t* unused_level);
@@ -188,7 +186,6 @@ typedef struct proposition_recall_level {
     s32 frame_window; /* 0x20 */
 } proposition_recall_level_t;
 
-void proposition_open_detail(s32 value);
 void proposition_update_detail(menu_stack_record_t* level);
 void proposition_build_detail_panel(proposition_detail_panel_t* panel, s32 proposition, s32 coordinate_mode);
 void proposition_suspend_detail(menu_stack_record_t* level);
@@ -266,14 +263,11 @@ typedef char proposition_send_unit_level_size_must_be_92[sizeof(proposition_send
 extern s32 g_proposition_gil_amount;
 extern s32 g_proposition_dispatch_days;
 
-void proposition_open_participants(void);
 void proposition_update_accept_panel(menu_stack_record_t* level);
 void proposition_update_participants(menu_stack_record_t* level);
 void proposition_suspend_participants(menu_stack_record_t* level);
 void proposition_resume_participants(menu_stack_record_t* level);
-void proposition_open_days_panel(void);
 void proposition_update_days_panel(menu_stack_record_t* level);
-void proposition_open_dispatch_confirm(void);
 void proposition_update_dispatch_confirm(menu_stack_record_t* level);
 
 /* report */

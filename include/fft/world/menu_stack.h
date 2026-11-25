@@ -119,7 +119,7 @@ typedef struct menu_stack_scrollable_text_level {
     s32 _unread_20; /* 0x20; 0x28 at push; nothing reads it */
 } menu_stack_scrollable_text_level_t;
 
-/* Panel levels: the number panels (proposition_open_days_panel, open_variable_edit and
+/* Panel levels: the number panels (open_days_panel, open_variable_edit and
  * open_party_number) and the list
  * panels (brave_story_open_unexplored_land_list, tutorial_open_topic_list and
  * leave_menu). */
