@@ -23,7 +23,7 @@ typedef struct sprite_frame_part {
 /* Encoded fields of sprite_frame_part_t.attributes. */
 enum {
     SPRITE_SHP_PART_TILE_MASK = 0x03ff, /* the picture's place in the sheet in 8-pixel tiles: bits 0-4 u, 5-9 v */
-    SPRITE_SHP_PART_SIZE_MASK = 0x3c00, /* bits 10-13: index of g_sprite_part_sizes */
+    SPRITE_SHP_PART_SIZE_MASK = 0x3c00, /* bits 10-13: index of s_sprite_part_sizes */
     SPRITE_SHP_PART_FLIP_MASK = 0xc000  /* shifted down 13: SPRITE_DISPLAY_HORIZONTAL_FLIP and _VERTICAL_FLIP */
 };
 
@@ -34,7 +34,7 @@ enum { SPRITE_SHP_PART_SIZE_48X48 = 14 };
  * (sprite_load_unit_frame). */
 typedef struct sprite_frame {
     /* Bits 0-2 are the part count minus one, bits 3-7 index the rotation
-     * table g_sprite_y_rotations. */
+     * table s_sprite_y_rotations. */
     u8 part_count_and_rotation;
     u8 flags; /* the SPRITE_DISPLAY_SEMI_TRANSPARENT and _BLEND_MASK bits of every part */
     sprite_frame_part_t parts[1];
@@ -252,7 +252,6 @@ void sprite_project_units(void);
 void sprite_draw_units(void);
 
 /* afterimages */
-void sprite_afterimage_init(struct map_unit* unit);
 
 /* shadows */
 void sprite_build_shadow_quad(struct map_unit* unit);

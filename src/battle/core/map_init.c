@@ -27,11 +27,10 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+extern u8 g_map_random_battle_music_tracks[4];
+
 static s32 s_sprite_unit_graphics_load_complete;
 
-/* The four random-battle music tracks (0x04, 0x05, 0x0e, 0x0f); map initialization plays the
- * one at rand() / 0x2000. */
-static u8 s_map_random_battle_music_tracks[4] = { 4, 5, 0xe, 0xf };
 extern palette_t g_weather_particle_palette;
 
 /* Resets the camera for a new map: screen offset (0x100, 0xa0, 0x280), zoom ONE,
@@ -267,7 +266,7 @@ s32 map_update_init_sequence(s32 map_id, s32 step) {
             /* Called with no argument: the sound id is whatever
              * music_unload_current_scenario left in $a0. */
             ((void (*)(void))sound_stop_sfx)();
-            music_set_track(s_map_random_battle_music_tracks[rand() / 0x2000]);
+            music_set_track(g_map_random_battle_music_tracks[rand() / 0x2000]);
         }
         step++;
         break;
@@ -391,7 +390,7 @@ s32 map_update_deployment_init_sequence(s32 map_id, s32 step, s32 deployment_run
             /* Called with no argument: the sound id is whatever
              * music_unload_current_scenario left in $a0. */
             ((void (*)(void))sound_stop_sfx)();
-            music_set_track(s_map_random_battle_music_tracks[rand() / 0x2000]);
+            music_set_track(g_map_random_battle_music_tracks[rand() / 0x2000]);
         }
         step++;
         break;

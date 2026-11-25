@@ -1,9 +1,10 @@
 /* The live units' sprites on the battle map: the indicators drawn around them (shadows, status bubbles,
  * afterimages, held items and animated action-result text), spritesheet resolution with palettes,
  * transparency and height, the animation chosen for actions, charging, statuses and target responses,
- * and the sprites themselves, which run their unit and weapon SEQ scripts and load SHP, SEQ and SPR
- * assets. The original compiled all of it as one object. Its smaller tables lie in BATTLE's shared
- * table block among other files' tables, so they stay address labels. */
+ * the sprites themselves, which run their unit and weapon SEQ scripts and load SHP, SEQ and SPR
+ * assets, the map cursor's tile glow and Wait direction indicator, and unit fades, coordinates and
+ * distortion animations. The original compiled the sprite code as one object; its data, defined in
+ * address order at the top, is BATTLE's core table block, including tables other files read. */
 
 #include "fft/battle/action.h"
 #include "fft/battle/ai.h"
@@ -16,6 +17,8 @@
 #include "fft/battle/projectile.h"
 #include "fft/battle/result.h"
 #include "fft/battle/weather.h"
+#include "fft/effect/effect.h"
+#include "fft/effect/effect_script.h"
 #include "fft/effect/effect_secondary.h"
 #include "fft/game/ability.h"
 #include "fft/game/battle_unit.h"
@@ -41,6 +44,27 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+static void set_real_coords_from_world_coords(map_unit_t* unit);
+static s32 distortion_none(map_unit_t* unused_unit);
+static s32 distortion_scale_pulse_update(map_unit_t* unit);
+static s32 distortion_rise(map_unit_t* unit);
+static s32 distortion_settle(map_unit_t* unit);
+static s32 distortion_move_to_target(map_unit_t* unit);
+static s32 distortion_move_to_own_tile(map_unit_t* unit);
+static s32 distortion_move_level_to_target(map_unit_t* unit);
+static s32 distortion_move_level_to_own_tile(map_unit_t* unit);
+static s32 distortion_jump_to_target(map_unit_t* unit);
+static s32 distortion_jump_to_own_tile(map_unit_t* unit);
+static s32 distortion_clear(map_unit_t* unit);
+static s32 distortion_clear_2(map_unit_t* unit);
+static s32 distortion_jump_takeoff(map_unit_t* unit);
+static s32 distortion_fall_to_target(map_unit_t* unit);
+static s32 distortion_teleport(map_unit_t* unit);
+static s32 distortion_back_away(map_unit_t* unit);
+static s32 distortion_jump_to_own_tile_faded(map_unit_t* unit);
+static s32 distortion_jump_rise(map_unit_t* unit);
+static void dispatch_distortion(map_unit_t* unit);
+
 /* WEP.SPR weapon/item graphics: palette rows and texture-row placement. */
 typedef struct sprite_item_graphic {
     u8 palettes;    /* 0x00; g_sprite_weapon_clut rows: high nibble for MAP_CLUT_ROW_ITEM_A, low for _B */
@@ -48,7 +72,357 @@ typedef struct sprite_item_graphic {
 } sprite_item_graphic_t;
 typedef char sprite_item_graphic_size_must_be_2[(sizeof(sprite_item_graphic_t) == 2) ? 1 : -1];
 
-extern sprite_item_graphic_t g_sprite_item_graphic_data[146];
+enum {
+    ANIMATION_DISTORTION_COUNT = 18 /* the handlers of s_distortion_handlers */
+};
+
+/* The dispatcher ignores the result and the handlers supply no value. The s32
+ * callback shape preserves the pulse and teleport handlers' instruction scheduling. */
+typedef s32 (*animation_distortion_handler_t)(map_unit_t* unit);
+
+/* tables */
+
+s32 g_map_deep_dungeon_load_in_progress = 0;
+
+/* Advanced by g_system_vsync_interval once per call and sampled with bit 5 to blink
+ * the highlighted arrow. */
+static u32 s_unit_facing_wait_arrow_blink_timer = 0;
+
+/* Status flag shown by each status bubble before SOURCE_UNIT. DEAD and DEATH_SENTENCE hold 0 and are
+ * tested separately by update_bubble_cycle; bubbles 8 and 11 hold 0 too,
+ * so they never show. */
+static s32 s_status_bubble_status_masks[STATUS_BUBBLE_SOURCE_UNIT] = { 0, 0x00000040, 0x08000000, 0x02000000,
+    0x01000000, 0x00004000, 0x00008000, 0x00010000, 0, 0x00000200, 0x10000000, 0, 0x00000080, 0x00020000, 0x00040000,
+    0x00080000, 0x00100000, 0x00200000, 0x00400000, 0x00800000, 0 };
+
+/* Post-action numeric and status displays. */
+static u8 s_result_numeric_selectors[ACTION_DISPLAY_VALUE_COUNT]
+    = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
+
+/* Eight per status_changes mask byte, indexed from the byte's high bit. */
+static u8 s_result_status_image_ids[STATUS_BYTE_COUNT][8] = { { 0, 0, 0, 0x01, 0, 0, 0, 0 },
+    { 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0, 0 }, { 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0, 0, 0 },
+    { 0x0d, 0x0e, 0x0f, 0x10, 0x11, 0x12, 0x13, 0 }, { 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b } };
+
+/* sound_sfx_e by the weapon's item_type_e (0x20 entries each): the swing, the
+ * hit, and the hit a shield or Golem stops (action_play_weapon_sfx). */
+static u8 s_action_weapon_swing_sfx_ids[ITEM_TYPE_SHURIKEN] = { 0x19, 0x19, 0x19, 0x1a, 0x1a, 0x1a, 0x1b, 0x1a, 0x1a,
+    0x1b, 0x5a, 0x56, 0x52, 0x19, 0x19, 0x1b, 0x1b, 0x19, 0x19, 0, 0, 0x1b, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+static u8 s_action_weapon_hit_sfx_ids[ITEM_TYPE_SHURIKEN] = { 0x18, 0x13, 0x13, 0x13, 0x13, 0x13, 0x15, 0x38, 0x38,
+    0x15, 0x5b, 0x74, 0x74, 0x9c, 0x9c, 0x3e, 0x3e, 0x18, 0x18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+static u8 s_action_shield_deflect_sfx_ids[ITEM_TYPE_SHURIKEN] = { 0x15, 0x2e, 0x2e, 0x2e, 0x2e, 0x2e, 0x2f, 0x2e, 0x2e,
+    0x2f, 0x47, 0x49, 0x49, 0x30, 0x30, 0x2e, 0x2e, 0x15, 0x15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+/* One handler for each distortion id; id 0 is skipped by the dispatcher. */
+static animation_distortion_handler_t s_distortion_handlers[ANIMATION_DISTORTION_COUNT] = {
+    distortion_none,
+    distortion_scale_pulse_update,
+    distortion_rise,
+    distortion_settle,
+    distortion_move_to_target,
+    distortion_move_to_own_tile,
+    distortion_jump_to_target,
+    distortion_jump_to_own_tile,
+    distortion_move_level_to_target,
+    distortion_move_level_to_own_tile,
+    distortion_clear,
+    distortion_clear_2,
+    distortion_jump_takeoff,
+    distortion_fall_to_target,
+    distortion_teleport,
+    distortion_back_away,
+    distortion_jump_to_own_tile_faded,
+    distortion_jump_rise,
+};
+
+/* Two animation_e for each set: the one that starts a charge and
+ * the one held while the unit charges or performs; 0 for none. */
+static u8 s_animation_ability_charge_sets[ANIMATION_CHARGE_SET_COUNT][ANIMATION_CHARGE_VARIANT_COUNT]
+    = { { 0x2a, 0x22 }, { 0x2a, 0x2b }, { 0x2a, 0x2b }, { 0x2a, 0x2b }, { 0, 0x22 }, { 0x2a, 0x2b }, { 0x2a, 0x2b },
+          { 0, 0x22 }, { 0x2a, 0x22 }, { 0, 0x2b }, { 0x2a, 0x22 }, { 0x2a, 0x2b }, { 0x2a, 0x22 }, { 0, 0x28 },
+          { 0, 0x29 }, { 0, 0x75 }, { 0x2a, 0x2b }, { 0, 0x16 }, { 0, 0x22 }, { 0, 0 } };
+
+animation_ability_data_t g_ability_animation_data[ANIMATION_ABILITY_COUNT] = { { 0, 0x2c, 0 }, { 0x01, 0x2c, 0 },
+    { 0x01, 0x2c, 0 }, { 0x01, 0x2c, 0 }, { 0x01, 0x2c, 0 }, { 0x01, 0x2c, 0 }, { 0x01, 0x2c, 0 }, { 0x01, 0x2c, 0 },
+    { 0x01, 0x2c, 0 }, { 0x01, 0x2c, 0 }, { 0x01, 0x2c, 0 }, { 0x01, 0x2c, 0 }, { 0x01, 0x2c, 0 }, { 0x01, 0x2c, 0 },
+    { 0x01, 0x2c, 0 }, { 0x01, 0x2c, 0 }, { 0x01, 0x2c, 0 }, { 0x01, 0x2c, 0 }, { 0x01, 0x2c, 0 }, { 0x01, 0x2c, 0 },
+    { 0x01, 0x2c, 0 }, { 0x01, 0x2c, 0 }, { 0x01, 0x2c, 0 }, { 0x01, 0x2c, 0 }, { 0x01, 0x2c, 0 }, { 0x01, 0x2c, 0 },
+    { 0x01, 0x2c, 0 }, { 0x01, 0x2c, 0 }, { 0x01, 0x2c, 0 }, { 0x01, 0x2c, 0 }, { 0x01, 0x2c, 0 }, { 0x01, 0x2c, 0 },
+    { 0x01, 0x2c, 0 }, { 0x01, 0x2c, 0 }, { 0x01, 0x2c, 0 }, { 0x01, 0x2c, 0 }, { 0x01, 0x2c, 0 }, { 0x01, 0x2c, 0 },
+    { 0x01, 0x2c, 0 }, { 0x01, 0x2c, 0 }, { 0x01, 0x2c, 0 }, { 0x01, 0x2c, 0 }, { 0x01, 0x2c, 0 }, { 0x01, 0x2c, 0 },
+    { 0x01, 0x2c, 0 }, { 0x01, 0x74, 0 }, { 0x01, 0x74, 0 }, { 0x01, 0x74, 0 }, { 0x01, 0x74, 0 }, { 0x01, 0x74, 0 },
+    { 0x01, 0x74, 0 }, { 0x01, 0x74, 0 }, { 0x01, 0x74, 0 }, { 0x01, 0x74, 0 }, { 0x01, 0x74, 0 }, { 0x01, 0x74, 0 },
+    { 0x01, 0x74, 0 }, { 0x01, 0x74, 0 }, { 0x01, 0x74, 0 }, { 0x01, 0x74, 0 }, { 0x02, 0x2c, 0 }, { 0x02, 0x2c, 0 },
+    { 0x02, 0x2c, 0 }, { 0x02, 0x2c, 0 }, { 0x02, 0x2c, 0 }, { 0x02, 0x2c, 0 }, { 0x02, 0x2c, 0 }, { 0x02, 0x2c, 0 },
+    { 0x02, 0x2c, 0 }, { 0x02, 0x2c, 0 }, { 0x02, 0x2c, 0 }, { 0x02, 0x2c, 0 }, { 0x02, 0x2c, 0 }, { 0x02, 0x2c, 0 },
+    { 0x02, 0x2c, 0 }, { 0x02, 0x2c, 0 }, { 0x03, 0x73, 0 }, { 0x03, 0x73, 0 }, { 0x03, 0x73, 0 }, { 0x03, 0x73, 0 },
+    { 0x03, 0x73, 0 }, { 0x03, 0x73, 0 }, { 0x03, 0x73, 0 }, { 0x03, 0x73, 0 }, { 0x03, 0x73, 0 }, { 0x03, 0x73, 0 },
+    { 0x0d, 0x28, 0 }, { 0x0d, 0x28, 0 }, { 0x0d, 0x28, 0 }, { 0x0d, 0x28, 0 }, { 0x0d, 0x28, 0 }, { 0x0d, 0x28, 0 },
+    { 0x0d, 0x28, 0 }, { 0x0e, 0x6f, 0 }, { 0x0e, 0x6f, 0 }, { 0x0e, 0x6f, 0 }, { 0x0e, 0x6f, 0 }, { 0x0e, 0x6f, 0 },
+    { 0x0e, 0x6f, 0 }, { 0x0e, 0x6f, 0 }, { 0x04, 0x67, 0 }, { 0x04, 0x68, 0 }, { 0x04, 0x3e, 0 }, { 0x04, 0x3e, 0 },
+    { 0x04, 0x3e, 0 }, { 0x04, 0x69, 0 }, { 0x04, 0x69, 0 }, { 0x04, 0x69, 0 }, { 0x11, 0x71, 0 }, { 0x11, 0x72, 0 },
+    { 0x11, 0x71, 0 }, { 0x11, 0x71, 0 }, { 0x11, 0x71, 0 }, { 0x11, 0x71, 0 }, { 0x11, 0x71, 0 }, { 0x11, 0x71, 0 },
+    { 0x06, 0x6c, 0x06 }, { 0x06, 0x6c, 0 }, { 0x06, 0x6c, 0 }, { 0x06, 0x6c, 0 }, { 0x06, 0x6c, 0 }, { 0x06, 0x6c, 0 },
+    { 0x06, 0x6c, 0 }, { 0x06, 0x6c, 0 }, { 0x06, 0x6c, 0x0e }, { 0x06, 0x6c, 0x0f }, { 0x03, 0x2c, 0 },
+    { 0x03, 0x2c, 0 }, { 0x03, 0x2c, 0 }, { 0x03, 0x2c, 0 }, { 0x03, 0x2c, 0 }, { 0x03, 0x2c, 0 }, { 0x03, 0x2c, 0 },
+    { 0x03, 0x2c, 0 }, { 0x03, 0x2c, 0 }, { 0x03, 0x2c, 0 }, { 0x03, 0x2c, 0 }, { 0x03, 0x2c, 0 }, { 0x07, 0, 0 },
+    { 0x07, 0, 0 }, { 0x07, 0, 0 }, { 0x07, 0, 0 }, { 0x07, 0, 0 }, { 0x07, 0, 0 }, { 0x07, 0, 0 }, { 0x07, 0, 0 },
+    { 0x07, 0x16, 0 }, { 0x04, 0x6a, 0 }, { 0x11, 0x4c, 0 }, { 0x03, 0x66, 0x16 }, { 0x03, 0x66, 0 }, { 0x03, 0x66, 0 },
+    { 0x03, 0x66, 0 }, { 0x11, 0x22, 0x19 }, { 0x01, 0x2c, 0 }, { 0x07, 0, 0 }, { 0x07, 0, 0 }, { 0x07, 0, 0 },
+    { 0x07, 0, 0 }, { 0x07, 0, 0 }, { 0x07, 0, 0 }, { 0x07, 0, 0 }, { 0x07, 0, 0 }, { 0x07, 0, 0 }, { 0x07, 0, 0 },
+    { 0x07, 0, 0 }, { 0x01, 0x2c, 0 }, { 0x01, 0x2c, 0 }, { 0x01, 0x2c, 0 }, { 0x06, 0x65, 0 }, { 0x06, 0x65, 0 },
+    { 0x06, 0x65, 0 }, { 0x06, 0x65, 0 }, { 0x06, 0x65, 0 }, { 0x06, 0x65, 0 }, { 0x06, 0x65, 0 }, { 0x06, 0x65, 0 },
+    { 0x06, 0x65, 0 }, { 0x06, 0x65, 0 }, { 0x06, 0x65, 0 }, { 0x06, 0x65, 0 }, { 0x05, 0x6d, 0 }, { 0x05, 0x6d, 0 },
+    { 0x05, 0x3e, 0 }, { 0x03, 0x2c, 0 }, { 0x03, 0x2c, 0 }, { 0x03, 0x2c, 0 }, { 0x03, 0x2c, 0 }, { 0x03, 0x2c, 0 },
+    { 0x03, 0x2c, 0 }, { 0x03, 0x2c, 0 }, { 0x03, 0x2c, 0 }, { 0x03, 0x2c, 0 }, { 0x03, 0x2c, 0 }, { 0x03, 0x2c, 0 },
+    { 0x03, 0x2c, 0 }, { 0x01, 0, 0 }, { 0x01, 0, 0 }, { 0x01, 0, 0 }, { 0x01, 0, 0 }, { 0x11, 0x16, 0x23 },
+    { 0x03, 0x2c, 0x03 }, { 0x01, 0x2c, 0 }, { 0x01, 0x2c, 0 }, { 0x01, 0x2c, 0 }, { 0x01, 0x2c, 0 }, { 0x01, 0x2c, 0 },
+    { 0x01, 0x2c, 0 }, { 0x01, 0x2c, 0 }, { 0x01, 0x2c, 0 }, { 0x01, 0x2c, 0 }, { 0x01, 0x2c, 0 }, { 0x03, 0x2c, 0 },
+    { 0x07, 0, 0x1f }, { 0x07, 0, 0x1e }, { 0x07, 0, 0x27 }, { 0x01, 0x2c, 0 }, { 0x01, 0x2c, 0 }, { 0x01, 0x2c, 0 },
+    { 0x01, 0x2c, 0 }, { 0x01, 0x2c, 0 }, { 0x01, 0x2c, 0 }, { 0x01, 0x2c, 0 }, { 0x01, 0x2c, 0 }, { 0x01, 0x2c, 0 },
+    { 0x0a, 0x41, 0 }, { 0x0a, 0x41, 0 }, { 0x01, 0x2c, 0 }, { 0x01, 0x2c, 0 }, { 0x01, 0x2c, 0 }, { 0x01, 0x2c, 0 },
+    { 0x01, 0x2c, 0 }, { 0x01, 0x2c, 0 }, { 0x01, 0x2c, 0 }, { 0x01, 0, 0 }, { 0x01, 0, 0 }, { 0x01, 0, 0 },
+    { 0x01, 0, 0 }, { 0x01, 0, 0 }, { 0x01, 0, 0 }, { 0x01, 0, 0 }, { 0x01, 0, 0 }, { 0x01, 0, 0 }, { 0x01, 0, 0 },
+    { 0x01, 0, 0 }, { 0x01, 0, 0 }, { 0x01, 0, 0 }, { 0x01, 0, 0 }, { 0x08, 0x65, 0 }, { 0x08, 0x65, 0 },
+    { 0x08, 0x65, 0 }, { 0x06, 0x66, 0x28 }, { 0x06, 0x66, 0 }, { 0x06, 0x66, 0 }, { 0x06, 0x66, 0 }, { 0x08, 0x65, 0 },
+    { 0x01, 0, 0 }, { 0x07, 0, 0 }, { 0x07, 0, 0 }, { 0x07, 0, 0 }, { 0x07, 0, 0 }, { 0x07, 0, 0 }, { 0x07, 0, 0 },
+    { 0x07, 0, 0 }, { 0x07, 0, 0 }, { 0x0a, 0, 0 }, { 0x0a, 0x41, 0 }, { 0x0b, 0x42, 0 }, { 0x0b, 0x44, 0 },
+    { 0x0b, 0x44, 0 }, { 0x0a, 0x6a, 0 }, { 0x0a, 0x7d, 0 }, { 0x0a, 0x67, 0 }, { 0x0a, 0, 0 }, { 0x0a, 0x6a, 0 },
+    { 0x0a, 0, 0 }, { 0x0a, 0x41, 0 }, { 0x0a, 0x61, 0x24 }, { 0x0a, 0x42, 0 }, { 0x0b, 0x62, 0 }, { 0x0a, 0x43, 0 },
+    { 0x0a, 0x63, 0 }, { 0x04, 0x22, 0 }, { 0x0a, 0x45, 0 }, { 0x04, 0x22, 0 }, { 0x0a, 0, 0 }, { 0x0c, 0x65, 0 },
+    { 0x0b, 0x29, 0 }, { 0x0b, 0x2c, 0x2a }, { 0x0b, 0x2c, 0 }, { 0x0a, 0x3d, 0 }, { 0x0a, 0x65, 0 }, { 0x0a, 0x65, 0 },
+    { 0x0a, 0x65, 0 }, { 0x0a, 0x65, 0 }, { 0x0a, 0x46, 0 }, { 0x0a, 0x47, 0 }, { 0x0a, 0x47, 0 }, { 0x0a, 0x47, 0 },
+    { 0x0a, 0x48, 0 }, { 0x0a, 0x49, 0 }, { 0x0b, 0x64, 0 }, { 0x0b, 0x64, 0 }, { 0x0b, 0x64, 0 }, { 0x0b, 0x64, 0 },
+    { 0x0a, 0x65, 0 }, { 0x0a, 0, 0 }, { 0x0a, 0x66, 0 }, { 0x0a, 0x67, 0 }, { 0x0a, 0x68, 0 }, { 0x0a, 0x69, 0 },
+    { 0x0a, 0x6a, 0 }, { 0x0a, 0x4b, 0 }, { 0x0a, 0x6b, 0 }, { 0x0a, 0x4c, 0 }, { 0x0b, 0x4d, 0 }, { 0x0b, 0x4d, 0 },
+    { 0x0b, 0x4d, 0 }, { 0x0b, 0x4d, 0 }, { 0x0b, 0x4d, 0 }, { 0x0a, 0, 0 }, { 0x0a, 0x6c, 0 }, { 0x0a, 0x4f, 0 },
+    { 0x0a, 0x50, 0 }, { 0x0c, 0x51, 0 }, { 0x0a, 0, 0 }, { 0x0a, 0x53, 0 }, { 0x0a, 0x6d, 0 }, { 0x0a, 0x6d, 0 },
+    { 0x0a, 0x6d, 0x2b }, { 0x0a, 0x6e, 0 }, { 0x0a, 0x6f, 0 }, { 0x0b, 0x54, 0 }, { 0x0b, 0x54, 0 }, { 0x0b, 0x54, 0 },
+    { 0x0a, 0x55, 0 }, { 0x0a, 0, 0 }, { 0x0c, 0x57, 0 }, { 0x0c, 0x57, 0 }, { 0x0c, 0x57, 0 }, { 0x0a, 0x58, 0 },
+    { 0x0c, 0x59, 0 }, { 0x0b, 0x70, 0 }, { 0x0b, 0x70, 0 }, { 0x0b, 0x70, 0 }, { 0x01, 0, 0 }, { 0x01, 0x2c, 0 },
+    { 0x0b, 0x2c, 0 }, { 0x0b, 0, 0 }, { 0x0b, 0x72, 0 }, { 0x0b, 0x72, 0 }, { 0x0a, 0x73, 0 }, { 0x0a, 0x74, 0 },
+    { 0x0a, 0x75, 0 }, { 0x0a, 0x76, 0 }, { 0x0a, 0x5c, 0 }, { 0x0a, 0x71, 0 }, { 0, 0x2c, 0 }, { 0, 0x2c, 0 },
+    { 0, 0x2c, 0 }, { 0, 0x2c, 0 }, { 0, 0x2c, 0 }, { 0, 0x2c, 0 }, { 0, 0x2c, 0 }, { 0, 0x2c, 0 }, { 0, 0x2c, 0 },
+    { 0, 0x2c, 0 }, { 0, 0, 0 }, { 0x09, 0x01, 0 }, { 0x09, 0x01, 0 }, { 0x09, 0x01, 0 }, { 0x09, 0x01, 0 },
+    { 0x09, 0x01, 0 }, { 0x09, 0x01, 0 }, { 0x09, 0x01, 0 }, { 0x09, 0x01, 0 }, { 0x09, 0x01, 0 }, { 0x09, 0x01, 0 },
+    { 0x09, 0x01, 0 }, { 0x09, 0x01, 0 }, { 0x09, 0x01, 0 }, { 0x09, 0x01, 0 }, { 0x12, 0x4c, 0 }, { 0x12, 0x4c, 0 },
+    { 0x12, 0x4c, 0 }, { 0x12, 0x4c, 0 }, { 0x12, 0x4c, 0 }, { 0x12, 0x4c, 0 }, { 0x12, 0x4c, 0 }, { 0x12, 0x4c, 0 },
+    { 0x12, 0x4c, 0 }, { 0x12, 0x4c, 0 }, { 0x12, 0x4c, 0 }, { 0x12, 0x4c, 0 }, { 0x0f, 0x76, 0 }, { 0x0f, 0x76, 0 },
+    { 0x0f, 0x76, 0 }, { 0x0f, 0x76, 0 }, { 0x0f, 0x76, 0 }, { 0x0f, 0x76, 0 }, { 0x0f, 0x76, 0 }, { 0x0f, 0x76, 0 },
+    { 0x0f, 0x76, 0 }, { 0x0f, 0x76, 0 }, { 0x0f, 0x76, 0 }, { 0x0f, 0x76, 0 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 },
+    { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0x2c, 0 }, { 0, 0x2c, 0 }, { 0, 0x2c, 0 },
+    { 0, 0x2c, 0 }, { 0, 0x2c, 0 }, { 0, 0x2c, 0 }, { 0, 0x2c, 0 }, { 0, 0x2c, 0 }, { 0x10, 0x69, 0 },
+    { 0x10, 0x69, 0 }, { 0x10, 0x69, 0 }, { 0x10, 0x6d, 0 }, { 0x10, 0x6d, 0 }, { 0x10, 0x69, 0 }, { 0x10, 0x69, 0 },
+    { 0x10, 0x69, 0 }, { 0x10, 0x69, 0 }, { 0x10, 0x69, 0 }, { 0x10, 0x69, 0 }, { 0x10, 0x69, 0 }, { 0x10, 0, 0 },
+    { 0x10, 0x69, 0 }, { 0x10, 0x69, 0 }, { 0x10, 0x69, 0 }, { 0x10, 0x69, 0 }, { 0x10, 0x69, 0x2f }, { 0x10, 0x69, 0 },
+    { 0x10, 0x69, 0 }, { 0x10, 0, 0 }, { 0x10, 0x69, 0 }, { 0x10, 0x69, 0 }, { 0x10, 0x69, 0 }, { 0x10, 0x69, 0 },
+    { 0x10, 0x69, 0 }, { 0x10, 0x69, 0 }, { 0x10, 0x69, 0 }, { 0x10, 0x69, 0 }, { 0x10, 0x69, 0 }, { 0x10, 0x69, 0 },
+    { 0x10, 0x69, 0 } };
+
+/* Three animation_e variants per item_type_e; animation_select_weapon_attack chooses the column. */
+static u8 s_animation_weapon_attacks[ITEM_TYPE_SHURIKEN][3] = { { 0x3d, 0x3e, 0x3f }, { 0x40, 0x41, 0x42 },
+    { 0x40, 0x41, 0x42 }, { 0x40, 0x41, 0x42 }, { 0x40, 0x41, 0x42 }, { 0x40, 0x41, 0x42 }, { 0x40, 0x41, 0x42 },
+    { 0x40, 0x41, 0x42 }, { 0x40, 0x41, 0x42 }, { 0x40, 0x41, 0x42 }, { 0x50, 0x51, 0x52 }, { 0x53, 0x54, 0x55 },
+    { 0x53, 0x54, 0x55 }, { 0x57, 0x57, 0x57 }, { 0x56, 0x56, 0x56 }, { 0x4d, 0x4e, 0x4f }, { 0x4d, 0x4e, 0x4f },
+    { 0x77, 0x78, 0x79 }, { 0x77, 0x78, 0x79 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 },
+    { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 } };
+
+/* Projectile secondary animation of each weapon item type: BOW_ARROW for bows, CROSSBOW_BOLT for
+ * crossbows, NONE for the rest. */
+u8 g_weapon_projectile_animations[32]
+    = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+static sprite_item_graphic_t s_sprite_item_graphic_data[146] = { { 0, 0 }, { 224, 0 }, { 240, 2 }, { 224, 4 },
+    { 48, 6 }, { 208, 0 }, { 48, 2 }, { 81, 4 }, { 64, 6 }, { 64, 2 }, { 130, 4 }, { 224, 8 }, { 224, 10 }, { 240, 8 },
+    { 48, 8 }, { 64, 10 }, { 208, 8 }, { 96, 10 }, { 82, 10 }, { 224, 0 }, { 224, 2 }, { 48, 4 }, { 240, 6 }, { 96, 4 },
+    { 112, 2 }, { 128, 6 }, { 240, 0 }, { 208, 6 }, { 64, 4 }, { 112, 2 }, { 80, 0 }, { 129, 2 }, { 129, 2 },
+    { 128, 12 }, { 240, 12 }, { 128, 14 }, { 224, 14 }, { 80, 12 }, { 208, 16 }, { 208, 18 }, { 208, 20 }, { 80, 16 },
+    { 64, 18 }, { 48, 20 }, { 96, 16 }, { 224, 18 }, { 240, 20 }, { 128, 16 }, { 208, 0 }, { 176, 0 }, { 224, 0 },
+    { 224, 22 }, { 146, 24 }, { 145, 22 }, { 192, 24 }, { 144, 22 }, { 240, 24 }, { 160, 22 }, { 176, 24 }, { 208, 26 },
+    { 112, 26 }, { 64, 26 }, { 224, 26 }, { 208, 28 }, { 64, 28 }, { 80, 28 }, { 112, 28 }, { 240, 3 }, { 144, 3 },
+    { 160, 3 }, { 208, 3 }, { 209, 0 }, { 161, 0 }, { 225, 0 }, { 209, 2 }, { 225, 2 }, { 177, 2 }, { 224, 0 },
+    { 240, 0 }, { 160, 0 }, { 176, 3 }, { 48, 3 }, { 240, 3 }, { 208, 0 }, { 112, 0 }, { 224, 0 }, { 240, 0 },
+    { 48, 0 }, { 224, 3 }, { 192, 3 }, { 176, 3 }, { 240, 3 }, { 128, 0 }, { 96, 0 }, { 240, 0 }, { 208, 0 },
+    { 224, 0 }, { 160, 0 }, { 176, 0 }, { 208, 0 }, { 208, 2 }, { 240, 0 }, { 160, 2 }, { 64, 0 }, { 240, 2 },
+    { 192, 0 }, { 128, 2 }, { 192, 4 }, { 160, 6 }, { 240, 4 }, { 48, 6 }, { 96, 4 }, { 192, 6 }, { 224, 4 },
+    { 176, 6 }, { 226, 0 }, { 162, 0 }, { 210, 0 }, { 210, 0 }, { 242, 0 }, { 162, 0 }, { 146, 0 }, { 224, 0 },
+    { 96, 0 }, { 64, 0 }, { 96, 0 }, { 112, 0 }, { 128, 0 }, { 80, 0 }, { 224, 0 }, { 224, 6 }, { 48, 0 }, { 160, 6 },
+    { 240, 0 }, { 128, 6 }, { 112, 0 }, { 96, 6 }, { 96, 0 }, { 208, 6 }, { 208, 0 }, { 208, 6 }, { 112, 0 }, { 48, 6 },
+    { 128, 0 }, { 128, 6 }, { 0, 0 } };
+
+/* The display rotations that the upper five bits of a frame's first byte select, ONE to the turn. */
+static u16 s_sprite_y_rotations[32] = { 0, 182, 262, 301, 304, 307, 341, 489, 512, 626, 683, 797, 1024, 1365, 1366,
+    1422, 1456, 1479, 1536, 1593, 1650, 1707, 1741, 1763, 1821, 1877, 0, 0, 0, 0, 0, 0 };
+
+/* The 24 orders in which draw_layers queues a unit's
+ * four layers: 0 is the unit's own sprite, n its sprite block n - 1. */
+static s32 s_animation_layer_priorities[24][4] = { { 0, 1, 2, 3 }, { 0, 1, 3, 2 }, { 0, 2, 1, 3 }, { 0, 3, 1, 2 },
+    { 0, 2, 3, 1 }, { 0, 3, 2, 1 }, { 1, 0, 2, 3 }, { 1, 0, 3, 2 }, { 2, 0, 1, 3 }, { 3, 0, 1, 2 }, { 2, 0, 3, 1 },
+    { 3, 0, 2, 1 }, { 1, 2, 0, 3 }, { 1, 3, 0, 2 }, { 2, 1, 0, 3 }, { 3, 1, 0, 2 }, { 2, 3, 0, 1 }, { 3, 2, 0, 1 },
+    { 1, 2, 3, 0 }, { 1, 3, 2, 0 }, { 2, 1, 3, 0 }, { 3, 1, 2, 0 }, { 2, 3, 1, 0 }, { 3, 2, 1, 0 } };
+
+/* Sprite part width/height in 8-pixel tiles, indexed by SHP size bits. */
+static size32_t s_sprite_part_sizes[16] = { { 1, 1 }, { 2, 1 }, { 2, 2 }, { 2, 3 }, { 3, 1 }, { 3, 2 }, { 3, 3 },
+    { 4, 1 }, { 4, 2 }, { 4, 3 }, { 4, 4 }, { 4, 5 }, { 5, 2 }, { 5, 4 }, { 6, 6 }, { 7, 7 } };
+
+sprite_sheet_data_t g_sprite_sheet_data[SPRITE_SHEET_ID_COUNT] = { { 0, 0, 0, 0 }, { 0, 0, 0, 36 }, { 0, 0, 0, 36 },
+    { 0, 0, 0, 36 }, { 0, 0, 0, 36 }, { 0, 0, 0, 36 }, { 0, 0, 0, 36 }, { 0, 0, 0, 36 }, { 0, 0, 0, 36 },
+    { 0, 0, 0, 36 }, { 1, 1, 0, 36 }, { 0, 0, 0, 36 }, { 1, 1, 0, 36 }, { 0, 0, 0, 36 }, { 1, 1, 0, 36 },
+    { 1, 1, 0, 36 }, { 1, 1, 0, 36 }, { 0, 0, 0, 36 }, { 0, 0, 0, 36 }, { 1, 1, 0, 36 }, { 1, 1, 0, 36 },
+    { 0, 0, 0, 36 }, { 0, 0, 0, 36 }, { 0, 0, 0, 36 }, { 1, 1, 0, 36 }, { 1, 1, 0, 36 }, { 0, 0, 0, 36 },
+    { 1, 1, 0, 36 }, { 1, 1, 0, 36 }, { 1, 1, 0, 36 }, { 0, 0, 0, 36 }, { 0, 0, 0, 36 }, { 0, 0, 0, 36 },
+    { 1, 1, 0, 36 }, { 0, 0, 0, 36 }, { 0, 0, 0, 36 }, { 0, 0, 0, 36 }, { 0, 0, 0, 36 }, { 0, 0, 0, 36 },
+    { 0, 0, 0, 36 }, { 0, 0, 0, 36 }, { 1, 1, 0, 36 }, { 0, 0, 0, 36 }, { 0, 0, 0, 36 }, { 1, 1, 0, 36 },
+    { 1, 1, 0, 36 }, { 1, 1, 0, 36 }, { 0, 0, 0, 36 }, { 1, 1, 0, 36 }, { 1, 1, 0, 36 }, { 0, 0, 0, 36 },
+    { 0, 0, 0, 36 }, { 0, 0, 0, 36 }, { 1, 1, 0, 36 }, { 1, 1, 0, 36 }, { 1, 1, 0, 36 }, { 1, 1, 0, 36 },
+    { 0, 0, 0, 36 }, { 1, 1, 0, 36 }, { 1, 1, 0, 36 }, { 3, 5, 0, 36 }, { 0, 0, 0, 36 }, { 3, 5, 0, 36 },
+    { 0, 0, 0, 36 }, { 3, 5, 0, 36 }, { 6, 6, 0, 60 }, { 1, 1, 0, 36 }, { 3, 5, 0, 36 }, { 1, 1, 0, 36 },
+    { 3, 5, 0, 36 }, { 1, 1, 0, 36 }, { 1, 1, 0, 36 }, { 3, 3, 0, 36 }, { 7, 7, 0, 120 }, { 1, 1, 0, 36 },
+    { 1, 1, 0, 36 }, { 1, 1, 0, 36 }, { 1, 1, 0, 36 }, { 1, 1, 0, 36 }, { 1, 1, 0, 36 }, { 1, 1, 0, 36 },
+    { 1, 1, 0, 36 }, { 1, 1, 0, 36 }, { 1, 1, 0, 36 }, { 1, 1, 0, 36 }, { 1, 1, 0, 36 }, { 1, 1, 0, 36 },
+    { 0, 0, 0, 36 }, { 0, 0, 0, 36 }, { 0, 0, 0, 36 }, { 0, 0, 0, 36 }, { 0, 0, 0, 36 }, { 0, 0, 0, 36 },
+    { 3, 3, 0, 36 }, { 0, 0, 0, 36 }, { 1, 1, 0, 36 }, { 0, 0, 0, 36 }, { 0, 0, 0, 36 }, { 1, 1, 0, 36 },
+    { 1, 1, 0, 36 }, { 0, 0, 0, 36 }, { 0, 0, 0, 36 }, { 0, 0, 0, 36 }, { 0, 0, 0, 36 }, { 0, 0, 0, 36 },
+    { 0, 0, 0, 36 }, { 1, 1, 0, 36 }, { 1, 1, 0, 36 }, { 1, 1, 0, 36 }, { 1, 1, 0, 36 }, { 1, 1, 0, 36 },
+    { 1, 1, 0, 36 }, { 1, 1, 0, 36 }, { 1, 1, 0, 36 }, { 0, 0, 0, 36 }, { 0, 0, 0, 36 }, { 1, 1, 0, 36 },
+    { 1, 1, 0, 36 }, { 1, 1, 0, 36 }, { 1, 1, 0, 36 }, { 1, 1, 0, 36 }, { 1, 1, 0, 36 }, { 0, 0, 0, 36 },
+    { 0, 0, 0, 36 }, { 0, 0, 0, 36 }, { 0, 0, 0, 36 }, { 0, 0, 0, 36 }, { 0, 0, 0, 36 }, { 1, 1, 0, 36 },
+    { 1, 1, 0, 36 }, { 1, 1, 0, 36 }, { 1, 1, 0, 36 }, { 1, 1, 0, 36 }, { 1, 1, 0, 36 }, { 2, 2, 0, 36 },
+    { 0, 0, 0, 36 }, { 3, 3, 0, 36 }, { 3, 3, 0, 36 }, { 1, 1, 0, 36 }, { 0, 0, 0, 36 }, { 3, 3, 0, 36 },
+    { 3, 3, 1, 36 }, { 3, 3, 1, 36 }, { 3, 3, 0, 36 }, { 3, 3, 0, 36 }, { 3, 3, 0, 36 }, { 3, 3, 0, 36 },
+    { 3, 3, 0, 36 }, { 3, 3, 0, 36 }, { 3, 3, 1, 36 }, { 3, 3, 0, 36 }, { 3, 5, 0, 36 }, { 3, 3, 0, 36 },
+    { 3, 3, 0, 36 }, { 3, 3, 0, 36 }, { 4, 4, 0, 36 }, { 4, 4, 1, 36 }, { 4, 4, 0, 36 }, { 4, 4, 0, 36 } };
+
+static u8 s_animation_targeted_frame_front[9] = { 11, 11, 2, 2, 1, 2, 1, 1, 0 };
+
+/* By sprite_shp_type_e: the frame a unit is left on when its sequence ends or its attack image is taken away, seen
+ * from behind and from the front. */
+static u8 s_animation_targeted_frame_back[9] = { 16, 16, 4, 4, 6, 4, 10, 10, 0 };
+
+/* Texture coordinates for the status bubble graphics, indexed by status bubble
+ * id (0x800949dc/0x800949f4) and by a counter digit (0x80094a0c/0x80094a24).
+ * Each table holds 24 bytes; the pairs are read together as one u/v. */
+static u8 s_status_bubble_u[24]
+    = { 0, 16, 30, 44, 58, 72, 86, 100, 114, 128, 142, 0, 16, 30, 44, 58, 72, 86, 100, 86, 0, 0, 0, 0 };
+
+static u8 s_status_bubble_v[24] = { 176, 176, 176, 176, 176, 176, 176, 176, 176, 176, 176, 188, 188, 188, 188, 188, 188,
+    188, 188, 200, 176, 0, 0, 0 };
+
+static u8 s_status_bubble_digit_u[24]
+    = { 142, 128, 114, 100, 86, 142, 128, 142, 128, 114, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+static u8 s_status_bubble_digit_v[24]
+    = { 200, 200, 200, 200, 200, 188, 188, 176, 176, 176, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+/* The four random-battle music tracks (0x04, 0x05, 0x0e, 0x0f); map initialization plays the
+ * one at rand() / 0x2000. */
+u8 g_map_random_battle_music_tracks[4] = { 4, 5, 0xe, 0xf };
+
+u32 g_status_mask_by_handler_index[STATUS_COUNT + 1] = { 0, 0, 0x00000001, 0x00000004, 0x40000000, 0x00000200,
+    0x00000040, 0x00000400, 0x00000100, 0x00000020, 0, 0x08000000, 0x00000080, 0x02000000, 0x00020000, 0x00002000,
+    0x00000008, 0x00800000, 0x00000020, 0x10000000, 0x00000010, 0x00004000, 0x00000002, 0x00000004, 0x00000008,
+    0x00400000, 0x20000000, 0x00200000, 0x00100000, 0x00001000, 0x00000800, 0x00000010, 0, 0x00008000, 0x00010000,
+    0x01000000, 0x00000040, 0x00040000, 0x00080000, 0, 0x04000000 };
+
+/* The tile glow palettes the cursor cycles; nothing loads the third. */
+palette_t g_cursor_tile_glow_palettes[3]
+    = { { { 0, 0, 0, 0 }, { 6, 9, 24, 1 }, { 7, 10, 22, 1 }, { 8, 11, 20, 1 }, { 9, 12, 19, 1 }, { 10, 13, 17, 1 },
+            { 11, 14, 16, 1 }, { 12, 15, 15, 1 }, { 14, 15, 14, 1 }, { 12, 15, 15, 1 }, { 11, 14, 16, 1 },
+            { 10, 13, 17, 1 }, { 9, 12, 19, 1 }, { 8, 11, 20, 1 }, { 7, 10, 22, 1 }, { 6, 9, 24, 1 } },
+          { { 0, 0, 0, 0 }, { 20, 5, 5, 1 }, { 21, 6, 5, 1 }, { 22, 7, 7, 1 }, { 23, 7, 9, 1 }, { 25, 8, 11, 1 },
+              { 26, 10, 15, 1 }, { 27, 12, 20, 1 }, { 29, 14, 25, 1 }, { 27, 11, 19, 1 }, { 26, 8, 13, 1 },
+              { 25, 7, 11, 1 }, { 23, 7, 10, 1 }, { 22, 6, 8, 1 }, { 21, 5, 6, 1 }, { 20, 5, 5, 1 } },
+          { { 0, 0, 0, 0 }, { 5, 5, 4, 0 }, { 29, 29, 29, 0 }, { 8, 9, 10, 0 }, { 12, 13, 14, 0 }, { 15, 17, 19, 0 },
+              { 22, 23, 24, 0 }, { 14, 7, 6, 0 }, { 18, 6, 4, 0 }, { 22, 8, 5, 0 }, { 28, 11, 5, 0 }, { 12, 7, 3, 0 },
+              { 20, 11, 4, 0 }, { 23, 15, 6, 0 }, { 26, 19, 8, 0 }, { 28, 25, 14, 0 } } };
+
+palette_t g_unit_facing_wait_arrow_palette = { { 0, 0, 0, 0 }, { 4, 4, 3, 0 }, { 31, 31, 29, 0 }, { 8, 9, 10, 0 },
+    { 12, 13, 14, 0 }, { 15, 17, 19, 0 }, { 22, 23, 24, 0 }, { 2, 1, 0, 1 }, { 4, 2, 0, 1 }, { 6, 3, 1, 1 },
+    { 8, 4, 2, 1 }, { 12, 7, 3, 1 }, { 19, 11, 5, 0 }, { 23, 15, 6, 0 }, { 26, 19, 8, 0 }, { 28, 25, 14, 0 } };
+
+palette_t g_cursor_map_selection_palette = { { 0, 0, 0, 0 }, { 2, 2, 2, 1 }, { 6, 6, 6, 1 }, { 10, 10, 10, 1 },
+    { 15, 15, 15, 1 }, { 19, 19, 19, 1 }, { 26, 26, 26, 1 }, { 9, 10, 12, 0 }, { 14, 15, 17, 0 }, { 20, 21, 23, 0 },
+    { 25, 27, 28, 0 }, { 13, 10, 7, 0 }, { 17, 12, 8, 0 }, { 21, 15, 9, 0 }, { 25, 20, 12, 0 }, { 29, 25, 15, 0 } };
+
+palette_t g_weather_particle_palette = { { 0, 0, 0, 0 }, { 28, 28, 28, 1 }, { 25, 25, 25, 1 }, { 23, 23, 23, 1 },
+    { 21, 21, 21, 1 }, { 19, 19, 19, 1 }, { 17, 17, 17, 1 }, { 15, 15, 15, 1 }, { 13, 13, 13, 1 }, { 11, 11, 11, 1 },
+    { 9, 9, 9, 1 }, { 7, 7, 7, 1 }, { 5, 5, 5, 1 }, { 3, 3, 3, 1 }, { 1, 1, 1, 1 }, { 1, 1, 1, 0 } };
+
+static palette_t s_result_palette = { { 0, 0, 0, 0 }, { 5, 5, 4, 1 }, { 29, 29, 29, 1 }, { 8, 9, 10, 1 },
+    { 12, 13, 14, 1 }, { 15, 17, 19, 1 }, { 22, 23, 24, 1 }, { 14, 7, 6, 1 }, { 18, 6, 4, 1 }, { 22, 8, 5, 1 },
+    { 28, 11, 5, 1 }, { 12, 7, 3, 1 }, { 20, 11, 4, 1 }, { 23, 15, 6, 1 }, { 26, 19, 8, 1 }, { 28, 25, 14, 1 } };
+
+palette_t g_sprite_shadow_palette = { { 0, 0, 0, 0 }, { 28, 28, 28, 1 }, { 25, 25, 25, 1 }, { 23, 23, 23, 1 },
+    { 21, 21, 21, 1 }, { 19, 19, 19, 1 }, { 17, 17, 17, 1 }, { 15, 15, 15, 1 }, { 13, 13, 13, 1 }, { 11, 11, 11, 1 },
+    { 9, 9, 9, 1 }, { 7, 7, 7, 1 }, { 5, 5, 5, 1 }, { 3, 3, 3, 1 }, { 1, 1, 1, 1 }, { 0, 0, 0, 0 } };
+
+palette_t g_status_bubble_palette = { { 0, 0, 0, 0 }, { 5, 5, 4, 0 }, { 29, 29, 29, 0 }, { 8, 9, 10, 0 },
+    { 12, 13, 14, 0 }, { 15, 17, 19, 0 }, { 22, 23, 24, 0 }, { 14, 7, 6, 0 }, { 18, 6, 4, 0 }, { 22, 8, 5, 0 },
+    { 28, 11, 5, 0 }, { 12, 7, 3, 0 }, { 20, 11, 4, 0 }, { 23, 15, 6, 0 }, { 26, 19, 8, 0 }, { 28, 25, 14, 0 } };
+
+static file_extent_t s_seq_files[9] = { { 57037, 8192 }, { 57045, 8192 }, { 57053, 4096 }, { 57055, 6144 },
+    { 57058, 4096 }, { 57060, 4096 }, { 57062, 4096 }, { 57064, 4096 }, { 0, 0 } };
+
+static file_extent_t s_shp_files[9] = { { 57017, 8192 }, { 57021, 10240 }, { 57026, 8192 }, { 57030, 4096 },
+    { 57032, 4096 }, { 0, 0 }, { 57034, 2048 }, { 57035, 4096 }, { 0, 0 } };
+
+static file_extent_t s_weapon_seq_files[2] = { { 57072, 4096 }, { 57074, 4096 } };
+
+static file_extent_t s_weapon_shp_files[2] = { { 57066, 6144 }, { 57069, 6144 } };
+
+static file_extent_t s_effect_seq_files[2] = { { 57080, 2048 }, { 0, 0 } };
+
+static file_extent_t s_effect_shp_files[2] = { { 57076, 4096 }, { 0, 0 } };
+
+static file_extent_t s_sheet_files[159] = { { 0, 0 }, { 59021, 45056 }, { 59043, 45056 }, { 59065, 45056 },
+    { 57586, 45056 }, { 57608, 45056 }, { 57630, 45056 }, { 57229, 45056 }, { 59772, 45056 }, { 57519, 45056 },
+    { 58998, 47104 }, { 57913, 45056 }, { 58247, 45056 }, { 58954, 45056 }, { 57805, 45056 }, { 59087, 45056 },
+    { 59839, 47104 }, { 57363, 45056 }, { 57827, 43008 }, { 59308, 47104 }, { 57935, 45056 }, { 58932, 45056 },
+    { 57848, 45056 }, { 57957, 45056 }, { 57652, 45056 }, { 58976, 45056 }, { 58600, 43008 }, { 57720, 45056 },
+    { 57742, 38912 }, { 57319, 45056 }, { 58356, 45056 }, { 57408, 45056 }, { 59685, 45056 }, { 57341, 45056 },
+    { 58800, 45056 }, { 59132, 45056 }, { 59619, 45056 }, { 57979, 45056 }, { 58001, 45056 }, { 58023, 45056 },
+    { 58045, 45056 }, { 58067, 45056 }, { 58089, 45056 }, { 58111, 45056 }, { 58133, 45056 }, { 58155, 45056 },
+    { 57251, 45056 }, { 58177, 45056 }, { 57273, 45056 }, { 57186, 45056 }, { 57473, 43008 }, { 59794, 45056 },
+    { 57164, 45056 }, { 58334, 45056 }, { 59353, 49152 }, { 58509, 47104 }, { 58888, 45056 }, { 58621, 45056 },
+    { 59286, 45056 }, { 58578, 45056 }, { 59596, 47104 }, { 58465, 45056 }, { 59816, 47104 }, { 59707, 45056 },
+    { 58199, 49152 }, { 57295, 49152 }, { 58509, 47104 }, { 58554, 49152 }, { 59532, 45056 }, { 57141, 47104 },
+    { 58888, 45056 }, { 59421, 45056 }, { 59109, 47104 }, { 58378, 49152 }, { 59862, 38912 }, { 59881, 38912 },
+    { 59900, 38912 }, { 59919, 38912 }, { 59938, 38912 }, { 59957, 38912 }, { 59976, 38912 }, { 59995, 38912 },
+    { 60014, 38912 }, { 60033, 38912 }, { 60052, 38912 }, { 60071, 38912 }, { 60090, 47104 }, { 58621, 45056 },
+    { 58621, 45056 }, { 58621, 45056 }, { 58621, 45056 }, { 58621, 45056 }, { 58621, 45056 }, { 57541, 45056 },
+    { 58402, 40960 }, { 58422, 40960 }, { 58621, 45056 }, { 58643, 45056 }, { 58312, 45056 }, { 58334, 45056 },
+    { 58465, 45056 }, { 58487, 45056 }, { 59707, 45056 }, { 59729, 45056 }, { 58712, 45056 }, { 58734, 45056 },
+    { 59331, 45056 }, { 59353, 49152 }, { 58509, 47104 }, { 58532, 45056 }, { 59510, 45056 }, { 59532, 45056 },
+    { 59398, 47104 }, { 59421, 45056 }, { 59466, 45056 }, { 59488, 45056 }, { 59641, 45056 }, { 59663, 45056 },
+    { 58888, 45056 }, { 58910, 45056 }, { 57761, 45056 }, { 57783, 45056 }, { 59154, 45056 }, { 59176, 45056 },
+    { 59198, 45056 }, { 59220, 45056 }, { 58822, 45056 }, { 58844, 45056 }, { 59242, 45056 }, { 59264, 45056 },
+    { 57870, 45056 }, { 58866, 45056 }, { 58756, 45056 }, { 58778, 45056 }, { 57494, 51200 }, { 57892, 43008 },
+    { 57452, 43008 }, { 58269, 45056 }, { 58291, 43008 }, { 59377, 43008 }, { 59751, 43008 }, { 57208, 43008 },
+    { 59554, 45056 }, { 59576, 40960 }, { 58442, 47104 }, { 58665, 49152 }, { 58689, 47104 }, { 57385, 47104 },
+    { 57674, 47104 }, { 57697, 47104 }, { 57430, 45056 }, { 58223, 49152 }, { 57674, 47104 }, { 57563, 47104 },
+    { 59443, 47104 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } };
+
+file_extent_t g_sprite_sp2_files[SPRITE_SHEET_ID_COUNT] = { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 },
+    { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 },
+    { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 },
+    { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 },
+    { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 },
+    { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 },
+    { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 },
+    { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 },
+    { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 },
+    { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 },
+    { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 },
+    { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 },
+    { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 60161, 32768 },
+    { 60209, 32768 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 60113, 32768 }, { 60321, 32768 }, { 60337, 32768 }, { 0, 0 },
+    { 60289, 32768 }, { 60305, 32768 }, { 60129, 32768 }, { 0, 0 }, { 60193, 32768 }, { 60145, 32768 }, { 0, 0 },
+    { 0, 0 }, { 60177, 32768 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } };
+
+file_extent_t g_sprite_worker8_sp2_files[4]
+    = { { 60273, 32768 }, { 60257, 32768 }, { 60225, 32768 }, { 60241, 32768 } };
 
 /* First 21 OTHER.SPR palettes, copied together and selected by status sheet. */
 typedef struct sprite_other_palettes {
@@ -71,38 +445,11 @@ extern sprite_wep_eff_graphics_t g_sprite_effect_graphics[1];
 
 /* indicators */
 
-/* Status flag shown by each status bubble before SOURCE_UNIT. DEAD and DEATH_SENTENCE hold 0 and are
- * tested separately by update_bubble_cycle; bubbles 8 and 11 hold 0 too,
- * so they never show. */
-extern s32 g_status_bubble_status_masks[STATUS_BUBBLE_SOURCE_UNIT];
-
 extern s32 g_cursor_selection_bob_timer;
 /* Frame counter and frame index of the selection cursor's bob animation. */
 extern s32 g_cursor_selection_bob_frame;
 
-/* Advanced by g_system_vsync_interval once per call and sampled with bit 5 to blink
- * the highlighted arrow. */
-extern u32 g_unit_facing_wait_arrow_blink_timer;
-
-/* Texture coordinates for the status bubble graphics, indexed by status bubble
- * id (0x800949dc/0x800949f4) and by a counter digit (0x80094a0c/0x80094a24).
- * Each table holds 24 bytes; the pairs are read together as one u/v. */
-extern u8 g_status_bubble_u[24];
-
-extern u8 g_status_bubble_v[24];
-
-extern u8 g_status_bubble_digit_u[24];
-
-extern u8 g_status_bubble_digit_v[24];
-
-/* Post-action numeric and status displays. */
-extern const u8 g_result_numeric_selectors[ACTION_DISPLAY_VALUE_COUNT];
 extern u16 g_result_display_values[ACTION_DISPLAY_VALUE_COUNT];
-extern const palette_t g_result_palette;
-
-/* Eight per status_changes mask byte, indexed from the byte's high bit. */
-extern u8 g_result_status_image_ids[STATUS_BYTE_COUNT][8];
-
 /* Queue a unit's ground shadow quad.
  *
  * The four shadow_quad corners are projected into a semi-transparent POLY_FT4.
@@ -238,7 +585,7 @@ void sprite_draw_shadow(map_unit_t* unit, u32* ot) {
  * only when the first three projected vertices face the camera. Every
  * primitive takes a POLY_FT4-sized slot of the pool.
  */
-void cursor_build_tile_glow(s32 palette, s32 shape, SVECTOR* v0, SVECTOR* v1, SVECTOR* v2, SVECTOR* v3, u32* ot) {
+static void build_tile_glow(s32 palette, s32 shape, SVECTOR* v0, SVECTOR* v1, SVECTOR* v2, SVECTOR* v3, u32* ot) {
     VECTOR screen;
     MATRIX unused_matrix; /* unreferenced; reserves the target frame's 0x20-byte gap at sp+0x20 */
     s32 flag;
@@ -440,7 +787,7 @@ void cursor_build_tile_glow(s32 palette, s32 shape, SVECTOR* v0, SVECTOR* v1, SV
  * The two initialized locals occupy 64 bytes of .rodata at 0x80067798: the bob
  * offsets and their durations in frames.
  */
-void cursor_draw_map_selection(SVECTOR* base, u32* ot) {
+static void draw_map_selection_cursor(SVECTOR* base, u32* ot) {
     VECTOR transformed;
     SVECTOR screen;
     s32 bob[8] = { 0, 1, 2, 3, 5, 3, 2, 1 };
@@ -516,7 +863,7 @@ void cursor_draw_map_selection(SVECTOR* base, u32* ot) {
  * into saved registers, which only happens with more than one use apiece;
  * cross-jumping merges the repeats back into one tail.
  */
-void map_unit_facing_draw_wait_arrows(SVECTOR* base, u32* ot) {
+static void draw_wait_arrows(SVECTOR* base, u32* ot) {
     SVECTOR position;
     VECTOR transformed;
     s32 dx[4] = { 0, -14, 0, 14 };
@@ -530,7 +877,7 @@ void map_unit_facing_draw_wait_arrows(SVECTOR* base, u32* ot) {
     s32 i;
 
     unit = map_unit_get_source();
-    g_unit_facing_wait_arrow_blink_timer += g_system_vsync_interval;
+    s_unit_facing_wait_arrow_blink_timer += g_system_vsync_interval;
     for (i = 0; i < 4; i++) {
         prim = g_sprite_prim_pool + sprite_take_primitive();
         setlen(prim, 9);
@@ -546,7 +893,7 @@ void map_unit_facing_draw_wait_arrows(SVECTOR* base, u32* ot) {
         prim->r0 = prim->g0 = prim->b0 = 0x80;
         facing_bits = unit->facing & 0xc00;
         if (i == facing_bits / 0x400) {
-            if (g_unit_facing_wait_arrow_blink_timer & 0x20) {
+            if (s_unit_facing_wait_arrow_blink_timer & 0x20) {
                 prim->u0 = prim->u2 = 0xbc;
                 prim->u1 = prim->u3 = 0xca;
                 prim->v1 = 0x9a;
@@ -577,7 +924,7 @@ void map_unit_facing_draw_wait_arrows(SVECTOR* base, u32* ot) {
 static const s8 s_float_bob_offsets[24];
 
 /* This updater needs a signed 16-bit result view. Changing the public return type
- * instead alters the arithmetic callers in animation_motion.c. */
+ * instead alters the arithmetic of its callers in the unit motion code. */
 typedef s16 (*unit_height_s16_fn_t)(map_unit_t* unit);
 
 /* Raise a floating unit's height offset, or lower it back to the ground.
@@ -636,13 +983,13 @@ static const s8 s_float_bob_offsets[24] = { 4, 4, 4, 4, 3, 3, 3, 2, 2, 1, 1, 1, 
  * STATUS_BUBBLE_COUNT bubbles that applies, wrapping to DEAD, and the
  * bubble's x/y offsets are chosen from the unit's SHP type and animation. The
  * bubbles before SOURCE_UNIT follow statuses
- * (g_status_bubble_status_masks); SOURCE_UNIT belongs to the source
+ * (s_status_bubble_status_masks); SOURCE_UNIT belongs to the source
  * unit instead. The DEAD and DEATH_SENTENCE bubbles, which show counters, stay
  * while their status lasts. A unit with no bubble status that
  * is not the source unit loses its bubble.
  *
  * The block-scoped bubble_mask keeps GCC from rotating the loop's leading exit
- * tests to the bottom, and indexing g_status_bubble_status_masks inside the loop lets loop.c
+ * tests to the bottom, and indexing s_status_bubble_status_masks inside the loop lets loop.c
  * strength-reduce it into the target's pointer walk. */
 static void update_bubble_cycle(map_unit_t* unit) {
     s32 frame;
@@ -685,7 +1032,7 @@ static void update_bubble_cycle(map_unit_t* unit) {
                     break;
                 }
                 if (bubble != STATUS_BUBBLE_SOURCE_UNIT) {
-                    bubble_mask = g_status_bubble_status_masks[bubble];
+                    bubble_mask = s_status_bubble_status_masks[bubble];
                     if (status_flags & bubble_mask) {
                         break;
                     }
@@ -816,18 +1163,18 @@ static void draw_status_bubble_sprite(map_unit_t* unit, const DVECTOR* unused_sc
     } else if (bubble_id == STATUS_BUBBLE_DEAD) {
         table_index = unit->battle_unit->death_counter;
         if (unit->status_flags_1_4 & UNIT_STATUS_RERAISE) {
-            display->parts[0].u = g_status_bubble_u[STATUS_BUBBLE_RERAISE];
-            flag_row = g_status_bubble_v[STATUS_BUBBLE_RERAISE];
+            display->parts[0].u = s_status_bubble_u[STATUS_BUBBLE_RERAISE];
+            flag_row = s_status_bubble_v[STATUS_BUBBLE_RERAISE];
             display->parts[0].v = flag_row;
             if (unit->status_bubble_alternate_row) {
                 display->parts[0].v = flag_row + 12;
             }
         } else if (table_index != 0xFF) {
-            display->parts[0].u = g_status_bubble_digit_u[table_index];
-            display->parts[0].v = g_status_bubble_digit_v[table_index];
+            display->parts[0].u = s_status_bubble_digit_u[table_index];
+            display->parts[0].v = s_status_bubble_digit_v[table_index];
         } else {
-            display->parts[0].u = g_status_bubble_u[STATUS_BUBBLE_DEAD];
-            default_row = g_status_bubble_v[STATUS_BUBBLE_DEAD];
+            display->parts[0].u = s_status_bubble_u[STATUS_BUBBLE_DEAD];
+            default_row = s_status_bubble_v[STATUS_BUBBLE_DEAD];
             display->parts[0].v = default_row;
             if (unit->status_bubble_alternate_row) {
                 display->parts[0].v = default_row + 12;
@@ -835,11 +1182,11 @@ static void draw_status_bubble_sprite(map_unit_t* unit, const DVECTOR* unused_sc
         }
     } else if (bubble_id == STATUS_BUBBLE_DEATH_SENTENCE) {
         table_index = unit->battle_unit->status_ct[STATUS_CT_INDEX(STATUS_ID_DEATH_SENTENCE)] & 3;
-        display->parts[0].u = g_status_bubble_digit_u[table_index];
-        display->parts[0].v = g_status_bubble_digit_v[table_index];
+        display->parts[0].u = s_status_bubble_digit_u[table_index];
+        display->parts[0].v = s_status_bubble_digit_v[table_index];
     } else {
-        display->parts[0].u = g_status_bubble_u[bubble_id];
-        row = g_status_bubble_v[bubble_id];
+        display->parts[0].u = s_status_bubble_u[bubble_id];
+        row = s_status_bubble_v[bubble_id];
         display->parts[0].v = row;
         if (bubble_id == STATUS_BUBBLE_CHARGING || bubble_id == STATUS_BUBBLE_RERAISE) {
             if (unit->status_bubble_alternate_row) {
@@ -886,7 +1233,7 @@ static void update_float_height_and_status_bubble(map_unit_t* unit) {
 
 /* Start the unit's afterimage trail: enable position_copies and seed all six at its world
  * position. Jump launches and SEQ opcode 0xbf start it. */
-void sprite_afterimage_init(map_unit_t* unit) {
+static void init_afterimage(map_unit_t* unit) {
     s32 i;
 
     unit->position_copies_active = 1;
@@ -898,7 +1245,7 @@ void sprite_afterimage_init(map_unit_t* unit) {
 
 /*
  * Draw the unit's current sprite frame once at each of its six position_copies:
- * the afterimage trail that sprite_afterimage_init starts.
+ * the afterimage trail that init_afterimage starts.
  *
  * Each copy is projected with the battle camera and queued at its own
  * ordering-table depth using the current camera zoom, semi-transparent with the
@@ -1035,7 +1382,7 @@ static s32 build_next_result_display(map_unit_t* unit) {
         for (index = 0; index < ACTION_DISPLAY_VALUE_COUNT; index++) {
             if (flag & scan_flags) {
                 display->value = g_result_display_values[index];
-                display->selector = g_result_numeric_selectors[index];
+                display->selector = s_result_numeric_selectors[index];
                 unit->action_display_flags &= ~flag;
                 break;
             }
@@ -1280,7 +1627,7 @@ static s32 build_next_result_display(map_unit_t* unit) {
         break;
     }
 
-    map_palette_load_data(&g_result_palette, MAP_CLUT_ROW_ACTION_RESULTS, unit->map_unit_id, 0);
+    map_palette_load_data(&s_result_palette, MAP_CLUT_ROW_ACTION_RESULTS, unit->map_unit_id, 0);
     return 1;
 }
 
@@ -1386,13 +1733,13 @@ void result_prepare_display(map_unit_t* unit) {
                     bit = 0x80 >> j;
                     if (count < ACTION_STATUS_DISPLAY_CAPACITY) {
                         if (action->status_changes.infliction[i] & bit) {
-                            image = g_result_status_image_ids[i][j];
+                            image = s_result_status_image_ids[i][j];
                             unit->status_display_image_list[count] = image;
                             if (image != 0) {
                                 unit->status_display_image_count++;
                             }
                         } else if (action->status_changes.removal[i] & bit) {
-                            image = g_result_status_image_ids[i][j];
+                            image = s_result_status_image_ids[i][j];
                             unit->status_display_image_list[count] = image;
                             if (image != 0) {
                                 unit->status_display_image_list[unit->status_display_image_count]
@@ -1551,7 +1898,7 @@ static s32 build_next_exp_jp_or_failure_display(map_unit_t* unit) {
         break;
     }
 
-    map_palette_load_data(&g_result_palette, MAP_CLUT_ROW_ACTION_RESULTS, unit->map_unit_id, 0);
+    map_palette_load_data(&s_result_palette, MAP_CLUT_ROW_ACTION_RESULTS, unit->map_unit_id, 0);
     return 1;
 }
 
@@ -1812,7 +2159,7 @@ void map_unit_set_move_and_world_coords(map_unit_t* unit) {
     unit->world_coords.vx = unit->map_x * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
     unit->world_coords.vz = unit->map_y * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
     unit->world_coords.vy = map_unit_calculate_height_from_world_coords(unit);
-    map_unit_set_real_coords_from_world_coords(unit);
+    set_real_coords_from_world_coords(unit);
 }
 
 /* Moves a rider killed on its mount (pending_attack_result set) off it: the pair
@@ -2199,25 +2546,13 @@ void map_unit_update_float_height(map_unit_t* unit) {
     if ((unit->status_flags_5_6 & (UNIT_STATUS_JUMP | UNIT_STATUS_JUMP_HEIGHT_ACTIVE)) == 0
         && (unit->statuses_to_remove_5_6 & UNIT_STATUS_JUMP) == 0) {
         unit->world_coords.vy = map_unit_calculate_height_from_world_coords(unit);
-        map_unit_set_real_coords_from_world_coords(unit);
+        set_real_coords_from_world_coords(unit);
     }
 }
 
 /* animation policy */
 
-/* sound_sfx_e by the weapon's item_type_e (0x20 entries each): the swing, the
- * hit, and the hit a shield or Golem stops (action_play_weapon_sfx). */
-extern u8 g_action_weapon_swing_sfx_ids[ITEM_TYPE_SHURIKEN];
-extern u8 g_action_weapon_hit_sfx_ids[ITEM_TYPE_SHURIKEN];
-extern u8 g_action_shield_deflect_sfx_ids[ITEM_TYPE_SHURIKEN];
 extern clut_t g_sprite_weapon_clut;
-
-/* Two animation_e for each set: the one that starts a charge and
- * the one held while the unit charges or performs; 0 for none. */
-extern u8 g_animation_ability_charge_sets[ANIMATION_CHARGE_SET_COUNT][ANIMATION_CHARGE_VARIANT_COUNT];
-
-/* Three animation_e variants per item_type_e; animation_select_weapon_attack chooses the column. */
-extern u8 g_animation_weapon_attacks[ITEM_TYPE_SHURIKEN][3];
 
 /* Play the weapon swing sound (`hit` 0) or the sound of each strike target's
  * outcome (`hit` 1).
@@ -2239,7 +2574,7 @@ void action_play_weapon_sfx(map_unit_t* unit, s32 hit) {
     }
     switch (hit) {
     case 0:
-        map_unit_play_sfx(unit, g_action_weapon_swing_sfx_ids[weapon_type]);
+        map_unit_play_sfx(unit, s_action_weapon_swing_sfx_ids[weapon_type]);
         break;
     case 1:
         for (i = 0; i < unit->strike.target_count; i++) {
@@ -2251,7 +2586,7 @@ void action_play_weapon_sfx(map_unit_t* unit, s32 hit) {
             case ACTION_MISS_TYPE_RIGHT_HAND_EVADE:
             case ACTION_MISS_TYPE_LEFT_HAND_EVADE:
             case ACTION_MISS_TYPE_GOLEM_GUARD:
-                map_unit_play_sfx(unit, g_action_shield_deflect_sfx_ids[weapon_type]);
+                map_unit_play_sfx(unit, s_action_shield_deflect_sfx_ids[weapon_type]);
                 break;
             case ACTION_MISS_TYPE_ACCESSORY_EVADE:
             case ACTION_MISS_TYPE_CLASS_EVADE_OR_ARROW_GUARD:
@@ -2268,7 +2603,7 @@ void action_play_weapon_sfx(map_unit_t* unit, s32 hit) {
                 if (target->battle_unit->action.critical != 0) {
                     map_unit_play_sfx(unit, SOUND_SFX_CRITICAL_HIT);
                 } else {
-                    map_unit_play_sfx(unit, g_action_weapon_hit_sfx_ids[weapon_type]);
+                    map_unit_play_sfx(unit, s_action_weapon_hit_sfx_ids[weapon_type]);
                 }
                 break;
             }
@@ -2327,11 +2662,11 @@ void animation_select_weapon_attack(map_unit_t* attacker, map_unit_t* target) {
     }
     if (target != 0) {
         if (attacker->spritesheet_id >= SPRITE_SHEET_ID_CRYSTAL) {
-            animation_request_forced(g_animation_weapon_attacks[0][1], attacker->facing, attacker);
+            animation_request_forced(s_animation_weapon_attacks[0][1], attacker->facing, attacker);
             return;
         }
         if (attacker->equipped_weapon_type == ITEM_TYPE_BOW) {
-            animation_request_forced(g_animation_weapon_attacks[ITEM_TYPE_BOW][projectile_get_bow_animation_column()],
+            animation_request_forced(s_animation_weapon_attacks[ITEM_TYPE_BOW][projectile_get_bow_animation_column()],
                 attacker->facing, attacker);
             return;
         }
@@ -2341,7 +2676,7 @@ void animation_select_weapon_attack(map_unit_t* attacker, map_unit_t* target) {
                 if (miss_type < ACTION_MISS_TYPE_BUGGED_REFLECTION) {
                     if (miss_type >= ACTION_MISS_TYPE_GOLEM_GUARD) {
                         animation_request_forced(
-                            g_animation_weapon_attacks[attacker->equipped_weapon_type][0], attacker->facing, attacker);
+                            s_animation_weapon_attacks[attacker->equipped_weapon_type][0], attacker->facing, attacker);
                         return;
                     }
                 }
@@ -2353,16 +2688,16 @@ void animation_select_weapon_attack(map_unit_t* attacker, map_unit_t* target) {
         difference = attacker_center - target_center;
         if (difference < -11) {
             animation_request_forced(
-                g_animation_weapon_attacks[attacker->equipped_weapon_type][0], attacker->facing, attacker);
+                s_animation_weapon_attacks[attacker->equipped_weapon_type][0], attacker->facing, attacker);
             return;
         }
         if (difference >= 12) {
             animation_request_forced(
-                g_animation_weapon_attacks[attacker->equipped_weapon_type][2], attacker->facing, attacker);
+                s_animation_weapon_attacks[attacker->equipped_weapon_type][2], attacker->facing, attacker);
             return;
         }
     }
-    animation_request_forced(g_animation_weapon_attacks[attacker->equipped_weapon_type][1], attacker->facing, attacker);
+    animation_request_forced(s_animation_weapon_attacks[attacker->equipped_weapon_type][1], attacker->facing, attacker);
 }
 
 /* Start the animation of an item ability: the item held up for a target on
@@ -2397,7 +2732,7 @@ static void set_item_ability_animation(map_unit_t* unit, map_unit_t* target) {
 /* Start the first animation of the used ability's charge set, if it has one. */
 void animation_start_ability_charge(map_unit_t* unit) {
     u8 set_id = g_ability_animation_data[unit->used_ability_id].charge_animation_set_id;
-    u8 animation = g_animation_ability_charge_sets[set_id][0];
+    u8 animation = s_animation_ability_charge_sets[set_id][0];
 
     if (animation != 0) {
         animation_request(animation, unit->facing, unit);
@@ -2408,7 +2743,7 @@ void animation_start_ability_charge(map_unit_t* unit) {
  * while charging or performing; the submerged idle in water two or more deep. */
 void animation_start_ability_charge_hold(map_unit_t* unit) {
     u8 set_id = g_ability_animation_data[unit->used_ability_id].charge_animation_set_id;
-    u8 animation = g_animation_ability_charge_sets[set_id][1];
+    u8 animation = s_animation_ability_charge_sets[set_id][1];
     u8 water_depth;
     s32 selected_animation;
 
@@ -2880,7 +3215,7 @@ void sprite_sheet_apply_status_change(map_unit_t* unit, s32 tile_effect_level) {
 
 /* Make item `item_id` the one a unit's weapon and effect blocks draw.
  *
- * The item's two palettes of g_sprite_item_graphic_data go to the unit's
+ * The item's two palettes of s_sprite_item_graphic_data go to the unit's
  * CLUTs of the ITEM_A and ITEM_B rows, and its type selects the frame set of
  * the weapon SHP; a thrown weapon, any Throw ability and Throw Stone use
  * set 0x15. */
@@ -2902,9 +3237,9 @@ void sprite_set_weapon_graphic(s32 item_id, map_unit_t* unit) {
     }
     clut_index = unit->map_unit_id;
     map_palette_load_data(
-        &g_sprite_weapon_clut[g_sprite_item_graphic_data[item_id].palettes >> 4], MAP_CLUT_ROW_ITEM_A, clut_index, 0);
+        &g_sprite_weapon_clut[s_sprite_item_graphic_data[item_id].palettes >> 4], MAP_CLUT_ROW_ITEM_A, clut_index, 0);
     map_palette_load_data(
-        &g_sprite_weapon_clut[g_sprite_item_graphic_data[item_id].palettes & 0xF], MAP_CLUT_ROW_ITEM_B, clut_index, 0);
+        &g_sprite_weapon_clut[s_sprite_item_graphic_data[item_id].palettes & 0xF], MAP_CLUT_ROW_ITEM_B, clut_index, 0);
     unit->used_item_or_weapon_id = item_id;
     unit->equipped_weapon_type = weapon_type;
 }
@@ -3181,9 +3516,6 @@ typedef struct weapon_spr_file {
     u8 particle_pixels[144][128]; /* 0x10600; 4bpp */
 } weapon_spr_file_t;
 
-/* Sprite part width/height in 8-pixel tiles, indexed by SHP size bits. */
-extern size32_t g_sprite_part_sizes[16];
-
 /* Loaded and fallback SHP/SEQ data. */
 extern u8 g_sprite_shp_frame_data_buffer[];
 extern u8 g_sprite_seq_data_buffer[];
@@ -3195,68 +3527,15 @@ extern u8* g_sprite_shp_frame_data_cursor;
 extern u8* g_sprite_seq_data_cursor;
 extern s32 g_status_bubble_delay;
 
-/* The display rotations that the upper five bits of a frame's first byte select, ONE to the turn. */
-extern u16 g_sprite_y_rotations[32];
 extern clut_t g_sprite_weapon_clut;
 
 /* Trail CLUT copied from WEP.SPR at offset 0x8200. */
 extern clut_t g_sprite_trail_clut;
 
-/* The 24 orders in which draw_layers queues a unit's
- * four layers: 0 is the unit's own sprite, n its sprite block n - 1. */
-extern s32 g_animation_layer_priorities[24][4];
-
-/* By sprite_shp_type_e: the frame a unit is left on when its sequence ends or its attack image is taken away, seen
- * from behind and from the front. */
-extern u8 g_animation_targeted_frame_back[9]; /* one per s_shp_files entry */
-extern u8 g_animation_targeted_frame_front[9];
-
 /* Set before allocation and read acceptance: a failed request can be skipped
  * on the next step because its ID already matches. */
 static s32 s_sprite_last_requested_seq_id;
 static s32 s_sprite_last_requested_shp_id;
-
-static file_extent_t s_seq_files[9] = { { 57037, 8192 }, { 57045, 8192 }, { 57053, 4096 }, { 57055, 6144 },
-    { 57058, 4096 }, { 57060, 4096 }, { 57062, 4096 }, { 57064, 4096 }, { 0, 0 } };
-
-static file_extent_t s_shp_files[9] = { { 57017, 8192 }, { 57021, 10240 }, { 57026, 8192 }, { 57030, 4096 },
-    { 57032, 4096 }, { 0, 0 }, { 57034, 2048 }, { 57035, 4096 }, { 0, 0 } };
-
-static file_extent_t s_weapon_seq_files[2] = { { 57072, 4096 }, { 57074, 4096 } };
-
-static file_extent_t s_weapon_shp_files[2] = { { 57066, 6144 }, { 57069, 6144 } };
-
-static file_extent_t s_effect_seq_files[2] = { { 57080, 2048 }, { 0, 0 } };
-
-static file_extent_t s_effect_shp_files[2] = { { 57076, 4096 }, { 0, 0 } };
-
-static file_extent_t s_sheet_files[159] = { { 0, 0 }, { 59021, 45056 }, { 59043, 45056 }, { 59065, 45056 },
-    { 57586, 45056 }, { 57608, 45056 }, { 57630, 45056 }, { 57229, 45056 }, { 59772, 45056 }, { 57519, 45056 },
-    { 58998, 47104 }, { 57913, 45056 }, { 58247, 45056 }, { 58954, 45056 }, { 57805, 45056 }, { 59087, 45056 },
-    { 59839, 47104 }, { 57363, 45056 }, { 57827, 43008 }, { 59308, 47104 }, { 57935, 45056 }, { 58932, 45056 },
-    { 57848, 45056 }, { 57957, 45056 }, { 57652, 45056 }, { 58976, 45056 }, { 58600, 43008 }, { 57720, 45056 },
-    { 57742, 38912 }, { 57319, 45056 }, { 58356, 45056 }, { 57408, 45056 }, { 59685, 45056 }, { 57341, 45056 },
-    { 58800, 45056 }, { 59132, 45056 }, { 59619, 45056 }, { 57979, 45056 }, { 58001, 45056 }, { 58023, 45056 },
-    { 58045, 45056 }, { 58067, 45056 }, { 58089, 45056 }, { 58111, 45056 }, { 58133, 45056 }, { 58155, 45056 },
-    { 57251, 45056 }, { 58177, 45056 }, { 57273, 45056 }, { 57186, 45056 }, { 57473, 43008 }, { 59794, 45056 },
-    { 57164, 45056 }, { 58334, 45056 }, { 59353, 49152 }, { 58509, 47104 }, { 58888, 45056 }, { 58621, 45056 },
-    { 59286, 45056 }, { 58578, 45056 }, { 59596, 47104 }, { 58465, 45056 }, { 59816, 47104 }, { 59707, 45056 },
-    { 58199, 49152 }, { 57295, 49152 }, { 58509, 47104 }, { 58554, 49152 }, { 59532, 45056 }, { 57141, 47104 },
-    { 58888, 45056 }, { 59421, 45056 }, { 59109, 47104 }, { 58378, 49152 }, { 59862, 38912 }, { 59881, 38912 },
-    { 59900, 38912 }, { 59919, 38912 }, { 59938, 38912 }, { 59957, 38912 }, { 59976, 38912 }, { 59995, 38912 },
-    { 60014, 38912 }, { 60033, 38912 }, { 60052, 38912 }, { 60071, 38912 }, { 60090, 47104 }, { 58621, 45056 },
-    { 58621, 45056 }, { 58621, 45056 }, { 58621, 45056 }, { 58621, 45056 }, { 58621, 45056 }, { 57541, 45056 },
-    { 58402, 40960 }, { 58422, 40960 }, { 58621, 45056 }, { 58643, 45056 }, { 58312, 45056 }, { 58334, 45056 },
-    { 58465, 45056 }, { 58487, 45056 }, { 59707, 45056 }, { 59729, 45056 }, { 58712, 45056 }, { 58734, 45056 },
-    { 59331, 45056 }, { 59353, 49152 }, { 58509, 47104 }, { 58532, 45056 }, { 59510, 45056 }, { 59532, 45056 },
-    { 59398, 47104 }, { 59421, 45056 }, { 59466, 45056 }, { 59488, 45056 }, { 59641, 45056 }, { 59663, 45056 },
-    { 58888, 45056 }, { 58910, 45056 }, { 57761, 45056 }, { 57783, 45056 }, { 59154, 45056 }, { 59176, 45056 },
-    { 59198, 45056 }, { 59220, 45056 }, { 58822, 45056 }, { 58844, 45056 }, { 59242, 45056 }, { 59264, 45056 },
-    { 57870, 45056 }, { 58866, 45056 }, { 58756, 45056 }, { 58778, 45056 }, { 57494, 51200 }, { 57892, 43008 },
-    { 57452, 43008 }, { 58269, 45056 }, { 58291, 43008 }, { 59377, 43008 }, { 59751, 43008 }, { 57208, 43008 },
-    { 59554, 45056 }, { 59576, 40960 }, { 58442, 47104 }, { 58665, 49152 }, { 58689, 47104 }, { 57385, 47104 },
-    { 57674, 47104 }, { 57697, 47104 }, { 57430, 45056 }, { 58223, 49152 }, { 57674, 47104 }, { 57563, 47104 },
-    { 59443, 47104 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } };
 
 static map_unit_t* claim_map_unit_slot(s16 requested_map_unit_id);
 
@@ -3303,7 +3582,7 @@ static map_unit_t* claim_map_unit_slot(s16 requested_map_unit_id) {
 }
 
 /* Fill a sprite display from SHP frame `src`: each part takes its shift, a texture position in
- * 8-pixel tiles, its size from g_sprite_part_sizes and its flip bits; the frame's blend bits
+ * 8-pixel tiles, its size from s_sprite_part_sizes and its flip bits; the frame's blend bits
  * are merged into texture page `tpage`. */
 static void load_frame_parts(map_unit_t* unit, sprite_display_t* display, const sprite_frame_t* src, s32 tpage) {
     const sprite_frame_part_t* part;
@@ -3326,8 +3605,8 @@ static void load_frame_parts(map_unit_t* unit, sprite_display_t* display, const 
         part = &src->parts[i];
         attr = part->attributes;
         size = (attr & SPRITE_SHP_PART_SIZE_MASK) >> 10;
-        width = g_sprite_part_sizes[size].width;
-        height = g_sprite_part_sizes[size].height;
+        width = s_sprite_part_sizes[size].width;
+        height = s_sprite_part_sizes[size].height;
         tile = attr & SPRITE_SHP_PART_TILE_MASK;
         u = (tile & 0x1f) * 8;
         v = (tile >> 5) * 8;
@@ -3463,7 +3742,7 @@ void sprite_load_unit_frame(map_unit_t* unit, animation_state_t* state, u16 fram
     }
     display = state->display;
     count = display->part_count = (frame_data->part_count_and_rotation & 7) + 1;
-    display->rotation = g_sprite_y_rotations[frame_data->part_count_and_rotation >> 3];
+    display->rotation = s_sprite_y_rotations[frame_data->part_count_and_rotation >> 3];
     if (count > 8) {
         count = 8;
         system_handle_error(SYSTEM_ERROR_FRAME_PART_COUNT);
@@ -3482,8 +3761,8 @@ void sprite_load_unit_frame(map_unit_t* unit, animation_state_t* state, u16 fram
                 s16 part_v;
                 s32 width;
                 s32 height;
-                width = g_sprite_part_sizes[size].width;
-                height = g_sprite_part_sizes[size].height;
+                width = s_sprite_part_sizes[size].width;
+                height = s_sprite_part_sizes[size].height;
                 tile = attr & SPRITE_SHP_PART_TILE_MASK;
                 part_u = (tile & 0x1f) * 8;
                 part_v = y_offset + (tile >> 5) * 8;
@@ -3512,8 +3791,8 @@ void sprite_load_unit_frame(map_unit_t* unit, animation_state_t* state, u16 fram
                         tile = attr & SPRITE_SHP_PART_TILE_MASK;
                         part_u = (tile & 0x1f) * 8;
                         part_v = y_offset + (tile >> 5) * 8;
-                        width = g_sprite_part_sizes[size].width;
-                        height = g_sprite_part_sizes[size].height;
+                        width = s_sprite_part_sizes[size].width;
+                        height = s_sprite_part_sizes[size].height;
                         sprite_display_set_part(display, i, part->x_shift, part->y_shift, part_u, part_v, width * 8,
                             height * 8,
                             (flags & (SPRITE_DISPLAY_SEMI_TRANSPARENT | SPRITE_DISPLAY_BLEND_MASK))
@@ -3537,8 +3816,8 @@ void sprite_load_unit_frame(map_unit_t* unit, animation_state_t* state, u16 fram
                     s16 part_v;
                     s32 width;
                     s32 height;
-                    width = g_sprite_part_sizes[size].width;
-                    height = g_sprite_part_sizes[size].height;
+                    width = s_sprite_part_sizes[size].width;
+                    height = s_sprite_part_sizes[size].height;
                     tile = attr & SPRITE_SHP_PART_TILE_MASK;
                     part_u = (tile & 0x1f) * 8;
                     part_v = y_offset + (tile >> 5) * 8;
@@ -3618,7 +3897,7 @@ static void shift_seq_forward(map_unit_t* unit, s8 delta) {
  * that frame again without restarting its wait.
  *
  * A sequence that ends leaves a unit on its SHP type's
- * g_animation_targeted_frame_front or _back frame with a wait of 0. The
+ * s_animation_targeted_frame_front or _back frame with a wait of 0. The
  * unpackers resolve a missing sequence to the start of the sequence data,
  * never to -1, so the SYSTEM_ERROR_SEQ_ANIMATION test cannot fire. */
 static void run_unit_seq(map_unit_t* unit, animation_state_t* state, s32 advance) {
@@ -3682,9 +3961,9 @@ static void run_unit_seq(map_unit_t* unit, animation_state_t* state, s32 advance
                 if (sequence_id < ANIMATION_SEQUENCE_EVTCHR_SLOT_0) {
                     /* Odd sequence ids are the views from behind. */
                     if (sequence_id % 2) {
-                        frame = g_animation_targeted_frame_back[g_sprite_sheet_data[unit->spritesheet_id].shp_id];
+                        frame = s_animation_targeted_frame_back[g_sprite_sheet_data[unit->spritesheet_id].shp_id];
                     } else {
-                        frame = g_animation_targeted_frame_front[g_sprite_sheet_data[unit->spritesheet_id].shp_id];
+                        frame = s_animation_targeted_frame_front[g_sprite_sheet_data[unit->spritesheet_id].shp_id];
                     }
                     unit->seq_offset.vz = 0;
                     unit->seq_offset.vy = 0;
@@ -3916,7 +4195,7 @@ static void run_unit_seq(map_unit_t* unit, animation_state_t* state, s32 advance
                 pos += offset - 2;
                 break;
             case ANIMATION_SEQ_OPCODE_START_POSITION_COPIES:
-                sprite_afterimage_init(unit);
+                init_afterimage(unit);
                 break;
             case ANIMATION_SEQ_OPCODE_STOP_POSITION_COPIES:
                 unit->position_copies_active = 0;
@@ -4010,7 +4289,7 @@ static void run_block_seq(map_unit_t* unit, sprite_block_t* sprite, s32 index, s
     u16 attr;
 
     sequence_id = sprite->sequence_id;
-    graphic_v = g_sprite_item_graphic_data[unit->used_item_or_weapon_id].texture_row * 8;
+    graphic_v = s_sprite_item_graphic_data[unit->used_item_or_weapon_id].texture_row * 8;
     pos = sprite->script_pos;
     shp = sprite->shp;
     seq = sprite->seq;
@@ -4180,7 +4459,7 @@ static void run_block_seq(map_unit_t* unit, sprite_block_t* sprite, s32 index, s
             }
             display = sprite->display;
             parts = display->part_count = (src->part_count_and_rotation & 7) + 1;
-            display->rotation = g_sprite_y_rotations[src->part_count_and_rotation >> 3];
+            display->rotation = s_sprite_y_rotations[src->part_count_and_rotation >> 3];
             if (unit->sprite_display_flags & SPRITE_DISPLAY_HORIZONTAL_FLIP) {
                 display->rotation = -display->rotation;
             }
@@ -4204,8 +4483,8 @@ static void run_block_seq(map_unit_t* unit, sprite_block_t* sprite, s32 index, s
                     part = &src->parts[i];
                     attr = part->attributes;
                     size = (attr & SPRITE_SHP_PART_SIZE_MASK) >> 10;
-                    width = g_sprite_part_sizes[size].width;
-                    height = g_sprite_part_sizes[size].height;
+                    width = s_sprite_part_sizes[size].width;
+                    height = s_sprite_part_sizes[size].height;
                     tile = attr & SPRITE_SHP_PART_TILE_MASK;
                     u = (tile & 0x1f) * 8;
                     v = (tile >> 5) * 8 + graphic_v;
@@ -4230,8 +4509,8 @@ static void run_block_seq(map_unit_t* unit, sprite_block_t* sprite, s32 index, s
                     part = &src->parts[i];
                     attr = part->attributes;
                     size = (attr & SPRITE_SHP_PART_SIZE_MASK) >> 10;
-                    width = g_sprite_part_sizes[size].width;
-                    height = g_sprite_part_sizes[size].height;
+                    width = s_sprite_part_sizes[size].width;
+                    height = s_sprite_part_sizes[size].height;
                     tile = attr & SPRITE_SHP_PART_TILE_MASK;
                     u = (tile & 0x1f) * 8;
                     v = (tile >> 5) * 8;
@@ -4423,10 +4702,10 @@ static void update_animation(map_unit_t* unit_data) {
                                             g_sprite_evtchr_slots[1].owner & SPRITE_EVTCHR_SLOT_OWNER_ID_MASK);
                                         if (other != 0) {
                                             if (other->animation.sequence_id & 1) {
-                                                other->animation.frame = g_animation_targeted_frame_back
+                                                other->animation.frame = s_animation_targeted_frame_back
                                                     [g_sprite_sheet_data[other->spritesheet_id].shp_id];
                                             } else {
-                                                other->animation.frame = g_animation_targeted_frame_front
+                                                other->animation.frame = s_animation_targeted_frame_front
                                                     [g_sprite_sheet_data[other->spritesheet_id].shp_id];
                                             }
                                             other->seq_offset.vz = 0;
@@ -4537,7 +4816,7 @@ static void update_animation(map_unit_t* unit_data) {
                         run_unit_seq(unit, &unit->animation, 1);
                     }
                 }
-                animation_dispatch_distortion(unit);
+                dispatch_distortion(unit);
             }
         }
     } else if (unit->animation.wait != 0) {
@@ -4549,7 +4828,7 @@ static void update_animation(map_unit_t* unit_data) {
                     run_unit_seq(unit, &unit->animation, 1);
                 }
             }
-            animation_dispatch_distortion(unit);
+            dispatch_distortion(unit);
         }
     }
 
@@ -4603,7 +4882,7 @@ static void draw_status_bubble(map_unit_t* unit) {
 
 /* Queue a unit's sprite layers into the ordering table at its depth.
  *
- * g_animation_layer_priorities[layer_priority] lists four layers in draw order: 0 is the unit's own
+ * s_animation_layer_priorities[layer_priority] lists four layers in draw order: 0 is the unit's own
  * sprite display, n > 0 is weapon/effect sprite block n - 1 (skipped while
  * its trigger is clear). A rider (mount state 1) is skipped here; a mount
  * (state 2) draws its first three body parts, then its rider's layers, then
@@ -4612,7 +4891,7 @@ static void draw_status_bubble(map_unit_t* unit) {
  *
  * The rider loop issues one call per arm; cross-jumping merges them after
  * reload, but the duplicated RTL makes the mount loop large enough that
- * loop.c leaves `row * 16 + g_animation_layer_priorities` inside it, which is why the target
+ * loop.c leaves `row * 16 + s_animation_layer_priorities` inside it, which is why the target
  * recomputes the table address each iteration and spills `row`. */
 static void draw_layers(map_unit_t* unit) {
     SVECTOR position;
@@ -4659,7 +4938,7 @@ static void draw_layers(map_unit_t* unit) {
             /* Its mount draws it. */
         } else if (unit->mount_state == UNIT_MOUNT_STATE_MOUNT) {
             for (i = 0; i < 4; i++) {
-                entry = g_animation_layer_priorities[row][i];
+                entry = s_animation_layer_priorities[row][i];
                 if (entry != 0) {
                     if (unit->sprite_blocks[entry - 1].trigger == 0) {
                         continue;
@@ -4678,7 +4957,7 @@ static void draw_layers(map_unit_t* unit) {
                         rider_flags = rider->sprite_display_flags;
                         rider_row = rider->layer_priority;
                         for (j = 0; j < 4; j++) {
-                            entry = g_animation_layer_priorities[rider_row][j];
+                            entry = s_animation_layer_priorities[rider_row][j];
                             if (entry != 0) {
                                 if (rider->sprite_blocks[entry - 1].trigger == 0) {
                                     continue;
@@ -4703,7 +4982,7 @@ static void draw_layers(map_unit_t* unit) {
         }
     } else {
         for (i = 0; i < 4; i++) {
-            entry = g_animation_layer_priorities[row][i];
+            entry = s_animation_layer_priorities[row][i];
             if (entry != 0) {
                 if (unit->sprite_blocks[entry - 1].trigger == 0) {
                     continue;
@@ -5881,4 +6160,1082 @@ s32 sprite_update_queued_load(void) {
     }
 
     return (g_sprite_load_state.index < g_unit_graphics_load_queue.count) ? result : 0;
+}
+
+/* cursor */
+
+/* Palette cycling for the cursor tile glow. */
+extern palette_t g_cursor_tile_glow_cycled_palettes[2];
+extern s32 g_cursor_tile_glow_cycle_offset;
+extern s32 g_cursor_tile_glow_cycle_timer;
+
+/* Cycles the colors of the two cursor tile glow palettes (sprite CLUTs 1 and 2).
+ *
+ * Every fourth animation tick the offset advances through 0..14 and the palettes
+ * are uploaded again with colors 1..15 rotated down by that many places; color
+ * 0 stays in place, and offset 0 uploads the palettes as stored. */
+static void update_tile_glow_palettes(void) {
+    s32 dst;
+    s32 src;
+    palette_t* palettes;
+    RECT rect; /* never used; retail reserves its 8 bytes */
+
+    g_cursor_tile_glow_cycle_timer += g_system_vsync_interval;
+    if (g_cursor_tile_glow_cycle_timer >= 4) {
+        g_cursor_tile_glow_cycle_timer = 0;
+        g_cursor_tile_glow_cycle_offset++;
+        if (g_cursor_tile_glow_cycle_offset >= 15) {
+            g_cursor_tile_glow_cycle_offset = 0;
+        }
+        if (g_cursor_tile_glow_cycle_offset != 0) {
+            /* Bytewise rotation retains the native stores and first-color 16-bit load. */
+            /* dst before src: the reverse order changes the copy loop registers. */
+            dst = 2;
+            src = g_cursor_tile_glow_cycle_offset * 2 + 2;
+            ((u8*)g_cursor_tile_glow_cycled_palettes[0])[0] = ((u8*)g_cursor_tile_glow_palettes)[0];
+            ((u8*)g_cursor_tile_glow_cycled_palettes[0])[1] = ((u8*)g_cursor_tile_glow_palettes)[1];
+            ((u8*)g_cursor_tile_glow_cycled_palettes[1])[0] = *(u16*)&g_cursor_tile_glow_palettes[1][0];
+            ((u8*)g_cursor_tile_glow_cycled_palettes[1])[1] = ((u8*)g_cursor_tile_glow_palettes[1])[1];
+            /* Colors offset + 1..15 move down to 1.., and colors 1..offset wrap to the top. */
+            for (; src < 32; src++, dst++) {
+                ((u8*)g_cursor_tile_glow_cycled_palettes[0])[dst] = ((u8*)g_cursor_tile_glow_palettes)[src];
+                ((u8*)g_cursor_tile_glow_cycled_palettes[1])[dst] = ((u8*)g_cursor_tile_glow_palettes[1])[src];
+            }
+            for (src = 2, dst = 32 - g_cursor_tile_glow_cycle_offset * 2; src < g_cursor_tile_glow_cycle_offset * 2 + 2;
+                src++, dst++) {
+                ((u8*)g_cursor_tile_glow_cycled_palettes[0])[dst] = ((u8*)g_cursor_tile_glow_palettes)[src];
+                ((u8*)g_cursor_tile_glow_cycled_palettes[1])[dst] = ((u8*)g_cursor_tile_glow_palettes[1])[src];
+            }
+            palettes = g_cursor_tile_glow_cycled_palettes;
+        } else {
+            palettes = g_cursor_tile_glow_palettes;
+        }
+        map_palette_load_data(palettes, MAP_CLUT_ROW_SPRITES, 1, 0);
+        map_palette_load_data(palettes + 1, MAP_CLUT_ROW_SPRITES, 2, 0);
+    }
+}
+
+/* Project the center of the cursor tile, at its surface height less any water depth, to the screen
+ * and store the cursor's screen x and y. `position` receives the tile point and `raised` its depth
+ * point. It first cycles the tile glow palettes. */
+void cursor_project_tile(VECTOR* projected, SVECTOR* position, SVECTOR* raised) {
+    map_tile_t* tile;
+    s32 flag;
+
+    update_tile_glow_palettes();
+    SetRotMatrix(&g_camera_matrix);
+    SetTransMatrix(&g_camera_matrix);
+    vector_set_short(position, g_cursor_x * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2), 0,
+        g_cursor_y * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2));
+    position->vy = map_calculate_surface_height(position, (u8)g_cursor_layer);
+    tile = map_get_tile(position->vx / MAP_TILE_SIZE, position->vz / MAP_TILE_SIZE, g_cursor_layer);
+    position->vy -= tile->depth_half_height.depth * 12;
+    if (tile->surface.depth_bias) {
+        camera_get_biased_tile_depth_point(position, raised);
+    } else {
+        camera_get_unbiased_tile_depth_point(position, raised);
+    }
+    RotTrans(raised, projected, &flag);
+    g_cursor_screen_x = projected->vx;
+    g_cursor_screen_y = projected->vy;
+}
+
+/* Project the cursor tile and draw the map cursor over it with the glow quad on the tile surface;
+ * update_cursor calls it while g_cursor_visible is set. The tile's
+ * untargetable flag picks the glow's palette. */
+void cursor_draw(void) {
+    SVECTOR position;
+    SVECTOR raised;
+    SVECTOR corner0;
+    SVECTOR corner1;
+    SVECTOR corner2;
+    SVECTOR corner3;
+    VECTOR projected;
+    s32 depth;
+    s32 shape;
+    map_tile_t* tile;
+
+    cursor_project_tile(&projected, &position, &raised);
+    /* The projected z is the ordering-table depth for the cursor glow. */
+    depth = projected.vz / 4;
+    draw_map_selection_cursor(&position, gfx_get_battle_otag());
+    /* The polygon routine reads the same three 16-bit values in renderer x, z, y order. */
+    shape = cursor_calculate_tile_polygon(&position, g_cursor_layer, &corner0);
+    tile = map_get_tile(position.vx / MAP_TILE_SIZE, position.vz / MAP_TILE_SIZE, g_cursor_layer);
+    build_tile_glow(
+        tile->flags.untargetable, shape, &corner0, &corner1, &corner2, &corner3, gfx_get_battle_otag() + depth);
+}
+
+/*
+ * Queue the acting unit's wait-direction indicator into the ordering table at
+ * the depth of a point 48 screen units above its feet.
+ */
+void map_unit_facing_draw_wait_direction(void) {
+    SVECTOR base;
+    SVECTOR raised;
+    VECTOR transformed;
+    s32 flag;
+    map_unit_t* unit;
+    s32 depth;
+    u32* ot;
+
+    SetRotMatrix(&g_camera_matrix);
+    SetTransMatrix(&g_camera_matrix);
+    unit = map_unit_get_source();
+    vector_set_short(&base, unit->world_coords.vx, unit->world_coords.vy, unit->world_coords.vz);
+    /* The second RotTrans overwrites this result unread. */
+    RotTrans(&base, &transformed, &flag);
+    camera_get_unbiased_tile_depth_point(&unit->world_coords, &raised);
+    raised.vy -= 48;
+    RotTrans(&raised, &transformed, &flag);
+    depth = transformed.vz / 4;
+    ot = gfx_get_battle_otag();
+    draw_wait_arrows(&base, &ot[depth]);
+}
+
+/* unit motion */
+
+/* Phases of the teleport distortion; other distortions reuse the phase field separately. */
+typedef enum teleport_phase {
+    ANIMATION_TELEPORT_PHASE_START_DEPARTURE = 0,
+    ANIMATION_TELEPORT_PHASE_WAIT_DEPARTURE_LOAD = 1,
+    ANIMATION_TELEPORT_PHASE_HOLD_DEPARTURE_FLASH = 2,
+    ANIMATION_TELEPORT_PHASE_MOVE_TO_DESTINATION = 3,
+    ANIMATION_TELEPORT_PHASE_WAIT_ARRIVAL_LOAD = 4,
+    ANIMATION_TELEPORT_PHASE_HOLD_ARRIVAL_DARK = 5,
+    ANIMATION_TELEPORT_PHASE_WAIT_ARRIVAL_FADE = 6,
+    ANIMATION_TELEPORT_PHASE_WAIT_ARRIVAL_END = 7
+} teleport_phase_e;
+
+/* Starts a unit's fade-out removal with a color flash.
+ *
+ * The unit moves to the head of the map unit list, enters UNIT_FADE_OUT_FLASH,
+ * loses its shadow and its float and depth offsets, and is drawn with additive
+ * blending while its palette fades by (red, green, blue) from the last applied
+ * color. `fade_step` is the amount map_palette_modify steps the fade by.
+ * update_fade_out_removal continues from there. */
+void map_unit_start_fade_out(s32 map_unit_id, s32 fade_step, s16 red, s16 green, s16 blue) {
+    map_unit_t* unit = map_unit_get(map_unit_id);
+
+    if (unit != 0) {
+        map_unit_move_to_list_head(map_unit_id);
+        unit->fade_out_phase = UNIT_FADE_OUT_FLASH;
+        unit->shadow_graphic_trigger = 0;
+        unit->sprite_display_flags = (unit->sprite_display_flags & ~SPRITE_DISPLAY_BLEND_MASK)
+            | (SPRITE_DISPLAY_BLEND_ADD | SPRITE_DISPLAY_SEMI_TRANSPARENT);
+        sprite_palette_apply_modulation_to_units(MAP_COLOR_MODE_BASE, fade_step, map_unit_id, red, green, blue);
+        unit->float_bob_offset = 0;
+        unit->depth_height_offset = 0;
+    }
+}
+
+/* Start a unit's fade-out removal with a red flash: fade step 4 and a red offset
+ * of 0x1f. */
+void map_unit_start_red_fade_out(s32 map_unit_id) {
+    map_unit_start_fade_out(map_unit_id, 4, 0x1F, 0, 0);
+}
+
+/* Sets the 20.12 fixed-point position from the integer world position. */
+static void set_real_coords_from_world_coords(map_unit_t* unit) {
+    unit->real.vx = unit->world_coords.vx * ONE;
+    unit->real.vy = unit->world_coords.vy * ONE;
+    unit->real.vz = unit->world_coords.vz * ONE;
+}
+
+/* Sets the integer world position from the 20.12 fixed-point position. */
+void map_unit_set_world_coords_from_real_coords(map_unit_t* unit) {
+    unit->world_coords.vx = unit->real.vx / ONE;
+    unit->world_coords.vy = unit->real.vy / ONE;
+    unit->world_coords.vz = unit->real.vz / ONE;
+}
+
+/* Convert map-tile coordinates to tile-centered Q12 world coordinates.
+ *
+ * Vertical position is derived separately from the unit's terrain and mount
+ * state. The stack-backed SVECTOR preserves the target's narrow stores. */
+static void set_real_coords_from_map_coords(map_unit_t* unit) {
+    SVECTOR tile_center;
+
+    tile_center.vx = unit->map_x * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
+    unit->real.vx = tile_center.vx * ONE;
+    tile_center.vz = unit->map_y * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
+    unit->real.vz = tile_center.vz * ONE;
+    unit->real.vy = map_unit_calculate_height_from_tile(unit) * ONE;
+}
+
+/* Entry 0 of s_distortion_handlers. Never called: id 0 means no distortion
+ * animation and dispatch_distortion skips it. */
+static s32 distortion_none(map_unit_t* unused_unit) {
+}
+
+/* Distortion animation 1 (ANIMATION_DISTORTION_SCALE_PULSE). Over 40 frames the sprite's width follows sin(timer) as
+ * the timer runs from 0x300 to 0x800, shrinking it to nothing, while its height swells to 2.5 times and back (1 + 1.5
+ * sin(angle) for an angle stepping 51 per frame); then both scales return to 1.
+ *
+ * An ignored s32 result keeps $v0 live at the exit and the dispatch branch's delay
+ * slot empty. This callback supplies no return value. */
+static s32 distortion_scale_pulse_update(map_unit_t* unit) {
+    s32 angle;
+    s32 stretch;
+
+    switch (unit->distortion_phase) {
+    case 0:
+        unit->distortion_phase = 1;
+        unit->distortion_timer = 0x300;
+        unit->distortion_target = 0;
+    case 1:
+        angle = unit->distortion_target;
+        unit->animation.display->scale_x = rsin(unit->distortion_timer);
+        stretch = rsin(angle);
+        unit->animation.display->scale_y = stretch + stretch / 2 + ONE;
+        if ((unit->distortion_timer & 0xfff) != 0x800) {
+            unit->distortion_timer += 32;
+            unit->distortion_target += 51;
+        } else {
+            unit->distortion_phase++;
+        }
+        break;
+    case 2:
+        unit->distortion_animation_id = ANIMATION_DISTORTION_NONE;
+        unit->animation.display->scale_x = ONE;
+        unit->animation.display->scale_y = ONE;
+        break;
+    }
+}
+
+/* Distortion animation 0x02: raise the unit by 0x24000 (36 world units) in equal
+ * steps over distortion_timer frames.
+ *
+ * Phase 0 replaces the frame count in distortion_timer with the per-frame step
+ * and stores the destination height in distortion_target; phase 1 steps until the
+ * unit reaches it, then snaps and ends the animation. */
+static s32 distortion_rise(map_unit_t* unit) {
+    s32 step = unit->distortion_timer;
+    s32 target = unit->distortion_target;
+
+    switch (unit->distortion_phase) {
+    case 0:
+        step = -0x24000 / step;
+        target = unit->real.vy - 0x24000;
+        unit->distortion_phase = 1;
+    case 1:
+        if (target < unit->real.vy) {
+            unit->real.vy += step;
+        } else {
+            unit->real.vy = target;
+            unit->distortion_animation_id = ANIMATION_DISTORTION_NONE;
+        }
+        unit->world_coords.vy = unit->real.vy / ONE;
+        break;
+    }
+    unit->distortion_timer = step;
+    unit->distortion_target = target;
+}
+
+/* Distortion animation 0x03: lower the unit to the ground height under it in
+ * equal steps over distortion_timer frames.
+ *
+ * Phase 0 stores the ground height (Q12) in distortion_target and replaces the
+ * frame count in distortion_timer with the per-frame step; phase 1 steps while
+ * the unit is above the ground, then snaps and ends the animation. A unit that
+ * starts at or below the ground snaps on the first frame. */
+static s32 distortion_settle(map_unit_t* unit) {
+    s32 step = unit->distortion_timer;
+    s32 ground = unit->distortion_target;
+
+    switch (unit->distortion_phase) {
+    case 0:
+        ground = map_unit_calculate_height_from_world_coords(unit) * ONE;
+        step = (ground - (unit->world_coords.vy * ONE)) / step;
+        unit->distortion_phase++;
+    case 1:
+        if (unit->real.vy < ground) {
+            unit->real.vy += step;
+        } else {
+            unit->real.vy = ground;
+            unit->distortion_animation_id = ANIMATION_DISTORTION_NONE;
+        }
+        unit->world_coords.vy = unit->real.vy / ONE;
+        break;
+    }
+    unit->distortion_timer = step;
+    unit->distortion_target = ground;
+}
+
+/* Moves a unit toward its action target over distortion_timer frames.
+ *
+ * Phase 0 picks the destination and splits the remaining distance into equal
+ * Q12 steps: during an event the unit's own map tile, else the first entry of
+ * the target list, else the recorded action target panel.  Phase 1 applies the
+ * steps (height only when allow_height_change is set). */
+static void step_toward_target(map_unit_t* unit, s32 allow_height_change) {
+    SVECTOR tile_center;
+    VECTOR velocity;
+    s32 timer = unit->distortion_timer;
+    s32 saved_target = unit->distortion_target;
+    map_unit_t* target;
+
+    velocity = unit->velocity;
+    switch (unit->distortion_phase) {
+    case 0:
+        if (unit->battle_unit != 0) {
+            if (g_battle_state == BATTLE_STATE_EVENT) {
+                velocity.vx = ((unit->map_x * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2)) * ONE) - unit->real.vx;
+                velocity.vz = ((unit->map_y * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2)) * ONE) - unit->real.vz;
+                velocity.vy = 0;
+            } else if (unit->strike.target_count != 0) {
+                target = map_unit_get_by_battle_unit_id(unit->strike.target_list[0]);
+                setVector(&velocity, target->real.vx - unit->real.vx, target->real.vy - unit->real.vy,
+                    target->real.vz - unit->real.vz);
+            } else {
+                velocity.vx = (unit->battle_unit->action_command.target_position.vx * MAP_TILE_SIZE
+                                  + (MAP_TILE_SIZE / 2) - unit->world_coords.vx)
+                    * ONE;
+                velocity.vz = (unit->battle_unit->action_command.target_position.vz * MAP_TILE_SIZE
+                                  + (MAP_TILE_SIZE / 2) - unit->world_coords.vz)
+                    * ONE;
+                tile_center.vx
+                    = unit->battle_unit->action_command.target_position.vx * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
+                tile_center.vz
+                    = unit->battle_unit->action_command.target_position.vz * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
+                velocity.vy
+                    = (map_calculate_surface_height(&tile_center, unit->battle_unit->action_command.target_position.vy)
+                          - unit->world_coords.vy)
+                    * ONE;
+            }
+            velocity.vx /= timer;
+            velocity.vy /= timer;
+            velocity.vz /= timer;
+            unit->distortion_phase++;
+        } else {
+            unit->distortion_animation_id = ANIMATION_DISTORTION_NONE;
+            break;
+        }
+    case 1:
+        if (timer > 0) {
+            unit->real.vx += velocity.vx;
+            if (allow_height_change) {
+                unit->real.vy += velocity.vy;
+            }
+            unit->real.vz += velocity.vz;
+        } else {
+            unit->distortion_animation_id = ANIMATION_DISTORTION_NONE;
+        }
+        timer--;
+        break;
+    }
+    unit->velocity = velocity;
+    map_unit_set_world_coords_from_real_coords(unit);
+    unit->distortion_timer = timer;
+    unit->distortion_target = saved_target;
+}
+
+/* Moves a unit to the center of its map tile over distortion_timer frames.
+ *
+ * Phase 0 splits the distance from its world position to the tile center into equal Q12 steps;
+ * phase 1 applies them (height only when allow_height_change is set) and
+ * snaps to the tile once the timer runs out. */
+static void step_to_own_tile(map_unit_t* unit, s32 allow_height_change) {
+    SVECTOR tile_center;
+    VECTOR velocity;
+    s32 timer = unit->distortion_timer;
+    s32 saved_target = unit->distortion_target;
+
+    velocity = unit->velocity;
+    switch (unit->distortion_phase) {
+    case 0:
+        velocity.vx = (unit->map_x * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2) - unit->world_coords.vx) * ONE;
+        velocity.vz = (unit->map_y * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2) - unit->world_coords.vz) * ONE;
+        tile_center.vx = unit->map_x * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
+        tile_center.vz = unit->map_y * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
+        velocity.vy = (map_calculate_surface_height(&tile_center, unit->map_layer) - unit->world_coords.vy) * ONE;
+        velocity.vx /= timer;
+        velocity.vy /= timer;
+        velocity.vz /= timer;
+        unit->distortion_phase++;
+    case 1:
+        if (timer > 0) {
+            unit->real.vx += velocity.vx;
+            if (allow_height_change) {
+                unit->real.vy += velocity.vy;
+            }
+            unit->real.vz += velocity.vz;
+        } else {
+            set_real_coords_from_map_coords(unit);
+            unit->distortion_animation_id = ANIMATION_DISTORTION_NONE;
+        }
+        timer--;
+        break;
+    }
+    unit->velocity = velocity;
+    map_unit_set_world_coords_from_real_coords(unit);
+    unit->distortion_timer = timer;
+    unit->distortion_target = saved_target;
+}
+
+/* Distortion animation 0x04: move toward the action target in equal steps,
+ * height included (step_toward_target). */
+static s32 distortion_move_to_target(map_unit_t* unit) {
+    step_toward_target(unit, 1);
+}
+
+/* Distortion animation 0x05: move to the center of the unit's map tile in equal
+ * steps, height included (step_to_own_tile). */
+static s32 distortion_move_to_own_tile(map_unit_t* unit) {
+    step_to_own_tile(unit, 1);
+}
+
+/* Distortion animation 0x08: move toward the action target in equal steps without
+ * changing height (step_toward_target). */
+static s32 distortion_move_level_to_target(map_unit_t* unit) {
+    step_toward_target(unit, 0);
+}
+
+/* Distortion animation 0x09: move to the center of the unit's map tile without
+ * changing height. */
+static s32 distortion_move_level_to_own_tile(map_unit_t* unit) {
+    step_to_own_tile(unit, 0);
+}
+
+/* Velocity and duration of a jump arc from `from` to `to`.
+ *
+ * The arc has two legs under g_move_jump_gravity, each taking
+ * sqrt(2 * gravity * height) / gravity frames: one over the height difference
+ * plus 24, one over 24. `out->vy` is the negated speed of the first leg; x and
+ * y (stored in vz) cover their distances evenly over the returned frame count. */
+static s32 calculate_jump_arc_velocity(const SVECTOR* from, const SVECTOR* to, VECTOR* out) {
+    s32 to_height = to->vy;
+    s32 from_height = from->vy;
+    s32 height = from_height - to_height + 24;
+    s32 speed;
+    s32 frames;
+
+    height = height * g_move_jump_gravity;
+    speed = SquareRoot12(height * 2);
+    frames = speed / g_move_jump_gravity;
+    out->vy = -speed;
+    /* The second leg reloads height through 24 first; folding the constant compiles shorter. */
+    height = 24;
+    height = g_move_jump_gravity * height;
+    speed = SquareRoot12(height * 2);
+    frames += speed / g_move_jump_gravity;
+    out->vx = ((to->vx - from->vx) * ONE) / frames;
+    out->vz = ((to->vz - from->vz) * ONE) / frames;
+    return frames;
+}
+
+/* Distortion animation 0x06: jump along an arc toward the first target's sprite
+ * center (its world position raised by half its spritesheet height), or to the
+ * action target tile when the unit has no targets.
+ *
+ * Phase 0 builds the target point and asks
+ * calculate_jump_arc_velocity for the velocity and frame count; a
+ * unit without battle data ends the animation instead. Phase 1 applies the
+ * velocity to all three real coordinates for that many frames, the height speed
+ * gaining g_move_jump_gravity each frame, and ends the animation where the
+ * arc leaves the unit. */
+static s32 distortion_jump_to_target(map_unit_t* unit) {
+    SVECTOR target;
+    /* The retail frame reserves eight bytes beyond the target vector. */
+    u8 unused_target_tail[8];
+    VECTOR velocity;
+    map_unit_t* other;
+    s32 timer;
+
+    timer = unit->distortion_timer;
+    velocity = unit->velocity;
+    switch (unit->distortion_phase) {
+    case 0:
+        if (unit->battle_unit != 0) {
+            if (unit->strike.target_count != 0) {
+                other = map_unit_get_by_battle_unit_id(unit->strike.target_list[0]);
+                setVector(&target, other->world_coords.vx,
+                    other->world_coords.vy - sprite_sheet_map_unit_get_height(other->map_unit_id) / 2,
+                    other->world_coords.vz);
+            } else {
+                target.vx = unit->battle_unit->action_command.target_position.vx * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
+                target.vz = unit->battle_unit->action_command.target_position.vz * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
+                target.vy = map_calculate_surface_height(&target, unit->battle_unit->action_command.target_position.vy);
+            }
+            timer = calculate_jump_arc_velocity(&unit->world_coords, &target, &velocity);
+            unit->distortion_phase++;
+        } else {
+            unit->distortion_animation_id = ANIMATION_DISTORTION_NONE;
+            break;
+        }
+    case 1:
+        if (timer > 0) {
+            unit->real.vx += velocity.vx;
+            unit->real.vy += velocity.vy;
+            unit->real.vz += velocity.vz;
+            velocity.vy += g_move_jump_gravity;
+        } else {
+            unit->distortion_animation_id = ANIMATION_DISTORTION_NONE;
+        }
+        timer--;
+        break;
+    }
+    unit->velocity = velocity;
+    map_unit_set_world_coords_from_real_coords(unit);
+    unit->distortion_timer = timer;
+}
+
+/* Distortion animation 0x07: jump along an arc to the center of the unit's own
+ * map tile.
+ *
+ * Phase 0 asks calculate_jump_arc_velocity for the velocity and frame
+ * count from the current world position to the tile center at ground height.
+ * Phase 1 applies the velocity for that many frames, the height speed gaining
+ * g_move_jump_gravity each frame, then stops the horizontal motion. Phase
+ * 2 keeps falling until the unit reaches the ground under it, snaps it to the
+ * tile and ends the animation. */
+static s32 distortion_jump_to_own_tile(map_unit_t* unit) {
+    /* Unreferenced 8-byte frame slot below the target point, like the one in
+     * distortion_jump_takeoff; it puts `target` at sp+0x18. */
+    SVECTOR unused_10;
+    SVECTOR target;
+    VECTOR velocity;
+    s32 timer;
+
+    timer = unit->distortion_timer;
+    velocity = unit->velocity;
+    switch (unit->distortion_phase) {
+    case 0:
+        target.vx = unit->map_x * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
+        target.vz = unit->map_y * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
+        target.vy = map_unit_calculate_height_from_tile(unit);
+        timer = calculate_jump_arc_velocity(&unit->world_coords, &target, &velocity);
+        unit->distortion_phase++;
+    case 1:
+        if (timer > 0) {
+            unit->real.vx += velocity.vx;
+            unit->real.vy += velocity.vy;
+            unit->real.vz += velocity.vz;
+            velocity.vy += g_move_jump_gravity;
+        } else {
+            velocity.vz = 0;
+            velocity.vx = 0;
+            unit->distortion_phase++;
+        }
+        timer--;
+        break;
+    case 2:
+        vector_set_short(&target, unit->map_x * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2), 0,
+            unit->map_y * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2));
+        target.vy = map_unit_calculate_height_from_world_coords(unit);
+        if (unit->world_coords.vy < target.vy) {
+            unit->real.vy += velocity.vy;
+            velocity.vy += g_move_jump_gravity;
+        } else {
+            set_real_coords_from_map_coords(unit);
+            unit->distortion_animation_id = ANIMATION_DISTORTION_NONE;
+        }
+        break;
+    }
+    unit->velocity = velocity;
+    map_unit_set_world_coords_from_real_coords(unit);
+    unit->distortion_timer = timer;
+}
+
+/* Distortion animation 10 of s_distortion_handlers: ends at once. Animation 11
+ * is a second copy of this routine. */
+static s32 distortion_clear(map_unit_t* unit) {
+    unit->distortion_animation_id = ANIMATION_DISTORTION_NONE;
+}
+
+/* Distortion animation 11: ends at once. The same routine as animation 10, compiled twice. */
+static s32 distortion_clear_2(map_unit_t* unit) {
+    unit->distortion_animation_id = ANIMATION_DISTORTION_NONE;
+}
+
+/*
+ * Distortion animation 0x0c: launch a unit straight up at the start of a jump.
+ *
+ * Phase 0 picks an initial rise speed of sqrt(2 * gravity * (0x120 - ground y))
+ * and the matching frame count, and starts the trailing position copies; phase 1
+ * then applies the velocity to the height each frame, decelerating by
+ * g_move_jump_gravity, and ends the animation when the count runs out.
+ * World y grows downward, so 0x120 - ground y is the altitude 0x120 above the
+ * ground under the unit, and the rise covers that distance from wherever the
+ * unit starts. `unused_10` reproduces an unreferenced 16-byte frame slot below
+ * the velocity copy.
+ */
+static s32 distortion_jump_takeoff(map_unit_t* unit) {
+    VECTOR unused_10;
+    VECTOR velocity;
+    s32 timer = unit->distortion_timer;
+    s32 speed;
+
+    velocity = unit->velocity;
+    switch (unit->distortion_phase) {
+    case 0:
+        speed = SquareRoot12((-map_unit_calculate_height_from_world_coords(unit) + 0x120) * g_move_jump_gravity * 2);
+        timer = speed / g_move_jump_gravity;
+        velocity.vy = -speed;
+        init_afterimage(unit);
+        unit->status_flags_5_6 |= UNIT_STATUS_JUMP_HEIGHT_ACTIVE;
+        unit->distortion_phase++;
+    case 1:
+        if (timer > 0) {
+            unit->real.vy += velocity.vy;
+            velocity.vy += g_move_jump_gravity;
+        } else {
+            unit->position_copies_active = 0;
+            unit->shadow_graphic_trigger = 0;
+            unit->distortion_animation_id = ANIMATION_DISTORTION_NONE;
+            animation_request_forced(ANIMATION_STAND, unit->facing, unit);
+        }
+        timer--;
+        break;
+    }
+    unit->velocity = velocity;
+    map_unit_set_world_coords_from_real_coords(unit);
+    unit->distortion_timer = timer;
+}
+
+/* This retail call passes an unused coordinate-buffer argument in $a1.
+ * Preserve the call shape even though the callee reads only the unit. */
+#define world_height_from_world_coords_passing_coords                                                                  \
+    ((s32 (*)(map_unit_t*, const SVECTOR*))map_unit_calculate_height_from_world_coords)
+
+/* Distortion animation 0x0d: drop the unit straight down until it reaches the
+ * ground.
+ *
+ * Phase 0 sets the fall speed to g_move_jump_gravity, starts the six
+ * position copies that draw the sprite's trail and shows the shadow. Phase 1
+ * takes the landing height each frame: during an event the ground under the
+ * unit's own tile, otherwise the ground under the first target's tile, or under
+ * the action target tile when the unit has no target. Above that height the unit
+ * falls and gains g_move_jump_gravity per frame; on reaching it the unit
+ * snaps to it, the position copies stop and the animation ends.
+ *
+ * During an event the unit is also centered on its tile, but retail writes the
+ * depth coordinate into real.vy instead of real.vz. The height then sits below
+ * the ground on the next frame, so an event fall ends on its second frame. */
+static s32 distortion_fall_to_target(map_unit_t* unit) {
+    SVECTOR coords;
+    /* Unreferenced 8-byte frame slot above `coords`; it puts `velocity` at
+     * sp+0x20, matching the sibling distortion handlers. */
+    SVECTOR unused_18;
+    VECTOR velocity;
+    map_unit_t* other;
+    battle_unit_t* battle_unit;
+    s32 timer;
+    s32 x;
+    s32 y;
+
+    timer = unit->distortion_timer;
+    velocity = unit->velocity;
+    switch (unit->distortion_phase) {
+    case 0:
+        velocity.vy = g_move_jump_gravity;
+        init_afterimage(unit);
+        unit->shadow_graphic_trigger = 1;
+        unit->distortion_phase++;
+    case 1:
+        if (g_battle_state == BATTLE_STATE_EVENT) {
+            unit->strike.target_count = 0;
+            x = unit->map_x * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
+            unit->world_coords.vx = x;
+            unit->real.vx = x * ONE;
+            y = unit->map_y * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
+            unit->world_coords.vz = y;
+            /* Retail stores the tile-center depth into real.vy (the height),
+             * not real.vz. The first frame adds the fall speed to it and the
+             * next one snaps the height to the ground. */
+            unit->real.vy = y * ONE;
+            vector_set_short(&coords, unit->map_x * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2), unit->map_layer,
+                unit->map_y * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2));
+            coords.vy = world_height_from_world_coords_passing_coords(unit, &coords);
+        } else {
+            if (unit->strike.target_count != 0) {
+                other = map_unit_get_by_battle_unit_id(unit->strike.target_list[0]);
+                vector_set_short(&coords, other->map_x * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2), other->map_layer,
+                    other->map_y * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2));
+            } else {
+                battle_unit = unit->battle_unit;
+                vector_set_short(&coords,
+                    battle_unit->action_command.target_position.vx * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2),
+                    battle_unit->action_command.target_position.vy,
+                    battle_unit->action_command.target_position.vz * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2));
+            }
+            coords.vy = map_unit_calculate_height_with_caller_coords(unit, &coords);
+        }
+        if (unit->world_coords.vy < coords.vy) {
+            unit->real.vy += velocity.vy;
+            velocity.vy += g_move_jump_gravity;
+        } else {
+            unit->real.vy = coords.vy * ONE;
+            unit->position_copies_active = 0;
+            unit->distortion_animation_id = ANIMATION_DISTORTION_NONE;
+        }
+        break;
+    }
+    unit->velocity = velocity;
+    map_unit_set_world_coords_from_real_coords(unit);
+    unit->distortion_timer = timer;
+}
+
+/* Fill the init record of a teleport effect: the unit is the caster and the only
+ * target, and there are no spectators. Both teleport starters use it for every
+ * unit, not only for Altima. */
+static void init_teleport_effect_data(map_unit_t* unit, effect_context_t* teleport_data) {
+    teleport_data->targets[EFFECT_CASTER_ENTRY].target_type = EFFECT_TARGET_TYPE_UNIT;
+    teleport_data->targets[EFFECT_CASTER_ENTRY].data.unit.map_unit_id = unit->map_unit_id;
+    teleport_data->target_count = 1;
+    teleport_data->targets[0].target_type = EFFECT_TARGET_TYPE_UNIT;
+    teleport_data->targets[0].data.unit.map_unit_id = unit->map_unit_id;
+    teleport_data->spectator_count = 0;
+}
+
+/* Start the departure effect of a teleport. Altima's two forms request their own
+ * ability effect and the result is 1; any other unit gets the teleport secondary
+ * effect and the teleport-out sound, and the result is 0. */
+static s32 start_teleport_departure(map_unit_t* unit) {
+    effect_context_t teleport_data;
+
+    init_teleport_effect_data(unit, &teleport_data);
+    switch (unit->spritesheet_id) {
+    case SPRITE_SHEET_ID_ALTIMA_FIRST_FORM:
+        effect_playback_request(0, ABILITY_ID_ALTIMA_HOLY_ANGEL_TELEPORT_DEPARTURE, &teleport_data);
+        return 1;
+    case SPRITE_SHEET_ID_ALTIMA_SECOND_FORM:
+        effect_playback_request(0, ABILITY_ID_ALTIMA_ARCH_ANGEL_TELEPORT_DEPARTURE, &teleport_data);
+        return 1;
+    }
+    effect_secondary_start_teleport(unit);
+    sound_play_sfx_on_free_channel(SOUND_SFX_TELEPORT_OUT);
+    return 0;
+}
+
+/* Start the arrival effect of a teleport. Altima's two forms request their own
+ * ability effect and the result is 1; any other unit gets the teleport secondary
+ * effect and the teleport-in sound, and the result is 0. */
+static s32 start_teleport_arrival(map_unit_t* unit) {
+    effect_context_t teleport_data;
+
+    init_teleport_effect_data(unit, &teleport_data);
+    switch (unit->spritesheet_id) {
+    case SPRITE_SHEET_ID_ALTIMA_FIRST_FORM:
+        effect_playback_request(0, ABILITY_ID_ALTIMA_HOLY_ANGEL_TELEPORT_ARRIVAL, &teleport_data);
+        return 1;
+    case SPRITE_SHEET_ID_ALTIMA_SECOND_FORM:
+        effect_playback_request(0, ABILITY_ID_ALTIMA_ARCH_ANGEL_TELEPORT_ARRIVAL, &teleport_data);
+        return 1;
+    }
+    effect_secondary_start_teleport(unit);
+    sound_play_sfx_on_free_channel(SOUND_SFX_TELEPORT_IN);
+    return 0;
+}
+
+/* Teleport distortion: begin the departure flash. Altima's forms release the
+ * ability effect that start_teleport_departure requested;
+ * the sprite switches to additive semi-transparency and a palette modulation of
+ * +31 on each color component starts. The distortion moves to its next phase
+ * with the timer at 0. */
+static void start_teleport_white_flash(map_unit_t* unit) {
+    if (unit->spritesheet_id == SPRITE_SHEET_ID_ALTIMA_FIRST_FORM
+        || unit->spritesheet_id == SPRITE_SHEET_ID_ALTIMA_SECOND_FORM) {
+        effect_playback_start();
+    }
+    unit->sprite_display_flags = (unit->sprite_display_flags & ~SPRITE_DISPLAY_BLEND_MASK)
+        | (SPRITE_DISPLAY_BLEND_ADD | SPRITE_DISPLAY_SEMI_TRANSPARENT);
+    sprite_palette_apply_modulation_to_units(MAP_COLOR_MODE_BASE, 2, unit->map_unit_id, 0x1f, 0x1f, 0x1f);
+    unit->distortion_phase++;
+    unit->distortion_timer = 0;
+}
+
+/* Teleport distortion: begin the arrival. Altima's forms release the ability
+ * effect that start_teleport_arrival requested; the unit's
+ * palette is refreshed for the shadow mode of the tile it stands on and a palette
+ * modulation of -31 on each color component starts. The distortion moves to its
+ * next phase with the timer at 0. */
+static void start_teleport_arrival_dark(map_unit_t* unit) {
+    map_tile_t* tile;
+
+    if (unit->spritesheet_id == SPRITE_SHEET_ID_ALTIMA_FIRST_FORM
+        || unit->spritesheet_id == SPRITE_SHEET_ID_ALTIMA_SECOND_FORM) {
+        effect_playback_start();
+    }
+    tile = map_get_tile(unit->map_x, unit->map_y, unit->map_layer);
+    sprite_palette_update(unit, tile->flags.shading, 1);
+    sprite_palette_apply_modulation_to_units(MAP_COLOR_MODE_BASE, 0, unit->map_unit_id, -31, -31, -31);
+    unit->distortion_phase++;
+    unit->distortion_timer = 0;
+}
+
+/* Distortion animation 14 (TELEPORT), for every unit: advance one frame of the eight-step
+ * warp-out / warp-in sequence.
+ *
+ * Jump table: .rodata 0x80068208, 8 32-bit addresses.
+ *
+ * An ignored s32 result keeps $v0 live at the epilogue and the switch range
+ * check's delay slot empty. This callback supplies no return value. */
+static s32 distortion_teleport(map_unit_t* unit) {
+    unit->distortion_timer++;
+    switch (unit->distortion_phase) {
+    case ANIMATION_TELEPORT_PHASE_START_DEPARTURE:
+        if (start_teleport_departure(unit) == 0) {
+            start_teleport_white_flash(unit);
+        }
+        unit->distortion_phase++;
+        break;
+    case ANIMATION_TELEPORT_PHASE_WAIT_DEPARTURE_LOAD:
+        /* The target passes no argument here. */
+        if (effect_update_file_load() == 0 && camera_is_active() == 0) {
+            start_teleport_white_flash(unit);
+        }
+        break;
+    case ANIMATION_TELEPORT_PHASE_HOLD_DEPARTURE_FLASH:
+        if (unit->distortion_timer >= 0x11) {
+            sprite_palette_apply_modulation_to_units(MAP_COLOR_MODE_BASE, 4, unit->map_unit_id, -31, -31, -31);
+            unit->distortion_timer = 0;
+            unit->distortion_phase++;
+        }
+        break;
+    case ANIMATION_TELEPORT_PHASE_MOVE_TO_DESTINATION:
+        if (g_battle_animation_wait_state == 0) {
+            unit->map_x = unit->movement.destination_x;
+            unit->map_y = unit->movement.destination_y;
+            unit->map_layer = unit->movement.destination_layer;
+            set_real_coords_from_map_coords(unit);
+            map_unit_set_world_coords_from_real_coords(unit);
+            if (start_teleport_arrival(unit) == 0) {
+                start_teleport_arrival_dark(unit);
+            }
+            unit->distortion_phase++;
+        }
+        break;
+    case ANIMATION_TELEPORT_PHASE_WAIT_ARRIVAL_LOAD:
+        if (effect_update_file_load() == 0 && camera_is_active() == 0) {
+            start_teleport_arrival_dark(unit);
+        }
+        break;
+    case ANIMATION_TELEPORT_PHASE_HOLD_ARRIVAL_DARK:
+        if (unit->distortion_timer >= 0x11) {
+            sprite_palette_apply_modulation_to_units(MAP_COLOR_MODE_BASE, 4, unit->map_unit_id, 31, 31, 31);
+            unit->distortion_phase++;
+        }
+        break;
+    case ANIMATION_TELEPORT_PHASE_WAIT_ARRIVAL_FADE:
+        if (unit->distortion_timer >= 0x21) {
+            sprite_palette_apply_modulation_to_units(MAP_COLOR_MODE_RESTORE, 2, unit->map_unit_id, 0, 0, 0);
+            unit->distortion_timer = 0;
+            unit->distortion_phase++;
+        }
+        break;
+    case ANIMATION_TELEPORT_PHASE_WAIT_ARRIVAL_END:
+        if (g_battle_animation_wait_state == 0) {
+            unit->distortion_animation_id = ANIMATION_DISTORTION_NONE;
+            unit->sprite_display_flags &= ~SPRITE_DISPLAY_SEMI_TRANSPARENT;
+        }
+        break;
+    }
+}
+
+/* Distortion animation 0x0f: slide a unit away from its target over
+ * distortion_timer frames (Rush winds up with it).
+ *
+ * Phase 0 takes the horizontal offset from the first unit in the target list,
+ * or from the center of the action target tile, to the unit, reduces it by an
+ * eighth, keeps the remainder of it modulo 0xe000 (half a tile, 14 world units,
+ * in Q12), and divides that into per-frame velocity. Phase 1 applies that
+ * velocity until the timer runs out. Clearing
+ * velocity.vy in each branch keeps its division, which GCC folds away when the
+ * zero is stored once after the branches. `unused_10` reproduces an
+ * unreferenced 8-byte frame slot below the velocity copy. */
+static s32 distortion_back_away(map_unit_t* unit) {
+    s32 unused_10[2];
+    VECTOR velocity;
+    map_unit_t* target;
+    s32 timer;
+
+    timer = unit->distortion_timer;
+    velocity = unit->velocity;
+    switch (unit->distortion_phase) {
+    case 0:
+        if (unit->battle_unit != 0) {
+            if (unit->strike.target_count != 0) {
+                target = map_unit_get_by_battle_unit_id(unit->strike.target_list[0]);
+                velocity.vx = unit->real.vx - target->real.vx;
+                velocity.vx = (velocity.vx - velocity.vx / 8) % 0xe000;
+                velocity.vz = unit->real.vz - target->real.vz;
+                velocity.vz = (velocity.vz - velocity.vz / 8) % 0xe000;
+                velocity.vy = 0;
+            } else {
+                velocity.vx = (unit->world_coords.vx
+                                  - (unit->battle_unit->action_command.target_position.vx * MAP_TILE_SIZE
+                                      + (MAP_TILE_SIZE / 2)))
+                    * ONE;
+                velocity.vx = (velocity.vx - velocity.vx / 8) % 0xe000;
+                velocity.vz = (unit->world_coords.vz
+                                  - (unit->battle_unit->action_command.target_position.vz * MAP_TILE_SIZE
+                                      + (MAP_TILE_SIZE / 2)))
+                    * ONE;
+                velocity.vz = (velocity.vz - velocity.vz / 8) % 0xe000;
+                velocity.vy = 0;
+            }
+            velocity.vx /= timer;
+            velocity.vy /= timer;
+            velocity.vz /= timer;
+            unit->distortion_phase++;
+        } else {
+            unit->distortion_animation_id = ANIMATION_DISTORTION_NONE;
+            break;
+        }
+    case 1:
+        if (timer > 0) {
+            unit->real.vx += velocity.vx;
+            unit->real.vz += velocity.vz;
+        } else {
+            unit->distortion_animation_id = ANIMATION_DISTORTION_NONE;
+        }
+        timer--;
+        break;
+    }
+    unit->velocity = velocity;
+    map_unit_set_world_coords_from_real_coords(unit);
+    unit->distortion_timer = timer;
+}
+
+/* Distortion animation 0x10: jump along an arc to the center of the unit's own
+ * map tile, darkened for the first part of the flight.
+ *
+ * Phase 0 computes the arc as distortion_jump_to_own_tile does,
+ * hides the shadow, selects quarter-add blending and starts
+ * a palette modulation of -31 on each color component. Phase 1 flies until 4
+ * frames remain (the threshold kept in distortion_target), then restores the
+ * palette. Phase 2 flies the remaining frames and stops the horizontal motion.
+ * Phase 3 falls to the ground, snaps the unit to the tile, shows the shadow,
+ * clears UNIT_STATUS_JUMP_HEIGHT_ACTIVE and the semi-transparency bit, and
+ * ends the animation. */
+static s32 distortion_jump_to_own_tile_faded(map_unit_t* unit) {
+    /* Unreferenced 8-byte frame slot below the target point, like the one in
+     * distortion_jump_to_own_tile; it puts `target` at sp+0x20. */
+    SVECTOR unused_18;
+    SVECTOR target;
+    VECTOR velocity;
+    s32 timer;
+    s32 threshold;
+
+    timer = unit->distortion_timer;
+    threshold = unit->distortion_target;
+    velocity = unit->velocity;
+    switch (unit->distortion_phase) {
+    case 0:
+        target.vx = unit->map_x * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
+        target.vz = unit->map_y * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
+        target.vy = map_unit_calculate_height_from_tile(unit);
+        timer = calculate_jump_arc_velocity(&unit->world_coords, &target, &velocity);
+        unit->shadow_graphic_trigger = 0;
+        unit->sprite_display_flags |= SPRITE_DISPLAY_BLEND_ADD_QUARTER | SPRITE_DISPLAY_SEMI_TRANSPARENT;
+        sprite_palette_apply_modulation_to_units(MAP_COLOR_MODE_BASE, 1, unit->map_unit_id, -31, -31, -31);
+        threshold = 4;
+        unit->distortion_phase++;
+    case 1:
+        if (timer > threshold) {
+            unit->real.vx += velocity.vx;
+            unit->real.vy += velocity.vy;
+            unit->real.vz += velocity.vz;
+            velocity.vy += g_move_jump_gravity;
+        } else {
+            sprite_palette_apply_modulation_to_units(MAP_COLOR_MODE_RESTORE, 1, unit->map_unit_id, 0, 0, 0);
+            unit->distortion_phase++;
+        }
+        timer--;
+        break;
+    case 2:
+        if (timer > 0) {
+            unit->real.vx += velocity.vx;
+            unit->real.vy += velocity.vy;
+            unit->real.vz += velocity.vz;
+            velocity.vy += g_move_jump_gravity;
+        } else {
+            velocity.vz = 0;
+            velocity.vx = 0;
+            unit->distortion_phase++;
+        }
+        timer--;
+        break;
+    case 3:
+        vector_set_short(&target, unit->map_x * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2), 0,
+            unit->map_y * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2));
+        target.vy = map_unit_calculate_height_from_world_coords(unit);
+        if (unit->world_coords.vy < target.vy) {
+            unit->real.vy += velocity.vy;
+            velocity.vy += g_move_jump_gravity;
+        } else {
+            set_real_coords_from_map_coords(unit);
+            unit->shadow_graphic_trigger = 1;
+            unit->status_flags_5_6 &= ~UNIT_STATUS_JUMP_HEIGHT_ACTIVE;
+            unit->distortion_animation_id = ANIMATION_DISTORTION_NONE;
+            unit->sprite_display_flags &= ~SPRITE_DISPLAY_SEMI_TRANSPARENT;
+        }
+        break;
+    }
+    unit->velocity = velocity;
+    map_unit_set_world_coords_from_real_coords(unit);
+    unit->distortion_timer = timer;
+    unit->distortion_target = threshold;
+}
+
+/*
+ * Distortion animation 0x11: launch a unit upward during a jump landing.
+ *
+ * Like distortion_jump_takeoff, phase 0 picks a rise speed of
+ * sqrt(2 * gravity * (0x120 - ground y)) and a frame count, and phase 1
+ * applies it to the height, decelerating by g_move_jump_gravity. Here phase 0 also
+ * plays the jump sound, and ends the animation at once when the unit is already
+ * at or above 0x120 over the ground; the end of phase 1 only clears the animation id.
+ */
+static s32 distortion_jump_rise(map_unit_t* unit) {
+    VECTOR unused_10;
+    VECTOR velocity;
+    s32 timer = unit->distortion_timer;
+    s32 height;
+    s32 speed;
+
+    velocity = unit->velocity;
+    switch (unit->distortion_phase) {
+    case 0:
+        height = -map_unit_calculate_height_from_world_coords(unit) + 0x120;
+        unit->status_flags_5_6 |= UNIT_STATUS_JUMP_HEIGHT_ACTIVE;
+        if (-unit->world_coords.vy >= height) {
+            unit->distortion_animation_id = ANIMATION_DISTORTION_NONE;
+            break;
+        }
+        speed = SquareRoot12(height * g_move_jump_gravity * 2);
+        timer = speed / g_move_jump_gravity;
+        velocity.vy = -speed;
+        init_afterimage(unit);
+        map_unit_play_sfx(unit, SOUND_SFX_JUMP);
+        unit->distortion_phase++;
+    case 1:
+        if (timer > 0) {
+            unit->real.vy += velocity.vy;
+            velocity.vy += g_move_jump_gravity;
+        } else {
+            unit->distortion_animation_id = ANIMATION_DISTORTION_NONE;
+        }
+        timer--;
+        break;
+    }
+    unit->velocity = velocity;
+    map_unit_set_world_coords_from_real_coords(unit);
+    unit->distortion_timer = timer;
+}
+
+/* Run one frame of the unit's distortion animation from
+ * s_distortion_handlers. An id past the table reports
+ * SYSTEM_ERROR_DISTORTION_ANIMATION. */
+static void dispatch_distortion(map_unit_t* unit) {
+    u32 distortion_id = unit->distortion_animation_id;
+
+    if (distortion_id != ANIMATION_DISTORTION_NONE) {
+        if (distortion_id < ANIMATION_DISTORTION_COUNT) {
+            s_distortion_handlers[distortion_id](unit);
+        } else {
+            system_handle_error(SYSTEM_ERROR_DISTORTION_ANIMATION);
+        }
+    }
 }

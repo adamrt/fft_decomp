@@ -248,7 +248,7 @@ void status_queue_current_graphics(s32 battle_unit_id, s32 change_type);
 
 /* status bubbles */
 /* map_unit_t.status_bubble_id: the bubbles the code names. The others follow the statuses of
- * g_status_bubble_status_masks. */
+ * s_status_bubble_status_masks. */
 typedef enum status_bubble {
     STATUS_BUBBLE_DEAD = 0, /* the death counter, or the RERAISE image under Reraise */
     STATUS_BUBBLE_CHARGING = 9,

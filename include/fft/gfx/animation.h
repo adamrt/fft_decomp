@@ -60,7 +60,7 @@ typedef enum animation_seq_opcode {
     ANIMATION_SEQ_OPCODE_CLEAR_ROTATION = 0xdf,
     ANIMATION_SEQ_OPCODE_HIDE_SHADOW = 0xe0,
     ANIMATION_SEQ_OPCODE_SHOW_SHADOW = 0xe1,
-    ANIMATION_SEQ_OPCODE_SET_LAYER_PRIORITY = 0xe2, /* row of g_animation_layer_priorities */
+    ANIMATION_SEQ_OPCODE_SET_LAYER_PRIORITY = 0xe2, /* row of s_animation_layer_priorities */
     ANIMATION_SEQ_OPCODE_UNKNOWN_E3 = 0xe3,         /* one operand */
     ANIMATION_SEQ_OPCODE_UNKNOWN_E4 = 0xe4,         /* one operand */
     ANIMATION_SEQ_OPCODE_SET_ROTATION = 0xe5,       /* low byte, high byte: the display's rotation, ONE to the turn */
@@ -238,7 +238,7 @@ void animation_update_status_changes(struct map_unit* unit);
 /* One row of the ability animation table, indexed by ability id: the ability's charge animation
  * set, its attack animation and the message shown when it hits. */
 typedef struct animation_ability_data {
-    u8 charge_animation_set_id; /* row of g_animation_ability_charge_sets */
+    u8 charge_animation_set_id; /* row of s_animation_ability_charge_sets */
     u8 attack_animation;        /* animation_e, or ANIMATION_ATTACK_USE_WEAPON or _USE_ITEM */
     u8 text_display; /* low byte of the message text id (0x1800 | this) shown when the ability hits; 0 none */
 } animation_ability_data_t;
@@ -259,7 +259,7 @@ void animation_select_weapon_attack(struct map_unit* attacker, struct map_unit* 
 
 /* distortions */
 /* map_unit_t.distortion_animation_id: the motion that
- * animation_dispatch_distortion steps once an animation frame
+ * dispatch_distortion steps once an animation frame
  * until its handler clears the id. ANIMATION_SEQ_OPCODE_START_DISTORTION gives the
  * id less 2 and, for most, the frames it takes (distortion_timer). */
 typedef enum animation_distortion {
@@ -282,7 +282,5 @@ typedef enum animation_distortion {
     ANIMATION_DISTORTION_JUMP_TO_OWN_TILE_FADED = 16, /* 7, blended, and dark until four frames remain */
     ANIMATION_DISTORTION_JUMP_RISE = 17               /* 12 with the jump sound, unless the unit is that high already */
 } animation_distortion_e;
-
-void animation_dispatch_distortion(struct map_unit* unit);
 
 #endif

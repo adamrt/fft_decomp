@@ -86,7 +86,7 @@ void effect_secondary_remove(u8 id);
 /* animations */
 /* Index into g_effect_secondary_animations: the secondary effects resident in BATTLE.BIN. Those
  * the code does not start by number come from two tables: the weapon type's projectile
- * (s_weapon_projectile_animations) and the ability's charge animation set
+ * (g_weapon_projectile_animations) and the ability's charge animation set
  * (g_effect_secondary_by_charge_animation). */
 typedef enum effect_secondary_animation_id {
     EFFECT_SECONDARY_ANIMATION_NONE = 0,

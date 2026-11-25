@@ -50,7 +50,7 @@ struct map_unit {
      * Read-modify-written as a 16-bit value over
      * 0x012..0x013 (sprite_update_transparency). */
     u16 sprite_display_flags; /* 0x012 */
-    /* 0x014; ANIMATION_SEQ_OPCODE_SET_LAYER_PRIORITY: the row of g_animation_layer_priorities. */
+    /* 0x014; ANIMATION_SEQ_OPCODE_SET_LAYER_PRIORITY: the row of s_animation_layer_priorities. */
     u16 layer_priority;
     u8 _padding_016[2]; /* aligns real */
     VECTOR real;        /* 0x018; world coordinates in 20.12 */
@@ -188,10 +188,10 @@ struct map_unit {
     u16 status_bubble_alternate_row;         /* 0x2e2; non-zero selects the second texture row */
     sprite_display_t* status_bubble_display; /* 0x2e4 */
     /* 0x2e8; enables the six-copy position trail seeded by
-     * sprite_afterimage_init. */
+     * init_afterimage. */
     u32 position_copies_active;
     /* Six past draw positions of the afterimage trail, newest first (0x2ec);
-     * sprite_afterimage_init seeds all six from world_coords. */
+     * init_afterimage seeds all six from world_coords. */
     SVECTOR position_copies[6]; /* 0x2ec..0x31b */
     /* Fixed sprite-display storage; API pointers address each header. */
     sprite_unit_display_t unit_sprite_display;                 /* 0x31c; 8 parts */
@@ -365,7 +365,6 @@ s16 map_unit_get_camera_facing_quadrant_by_battle_unit_id(u32 battle_unit_id);
 s32 map_unit_get_facing_sixteenth(u32 map_unit_id);
 s32 map_unit_set_facing_sixteenth(u32 map_unit_id, s32 facing_nibble);
 void map_unit_facing_snap_to_quadrants(void);
-void map_unit_facing_draw_wait_arrows(SVECTOR* vector, u32* ot);
 void map_unit_facing_draw_wait_direction(void);
 void map_unit_set_event_facing(s32 map_unit_id, s32 facing);
 s32 map_unit_is_facing_away_from_camera_by_event_unit_id(s32 event_unit_id);
@@ -393,7 +392,6 @@ void map_unit_clear_palette_update_suppression(u32 map_unit_id);
 extern SVECTOR g_unit_scratch_coords; /* a unit's map coordinates or projected screen position */
 
 SVECTOR* map_unit_get_world_coords(u32 map_unit_id);
-void map_unit_set_real_coords_from_world_coords(struct map_unit* unit);
 void map_unit_set_world_coords_from_real_coords(struct map_unit* unit);
 void map_unit_set_move_and_world_coords(map_unit_t* unit);
 s32 map_unit_get_map_coords(u32 map_unit_id, SVECTOR* coords);

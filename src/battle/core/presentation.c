@@ -22,12 +22,8 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-/* Projectile secondary animation of each weapon item type: BOW_ARROW for bows, CROSSBOW_BOLT for
- * crossbows, NONE for the rest. */
-static u8 s_weapon_projectile_animations[32]
-    = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-
-extern const u32 g_status_mask_by_handler_index[STATUS_COUNT + 1];
+extern u8 g_weapon_projectile_animations[32];
+extern u32 g_status_mask_by_handler_index[STATUS_COUNT + 1];
 
 /* Fill an init record for a secondary effect that one unit both casts and
  * receives: the caster and the single target are the unit. Every other field of
@@ -127,7 +123,7 @@ void effect_secondary_start_projectile(map_unit_t* unit) {
         animation_id = EFFECT_SECONDARY_ANIMATION_THROWN_ITEM;
         if (ability_id != ABILITY_ID_THROW_SHURIKEN
             && (u32)(unit->used_ability_id - ABILITY_ID_ITEM_FIRST) >= ABILITY_ID_JUMP_FIRST - ABILITY_ID_ITEM_FIRST) {
-            animation_id = s_weapon_projectile_animations[unit->equipped_weapon_type];
+            animation_id = g_weapon_projectile_animations[unit->equipped_weapon_type];
         }
     }
     effect_secondary_init_projectile(animation_id, &secondary_init);

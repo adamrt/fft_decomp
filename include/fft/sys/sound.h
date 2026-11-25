@@ -80,9 +80,9 @@ typedef enum sound_sfx {
     SOUND_SFX_CAMERA_ZOOM_OUT = 17,
     SOUND_SFX_WINDOW_OPEN = 18, /* help, message or text window opens */
     /* The weapon sounds of action_play_weapon_sfx, by the weapon's
-     * item_type_e: g_action_weapon_swing_sfx_ids (the swing, played
-     * before the hit is known), g_action_weapon_hit_sfx_ids and
-     * g_action_shield_deflect_sfx_ids. */
+     * item_type_e: s_action_weapon_swing_sfx_ids (the swing, played
+     * before the hit is known), s_action_weapon_hit_sfx_ids and
+     * s_action_shield_deflect_sfx_ids. */
     SOUND_SFX_HIT_BLADE = 19,    /* knife, ninja blade, sword, knight sword, katana */
     SOUND_SFX_HIT_HEAVY = 21,    /* axe, flail; also the deflect of a fist, bag or cloth */
     SOUND_SFX_HIT_UNARMED = 24,  /* fist, bag, cloth */
