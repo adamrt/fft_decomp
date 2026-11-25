@@ -315,10 +315,10 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   `ABILITY_ID_ITEM_FIRST`.
 - `reaction_prepare_next`: Counter Tackle performs Dash under the
   Black Magic skillset, the skillset Counter Magic passes.
-- `formula_element_apply`: Oil on a fire-element action doubles XA
+- `apply_element`: Oil on a fire-element action doubles XA
   after every caller has stored the HP damage, and nothing reads XA again: Oil
   is removed and the damage is unchanged. The weapon-element path
-  (`formula_element_modify_weapon_damage`) does not test Oil at all.
+  (`modify_weapon_damage_by_element`) does not test Oil at all.
 - `proposition_determine_success`: the level score is
   read from the bravery scores (proposition data record 5, three rows of
   five) with a ten-entry stride, so it runs on into the faith scores (record
@@ -364,7 +364,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   `init_pathfind_work` copies 64 and keeps 0xff.
 - `formula_healing_staff` (formula 0x07, the Healing Staff) applies
   zodiac compatibility twice, once itself and once inside
-  `formula_apply_physical_modifiers`, whose Defense
+  `apply_physical_modifiers`, whose Defense
   Up and Protect steps also cut the healing to two thirds.
 - `formula_please_eat` (formula 0x57,
   Please Eat) stores a full HP and MP heal (max-HP damage for an undead
@@ -450,8 +450,8 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   movement code sets gates nothing.
 - `formula_holy_sword` (formula 0x2D, Holy Sword)
   runs Strengthen and the target's affinities on the weapon's elements only
-  (`formula_element_apply_weapon_strengthen`,
-  `formula_element_modify_weapon_damage`): the Holy element in the range data
+  (`apply_weapon_element_strengthen`,
+  `modify_weapon_damage_by_element`): the Holy element in the range data
   of the five Holy Sword abilities (0x9b-0x9f; 0x9e adds Lightning) is never
   applied.
 - Half of MP: `skillset_build_ability_lists` lists the halved
@@ -503,7 +503,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
 - `status_queue_display_flag_change`: removing Crystal shares
   the Chicken case, so it queues the Chicken display bit for removal and leaves
   the Crystal bit set.
-- `formula_apply_zodiac_compatibility` returns early when either unit is
+- `apply_zodiac_compatibility` returns early when either unit is
   Serpentarius, skipping the floor of 1 at its end: an XA already cut to 0 (a
   Frog's XA of 1 against Defense Up or Protect) stays 0, and the hit deals 0
   damage where any other sign pair deals 1 * YA.
@@ -1037,7 +1037,7 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
   `level_bonus_money` ((highest enemy level - lowest party level) * 100, 0
   once a player unit has fallen) and nothing reads it; REQUIRE pays
   `level_sum_money` and `bonus_money`.
-- `formula_evade_apply_weather_on_bows` reads the weather variable
+- `apply_weather_to_bow_evade` reads the weather variable
   itself, not `weather_get_effective`: the bow penalty of a storm
   also applies on a snow map and on a map flagged to ignore weather, where the
   elemental and movement rules see no storm.
@@ -1154,7 +1154,7 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
 - `wait_hardware_event` is OPEN's only caller of
   `poll_hardware_event`, and nothing calls the wait routine.
 - MAIN's Orbonne caption fades have no callers. `set_up_caption_display`
-  is called only by `new_game_fade_in_caption`, so it is unreachable too.
+  is called only by `fade_in_caption`, so it is unreachable too.
 - `suzuki_sound_set_unread_value` stores a halfword in main RAM at `0x80032a28`;
   initialization and shutdown clear it. Original-code references identify only
   stores, and the traced SPU transfer paths do not send it to sound RAM. No reader
@@ -1195,7 +1195,7 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
 - `effect_secondary_start_projectile` tests Throw Shuriken (382)
   on its own before the Item/Throw range 368-393, which already contains it.
 - `formula_steal_exp` (formula 0x28) calls
-  `formula_set_exp_stolen` after a failed hit test whenever the action
+  `set_exp_stolen` after a failed hit test whenever the action
   is not executing; outside execution only a 0% chance misses, so the preview
   shows 0% with an EXP amount. Formula 0x27 (steal gil) fills nothing then.
 - `effect_emitter_spawn_particles`: an emitter with no velocity-spread

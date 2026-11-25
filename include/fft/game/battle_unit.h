@@ -451,9 +451,9 @@ typedef struct action_data {
     u16 last_received_attack;                    /* 0x26; reaction data, varies by ability */
     u8 exp_change;                               /* 0x28; Steal EXP */
     u8 jp_change;                                /* 0x29; Move-JP Up / JP stolen */
-    /* Written as a 16-bit value everywhere (formula_apply_status_keeping_hit lhu/sh,
-     * try_arrow_guard, reaction_try_catch,
-     * formula_force_attack_miss). */
+    /* Written as a 16-bit value everywhere (apply_status_keeping_hit lhu/sh,
+     * try_arrow_guard, try_catch,
+     * force_attack_miss). */
     s16 attack_accuracy; /* 0x2a */
 } action_data_t;
 typedef char action_data_size_must_be_44[(sizeof(action_data_t) == 44) ? 1 : -1];

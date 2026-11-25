@@ -125,9 +125,9 @@ static int draw_squaresoft_logo(u32* otag, u32* image) {
  *
  * A full-screen subtractive quad steps from 248 to 0 in 32 frames while
  * draw_squaresoft_logo uploads the logo each frame. The logo stays on
- * screen while the caller loads its files; boot_fade_out_squaresoft_logo
+ * screen while the caller loads its files; fade_out_squaresoft_logo
  * removes it. */
-static void boot_fade_in_squaresoft_logo(void) {
+static void fade_in_squaresoft_logo(void) {
     POLY_F4 polygons[2];
     DR_MODE draw_modes[2];
     u32 otags[2][2];
@@ -176,10 +176,10 @@ static void boot_fade_in_squaresoft_logo(void) {
     DrawSync(0);
 }
 
-/* Fade out the Squaresoft logo that boot_fade_in_squaresoft_logo left
+/* Fade out the Squaresoft logo that fade_in_squaresoft_logo left
  * on screen: the subtractive quad steps from 0 to 255 in 32 frames, then both
  * display buffers are cleared. */
-static void boot_fade_out_squaresoft_logo(void) {
+static void fade_out_squaresoft_logo(void) {
     POLY_F4 polygons[2];
     DR_MODE draw_modes[2];
     u32 otags[2][2];
@@ -256,7 +256,7 @@ static int draw_sceap_logo(u32* otag, u32* image) {
  * the strip in over 32 frames, it stays for 180 frames, and the same quad fades
  * it out over 32; each frame uploads the image again through
  * draw_sceap_logo. Both display buffers are cleared before and after. */
-static void boot_show_sceap_logo(void) {
+static void show_sceap_logo(void) {
     POLY_F4 polygons[2];
     DR_MODE draw_modes[2];
     u32 otags[2][2];
@@ -331,7 +331,7 @@ static void boot_show_sceap_logo(void) {
  * Unlike set_up_display this also calls ResetGraph(0) and InitGeom, clears
  * the whole 1024x512 VRAM, loads the debug font at (640, 0) and opens a print
  * stream, and leaves background clearing off. The display stays masked. */
-static void gfx_reset_display(int width, int height, int projection, u8 red, u8 green, u8 blue) {
+static void reset_display(int width, int height, int projection, u8 red, u8 green, u8 blue) {
     RECT image_rect = { 0, 0, 1024, 512 };
     int second_y = height == 480 ? 0 : 240;
 
@@ -412,14 +412,14 @@ void boot_run_startup(void) {
     PadInit(0);
     SpuInit();
     init_memory_and_cd();
-    gfx_reset_display(256, 240, 512, 0, 0, 0);
-    boot_show_sceap_logo();
-    boot_fade_in_squaresoft_logo();
+    reset_display(256, 240, 512, 0, 0, 0);
+    show_sceap_logo();
+    fade_in_squaresoft_logo();
     memcard_init_events();
     sound_init();
     gfx_load_zodiac_and_frame_textures();
     srand(1);
-    boot_fade_out_squaresoft_logo();
+    fade_out_squaresoft_logo();
     s_session_initialized = 0;
 }
 
@@ -447,8 +447,8 @@ void boot_reset_session(void) {
         SetGraphDebug(0);
         SpuInitHot();
         init_memory_and_cd();
-        gfx_reset_display(256, 240, 512, 0, 0, 0);
-        boot_fade_in_squaresoft_logo();
+        reset_display(256, 240, 512, 0, 0, 0);
+        fade_in_squaresoft_logo();
         sound_init();
         gfx_load_zodiac_and_frame_textures();
     }
@@ -462,7 +462,7 @@ void boot_reset_session(void) {
         for (frame = 0; frame < 60; frame++) {
             VSync(0);
         }
-        boot_fade_out_squaresoft_logo();
+        fade_out_squaresoft_logo();
     }
 
     s_session_initialized = 1;
@@ -679,8 +679,8 @@ static int present_caption_frame(u32* otag) {
  * The strip is the texture at VRAM (896, 256) with its CLUT at (896, 287), drawn
  * at y 116. A full-screen subtractive quad steps from 248 to 0 in 32 frames, each
  * presented with present_caption_frame. No function in the tree calls this
- * routine or new_game_fade_out_caption. */
-static void new_game_fade_in_caption(void) {
+ * routine or fade_out_caption. */
+static void fade_in_caption(void) {
     POLY_F4 fade_polygons[2];
     DR_MODE draw_modes[2];
     POLY_FT4 title_polygons[2];
@@ -734,10 +734,10 @@ static void new_game_fade_in_caption(void) {
     DrawSync(0);
 }
 
-/* Fade out the caption strip new_game_fade_in_caption shows: the
+/* Fade out the caption strip fade_in_caption shows: the
  * subtractive quad steps from 0 to 255 in 32 frames over the same strip, then
  * both display buffers are cleared. */
-static void new_game_fade_out_caption(void) {
+static void fade_out_caption(void) {
     POLY_F4 fade_polygons[2];
     DR_MODE draw_modes[2];
     POLY_FT4 title_polygons[2];

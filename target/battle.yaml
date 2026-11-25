@@ -1369,62 +1369,62 @@ functions:
   - {addr: 0x8018401c, size: 304, name: map_get_tile_value, hash: 76b2083e858cf6dd, unit: terrain_data, rodata: [{addr: 0x801741c4, size: 56, hash: a9baa9062de74326}]}
   - {addr: 0x8018414c, size: 428, name: map_set_tile_value, hash: 53353ae1a060082b, unit: terrain_data, rodata: [{addr: 0x801741fc, size: 64, hash: 3be3de88e710441d}]}
   - {addr: 0x801842f8, size: 20, name: tile_selector_15_stub, hash: def2f9c06f5203fb, unit: terrain_data}
-  - {addr: 0x8018430c, size: 48, name: formula_force_attack_miss, hash: c4a705e8091a8683, unit: formulas}
-  - {addr: 0x8018433c, size: 36, name: formula_cause_accuracy_miss, hash: 0c3f4b4ac3a1aa90, unit: formulas}
-  - {addr: 0x80184360, size: 140, name: formula_calculate_dance_song_hit, hash: 2f58bba7c54f0b89, unit: formulas}
+  - {addr: 0x8018430c, size: 48, name: force_attack_miss, hash: c4a705e8091a8683, unit: formulas}
+  - {addr: 0x8018433c, size: 36, name: cause_accuracy_miss, hash: 0c3f4b4ac3a1aa90, unit: formulas}
+  - {addr: 0x80184360, size: 140, name: calculate_dance_song_hit, hash: 2f58bba7c54f0b89, unit: formulas}
   - {addr: 0x801843ec, size: 548, name: calculate_knockback, hash: 30c933b534bf5a2b, unit: formulas}
   - {addr: 0x80184610, size: 712, name: check_knockback_destination, hash: fb9351b2bfdb7550, unit: formulas}
   - {addr: 0x801848d8, size: 140, name: roll_evade_source, hash: c21cf5ca5200fff7, unit: formulas}
-  - {addr: 0x80184964, size: 448, name: formula_apply_zodiac_compatibility, hash: aa5ea5e4e7c4fa1d, unit: formulas}
+  - {addr: 0x80184964, size: 448, name: apply_zodiac_compatibility, hash: aa5ea5e4e7c4fa1d, unit: formulas}
   - {addr: 0x80184b24, size: 796, name: status_filter_action_changes, hash: d22a41e561e729ae, unit: formulas}
-  - {addr: 0x80184e40, size: 88, name: formula_nullify_action, hash: fe97cf5fa8c71c21, unit: formulas}
-  - {addr: 0x80184e98, size: 260, name: formula_element_modify_damage, hash: 1246bf9fcb0de648, unit: formulas}
-  - {addr: 0x80184f9c, size: 552, name: formula_evade_store_physical, hash: b4852851b6e3d787, unit: formulas}
-  - {addr: 0x801851c4, size: 288, name: formula_evade_store_magical, hash: ecf9ae84a056565b, unit: formulas}
-  - {addr: 0x801852e4, size: 68, name: formula_evade_calculate_concentrate, hash: 8a5a6c0b912bc4d1, unit: formulas}
-  - {addr: 0x80185328, size: 84, name: formula_evade_apply_attacker_statuses, hash: 66c41e35a521cc9b, unit: formulas}
-  - {addr: 0x8018537c, size: 120, name: formula_evade_calculate_abandon, hash: ff057cb71911fc57, unit: formulas}
-  - {addr: 0x801853f4, size: 196, name: formula_evade_apply_target_statuses, hash: aa4c9ed601451a65, unit: formulas}
-  - {addr: 0x801854b8, size: 68, name: formula_evade_calculate_transparent, hash: 489fdeb4ffbe21c3, unit: formulas}
-  - {addr: 0x801854fc, size: 572, name: formula_evade_calculate_facing, hash: d2c4d82cf86f4164, unit: formulas}
-  - {addr: 0x80185738, size: 220, name: formula_evade_apply_weather_on_bows, hash: 1eedac1b37df2963, unit: formulas}
-  - {addr: 0x80185814, size: 648, name: formula_evade_roll_sources, hash: 2ff06e9ffaebf73a, unit: formulas}
-  - {addr: 0x80185a9c, size: 504, name: formula_store_weapon_xa_ya, hash: b7b2ba194698b07f, unit: formulas}
-  - {addr: 0x80185c94, size: 44, name: formula_store_ma_and_y, hash: 32cecab95be18a46, unit: formulas}
-  - {addr: 0x80185cc0, size: 64, name: formula_store_ma_and_ma_plus_y_divided_by_two, hash: 1867f4f17426186c, unit: formulas}
-  - {addr: 0x80185d00, size: 64, name: formula_store_pa_and_pa_plus_y_divided_by_two, hash: e17f0954220a1fd8, unit: formulas}
-  - {addr: 0x80185d40, size: 64, name: formula_store_ma_and_pa_plus_y_divided_by_two, hash: 34ea33daee3651a4, unit: formulas}
-  - {addr: 0x80185d80, size: 44, name: formula_store_ma_and_x, hash: 239ad38d0e6cedd6, unit: formulas}
-  - {addr: 0x80185dac, size: 44, name: formula_store_pa_and_x, hash: e64c8b9f251e63b2, unit: formulas}
-  - {addr: 0x80185dd8, size: 44, name: formula_store_pa_and_weapon_power, hash: f421c85cf5eba3d1, unit: formulas}
-  - {addr: 0x80185e04, size: 44, name: formula_store_pa_and_y, hash: 7ba84ad18ea383b1, unit: formulas}
-  - {addr: 0x80185e30, size: 44, name: formula_store_speed_and_x, hash: 73530a6af0c8af8b, unit: formulas}
-  - {addr: 0x80185e5c, size: 56, name: formula_store_pa_and_weapon_power_plus_y, hash: 662e9a93d98aa342, unit: formulas}
-  - {addr: 0x80185e94, size: 236, name: formula_store_jump_xa_ya, hash: 434d5ef331229ed1, unit: formulas}
-  - {addr: 0x80185f80, size: 36, name: formula_apply_charge, hash: 6002cec17e1cc620, unit: formulas}
-  - {addr: 0x80185fa4, size: 88, name: formula_element_apply_weapon_strengthen, hash: 0fb240f00ad442b6, unit: formulas}
-  - {addr: 0x80185ffc, size: 88, name: formula_element_apply_strengthen, hash: 42b74312c13089c9, unit: formulas}
-  - {addr: 0x80186054, size: 248, name: formula_apply_physical_attack_supports, hash: 9f1bdc4db989d39e, unit: formulas}
-  - {addr: 0x8018614c, size: 184, name: formula_apply_attack_up_and_martial_arts, hash: 9c71bf82b11e6870, unit: formulas}
-  - {addr: 0x80186204, size: 80, name: formula_apply_magic_attack_up, hash: 256e8af77b4efc2b, unit: formulas}
-  - {addr: 0x80186254, size: 120, name: formula_apply_attacker_berserk_frog, hash: a5d19d83f13e0134, unit: formulas}
-  - {addr: 0x801862cc, size: 80, name: formula_apply_defense_up, hash: cd923631fb51ae4f, unit: formulas}
-  - {addr: 0x8018631c, size: 80, name: formula_apply_magic_defense_up, hash: d646624806446ce9, unit: formulas}
-  - {addr: 0x8018636c, size: 244, name: formula_apply_target_physical_statuses, hash: 41852b76fb8cb161, unit: formulas}
-  - {addr: 0x80186460, size: 152, name: formula_apply_target_magical_statuses, hash: 777ebb62be386114, unit: formulas}
-  - {addr: 0x801864f8, size: 112, name: formula_calculate_critical_hit, hash: 7f045fae78343d45, unit: formulas}
-  - {addr: 0x80186568, size: 52, name: formula_store_xa_times_ya_damage, hash: 3884ac2eca3872d3, unit: formulas}
-  - {addr: 0x8018659c, size: 136, name: formula_store_xa_plus_ya, hash: 34f74861bb791ce1, unit: formulas}
-  - {addr: 0x80186624, size: 104, name: formula_calculate_hp_percent_damage, hash: fbd9033b617345a3, unit: formulas}
-  - {addr: 0x8018668c, size: 96, name: formula_calculate_mp_percent_damage, hash: 35af0565285d2fd6, unit: formulas}
-  - {addr: 0x801866ec, size: 88, name: formula_calculate_damage_leaving_one_hp, hash: 6804086c15a9d8a2, unit: formulas}
-  - {addr: 0x80186744, size: 208, name: formula_calculate_stolen_gil, hash: 562507cf4ddf1b15, unit: formulas}
-  - {addr: 0x80186814, size: 220, name: formula_set_exp_stolen, hash: e5c15126b58064e7, unit: formulas}
+  - {addr: 0x80184e40, size: 88, name: nullify_action, hash: fe97cf5fa8c71c21, unit: formulas}
+  - {addr: 0x80184e98, size: 260, name: modify_damage_by_element, hash: 1246bf9fcb0de648, unit: formulas}
+  - {addr: 0x80184f9c, size: 552, name: store_physical_evade, hash: b4852851b6e3d787, unit: formulas}
+  - {addr: 0x801851c4, size: 288, name: store_magical_evade, hash: ecf9ae84a056565b, unit: formulas}
+  - {addr: 0x801852e4, size: 68, name: calculate_concentrate_evade, hash: 8a5a6c0b912bc4d1, unit: formulas}
+  - {addr: 0x80185328, size: 84, name: apply_attacker_statuses_to_evade, hash: 66c41e35a521cc9b, unit: formulas}
+  - {addr: 0x8018537c, size: 120, name: calculate_abandon_evade, hash: ff057cb71911fc57, unit: formulas}
+  - {addr: 0x801853f4, size: 196, name: apply_target_statuses_to_evade, hash: aa4c9ed601451a65, unit: formulas}
+  - {addr: 0x801854b8, size: 68, name: calculate_transparent_evade, hash: 489fdeb4ffbe21c3, unit: formulas}
+  - {addr: 0x801854fc, size: 572, name: calculate_facing_evade, hash: d2c4d82cf86f4164, unit: formulas}
+  - {addr: 0x80185738, size: 220, name: apply_weather_to_bow_evade, hash: 1eedac1b37df2963, unit: formulas}
+  - {addr: 0x80185814, size: 648, name: roll_evade_sources, hash: 2ff06e9ffaebf73a, unit: formulas}
+  - {addr: 0x80185a9c, size: 504, name: store_weapon_xa_ya, hash: b7b2ba194698b07f, unit: formulas}
+  - {addr: 0x80185c94, size: 44, name: store_ma_and_y, hash: 32cecab95be18a46, unit: formulas}
+  - {addr: 0x80185cc0, size: 64, name: store_ma_and_ma_plus_y_divided_by_two, hash: 1867f4f17426186c, unit: formulas}
+  - {addr: 0x80185d00, size: 64, name: store_pa_and_pa_plus_y_divided_by_two, hash: e17f0954220a1fd8, unit: formulas}
+  - {addr: 0x80185d40, size: 64, name: store_ma_and_pa_plus_y_divided_by_two, hash: 34ea33daee3651a4, unit: formulas}
+  - {addr: 0x80185d80, size: 44, name: store_ma_and_x, hash: 239ad38d0e6cedd6, unit: formulas}
+  - {addr: 0x80185dac, size: 44, name: store_pa_and_x, hash: e64c8b9f251e63b2, unit: formulas}
+  - {addr: 0x80185dd8, size: 44, name: store_pa_and_weapon_power, hash: f421c85cf5eba3d1, unit: formulas}
+  - {addr: 0x80185e04, size: 44, name: store_pa_and_y, hash: 7ba84ad18ea383b1, unit: formulas}
+  - {addr: 0x80185e30, size: 44, name: store_speed_and_x, hash: 73530a6af0c8af8b, unit: formulas}
+  - {addr: 0x80185e5c, size: 56, name: store_pa_and_weapon_power_plus_y, hash: 662e9a93d98aa342, unit: formulas}
+  - {addr: 0x80185e94, size: 236, name: store_jump_xa_ya, hash: 434d5ef331229ed1, unit: formulas}
+  - {addr: 0x80185f80, size: 36, name: apply_charge, hash: 6002cec17e1cc620, unit: formulas}
+  - {addr: 0x80185fa4, size: 88, name: apply_weapon_element_strengthen, hash: 0fb240f00ad442b6, unit: formulas}
+  - {addr: 0x80185ffc, size: 88, name: apply_element_strengthen, hash: 42b74312c13089c9, unit: formulas}
+  - {addr: 0x80186054, size: 248, name: apply_physical_attack_supports, hash: 9f1bdc4db989d39e, unit: formulas}
+  - {addr: 0x8018614c, size: 184, name: apply_attack_up_and_martial_arts, hash: 9c71bf82b11e6870, unit: formulas}
+  - {addr: 0x80186204, size: 80, name: apply_magic_attack_up, hash: 256e8af77b4efc2b, unit: formulas}
+  - {addr: 0x80186254, size: 120, name: apply_attacker_berserk_frog, hash: a5d19d83f13e0134, unit: formulas}
+  - {addr: 0x801862cc, size: 80, name: apply_defense_up, hash: cd923631fb51ae4f, unit: formulas}
+  - {addr: 0x8018631c, size: 80, name: apply_magic_defense_up, hash: d646624806446ce9, unit: formulas}
+  - {addr: 0x8018636c, size: 244, name: apply_target_physical_statuses, hash: 41852b76fb8cb161, unit: formulas}
+  - {addr: 0x80186460, size: 152, name: apply_target_magical_statuses, hash: 777ebb62be386114, unit: formulas}
+  - {addr: 0x801864f8, size: 112, name: calculate_critical_hit, hash: 7f045fae78343d45, unit: formulas}
+  - {addr: 0x80186568, size: 52, name: store_xa_times_ya_damage, hash: 3884ac2eca3872d3, unit: formulas}
+  - {addr: 0x8018659c, size: 136, name: store_xa_plus_ya, hash: 34f74861bb791ce1, unit: formulas}
+  - {addr: 0x80186624, size: 104, name: calculate_hp_percent_damage, hash: fbd9033b617345a3, unit: formulas}
+  - {addr: 0x8018668c, size: 96, name: calculate_mp_percent_damage, hash: 35af0565285d2fd6, unit: formulas}
+  - {addr: 0x801866ec, size: 88, name: calculate_damage_leaving_one_hp, hash: 6804086c15a9d8a2, unit: formulas}
+  - {addr: 0x80186744, size: 208, name: calculate_stolen_gil, hash: 562507cf4ddf1b15, unit: formulas}
+  - {addr: 0x80186814, size: 220, name: set_exp_stolen, hash: e5c15126b58064e7, unit: formulas}
   - {addr: 0x801868f0, size: 44, name: formula_add_pa_y, hash: 1c38bc686de761a1, unit: formulas}
-  - {addr: 0x8018691c, size: 208, name: formula_apply_damage_and_knockback, hash: ebe485c19957f75d, unit: formulas}
-  - {addr: 0x801869ec, size: 268, name: formula_apply_song_abilities, hash: 301a70fb7154fd40, unit: formulas, rodata: [{addr: 0x8017423c, size: 28, hash: 80e66fa8fd4b1cef}]}
-  - {addr: 0x80186af8, size: 268, name: formula_apply_dance_abilities, hash: c8b849f77b62eb0d, unit: formulas, rodata: [{addr: 0x8017425c, size: 28, hash: cd23e62c0d755c94}]}
-  - {addr: 0x80186c04, size: 252, name: formula_apply_talk_skill, hash: 10fdfa9a2ac61d52, unit: formulas, rodata: [{addr: 0x8017427c, size: 28, hash: 451f45e2c1aac03b}]}
+  - {addr: 0x8018691c, size: 208, name: apply_damage_and_knockback, hash: ebe485c19957f75d, unit: formulas}
+  - {addr: 0x801869ec, size: 268, name: apply_song_abilities, hash: 301a70fb7154fd40, unit: formulas, rodata: [{addr: 0x8017423c, size: 28, hash: 80e66fa8fd4b1cef}]}
+  - {addr: 0x80186af8, size: 268, name: apply_dance_abilities, hash: c8b849f77b62eb0d, unit: formulas, rodata: [{addr: 0x8017425c, size: 28, hash: cd23e62c0d755c94}]}
+  - {addr: 0x80186c04, size: 252, name: apply_talk_skill, hash: 10fdfa9a2ac61d52, unit: formulas, rodata: [{addr: 0x8017427c, size: 28, hash: 451f45e2c1aac03b}]}
   - {addr: 0x80186d00, size: 44, name: formula_cheer_up, hash: 3433e4c5554e8f14, unit: formulas}
   - {addr: 0x80186d2c, size: 44, name: formula_yell, hash: 0ef381316ef5960a, unit: formulas}
   - {addr: 0x80186d58, size: 100, name: formula_add_brave_x_stats_y, hash: d7807c6c0a050c65, unit: formulas}
@@ -1432,48 +1432,48 @@ functions:
   - {addr: 0x80186e28, size: 44, name: formula_damage_caster_missing_hp, hash: 0d8d7af56fb384dd, unit: formulas}
   - {addr: 0x80186e54, size: 36, name: formula_difference, hash: aa2fee3cf991a0ba, unit: formulas}
   - {addr: 0x80186e78, size: 44, name: formula_climhazzard, hash: aeec8464c74ad5c3, unit: formulas}
-  - {addr: 0x80186ea4, size: 44, name: formula_set_brave_loss_y, hash: c33db6df89772a17, unit: formulas}
-  - {addr: 0x80186ed0, size: 256, name: formula_element_apply_weather, hash: 67bc5f454dd4dcc6, unit: formulas}
-  - {addr: 0x80186fd0, size: 40, name: formula_element_modify_weapon_damage, hash: 0e63aead82382650, unit: formulas}
-  - {addr: 0x80186ff8, size: 260, name: formula_element_apply, hash: bcc5c45352ec9962, unit: formulas}
-  - {addr: 0x801870fc, size: 84, name: formula_element_apply_absorption, hash: a4da38a8c28fee60, unit: formulas}
-  - {addr: 0x80187150, size: 248, name: formula_calculate_faith, hash: 2ee629ef8667424d, unit: formulas}
-  - {addr: 0x80187248, size: 264, name: formula_apply_hp_absorption, hash: 12be881fecadca11, unit: formulas}
-  - {addr: 0x80187350, size: 136, name: formula_convert_hp_damage_to_healing, hash: 0c1d46bb9be220ea, unit: formulas}
-  - {addr: 0x801873d8, size: 148, name: formula_apply_undead_absorb_attack, hash: a23d869edab6196c, unit: formulas}
-  - {addr: 0x8018746c, size: 128, name: formula_apply_mp_absorption, hash: 6947e4ac0585ebc3, unit: formulas}
-  - {addr: 0x801874ec, size: 36, name: formula_convert_hp_damage_to_mp_recovery, hash: 69ecb124225604e2, unit: formulas}
-  - {addr: 0x80187510, size: 172, name: formula_use_hp_damage_as_action_hit_percent, hash: 628d00ea13c8754d, unit: formulas}
-  - {addr: 0x801875bc, size: 64, name: formula_force_non_dragon_target_miss, hash: cc2acf558a3f41f6, unit: formulas}
-  - {addr: 0x801875fc, size: 60, name: formula_force_sleeping_target_miss, hash: 5ec97cea4b65fa8a, unit: formulas}
-  - {addr: 0x80187638, size: 88, name: formula_apply_maintenance, hash: 8d2d3d3a288513d5, unit: formulas}
+  - {addr: 0x80186ea4, size: 44, name: set_brave_loss_y, hash: c33db6df89772a17, unit: formulas}
+  - {addr: 0x80186ed0, size: 256, name: apply_element_weather, hash: 67bc5f454dd4dcc6, unit: formulas}
+  - {addr: 0x80186fd0, size: 40, name: modify_weapon_damage_by_element, hash: 0e63aead82382650, unit: formulas}
+  - {addr: 0x80186ff8, size: 260, name: apply_element, hash: bcc5c45352ec9962, unit: formulas}
+  - {addr: 0x801870fc, size: 84, name: apply_element_absorption, hash: a4da38a8c28fee60, unit: formulas}
+  - {addr: 0x80187150, size: 248, name: calculate_faith, hash: 2ee629ef8667424d, unit: formulas}
+  - {addr: 0x80187248, size: 264, name: apply_hp_absorption, hash: 12be881fecadca11, unit: formulas}
+  - {addr: 0x80187350, size: 136, name: convert_hp_damage_to_healing, hash: 0c1d46bb9be220ea, unit: formulas}
+  - {addr: 0x801873d8, size: 148, name: apply_undead_absorb_attack, hash: a23d869edab6196c, unit: formulas}
+  - {addr: 0x8018746c, size: 128, name: apply_mp_absorption, hash: 6947e4ac0585ebc3, unit: formulas}
+  - {addr: 0x801874ec, size: 36, name: convert_hp_damage_to_mp_recovery, hash: 69ecb124225604e2, unit: formulas}
+  - {addr: 0x80187510, size: 172, name: use_hp_damage_as_action_hit_percent, hash: 628d00ea13c8754d, unit: formulas}
+  - {addr: 0x801875bc, size: 64, name: force_non_dragon_target_miss, hash: cc2acf558a3f41f6, unit: formulas}
+  - {addr: 0x801875fc, size: 60, name: force_sleeping_target_miss, hash: 5ec97cea4b65fa8a, unit: formulas}
+  - {addr: 0x80187638, size: 88, name: apply_maintenance, hash: 8d2d3d3a288513d5, unit: formulas}
   - {addr: 0x80187690, size: 84, name: roll_added_effect, hash: 2af947cb8f431b6f, unit: formulas}
-  - {addr: 0x801876e4, size: 76, name: formula_queue_weapon_proc, hash: 710c34a1c7dc6f4f, unit: formulas}
-  - {addr: 0x80187730, size: 268, name: formula_select_magic_gun_ability, hash: d28f46ca3dc63488, unit: formulas}
-  - {addr: 0x8018783c, size: 36, name: formula_apply_quick_effect, hash: d44e57f5a3edf580, unit: formulas}
-  - {addr: 0x80187860, size: 176, name: formula_set_stat_reduction, hash: 206b4a18443e690b, unit: formulas}
-  - {addr: 0x80187910, size: 184, name: formula_calculate_katana_break, hash: a5e0f5599c12f8d8, unit: formulas}
-  - {addr: 0x801879c8, size: 728, name: formula_select_targeted_equipment, hash: 455287e6df9bfdfe, unit: formulas}
-  - {addr: 0x80187ca0, size: 532, name: formula_apply_poach_and_train, hash: c76a5a1a24eca582, unit: formulas}
-  - {addr: 0x80187eb4, size: 112, name: formula_apply_status_keeping_hit, hash: 7b84444a4587202b, unit: formulas}
+  - {addr: 0x801876e4, size: 76, name: queue_weapon_proc, hash: 710c34a1c7dc6f4f, unit: formulas}
+  - {addr: 0x80187730, size: 268, name: select_magic_gun_ability, hash: d28f46ca3dc63488, unit: formulas}
+  - {addr: 0x8018783c, size: 36, name: apply_quick_effect, hash: d44e57f5a3edf580, unit: formulas}
+  - {addr: 0x80187860, size: 176, name: set_stat_reduction, hash: 206b4a18443e690b, unit: formulas}
+  - {addr: 0x80187910, size: 184, name: calculate_katana_break, hash: a5e0f5599c12f8d8, unit: formulas}
+  - {addr: 0x801879c8, size: 728, name: select_targeted_equipment, hash: 455287e6df9bfdfe, unit: formulas}
+  - {addr: 0x80187ca0, size: 532, name: apply_poach_and_train, hash: c76a5a1a24eca582, unit: formulas}
+  - {addr: 0x80187eb4, size: 112, name: apply_status_keeping_hit, hash: 7b84444a4587202b, unit: formulas}
   - {addr: 0x80187f24, size: 868, name: formula_apply_status_to_action, hash: 55cb61c643335384, unit: formulas}
   - {addr: 0x80188288, size: 64, name: formula_ether, hash: b79a349fe6ac28dd, unit: formulas}
-  - {addr: 0x801882c8, size: 48, name: formula_apply_full_hp_mp_heal, hash: 609c4b69f8f3d928, unit: formulas}
-  - {addr: 0x801882f8, size: 180, name: reaction_try_finger_guard, hash: f08d19021384c308, unit: formulas}
-  - {addr: 0x801883ac, size: 220, name: reaction_try_catch, hash: 93b16a73f824bdfb, unit: formulas}
+  - {addr: 0x801882c8, size: 48, name: apply_full_hp_mp_heal, hash: 609c4b69f8f3d928, unit: formulas}
+  - {addr: 0x801882f8, size: 180, name: try_finger_guard, hash: f08d19021384c308, unit: formulas}
+  - {addr: 0x801883ac, size: 220, name: try_catch, hash: 93b16a73f824bdfb, unit: formulas}
   - {addr: 0x80188488, size: 56, name: roll_evade, hash: 4e6e56d3fbee1379, unit: formulas}
-  - {addr: 0x801884c0, size: 80, name: formula_roll_conditional_status_proc, hash: 6af7bd37b8b6ddfe, unit: formulas}
-  - {addr: 0x80188510, size: 88, name: formula_evade_calculate_physical, hash: a91a0c3b819e2925, unit: formulas}
-  - {addr: 0x80188568, size: 80, name: formula_evade_calculate_physical_without_weather, hash: 34f8a4db5b523940, unit: formulas}
-  - {addr: 0x801885b8, size: 64, name: formula_evade_calculate_magical, hash: fd840af8aa493e15, unit: formulas}
-  - {addr: 0x801885f8, size: 64, name: formula_apply_physical_modifiers, hash: caf0fc3b0aeeebd9, unit: formulas}
-  - {addr: 0x80188638, size: 108, name: formula_calculate_weapon_damage, hash: 80e17426a7add5d7, unit: formulas}
-  - {addr: 0x801886a4, size: 48, name: formula_calculate_physical_damage, hash: 9cd2a030b2f0ea98, unit: formulas}
-  - {addr: 0x801886d4, size: 72, name: formula_accuracy_calculate_physical, hash: 1fc77da18e512bc5, unit: formulas}
-  - {addr: 0x8018871c, size: 40, name: formula_element_apply_absorption_and_roll_status, hash: 44cd604fa6735241, unit: formulas}
-  - {addr: 0x80188744, size: 56, name: formula_apply_magical_modifiers, hash: 242c20f79b9859aa, unit: formulas}
-  - {addr: 0x8018877c, size: 72, name: formula_calculate_elemental_xa_times_ya, hash: dee4978482d21a5a, unit: formulas}
-  - {addr: 0x801887c4, size: 60, name: formula_element_apply_absorption_and_status, hash: 6347378a36978b8a, unit: formulas}
+  - {addr: 0x801884c0, size: 80, name: roll_conditional_status_proc, hash: 6af7bd37b8b6ddfe, unit: formulas}
+  - {addr: 0x80188510, size: 88, name: calculate_physical_evade, hash: a91a0c3b819e2925, unit: formulas}
+  - {addr: 0x80188568, size: 80, name: calculate_physical_evade_without_weather, hash: 34f8a4db5b523940, unit: formulas}
+  - {addr: 0x801885b8, size: 64, name: calculate_magical_evade, hash: fd840af8aa493e15, unit: formulas}
+  - {addr: 0x801885f8, size: 64, name: apply_physical_modifiers, hash: caf0fc3b0aeeebd9, unit: formulas}
+  - {addr: 0x80188638, size: 108, name: calculate_weapon_damage, hash: 80e17426a7add5d7, unit: formulas}
+  - {addr: 0x801886a4, size: 48, name: calculate_physical_damage, hash: 9cd2a030b2f0ea98, unit: formulas}
+  - {addr: 0x801886d4, size: 72, name: calculate_physical_accuracy, hash: 1fc77da18e512bc5, unit: formulas}
+  - {addr: 0x8018871c, size: 40, name: apply_element_absorption_and_roll_status, hash: 44cd604fa6735241, unit: formulas}
+  - {addr: 0x80188744, size: 56, name: apply_magical_modifiers, hash: 242c20f79b9859aa, unit: formulas}
+  - {addr: 0x8018877c, size: 72, name: calculate_elemental_xa_times_ya, hash: dee4978482d21a5a, unit: formulas}
+  - {addr: 0x801887c4, size: 60, name: apply_element_absorption_and_status, hash: 6347378a36978b8a, unit: formulas}
   - {addr: 0x80188800, size: 88, name: calculate_friendly_magic_accuracy, hash: ab9efbe8205fa8f9, unit: formulas}
   - {addr: 0x80188858, size: 48, name: calculate_friendly_xa_times_ya, hash: 8263857d6512b882, unit: formulas}
   - {addr: 0x80188888, size: 220, name: calculate_golem_accuracy, hash: fd3de29223a7cfc1, unit: formulas}
@@ -1576,24 +1576,24 @@ functions:
   - {addr: 0x8018ab98, size: 172, name: formula_throw_damage, hash: a9334582c1a5c49d, unit: formulas}
   - {addr: 0x8018ac44, size: 48, name: formula_jump_damage, hash: 40f050d9561b0355, unit: formulas}
   - {addr: 0x8018ac74, size: 104, name: status_prepare_jump_transparent_removal, hash: ce1be0a3793d8340, unit: formulas}
-  - {addr: 0x8018acdc, size: 124, name: formula_apply_status_or_fail, hash: 7e43893b9dc201c3, unit: formulas}
-  - {addr: 0x8018ad58, size: 156, name: action_recalculate_target_result_as_attack, hash: 5ed037b233f770da, unit: formulas}
+  - {addr: 0x8018acdc, size: 124, name: apply_status_or_fail, hash: 7e43893b9dc201c3, unit: formulas}
+  - {addr: 0x8018ad58, size: 156, name: recalculate_target_result_as_attack, hash: 5ed037b233f770da, unit: formulas}
   - {addr: 0x8018adf4, size: 72, name: reset_current_results, hash: 4b546e6c03ff4f55, unit: formulas}
   - {addr: 0x8018ae3c, size: 240, name: apply_knockback, hash: 19142825be8e5b20, unit: formulas}
   - {addr: 0x8018af2c, size: 840, name: apply_reaction_effect, hash: 444cf78c62cd1481, unit: formulas, rodata: [{addr: 0x8017429c, size: 100, hash: 7c47c77aa09eba56}]}
   - {addr: 0x8018b274, size: 216, name: action_store_used_weapon, hash: d2b52d870f0e59f6, unit: formulas, rodata: [{addr: 0x80174304, size: 64, hash: 608a00d2e1692024}]}
   - {addr: 0x8018b34c, size: 1708, name: action_calculate_target_result, hash: 48143423d1ae501f, unit: formulas, rodata: [{addr: 0x80174344, size: 44, hash: 8dbd62702444125e}]}
   - {addr: 0x8018b9f8, size: 76, name: store_ability_cancellations, hash: 4e301fa3f6d3b78a, unit: formulas}
-  - {addr: 0x8018ba44, size: 684, name: action_finalize_target_result, hash: 96161cc564236dec, unit: formulas}
-  - {addr: 0x8018bcf0, size: 68, name: formula_clear_pending_proc, hash: d63c553967caf2a6, unit: formulas}
-  - {addr: 0x8018bd34, size: 64, name: move_cancel_knockback, hash: bbfdf95f106fba09, unit: formulas}
+  - {addr: 0x8018ba44, size: 684, name: finalize_target_result, hash: 96161cc564236dec, unit: formulas}
+  - {addr: 0x8018bcf0, size: 68, name: clear_pending_proc, hash: d63c553967caf2a6, unit: formulas}
+  - {addr: 0x8018bd34, size: 64, name: cancel_knockback, hash: bbfdf95f106fba09, unit: formulas}
   - {addr: 0x8018bd74, size: 96, name: action_reset_result, hash: c2b153b52b845de6, unit: formulas}
   - {addr: 0x8018bdd4, size: 52, name: clear_status_changes, hash: 297f6e1027974c85, unit: formulas}
   - {addr: 0x8018be08, size: 2168, name: action_apply_target_result, hash: 5c75227756a6f040, unit: formulas}
   - {addr: 0x8018c680, size: 216, name: store_poached_item, hash: 72538317d3c0172a, unit: formulas}
   - {addr: 0x8018c758, size: 260, name: battle_unit_transform_into_morbol, hash: 76e82657d702035b, unit: formulas}
   - {addr: 0x8018c85c, size: 196, name: apply_level_change, hash: 8a382a349b37ab95, unit: formulas}
-  - {addr: 0x8018c920, size: 72, name: reaction_is_blocked, hash: 3a0a9aae99ebf4c4, unit: formulas}
+  - {addr: 0x8018c920, size: 72, name: is_reaction_blocked, hash: 3a0a9aae99ebf4c4, unit: formulas}
   - {addr: 0x8018c968, size: 56, name: reaction_is_prevented, hash: ce6b4744b8afaf88, unit: formulas}
   - {addr: 0x8018c9a0, size: 68, name: check_pending_reactions, hash: 3295dc9e786a8c8d, unit: formulas}
   - {addr: 0x8018c9e4, size: 284, name: dispatch_evasion_reactions, hash: 4ba6d979790df352, unit: formulas}
