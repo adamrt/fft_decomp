@@ -103,7 +103,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
 - `effect_secondary_spell_charge_handler` saves the inertia threshold
   and sets the secondary-effect value but never restores it, unlike the other
   secondary handlers.
-- `battle_unit_generate_random_equipment`: the Shuriken and Ball item
+- `generate_random_equipment`: the Shuriken and Ball item
   types (32, 33) index past the four `equipment_categories` bytes into the
   first innate status byte; that adjacent byte controls their eligibility.
 - `menu_text_render_encoded_ids_to_image`: the encoded-text branch tests
@@ -496,7 +496,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   rows, and its last-band test `i - height >= 0x60` is never true. After the
   band at row 0x20 the rows are written before the start of the buffer. No
   retail window is known to be that large.
-- `battle_unit_generate_random_equipment` restarts its candidate list when an
+- `generate_random_equipment` restarts its candidate list when an
   item with a higher required level appears, but items scanned after it with a
   lower level still join the list, so the pick is not limited to the best
   level reached.

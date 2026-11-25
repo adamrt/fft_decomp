@@ -26,7 +26,6 @@ s32 party_find_free_slot(s32 save_formation, u8* palette);
 s32 party_unit_save(const battle_unit_t* unit, s32 allow_guest);
 s32 party_save_encounter_unit(const struct entd_encounter* entd, s32 unit_id, s32 allow_guest, s32 use_world_text);
 void party_unit_remove(u32 index);
-s32 party_find_slot_by_sprite_set(s32 sprite_set);
 s32 party_create_monster_egg(s32 monster_job, s32 egg_modifier, s32 egg_color);
 u32 party_unit_gain_levels(party_unit_t* party_unit, s32 level_delta);
 u8 party_calculate_highest_level(void);

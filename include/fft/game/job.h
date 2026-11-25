@@ -346,8 +346,6 @@ extern const u16 g_job_jp_requirements_by_level[UNIT_JOB_LEVEL_MAX + 1];
 extern const u8 g_job_unlock_requirements[UNIT_CAREER_JOB_COUNT - 1][UNIT_JOB_LEVEL_BYTE_COUNT];
 
 u32 job_calculate_level(u16 job_jp);
-void job_calculate_levels_from_jp(
-    const unit_job_point_table_t* unit_job_jp, u8 unit_job_levels[UNIT_JOB_LEVEL_BYTE_COUNT]);
 u32 job_calculate_unlocks(const u8* packed_job_levels, u32 gender_flags);
 void job_store_unlocks(u8 destination[UNIT_UNLOCKED_JOB_BYTE_COUNT], u32 unlocked_jobs);
 s32 job_add_proposition_jp(u32 party_index, s32 jp);

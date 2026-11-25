@@ -19,8 +19,6 @@ typedef enum zodiac_compatibility {
     ZODIAC_COMPATIBILITY_BEST = 5
 } zodiac_compatibility_e;
 
-s32 zodiac_calculate_sign(u16 birthday);
-
 /* zodiac pictures */
 /* Draw state shared by the resident, formation and deployment ZODIAC renderers. */
 typedef struct zodiac_draw_context {

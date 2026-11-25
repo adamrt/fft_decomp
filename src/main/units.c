@@ -1,13 +1,15 @@
-/* Battle unit records as the resident executable builds and maintains them: a unit built for a
- * battle or Formation from a party slot or ENTD unit, an ENTD unit's generated equipment and
- * abilities, stat rebuilding and level growth, job levels and unlocks from JP, and status changes
- * and battle resets. The original compiled this as one object, with small memory, item-count,
- * random and zodiac helpers among the unit code. */
+/* The units of the resident executable: the status masks and item-location flags prepared before a
+ * fresh session, the party roster that survives battles and program loads (with new-recruit
+ * generation), access to the packed skillset, ability, item and job tables, and battle unit records:
+ * a unit built for a battle or Formation from a party slot or ENTD unit, an ENTD unit's generated
+ * equipment and abilities, stat rebuilding and level growth, job levels and unlocks from JP, and
+ * status changes and battle resets. This is MAIN's last code image; the original compiled it as one
+ * object, with small memory, item-count, random and zodiac helpers among the unit code. */
 
-#include "fft/game/battle_unit.h"
 #include "fft/battle/action.h"
 #include "fft/battle/encounter.h"
 #include "fft/game/ability.h"
+#include "fft/game/battle_unit.h"
 #include "fft/game/character_identity.h"
 #include "fft/game/entd.h"
 #include "fft/game/item.h"
@@ -25,13 +27,9 @@
 #include "psx/libc.h"
 #include "psx/types.h"
 
-extern job_data_t g_job_data[JOB_ID_COUNT];
-extern u16 g_calendar_month_start_day_offsets[13];
-extern const u16 g_zodiac_day_limits[ZODIAC_SIGN_ORDINARY_COUNT];
-
-static u8 s_party_highest_level;
-static u32 s_names_use_world_text = 0;
-
+static void generate_record(party_unit_t* party, unit_generation_type_e unit_type);
+static void generate_record_raw_stats(party_unit_t* party, unit_generation_type_e unit_type);
+static void generate_raw_stats(unit_raw_stat_t raw_stats[UNIT_RAW_STAT_COUNT], unit_generation_type_e unit_type);
 static void finish_build(battle_unit_t* unit);
 static void set_ramza_identity(battle_unit_t* unit);
 static s32 set_encounter_data(battle_unit_t* unit, const entd_unit_t* entd);
@@ -50,13 +48,685 @@ static void set_equipment_stats(battle_unit_t* unit);
 static void set_equipment_attributes(battle_unit_t* unit, s32 level_up_check);
 static void apply_movement_bonuses(battle_unit_t* unit, s32 keep_hp_mp);
 static void store_names(battle_unit_t* unit);
+static void copy_bytes_source_first(const void* source, void* destination, int count);
+static s32 generate_random_equipment(
+    const battle_unit_t* unit, u8 item_type_flag, u8 weapon_flag_mask, u8 required_item_type);
 static void learn_job_abilities(battle_unit_t* unit, s32 job_id, const entd_unit_t* entd);
 static u16 select_rsm(const battle_unit_t* unit, u16 ability_id, s32 flags, const entd_unit_t* entd);
 static void init_timers(battle_unit_t* unit);
 static void reconcile_statuses(battle_unit_t* unit);
 static void refresh_stats(battle_unit_t* unit, s32 skip_status_check, s32 initializing);
+static void calculate_job_levels_from_jp(
+    const unit_job_point_table_t* unit_job_jp, u8 unit_job_levels[UNIT_JOB_LEVEL_BYTE_COUNT]);
 static void reset_battle_state(battle_unit_t* unit);
 static u8 resolve_sprite_identity(const battle_unit_t* unit, u8* palette);
+static s32 calculate_zodiac_sign(u16 birthday);
+
+/* status check data */
+
+/* At boot, clear the item location flags and build g_status_check_sets: rows 0 to 9
+ * from each status's effect flags, and the unmountable row from a fixed status list. */
+void status_init_check_data(void) {
+    int status;
+    u8 flags_1;
+    u8 flags_2;
+    int byte;
+    u8 mask;
+
+    mem_zero(g_item_location_flags, sizeof(g_item_location_flags));
+    mem_zero(g_status_check_sets, sizeof(g_status_check_sets));
+    for (status = 0; status < STATUS_COUNT; status++) {
+        flags_1 = g_status_effect_data[status].flags_1;
+        flags_2 = g_status_effect_data[status].flags_2;
+        byte = status / 8;
+        mask = 0x80 >> (status & 7);
+        if (flags_1 & STATUS_EFFECT_FLAG_1_KO) {
+            g_status_check_sets[STATUS_CHECK_SET_KO][byte] |= mask;
+        }
+        if (flags_1 & STATUS_EFFECT_FLAG_1_UNIT_LOST) {
+            g_status_check_sets[STATUS_CHECK_SET_UNIT_LOST][byte] |= mask;
+        }
+        if (flags_1 & STATUS_EFFECT_FLAG_1_CHECK_SET_2) {
+            g_status_check_sets[STATUS_CHECK_SET_UNREAD_2][byte] |= mask;
+        }
+        if (flags_1 & STATUS_EFFECT_FLAG_1_FREEZE_CT) {
+            g_status_check_sets[STATUS_CHECK_SET_FREEZE_CT][byte] |= mask;
+        }
+        if (flags_2 & STATUS_EFFECT_FLAG_2_PREVENT_REACTION) {
+            g_status_check_sets[STATUS_CHECK_SET_PREVENT_REACTION][byte] |= mask;
+        }
+        if (flags_2 & STATUS_EFFECT_FLAG_2_IMMORTAL_IMMUNITY) {
+            g_status_check_sets[STATUS_CHECK_SET_IMMORTAL_IMMUNITY][byte] |= mask;
+        }
+        if (flags_2 & STATUS_EFFECT_FLAG_2_FORMATION_IMMUNITY) {
+            g_status_check_sets[STATUS_CHECK_SET_FORMATION_IMMUNITY][byte] |= mask;
+        }
+        if (flags_2 & STATUS_EFFECT_FLAG_2_CHECK_SET_7) {
+            g_status_check_sets[STATUS_CHECK_SET_UNREAD_7][byte] |= mask;
+        }
+        if (flags_2 & STATUS_EFFECT_FLAG_2_SCRIPT_FILTER_EXCLUDED) {
+            g_status_check_sets[STATUS_CHECK_SET_SCRIPT_FILTER_EXCLUDED][byte] |= mask;
+        }
+        if (flags_2 & STATUS_EFFECT_FLAG_2_MOUNT_REMOVAL) {
+            g_status_check_sets[STATUS_CHECK_SET_MOUNT_REMOVAL][byte] |= mask;
+        }
+    }
+    g_status_check_sets[STATUS_CHECK_SET_UNMOUNTABLE][STATUS_BYTE_INDEX(STATUS_ID_CRYSTAL)]
+        = STATUS_BYTE_MASK(STATUS_ID_CRYSTAL) | STATUS_BYTE_MASK(STATUS_ID_DEAD);
+    g_status_check_sets[STATUS_CHECK_SET_UNMOUNTABLE][STATUS_BYTE_INDEX(STATUS_ID_PETRIFY)]
+        = STATUS_BYTE_MASK(STATUS_ID_PETRIFY) | STATUS_BYTE_MASK(STATUS_ID_BLOOD_SUCK)
+        | STATUS_BYTE_MASK(STATUS_ID_TREASURE);
+    g_status_check_sets[STATUS_CHECK_SET_UNMOUNTABLE][STATUS_BYTE_INDEX(STATUS_ID_BERSERK)]
+        = STATUS_BYTE_MASK(STATUS_ID_BERSERK) | STATUS_BYTE_MASK(STATUS_ID_CHICKEN) | STATUS_BYTE_MASK(STATUS_ID_FROG);
+    g_status_check_sets[STATUS_CHECK_SET_UNMOUNTABLE][STATUS_BYTE_INDEX(STATUS_ID_CHARM)]
+        = STATUS_BYTE_MASK(STATUS_ID_CHARM);
+}
+
+/* party roster */
+
+/* One row of g_unit_generation_base_data, selected by
+ * unit_generation_type_e. */
+typedef struct unit_generation_base_data {
+    u8 raw_stat_seeds[UNIT_RAW_STAT_COUNT];
+    u8 equipment[UNIT_EQUIPMENT_SLOT_COUNT];
+} unit_generation_base_data_t;
+typedef char unit_generation_base_data_size_must_be_12[(sizeof(unit_generation_base_data_t) == 12) ? 1 : -1];
+
+extern unit_generation_base_data_t g_unit_generation_base_data[UNIT_GENERATION_TYPE_COUNT];
+extern u8 g_unit_generation_raw_stat_variance[UNIT_GENERATION_TYPE_COUNT][UNIT_RAW_STAT_COUNT];
+
+/* Uncalled empty routine (jr ra; nop in the original) preceding party_clear. */
+static void noop(void) {
+}
+
+/* Mark all 20 roster slots empty (party_id = PARTY_ID_NONE); the rest of each record is left as
+ * is. */
+void party_clear(void) {
+    s32 i;
+
+    for (i = PARTY_ROSTER_SLOT_COUNT - 1; i >= 0; i--) {
+        g_party_units[i].party_id = PARTY_ID_NONE;
+    }
+}
+
+/* Return the roster record at party_index, or NULL at or past PARTY_ROSTER_SLOT_COUNT (negative
+ * indexes are not rejected). */
+party_unit_t* party_unit_get(s32 party_index) {
+    return party_index < PARTY_ROSTER_SLOT_COUNT ? &g_party_units[party_index] : 0;
+}
+
+/* Build a battle unit from one ENTD unit slot on the stack and save it into the
+ * party roster. Returns -2 for an empty ENTD slot, otherwise
+ * party_unit_save's result (0, or -1 when the roster is full). */
+s32 party_save_encounter_unit(const entd_encounter_t* entd, s32 unit_id, s32 allow_guest, s32 use_world_text) {
+    const entd_unit_t* entd_unit = &entd->units[unit_id];
+
+    g_encounter_current_unit = entd_unit;
+    if (entd_unit->sprite_set == CHARACTER_IDENTITY_ENTD_NONE) {
+        return -2;
+    }
+    {
+        battle_unit_t unit;
+        battle_unit_t* unit_data = &unit;
+
+        unit_data->battle_unit_id = 0xff;
+        /* Placeholder for this temporary roster-conversion record. */
+        unit_data->active_battle_unit_id = 0x20;
+        unit_data->existence = UNIT_EXISTENCE_ACTIVE;
+        unit_data->formation_index = UNIT_FORMATION_INDEX_NONE;
+        battle_unit_init_from_encounter(unit_data, entd_unit, use_world_text, UNIT_ENTD_INIT_NEW);
+        return party_unit_save(unit_data, allow_guest);
+    }
+}
+
+/*
+ * Save an in-battle unit into the party roster. Returns 0, or -1 when there
+ * is no room. A unit already in the roster keeps its slot, except that a
+ * non-guest save moves a unit out of a guest slot (16-19) into a free
+ * ordinary slot. A new unit takes a free ordinary slot, or a free guest slot
+ * when allow_guest is set and it is a story character carrying
+ * UNIT_FLAG_SAVE_FORMATION. A guest record keeps the unit's palette; an
+ * ordinary one gets palette 0 and drops the save-formation flag.
+ */
+s32 party_unit_save(const battle_unit_t* unit, s32 allow_guest) {
+    party_unit_t* party;
+    s32 slot;
+    s32 index;
+    u32 unit_slot;
+    u8 kind = unit->unit_flags & UNIT_FLAG_SAVE_FORMATION;
+    u8 palette;
+    u16 birthday;
+    s32 sprite_set;
+
+    if (unit->character_identity >= CHARACTER_IDENTITY_SELECTOR_FIRST || allow_guest == 0) {
+        kind = 0;
+    }
+    index = unit->formation_index;
+    unit_slot = index & 0xff;
+
+    if (kind == 0 && index >= PARTY_GUEST_SLOT_FIRST && index < PARTY_ROSTER_SLOT_COUNT) {
+        /* A non-guest save of a unit that currently sits in a guest slot. */
+        party_unit_remove(index);
+        index = party_find_free_slot(0, &palette);
+        if (index == -1) {
+            return -1;
+        }
+        slot = index;
+    } else if (unit_slot >= BATTLE_UNIT_SLOT_COUNT) {
+        /* GCC cross-jumps this search into the identical one above. */
+        index = party_find_free_slot(kind, &palette);
+        if (index == -1) {
+            return -1;
+        }
+        slot = index;
+    } else {
+        party_find_free_slot(0, &palette);
+        slot = unit_slot;
+    }
+
+    party = party_unit_get(slot);
+    sprite_set = unit->character_identity;
+    party->party_id = slot;
+    party->sprite_set = sprite_set;
+    party->job_id = unit->job_id;
+    if (slot >= PARTY_GUEST_SLOT_FIRST) {
+        party->palette = unit->sprite_palette;
+        party->gender_flags = unit->unit_flags & ~UNIT_FLAG_EGG;
+    } else {
+        party->palette = palette;
+        party->gender_flags = unit->unit_flags & ~(UNIT_FLAG_EGG | UNIT_FLAG_SAVE_FORMATION);
+    }
+
+    /* The 16-bit value at 0x008 packs the birthday (9 bits) and zodiac (top nibble). */
+    birthday = unit->birthday.birthday | (unit->birthday.zodiac << 12);
+    party->birthday_day = birthday;
+    party->zodiac = birthday >> 8;
+    mem_copy_byte_data_source_first(&unit->secondary_skillset, &party->secondary_skillset, 0x10);
+    party->brave = unit->original_brave;
+    party->faith = unit->original_faith;
+    mem_copy_byte_data_source_first(unit->raw_stats, party->raw_stats, sizeof(party->raw_stats));
+    /* The saved span includes the career record and following 16-byte name. */
+    mem_copy_byte_data_source_first(&unit->career, &party->career, sizeof(party->career) + sizeof(party->name));
+    /* name_id is stored as two byte writes (lbu / lhu+srl), not one sh. */
+    party->name_id.index = unit->quote_name_id.value;
+    party->name_id.name_class = unit->quote_name_id.value >> 8;
+    party->proposition_status = 0;
+    party->egg_color = 0;
+    return 0;
+}
+
+/* Return the first empty roster slot, or -1 when the searched range is full.
+ *
+ * A nonzero save_formation searches the four guest slots (16..19), zero the
+ * sixteen ordinary slots. *palette is always set to 0. */
+s32 party_find_free_slot(s32 save_formation, u8* palette) {
+    party_unit_t* party_units[PARTY_ROSTER_SLOT_COUNT];
+    s32 party_index;
+    s32 start_index;
+    s32 limit;
+
+    *palette = 0;
+
+    for (party_index = 0; party_index < PARTY_ROSTER_SLOT_COUNT; party_index++) {
+        party_units[party_index] = party_unit_get(party_index);
+    }
+
+    if (save_formation != 0) {
+        start_index = PARTY_GUEST_SLOT_FIRST;
+        limit = PARTY_ROSTER_SLOT_COUNT;
+    } else {
+        start_index = 0;
+        limit = PARTY_MEMBER_SLOT_COUNT;
+    }
+
+    for (party_index = start_index; party_index < limit; party_index++) {
+        if (party_units[party_index]->party_id == PARTY_ID_NONE) {
+            return party_index;
+        }
+    }
+
+    return -1;
+}
+
+/* Add an egg of monster_job to the first empty ordinary roster slot. Returns the
+ * slot, or -1 when there is none.
+ *
+ * egg_modifier is stored as the unit's birthday (values from 0x16e up become 1)
+ * and the zodiac sign is derived from it; the breeding code passes the same value
+ * in both nibbles. */
+s32 party_create_monster_egg(s32 monster_job, s32 egg_modifier, s32 egg_color) {
+    s32 party_index = party_unit_generate(UNIT_GENERATION_TYPE_MONSTER);
+    party_unit_t* party;
+    u16 birthday;
+    s32 zodiac;
+
+    if (party_index == -1) {
+        return party_index;
+    }
+    party = party_unit_get(party_index);
+    party->job_id = monster_job;
+    party->egg_color = egg_color;
+    party->gender_flags |= UNIT_FLAG_EGG;
+    birthday = egg_modifier;
+    if (birthday >= 0x16e) {
+        birthday = 1;
+    }
+    zodiac = calculate_zodiac_sign(birthday);
+    party->birthday_day = birthday;
+    party->zodiac = ((birthday & 0x100) >> 8) + (zodiac << 4);
+    return party_index;
+}
+
+/* Generate a new unit of unit_type (UNIT_GENERATION_TYPE_*) in the first empty ordinary
+ * roster slot (0..15), with palette 0. Returns the slot, or -1 when all sixteen
+ * are taken. */
+s32 party_unit_generate(unit_generation_type_e unit_type) {
+    party_unit_t* party_units[PARTY_ROSTER_SLOT_COUNT];
+    s32 party_index;
+    s32 palette = 0;
+
+    for (party_index = 0; party_index < PARTY_ROSTER_SLOT_COUNT; party_index++) {
+        party_units[party_index] = party_unit_get(party_index);
+    }
+
+    for (party_index = 0; party_index < PARTY_MEMBER_SLOT_COUNT; party_index++) {
+        if (party_units[party_index]->party_id == PARTY_ID_NONE) {
+            party_units[party_index]->party_id = party_index;
+            party_units[party_index]->palette = palette;
+            generate_record(party_units[party_index], unit_type);
+            return party_index;
+        }
+    }
+
+    return -1;
+}
+
+/* Return the first occupied roster slot whose sprite set matches, or -1. */
+static s32 find_party_slot_by_sprite_set(s32 sprite_set) {
+    s32 party_index = 0;
+    s32 empty_party_id = PARTY_ID_NONE;
+    party_unit_t* party = g_party_units;
+
+    for (; party_index < PARTY_ROSTER_SLOT_COUNT; party_index++, party++) {
+        if (party->party_id != empty_party_id && party->sprite_set == sprite_set) {
+            return party_index;
+        }
+    }
+
+    return -1;
+}
+
+/* Free a roster slot by marking its party_id empty; the record's other bytes are kept. */
+void party_unit_remove(u32 index) {
+    g_party_units[index].party_id = PARTY_ID_NONE;
+}
+
+/* Fills a fresh party record for a generic male (0), generic female (1),
+ * monster (3) or Ramza (anything else, forced to 2).
+ *
+ * The birthday is a random day 1..365. Brave and Faith are each rolled in
+ * 40..70; Ramza gets 70 and 70. The unit starts at level 1 with 0 EXP, and a
+ * human gets 100..199 JP and job level 1 in every job but the one its sex
+ * cannot take (Bard, Dancer). The name is drawn until no party member of the
+ * same kind has it; the roll rand() * 255 / 0x8000 gives 0..254, so name
+ * index 255 is never drawn. */
+static void generate_record(party_unit_t* party, unit_generation_type_e unit_type) {
+    s32 name_flags;
+    unit_name_id_t name_base;
+    unit_name_id_t name_id;
+    unit_name_id_t existing_name;
+    u16 birthday;
+    s32 zodiac;
+    s32 gender;
+    s32 i;
+    u8 generic_id;
+    unit_generation_base_data_t* base;
+    unit_generation_base_data_t* table;
+    party_unit_t* other;
+    s32 found;
+    s32 jp;
+
+    if (unit_type == UNIT_GENERATION_TYPE_MALE) {
+        name_flags = TEXT_ID_UNIT_NAME_GENERIC_MALE_BASE;
+        name_base.value = 0;
+        name_base.fields.name_class = PARTY_NAME_CLASS_GENERIC_MALE;
+        party->sprite_set = CHARACTER_IDENTITY_GENERIC_MALE;
+        party->gender_flags = UNIT_FLAG_MALE;
+        party->job_id = JOB_ID_SQUIRE;
+    } else if (unit_type == UNIT_GENERATION_TYPE_FEMALE) {
+        name_flags = TEXT_ID_UNIT_NAME_GENERIC_FEMALE_BASE;
+        name_base.value = 0;
+        name_base.fields.name_class = PARTY_NAME_CLASS_GENERIC_FEMALE;
+        party->sprite_set = CHARACTER_IDENTITY_GENERIC_FEMALE;
+        party->gender_flags = UNIT_FLAG_FEMALE;
+        party->job_id = JOB_ID_SQUIRE;
+    } else if (unit_type == UNIT_GENERATION_TYPE_MONSTER) {
+        name_flags = TEXT_ID_UNIT_NAME_GENERIC_MONSTER_BASE;
+        name_base.value = 0;
+        name_base.fields.name_class = PARTY_NAME_CLASS_GENERIC_MONSTER;
+        party->sprite_set = CHARACTER_IDENTITY_MONSTER;
+        party->gender_flags = UNIT_FLAG_MONSTER;
+        party->job_id = JOB_ID_SQUIRE;
+    } else {
+        name_flags = TEXT_ID_UNIT_NAME_SPECIAL_BASE;
+        unit_type = UNIT_GENERATION_TYPE_RAMZA;
+        name_base.value = 0;
+        name_base.fields.name_class = PARTY_NAME_CLASS_SPECIAL;
+        party->sprite_set = CHARACTER_IDENTITY_RAMZA_CHAPTER_1;
+        party->gender_flags = UNIT_FLAG_MALE;
+        party->job_id = JOB_ID_SQUIRE_RAMZA_CHAPTER_1;
+    }
+
+    birthday = (rand() * 365) / 0x8000 + 1;
+    zodiac = calculate_zodiac_sign(birthday) << PARTY_ZODIAC_SHIFT;
+    party->birthday_day = birthday;
+    party->zodiac = ((birthday & (PARTY_BIRTHDAY_DAY_HIGH_BIT_MASK << 8)) >> 8) + zodiac;
+
+    if (unit_type == UNIT_GENERATION_TYPE_RAMZA) {
+        party->brave = 70;
+        party->faith = 70;
+    } else {
+        party->brave = (rand() * 31) / 0x8000 + 40;
+        party->faith = (rand() * 31) / 0x8000 + 40;
+    }
+
+    mem_zero(&party->secondary_skillset, 7);
+    generate_record_raw_stats(party, unit_type);
+    party->level = 1;
+    party->experience = 0;
+    mem_zero(&party->career, sizeof(party->career));
+
+    gender = party->gender_flags;
+    if (gender & (UNIT_FLAG_FEMALE | UNIT_FLAG_MALE)) {
+        for (i = 0; i < UNIT_CAREER_JOB_COUNT; i++) {
+            if (i == UNIT_CAREER_JOB_INDEX_BARD && (gender & UNIT_FLAG_FEMALE)) {
+                continue;
+            }
+            if (i == UNIT_CAREER_JOB_INDEX_DANCER && (gender & UNIT_FLAG_MALE)) {
+                continue;
+            }
+            jp = (rand() * 100) / 0x8000 + 100;
+            party->career.job_points.total.entries[i].low = jp;
+            party->career.job_points.current.entries[i].low = jp;
+            party->career.job_levels[i / UNIT_JOBS_PER_LEVEL_BYTE] = UNIT_JOB_LEVEL_ONE_BOTH_NIBBLES;
+        }
+    }
+    if (gender & UNIT_FLAG_MALE) {
+        party->career.job_levels[UNIT_JOB_LEVEL_BYTE_INDEX_DANCER_MIME] = UNIT_JOB_LEVEL_ONE_LOW_NIBBLE;
+    }
+    if (gender & UNIT_FLAG_FEMALE) {
+        party->career.job_levels[UNIT_JOB_LEVEL_BYTE_INDEX_CALCULATOR_BARD] = UNIT_JOB_LEVEL_ONE_HIGH_NIBBLE;
+    }
+
+    table = g_unit_generation_base_data;
+    base = table + unit_type;
+    generic_id = party->sprite_set;
+    party->career.unlocked_jobs[0] = UNIT_UNLOCKED_JOB_SQUIRE >> 16;
+    /* Keep sprite sets 0x80+ for the name-uniqueness comparison; collapse
+     * other identities to zero. */
+    generic_id = generic_id >= CHARACTER_IDENTITY_SELECTOR_FIRST ? generic_id : 0;
+    for (i = 0; i < UNIT_EQUIPMENT_SLOT_COUNT; i++) {
+        party->equipment[i] = base->equipment[i];
+    }
+
+    if (unit_type == UNIT_GENERATION_TYPE_RAMZA) {
+        name_id.value = 1;
+    } else {
+        party->name_id.index = 0xff;
+        party->name_id.name_class = name_base.fields.name_class;
+        do {
+            found = 1;
+            name_id.value = name_base.value + (rand() * 255) / 0x8000;
+            for (i = 0; i < PARTY_MEMBER_SLOT_COUNT; i++) {
+                other = &g_party_units[i];
+                if (other->party_id != PARTY_ID_NONE && (other->sprite_set & -(other->sprite_set >> 7)) == generic_id) {
+                    existing_name.value = 0;
+                    existing_name.fields.name_class = other->name_id.name_class;
+                    existing_name.fields.index = other->name_id.index;
+                    if (existing_name.value == name_id.value) {
+                        found = 0;
+                        break;
+                    }
+                }
+            }
+        } while (found == 0);
+    }
+    party->name_id.index = name_id.fields.index;
+    party->name_id.name_class = name_id.fields.name_class;
+    name_flags += name_id.fields.index;
+    copy_bytes_source_first(text_find_world_entry(name_flags), party->name, sizeof(party->name));
+    party->proposition_status = 0;
+    party->egg_color = 0;
+    if (unit_type == UNIT_GENERATION_TYPE_RAMZA) {
+        party->career.learned_abilities[0][0] = 4;
+    }
+}
+
+/* The target leaves a1 intact while advancing a0 to the raw-stat field. */
+static void generate_record_raw_stats(party_unit_t* party, unit_generation_type_e unit_type) {
+    generate_raw_stats(party->raw_stats, unit_type);
+}
+
+/* Roll the unit's raw stats by its sex flags; a unit with neither flag is rolled
+ * as a monster. */
+static void generate_unit_raw_stats(battle_unit_t* unit) {
+    unit_generation_type_e unit_type;
+
+    if (unit->unit_flags & UNIT_FLAG_MALE) {
+        unit_type = UNIT_GENERATION_TYPE_MALE;
+    } else if (unit->unit_flags & UNIT_FLAG_FEMALE) {
+        unit_type = UNIT_GENERATION_TYPE_FEMALE;
+    } else {
+        unit_type = UNIT_GENERATION_TYPE_MONSTER;
+    }
+    generate_raw_stats(unit->raw_stats, unit_type);
+}
+
+/* Roll the five little-endian 24-bit raw stats for the selected unit type. */
+static void generate_raw_stats(unit_raw_stat_t raw_stats[UNIT_RAW_STAT_COUNT], unit_generation_type_e unit_type) {
+    /* Without the pin, type_index, index and base rotate among $s2/$s3/$s4. */
+    register s32 type_index __asm__("$20") = unit_type;
+    s32 index = 0;
+    u8(*variance)[UNIT_RAW_STAT_COUNT] = g_unit_generation_raw_stat_variance;
+    unit_generation_base_data_t* table = g_unit_generation_base_data;
+    u8* base = table[type_index].raw_stat_seeds;
+
+    do {
+        s32 value = base[index] << 14;
+
+        /* Removing the tied use changes the prologue schedule. */
+        __asm__("" : "=r"(type_index) : "0"(type_index));
+        value += (rand() * variance[type_index][index]) / 2;
+        raw_stats[index].low = value;
+        raw_stats[index].middle = (u32)value >> 8;
+        raw_stats[index].high = value >> 16;
+        index++;
+    } while (index < UNIT_RAW_STAT_COUNT);
+}
+
+/* Copy the current job's growth and multiplier pairs for HP, MP, Speed, PA and MA into the unit. */
+static void copy_job_growths(battle_unit_t* unit) {
+    mem_copy_byte_data_source_first(
+        g_job_data_pointer[unit->job_id].stat_growths, unit->stat_growths, sizeof(unit->stat_growths));
+}
+
+/* game tables */
+
+extern job_data_t g_job_data[JOB_ID_COUNT];
+
+/* Packed skillset rows decoded by skillset_get_ability_id. */
+typedef struct ability_human_skillset {
+    u8 high_id_bits[3];
+    u8 ability_ids[HUMAN_SKILLSET_ABILITY_COUNT];
+} ability_human_skillset_t;
+typedef char ability_human_skillset_size_must_be_25[sizeof(ability_human_skillset_t) == 25 ? 1 : -1];
+
+typedef struct ability_monster_skillset {
+    u8 high_id_bits;
+    u8 ability_ids[MONSTER_SKILLSET_ABILITY_COUNT];
+} ability_monster_skillset_t;
+typedef char ability_monster_skillset_size_must_be_5[sizeof(ability_monster_skillset_t) == 5 ? 1 : -1];
+
+extern ability_human_skillset_t g_ability_human_skillset_abilities[SKILLSET_ID_MONSTER_FIRST];
+extern ability_monster_skillset_t g_ability_monster_skillset_abilities[SKILLSET_ID_END - SKILLSET_ID_MONSTER_FIRST];
+
+/* Defined here, before the skillset scratch list, so the data keeps its retail order. */
+static u32 s_names_use_world_text = 0;
+
+/* Scratch list filled by skillset_build_ability_list. */
+static u16 s_skillset_abilities[SKILLSET_ABILITY_LIST_COUNT] = { 0 };
+
+/* Return the ability id in one slot of a skillset, or 0 for a slot or skillset
+ * out of range.
+ *
+ * A human skillset (below SKILLSET_ID_MONSTER_FIRST) has 22 slots, a monster
+ * skillset 4. Each record stores the low byte of every id; bit 8 of slot n comes
+ * from the high_id_bits bytes, most significant bit first. */
+s32 skillset_get_ability_id(s32 skillset_id, s32 ability_index) {
+    if (skillset_id < SKILLSET_ID_MONSTER_FIRST) {
+        ability_human_skillset_t* table_base;
+        ability_human_skillset_t* skillset;
+        s32 flag_byte_index;
+        s32 high_id_bit;
+
+        if (ability_index >= HUMAN_SKILLSET_ABILITY_COUNT) {
+            return 0;
+        }
+        table_base = g_ability_human_skillset_abilities;
+        skillset = table_base + skillset_id;
+        flag_byte_index = ability_index / 8;
+        high_id_bit = skillset->high_id_bits[flag_byte_index];
+        high_id_bit <<= ability_index - flag_byte_index * 8 + 1;
+        high_id_bit &= 0x100;
+        return skillset->ability_ids[ability_index] | high_id_bit;
+    }
+
+    if (skillset_id < SKILLSET_ID_END) {
+        ability_monster_skillset_t* table_base;
+        ability_monster_skillset_t* skillset;
+        s32 flag_byte_index;
+        s32 high_id_bit;
+
+        if (ability_index >= MONSTER_SKILLSET_ABILITY_COUNT) {
+            return 0;
+        }
+        table_base = g_ability_monster_skillset_abilities - SKILLSET_ID_MONSTER_FIRST;
+        skillset = table_base + skillset_id;
+        flag_byte_index = ability_index / 8;
+        high_id_bit = (&skillset->high_id_bits)[flag_byte_index];
+        high_id_bit <<= ability_index - flag_byte_index * 8 + 1;
+        high_id_bit &= 0x100;
+        return skillset->ability_ids[ability_index] | high_id_bit;
+    }
+
+    return 0;
+}
+
+/* Fill g_skillset_abilities with the skillset's 24 ability ids and return
+ * it. An id whose class (skillset_ability_filter_e) is not selected in filters
+ * is written as 0. Skillset ids from 0x100 up read skillset 0. */
+u16* skillset_build_ability_list(s32 skillset_id, s32 filters) {
+    s32 output_count;
+    s32 ability_index;
+    u16 ability_id;
+    s32 keep;
+
+    if (skillset_id >= 0x100) {
+        skillset_id = 0;
+    }
+    output_count = 0;
+    for (ability_index = 0; ability_index < SKILLSET_ABILITY_LIST_COUNT; ability_index++) {
+        ability_id = skillset_get_ability_id(skillset_id, ability_index);
+        if (ability_id < ABILITY_ID_REACTION_FIRST) {
+            keep = filters & SKILLSET_ABILITY_FILTER_ACTION;
+        } else if (ability_id < ABILITY_ID_SUPPORT_FIRST) {
+            keep = filters & SKILLSET_ABILITY_FILTER_REACTION;
+        } else if (ability_id <= ABILITY_ID_MOVEMENT_FIRST) {
+            /* One past ABILITY_ID_MOVEMENT_FIRST in the original. */
+            keep = filters & SKILLSET_ABILITY_FILTER_SUPPORT;
+        } else {
+            keep = filters & SKILLSET_ABILITY_FILTER_MOVEMENT;
+        }
+        if (keep == 0) {
+            ability_id = 0;
+        }
+        s_skillset_abilities[output_count++] = ability_id;
+    }
+
+    for (; output_count < SKILLSET_ABILITY_LIST_COUNT; output_count++) {
+        s_skillset_abilities[output_count] = 0;
+    }
+    return s_skillset_abilities;
+}
+
+/* Classify an ability id and return pointers to its two table records.
+ *
+ * *out_ability_data always receives the common 8-byte record. *out_secondary_data
+ * receives the record of the id's range: the range/effect record of an ordinary
+ * ability, the item id of an Item ability, the item type of a Throw ability, the
+ * Jump or Charge record, or the one-byte record shared by Math, reaction, support
+ * and movement abilities. The result is the matching ability_type_e. */
+ability_type_e ability_get_records(
+    s32 ability_id, const ability_data_t** out_ability_data, ability_secondary_pointer_t* out_secondary_data) {
+    ability_id &= ABILITY_ID_MASK;
+    /* 0x8005ebf0: Ability Data 1, 8 bytes each. */
+    *out_ability_data = &g_ability_data[ability_id];
+    if (ability_id < ABILITY_ID_ITEM_FIRST) {
+        out_secondary_data->range = &g_ability_range_data[ability_id];
+        return ABILITY_TYPE_DEFAULT;
+    }
+    if (ability_id < ABILITY_ID_THROW_FIRST) {
+        out_secondary_data->item_id = &g_item_ability_item_ids[ability_id - ABILITY_ID_ITEM_FIRST];
+        return ABILITY_TYPE_ITEM;
+    }
+    if (ability_id < ABILITY_ID_JUMP_FIRST) {
+        out_secondary_data->throw_item_type = &g_ability_throw_item_types[ability_id - ABILITY_ID_THROW_FIRST];
+        return ABILITY_TYPE_THROW;
+    }
+    if (ability_id < ABILITY_ID_CHARGE_FIRST) {
+        out_secondary_data->jump = &g_ability_jump_data[ability_id - ABILITY_ID_JUMP_FIRST];
+        return ABILITY_TYPE_JUMP;
+    }
+    if (ability_id < ABILITY_ID_MATH_FIRST) {
+        out_secondary_data->charge = &g_ability_charge_data[ability_id - ABILITY_ID_CHARGE_FIRST];
+        return ABILITY_TYPE_CHARGE;
+    }
+    if (ability_id < ABILITY_ID_REACTION_FIRST) {
+        out_secondary_data->math_rsm = &g_ability_math_rsm_data[ability_id - ABILITY_ID_MATH_FIRST];
+        return ABILITY_TYPE_MATH;
+    }
+    if (ability_id < ABILITY_ID_SUPPORT_FIRST) {
+        out_secondary_data->math_rsm = &g_ability_math_rsm_data[ability_id - ABILITY_ID_MATH_FIRST];
+        return ABILITY_TYPE_REACTION;
+    }
+    if (ability_id < ABILITY_ID_MOVEMENT_FIRST) {
+        out_secondary_data->math_rsm = &g_ability_math_rsm_data[ability_id - ABILITY_ID_MATH_FIRST];
+        return ABILITY_TYPE_SUPPORT;
+    }
+    out_secondary_data->math_rsm = &g_ability_math_rsm_data[ability_id - ABILITY_ID_MATH_FIRST];
+    return ABILITY_TYPE_MOVEMENT;
+}
+
+/* Return an item's primary data record; the id is masked to its low byte, so it never fails. */
+const item_data_t* item_get_data(s32 item_id) {
+    return &g_item_primary_data[item_id & ITEM_ID_MASK];
+}
+
+/* Return a job's data record, or NULL for ids at or past JOB_ID_COUNT. */
+const job_data_t* job_get_data(s32 job_id) {
+    if (job_id < JOB_ID_COUNT) {
+        return &g_job_data[job_id];
+    }
+    return 0;
+}
+
+/* battle units */
+
+extern job_data_t g_job_data[JOB_ID_COUNT];
+extern u16 g_calendar_month_start_day_offsets[13];
+extern const u16 g_zodiac_day_limits[ZODIAC_SIGN_ORDINARY_COUNT];
+
+static u8 s_party_highest_level;
 
 /* building units */
 
@@ -75,7 +745,7 @@ s32 battle_unit_init_from_party_slot(battle_unit_t* unit, s32 slot, s32 use_worl
     if (party_unit->party_id == PARTY_ID_NONE) {
         return -1;
     }
-    job_calculate_levels_from_jp(&party_unit->career.job_points.total, party_unit->career.job_levels);
+    calculate_job_levels_from_jp(&party_unit->career.job_points.total, party_unit->career.job_levels);
     job_store_unlocks(party_unit->career.unlocked_jobs,
         job_calculate_unlocks(party_unit->career.job_levels, party_unit->gender_flags));
     reset_battle_state(unit);
@@ -118,8 +788,8 @@ s32 battle_unit_init_from_encounter(battle_unit_t* unit, const entd_unit_t* entd
     set_encounter_jobs(unit, entd);
     set_encounter_abilities(unit, entd);
     enable_rsm_flags(unit);
-    battle_unit_generate_raw_stats(unit);
-    battle_unit_copy_job_growths(unit);
+    generate_unit_raw_stats(unit);
+    copy_job_growths(unit);
     if (unit->formation_index == UNIT_FORMATION_INDEX_NONE) {
         unit->formation_index = UNIT_FORMATION_INDEX_GENERATED_UNIT;
     }
@@ -285,7 +955,7 @@ static s32 set_encounter_data(battle_unit_t* unit, const entd_unit_t* entd) {
     unit->birthday.birthday = year_day;
     /* Preserve the target's explicit 16-bit normalization before packing the
      * zodiac nibble into the 16-bit birthday value. */
-    zodiac = zodiac_calculate_sign(year_day) & 0xFFFF;
+    zodiac = calculate_zodiac_sign(year_day) & 0xFFFF;
     unit->birthday.zodiac = zodiac;
     if (entd->job_id == JOB_ID_SERPENTARIUS) {
         unit->birthday.zodiac = ZODIAC_SIGN_SERPENTARIUS;
@@ -317,7 +987,7 @@ static s32 set_encounter_data(battle_unit_t* unit, const entd_unit_t* entd) {
  * Preserve the party unit's kind flags while taking the ENTD persistence
  * controls and team assignment. Returns -1 when no matching party slot exists. */
 static s32 init_encounter_party_member(battle_unit_t* unit, const entd_unit_t* entd_unit) {
-    s32 slot = party_find_slot_by_sprite_set(entd_unit->sprite_set);
+    s32 slot = find_party_slot_by_sprite_set(entd_unit->sprite_set);
 
     if (slot != -1) {
         battle_unit_init_from_party_slot(unit, slot, s_names_use_world_text);
@@ -821,11 +1491,11 @@ static void set_encounter_equipment(battle_unit_t* unit, const entd_unit_t* entd
     flags = unit->ability_flags.support[2];
     if (item == ENTD_VALUE_RANDOM) {
         if (flags & UNIT_SUPPORT_SET_3_TWO_HANDS) {
-            item = battle_unit_generate_random_equipment(
+            item = generate_random_equipment(
                 unit, ITEM_TYPE_FLAG_WEAPON, WEAPON_FLAG_TWO_HANDS_COMPATIBLE, ITEM_TYPE_FILTER_ANY);
         }
         if (item == ENTD_VALUE_RANDOM && (flags & UNIT_SUPPORT_SET_3_TWO_SWORDS)) {
-            item = battle_unit_generate_random_equipment(
+            item = generate_random_equipment(
                 unit, ITEM_TYPE_FLAG_WEAPON, WEAPON_FLAG_TWO_SWORDS_COMPATIBLE, ITEM_TYPE_FILTER_ANY);
         }
     }
@@ -834,32 +1504,30 @@ static void set_encounter_equipment(battle_unit_t* unit, const entd_unit_t* entd
     flags = unit->ability_flags.support[0];
     if (item == ENTD_VALUE_RANDOM) {
         if (flags & UNIT_SUPPORT_SET_1_EQUIP_SWORD) {
-            item = battle_unit_generate_random_equipment(unit, ITEM_TYPE_FLAG_WEAPON, 0, ITEM_TYPE_SWORD);
+            item = generate_random_equipment(unit, ITEM_TYPE_FLAG_WEAPON, 0, ITEM_TYPE_SWORD);
         }
         if (item == ENTD_VALUE_RANDOM) {
             if (flags & UNIT_SUPPORT_SET_1_EQUIP_KATANA) {
-                item = battle_unit_generate_random_equipment(unit, ITEM_TYPE_FLAG_WEAPON, 0, ITEM_TYPE_KATANA);
+                item = generate_random_equipment(unit, ITEM_TYPE_FLAG_WEAPON, 0, ITEM_TYPE_KATANA);
             }
             if (item == ENTD_VALUE_RANDOM) {
                 if (flags & UNIT_SUPPORT_SET_1_EQUIP_CROSSBOW) {
-                    item = battle_unit_generate_random_equipment(unit, ITEM_TYPE_FLAG_WEAPON, 0, ITEM_TYPE_CROSSBOW);
+                    item = generate_random_equipment(unit, ITEM_TYPE_FLAG_WEAPON, 0, ITEM_TYPE_CROSSBOW);
                 }
                 if (item == ENTD_VALUE_RANDOM) {
                     if (flags & UNIT_SUPPORT_SET_1_EQUIP_SPEAR) {
-                        item = battle_unit_generate_random_equipment(unit, ITEM_TYPE_FLAG_WEAPON, 0, ITEM_TYPE_SPEAR);
+                        item = generate_random_equipment(unit, ITEM_TYPE_FLAG_WEAPON, 0, ITEM_TYPE_SPEAR);
                     }
                     if (item == ENTD_VALUE_RANDOM) {
                         if (flags & UNIT_SUPPORT_SET_1_EQUIP_AXE) {
-                            item = battle_unit_generate_random_equipment(unit, ITEM_TYPE_FLAG_WEAPON, 0, ITEM_TYPE_AXE);
+                            item = generate_random_equipment(unit, ITEM_TYPE_FLAG_WEAPON, 0, ITEM_TYPE_AXE);
                         }
                         if (item == ENTD_VALUE_RANDOM) {
                             if (flags & UNIT_SUPPORT_SET_1_EQUIP_GUN) {
-                                item = battle_unit_generate_random_equipment(
-                                    unit, ITEM_TYPE_FLAG_WEAPON, 0, ITEM_TYPE_GUN);
+                                item = generate_random_equipment(unit, ITEM_TYPE_FLAG_WEAPON, 0, ITEM_TYPE_GUN);
                             }
                             if (item == ENTD_VALUE_RANDOM) {
-                                item = battle_unit_generate_random_equipment(
-                                    unit, ITEM_TYPE_FLAG_WEAPON, 0, ITEM_TYPE_FILTER_ANY);
+                                item = generate_random_equipment(unit, ITEM_TYPE_FLAG_WEAPON, 0, ITEM_TYPE_FILTER_ANY);
                                 if (item == ENTD_VALUE_RANDOM) {
                                     item = ITEM_ID_NONE;
                                 }
@@ -891,13 +1559,13 @@ static void set_encounter_equipment(battle_unit_t* unit, const entd_unit_t* entd
 
     flags = unit->ability_flags.support[2];
     if (item == ENTD_VALUE_RANDOM && (flags & UNIT_SUPPORT_SET_3_TWO_SWORDS)) {
-        item = battle_unit_generate_random_equipment(
+        item = generate_random_equipment(
             unit, ITEM_TYPE_FLAG_WEAPON, WEAPON_FLAG_TWO_SWORDS_COMPATIBLE, ITEM_TYPE_FILTER_ANY);
     }
     flags = unit->equipment_categories[EQUIPPABLE_ITEM_TYPE_BYTE_INDEX(ITEM_TYPE_SHIELD)];
     if (item == ENTD_VALUE_RANDOM) {
         if (flags & EQUIPPABLE_ITEM_TYPE_BYTE_MASK(ITEM_TYPE_SHIELD)) {
-            item = battle_unit_generate_random_equipment(unit, ITEM_TYPE_FLAG_SHIELD, 0, ITEM_TYPE_FILTER_ANY);
+            item = generate_random_equipment(unit, ITEM_TYPE_FLAG_SHIELD, 0, ITEM_TYPE_FILTER_ANY);
         } else {
             item = ITEM_ID_NONE;
         }
@@ -916,10 +1584,10 @@ static void set_encounter_equipment(battle_unit_t* unit, const entd_unit_t* entd
     flags = unit->ability_flags.support[0];
     if (item == ENTD_VALUE_RANDOM) {
         if (flags & UNIT_SUPPORT_SET_1_EQUIP_ARMOR) {
-            item = battle_unit_generate_random_equipment(unit, ITEM_TYPE_FLAG_HEADGEAR, 0, ITEM_TYPE_HELMET);
+            item = generate_random_equipment(unit, ITEM_TYPE_FLAG_HEADGEAR, 0, ITEM_TYPE_HELMET);
         }
         if (item == ENTD_VALUE_RANDOM) {
-            item = battle_unit_generate_random_equipment(unit, ITEM_TYPE_FLAG_HEADGEAR, 0, ITEM_TYPE_FILTER_ANY);
+            item = generate_random_equipment(unit, ITEM_TYPE_FLAG_HEADGEAR, 0, ITEM_TYPE_FILTER_ANY);
             if (item == ENTD_VALUE_RANDOM) {
                 item = ITEM_ID_NONE;
             }
@@ -933,10 +1601,10 @@ static void set_encounter_equipment(battle_unit_t* unit, const entd_unit_t* entd
         /* The target reuses Equip Shield here while requesting random Armor;
          * preserve this native equipment-generation quirk. */
         if (flags & UNIT_SUPPORT_SET_1_EQUIP_SHIELD) {
-            item = battle_unit_generate_random_equipment(unit, ITEM_TYPE_FLAG_BODY_ARMOR, 0, ITEM_TYPE_ARMOR);
+            item = generate_random_equipment(unit, ITEM_TYPE_FLAG_BODY_ARMOR, 0, ITEM_TYPE_ARMOR);
         }
         if (item == ENTD_VALUE_RANDOM) {
-            item = battle_unit_generate_random_equipment(unit, ITEM_TYPE_FLAG_BODY_ARMOR, 0, ITEM_TYPE_FILTER_ANY);
+            item = generate_random_equipment(unit, ITEM_TYPE_FLAG_BODY_ARMOR, 0, ITEM_TYPE_FILTER_ANY);
             if (item == ENTD_VALUE_RANDOM) {
                 item = ITEM_ID_NONE;
             }
@@ -947,7 +1615,7 @@ static void set_encounter_equipment(battle_unit_t* unit, const entd_unit_t* entd
     /* Accessory */
     item = entd->equipment[ENTD_EQUIPMENT_SLOT_ACCESSORY];
     if (item == ENTD_VALUE_RANDOM) {
-        item = battle_unit_generate_random_equipment(unit, ITEM_TYPE_FLAG_ACCESSORY, 0, ITEM_TYPE_FILTER_ANY);
+        item = generate_random_equipment(unit, ITEM_TYPE_FLAG_ACCESSORY, 0, ITEM_TYPE_FILTER_ANY);
         if (item == ENTD_VALUE_RANDOM) {
             item = ITEM_ID_NONE;
         }
@@ -1292,14 +1960,13 @@ static void store_names(battle_unit_t* unit) {
     } else {
         text = party_unit_get(unit->formation_index)->name;
     }
-    mem_copy_bytes_source_first(text, unit->name, sizeof(unit->name));
+    copy_bytes_source_first(text, unit->name, sizeof(unit->name));
     text_id = unit->job_id | TEXT_ID_JOB_NAME_BASE;
-    mem_copy_bytes_source_first(prepare_text(text_id), unit->job_name, sizeof(unit->job_name));
+    copy_bytes_source_first(prepare_text(text_id), unit->job_name, sizeof(unit->job_name));
     text_id = unit->primary_skillset | TEXT_ID_SKILLSET_NAME_BASE;
-    mem_copy_bytes_source_first(
-        prepare_text(text_id), unit->primary_skillset_name, sizeof(unit->primary_skillset_name));
+    copy_bytes_source_first(prepare_text(text_id), unit->primary_skillset_name, sizeof(unit->primary_skillset_name));
     text_id = unit->secondary_skillset | TEXT_ID_SKILLSET_NAME_BASE;
-    mem_copy_bytes_source_first(
+    copy_bytes_source_first(
         prepare_text(text_id), unit->secondary_skillset_name, sizeof(unit->secondary_skillset_name));
     mem_zero(&unit->action.status_changes, sizeof(unit->action.status_changes));
 }
@@ -1327,7 +1994,7 @@ u8 party_calculate_highest_level(void) {
 /* equipment and ability generation */
 
 /* Copy count bytes one at a time; the source comes first, unlike memcpy. */
-void mem_copy_bytes_source_first(const void* source, void* destination, int count) {
+static void copy_bytes_source_first(const void* source, void* destination, int count) {
     const u8* src = source;
     u8* dst = destination;
     int i;
@@ -1341,7 +2008,7 @@ void mem_copy_bytes_source_first(const void* source, void* destination, int coun
  * its level, optionally limited to one item type and to weapons with a flag in weapon_flag_mask.
  * Returns ENTD_VALUE_RANDOM when nothing fits. The candidate list restarts only when an item with
  * a higher required level appears, so items scanned after it with a lower level still join it. */
-s32 battle_unit_generate_random_equipment(
+static s32 generate_random_equipment(
     const battle_unit_t* unit, u8 item_type_flag, u8 weapon_flag_mask, u8 required_item_type) {
     u8 candidates[128];
     s32 first;
@@ -1622,7 +2289,7 @@ static u16 select_rsm(const battle_unit_t* unit, u16 ability_id, s32 flags, cons
 /* Return the first job id below JOB_ID_COUNT - 1 whose job record has this
  * skillset. The result is 0 when none has, which is also job 0's id. Nothing
  * in the tree calls it. */
-s32 job_find_by_skillset(u8 skillset_id) {
+static s32 find_job_by_skillset(u8 skillset_id) {
     u8 job_id = 0;
     s32 result;
 
@@ -1705,7 +2372,7 @@ void battle_unit_refresh_stats(battle_unit_t* unit) {
 /* refresh_stats in its initializing form: the
  * inflicted statuses are seeded from the current ones and their CTs cleared.
  * Nothing in the tree calls it. */
-void battle_unit_init(battle_unit_t* unit) {
+static void init_battle_unit(battle_unit_t* unit) {
     refresh_stats(unit, 0, 1);
 }
 
@@ -1735,10 +2402,9 @@ static void refresh_stats(battle_unit_t* unit, s32 skip_status_check, s32 initia
     job = &g_job_data_pointer[unit->job_id];
     unit->move = job->move;
     unit->jump = job->jump & JOB_JUMP_VALUE_MASK;
-    mem_copy_bytes_source_first(
-        job->equipment_categories, unit->equipment_categories, sizeof(job->equipment_categories));
-    mem_copy_bytes_source_first(&job->status_sets, &unit->status_sets, sizeof(job->status_sets));
-    mem_copy_bytes_source_first(job->elemental_affinity, unit->elemental_affinity, sizeof(job->elemental_affinity));
+    copy_bytes_source_first(job->equipment_categories, unit->equipment_categories, sizeof(job->equipment_categories));
+    copy_bytes_source_first(&job->status_sets, &unit->status_sets, sizeof(job->status_sets));
+    copy_bytes_source_first(job->elemental_affinity, unit->elemental_affinity, sizeof(job->elemental_affinity));
     unit->elemental_affinity[ELEMENTAL_AFFINITY_STRENGTHEN] = 0;
     enable_rsm_flags(unit);
     apply_movement_bonuses(unit, 1);
@@ -2083,7 +2749,7 @@ u32 job_calculate_level(u16 job_jp) {
 
 /* Pack each pair of job levels from the jobs' total JP: the first job of a pair in the high
  * nibble, the second in the low. */
-void job_calculate_levels_from_jp(
+static void calculate_job_levels_from_jp(
     const unit_job_point_table_t* unit_job_jp, u8 unit_job_levels[UNIT_JOB_LEVEL_BYTE_COUNT]) {
     s32 i;
     s32 level;
@@ -2125,7 +2791,7 @@ void battle_unit_init_status_and_rewards(battle_unit_t* unit, s32 clear_rewards)
 /* The range byte of an ordinary ability's range record; 0 for an id from
  * ABILITY_ID_ITEM_FIRST up, which has no such record. Nothing in the tree
  * calls it. */
-u32 ability_get_range(u32 ability_id) {
+static u32 get_ability_range(u32 ability_id) {
     u16 index = ability_id;
 
     return index < ABILITY_ID_ITEM_FIRST ? g_ability_range_data[index].range : 0;
@@ -2134,7 +2800,7 @@ u32 ability_get_range(u32 ability_id) {
 /* The area-of-effect byte of an ordinary ability's range record; 0 for an id from
  * ABILITY_ID_ITEM_FIRST up, which has no such record. Nothing in the tree calls
  * it. */
-u32 ability_get_aoe(u32 ability_id) {
+static u32 get_ability_aoe(u32 ability_id) {
     u16 index = ability_id;
 
     return index < ABILITY_ID_ITEM_FIRST ? g_ability_range_data[index].aoe : 0;
@@ -2230,7 +2896,7 @@ void action_command_copy(const action_command_t* source, action_command_t* desti
     }
 }
 
-/* A second native entry with the same copy loop as mem_copy_bytes_source_first. */
+/* A second native entry with the same copy loop as copy_bytes_source_first. */
 void mem_copy_byte_data_source_first(const void* source, void* destination, int count) {
     const u8* src = source;
     u8* dst = destination;
@@ -2359,7 +3025,7 @@ s32 status_find_action_priority(const action_data_t* action) {
  *
  * Counts the sign boundaries at or before the day, then rotates the count
  * into zodiac order with (count + 9) % 12. */
-s32 zodiac_calculate_sign(u16 birthday) {
+static s32 calculate_zodiac_sign(u16 birthday) {
     s32 zodiac = 0;
     s32 i;
 

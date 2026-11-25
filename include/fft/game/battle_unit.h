@@ -659,14 +659,10 @@ typedef enum unit_entd_init_kind {
 
 s32 battle_unit_init_from_encounter(battle_unit_t* unit, const struct entd_unit* entd, u32 use_world_text, s32 kind);
 s32 battle_unit_init_from_party_slot(battle_unit_t* unit, s32 slot, s32 use_world_text);
-void battle_unit_generate_raw_stats(battle_unit_t* unit);
-void battle_unit_copy_job_growths(battle_unit_t* unit);
 void battle_unit_init_status_and_rewards(battle_unit_t* unit, s32 clear_rewards);
 void battle_unit_init_position_and_rewards(battle_unit_t* unit, const struct entd_unit* entd);
 void battle_unit_refresh_stats(battle_unit_t* unit);
 void battle_unit_refresh_formation_stats(battle_unit_t* unit);
-s32 battle_unit_generate_random_equipment(
-    const battle_unit_t* unit, u8 item_type_flag, u8 weapon_flag_mask, u8 required_item_type);
 u8 battle_unit_set_sprite_identity(battle_unit_t* unit, u8* palette);
 void battle_unit_set_ability_ct(battle_unit_t* unit);
 s32 battle_unit_try_level_up(battle_unit_t* unit);

@@ -13,7 +13,6 @@ void mem_zero_words(void* buffer, u32 bytes);
 s16 mem_load_unaligned_s16(const u8* ptr);
 
 /* Source-first byte copies; nonpositive counts leave the destination unchanged. */
-void mem_copy_bytes_source_first(const void* source, void* destination, int count);
 void mem_copy_byte_data_source_first(const void* source, void* destination, s32 count);
 
 /* Clear count bytes; nonpositive counts leave the destination unchanged. */

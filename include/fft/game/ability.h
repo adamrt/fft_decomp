@@ -649,7 +649,7 @@ typedef enum ability_formula {
 enum { ABILITY_FORMULA_ID_LIMIT = 101 };
 
 /* Default-ability secondary records, g_ability_range_data.
- * ability_get_range uses the 14-byte stride and the range;
+ * get_ability_range uses the 14-byte stride and the range;
  * action_calculate_target_result reads flags_1,
  * ai_classify_target_ability_effect reads flags_2, and
  * ai_load_ability_entry copies the element, CT and AoE into the
