@@ -23,8 +23,7 @@ units:
   - {name: suzuki_smd_voices, source: src/lib/suzuki/smd_voices.c, data: [{addr: 0x80028fe8, size: 120, hash: b76b6c92808b2147}, {addr: 0x80029060, size: 120, hash: 30da9f7074541cf1}, {addr: 0x800290d8, size: 6144, hash: d3f07a5746f7a2fb}]}
   - {name: suzuki_driver, source: src/lib/suzuki/driver.c, bss: [{addr: 0x80032a3c, size: 4, hash: df3f619804a92fdb}, {addr: 0x80032a40, size: 2, hash: 96a296d224f285c6}]}
   - {name: game_loop, source: src/main/entry.c, data: [{addr: 0x800473a0, size: 1, hash: 4bf5122f344554c5}], bss: [{addr: 0x80047608, size: 4, hash: df3f619804a92fdb}]}
-  - {name: loading_message, source: src/main/loading_message.c, bss: [{addr: 0x8004e5b8, size: 4, hash: df3f619804a92fdb}]}
-  - {name: startup, source: src/main/startup.c, data: [{addr: 0x8004d9b4, size: 4, hash: df3f619804a92fdb}]}
+  - {name: startup, source: src/main/startup.c, data: [{addr: 0x8004d9b4, size: 4, hash: df3f619804a92fdb}], bss: [{addr: 0x8004e5b8, size: 4, hash: df3f619804a92fdb}]}
   - {name: system_callbacks, source: src/main/system_callbacks.c, bss: [{addr: 0x800459b8, size: 4, hash: df3f619804a92fdb}, {addr: 0x800459bc, size: 4, hash: df3f619804a92fdb}, {addr: 0x800459c0, size: 4, hash: df3f619804a92fdb}, {addr: 0x800459c4, size: 4, hash: df3f619804a92fdb}]}
   - {name: sound_requests, source: src/main/sound_requests.c, data: [{addr: 0x80047080, size: 800, hash: 9ac66e2befd1621a}], bss: [{addr: 0x8004599c, size: 4, hash: df3f619804a92fdb}]}
   - {name: heap, source: src/main/heap.c, data: [{addr: 0x8004e9d4, size: 64, hash: f5a5fd42d16a2030}], bss: [{addr: 0x8004e5c0, size: 16, hash: 374708fff7719dd5}]}
@@ -689,9 +688,9 @@ functions:
   - {addr: 0x800409c4, size: 60, name: load_battle_overlay, hash: 9f332892998856cc, unit: game_loop}
   - {addr: 0x80040a00, size: 392, name: system_run_game_loop, hash: a21b6246c7cbd252, unit: game_loop}
   - {addr: 0x80040b88, size: 80, name: main, hash: 5c256ef1eae8d688, unit: game_loop}
-  - {addr: 0x80040bd8, size: 1964, name: loading_message_build, hash: 15501d7711e0aeea, unit: loading_message}
-  - {addr: 0x80041384, size: 36, name: loading_message_build_offset, hash: c119ee540bd1e857, unit: loading_message}
-  - {addr: 0x800413a8, size: 196, name: loading_message_append_to_otag, hash: 5438e0eb0e7a80c7, unit: loading_message}
+  - {addr: 0x80040bd8, size: 1964, name: loading_message_build, hash: 15501d7711e0aeea, unit: startup}
+  - {addr: 0x80041384, size: 36, name: loading_message_build_offset, hash: c119ee540bd1e857, unit: startup}
+  - {addr: 0x800413a8, size: 196, name: loading_message_append_to_otag, hash: 5438e0eb0e7a80c7, unit: startup}
   - {addr: 0x8004146c, size: 300, name: gfx_load_debug_font, hash: 02911c7008f10711, unit: startup}
   - {addr: 0x80041598, size: 476, name: set_up_display, hash: 8715c0b670c3f523, unit: startup, rodata: [{addr: 0x8004091c, size: 8, hash: b6d79f3197c64574}]}
   - {addr: 0x80041774, size: 284, name: draw_squaresoft_logo, hash: 8a5c9395c78d9abc, unit: startup}
