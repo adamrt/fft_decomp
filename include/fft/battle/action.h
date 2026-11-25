@@ -99,7 +99,6 @@ enum { ACTION_EXP_CHANGE_VALUE_MASK = 0x7f, ACTION_EXP_CHANGE_LOSS = 0x80 };
 enum { ACTION_VALUE_MAX = 999 };
 
 void action_reset_result(action_data_t* action);
-void action_finalize_target_result(void);
 s32 action_apply_target_result(s32 battle_unit_id);
 s32 action_apply_attacker_result(s32 unit_id);
 
@@ -249,7 +248,6 @@ void action_finish_actor(battle_unit_t* unit);
 s32 action_resolve_strike(s32 battle_unit_id, action_strike_work_t* work);
 void action_store_used_weapon(action_command_t* action);
 s32 action_calculate_target_result(const action_command_t* source, u8 target_id);
-void action_recalculate_target_result_as_attack(void);
 void action_start_target_response(map_unit_t* attacker, map_unit_t* target);
 s32 action_map_unit_start_target_response(s32 map_unit_id);
 void action_store_ability_targets(u8* src);

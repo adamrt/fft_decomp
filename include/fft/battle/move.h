@@ -258,7 +258,6 @@ enum { MOVE_KNOCKBACK_KIND_MASK = 0x7f, MOVE_KNOCKBACK_PENDING = 0x80 };
 
 void move_start_knockback(const map_unit_t* src, map_unit_t* dst);
 void move_update_knockback(map_unit_t* unit);
-void move_cancel_knockback(void);
 
 /* Move-Find items and traps */
 typedef enum move_find_trap_id {
