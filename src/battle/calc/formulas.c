@@ -1,12 +1,12 @@
 /* BATTLE's ability formulas and strike resolution: accuracy, zodiac compatibility, elemental damage, stat
  * modifiers and base damage; shared result modifiers and direct ability effects; the ability-formula
  * catalog that s_formulas dispatches; and the resolution of each strike through reactions, knockback
- * and the final stat, equipment and reward changes. The original compiled all of it as one object. */
+ * and the final stat, equipment and reward changes; then action outcomes, Mime copies, rewards, target
+ * lists and the AI simulation state. The original compiled all of it as one object. */
 
 #include "fft/battle/action.h"
 #include "fft/battle/ai.h"
 #include "fft/battle/command.h"
-#include "fft/battle/formula.h"
 #include "fft/battle/move.h"
 #include "fft/battle/reaction.h"
 #include "fft/battle/reward.h"
@@ -27,15 +27,6 @@
 #include "fft/sys/memory.h"
 #include "psx/libc.h"
 #include "psx/types.h"
-
-/* Chances in 100 of a critical hit and of a weapon's added effect. */
-enum { FORMULA_CRITICAL_HIT_CHANCE = 4, FORMULA_ADDED_EFFECT_CHANCE = 19 };
-
-typedef enum formula_facing_modifier {
-    FORMULA_FACING_FRONT = 0,
-    FORMULA_FACING_SIDE = 1,
-    FORMULA_FACING_BACK = 2
-} formula_facing_modifier_e;
 
 static s32 check_knockback_destination(s32 direction, s32 x, s32 y);
 static void calculate_transparent_evade(void);
@@ -75,6 +66,20 @@ static void apply_jp_change(battle_unit_t* unit);
 static void update_control_status(battle_unit_t* unit);
 static void apply_removals(s32 unit_idx);
 static void apply_inflictions(s32 unit_id, s32 removal_only);
+static s32 add_war_funds(battle_unit_t* unit, s32 total, u8 item_id);
+static void apply_exp_change(battle_unit_t* unit, u8 amount);
+static void remove_ability_target(s32 target_battle_unit_id);
+static s32 get_random(void);
+static s32 roll_random_at_least(s32 limit, s32 threshold);
+
+/* Chances in 100 of a critical hit and of a weapon's added effect. */
+enum { FORMULA_CRITICAL_HIT_CHANCE = 4, FORMULA_ADDED_EFFECT_CHANCE = 19 };
+
+typedef enum formula_facing_modifier {
+    FORMULA_FACING_FRONT = 0,
+    FORMULA_FACING_SIDE = 1,
+    FORMULA_FACING_BACK = 2
+} formula_facing_modifier_e;
 
 /* accuracy and damage */
 
@@ -920,7 +925,7 @@ static void store_weapon_xa_ya(void) {
     } else if (type == ITEM_TYPE_STAFF || type == ITEM_TYPE_STICK) {
         g_action_work.xa = ma;
     } else if (type == ITEM_TYPE_AXE || type == ITEM_TYPE_HAMMER || type == ITEM_TYPE_BAG) {
-        g_action_work.xa = pa * formula_get_random() / 0x8000 + 1;
+        g_action_work.xa = pa * get_random() / 0x8000 + 1;
     } else if (type == ITEM_TYPE_INSTRUMENT || type == ITEM_TYPE_DICTIONARY || type == ITEM_TYPE_CLOTH) {
         g_action_work.xa = (pa + ma) >> 1;
     }
@@ -1142,9 +1147,9 @@ static void calculate_critical_hit(void) {
     s32 rnd;
     s16 base_xa;
 
-    if (formula_roll_random_at_least(100, FORMULA_CRITICAL_HIT_CHANCE) == 0) {
+    if (roll_random_at_least(100, FORMULA_CRITICAL_HIT_CHANCE) == 0) {
         g_action_target_data->critical = 1;
-        rnd = formula_get_random();
+        rnd = get_random();
         base_xa = g_action_work.xa;
         g_action_work.xa = base_xa + rnd * base_xa / 32768;
         calculate_knockback();
@@ -1244,7 +1249,7 @@ static void calculate_stolen_gil(void) {
  * Steal Exp.: take attacker Speed + Y EXP, at most 100 and at most the target's
  * EXP; nothing to take is a forced miss. The attacker gains the amount; the
  * target's exp_change carries it with ACTION_EXP_CHANGE_LOSS, the flag
- * reward_apply_exp_change tests.
+ * apply_exp_change tests.
  */
 static void set_exp_stolen(void) {
     u8 amount = g_action_attacker->attributes[UNIT_ATTRIBUTE_SPEED] + g_action_work.range_data.y;
@@ -1281,14 +1286,14 @@ static void apply_damage_and_knockback(void) {
     s32 damage;
     s32 roll;
 
-    damage = (formula_get_random() * g_action_work.range_data.y / 32768 + 1) * (u16)g_action_work.xa;
+    damage = (get_random() * g_action_work.range_data.y / 32768 + 1) * (u16)g_action_work.xa;
     action = g_action_target_data;
     action->attack_type = ACTION_TYPE_HP_DAMAGE;
     action->hp_damage = damage;
     if (g_action_state != ACTION_STATE_EXECUTE) {
         return;
     }
-    roll = (formula_get_random() * g_action_attacker->brave) / 32768;
+    roll = (get_random() * g_action_attacker->brave) / 32768;
     if (random_roll_pass_fail(g_action_target->brave, roll) == 0) {
         calculate_knockback();
     }
@@ -1768,7 +1773,7 @@ static void select_magic_gun_ability(void) {
     s32 roll;
 
     element = g_action_work.weapon_data.element;
-    roll = formula_get_random();
+    roll = get_random();
     pct = (roll * 100) / 0x8000;
     if (element & ELEMENT_FIRE) {
         if (pct < 10) {
@@ -2034,7 +2039,7 @@ static void formula_apply_status_to_action(void) {
             }
         }
 
-        selected_status = status_ids[(formula_get_random() * count) / 32768];
+        selected_status = status_ids[(get_random() * count) / 32768];
         g_action_target_data->status_changes.infliction[selected_status / 8] |= 0x80 >> (selected_status & 7);
     } else if (type & STATUS_INFLICTION_TYPE_SEPARATE) {
         for (status = 0; status < STATUS_COUNT; status++) {
@@ -3068,7 +3073,7 @@ static void formula_repeating_fist(void) {
     apply_physical_modifiers_without_supports();
     calculate_critical_hit();
     store_xa_plus_ya();
-    g_action_work.random_damage_factor = formula_get_random() * g_action_work.range_data.x / 32768 + 1;
+    g_action_work.random_damage_factor = get_random() * g_action_work.range_data.x / 32768 + 1;
     g_action_target_data->hp_damage = g_action_target_data->hp_damage * g_action_work.random_damage_factor;
     g_action_target_data->attack_type = ACTION_TYPE_HP_DAMAGE;
 }
@@ -3242,7 +3247,7 @@ static void formula_phoenix_down(void) {
         g_action_target_data->hp_damage = unit->hp;
     } else {
         g_action_target_data->hp_damage
-            = formula_get_random() * g_item_secondary_data[g_action_work.used_item_id].z / 32768 + 1;
+            = get_random() * g_item_secondary_data[g_action_work.used_item_id].z / 32768 + 1;
     }
     convert_hp_damage_to_healing();
 }
@@ -4176,7 +4181,7 @@ static void finalize_target_result(void) {
         invalid = 1;
     }
     if (invalid != 0) {
-        action_remove_ability_target(g_action_target->battle_unit_id);
+        remove_ability_target(g_action_target->battle_unit_id);
         reset_current_results();
         clear_pending_proc();
         cancel_knockback();
@@ -4405,8 +4410,8 @@ s32 action_apply_target_result(s32 battle_unit_id) {
     if (g_action_target_data->gil_change != 0 || g_action_target_data->exp_change != 0) {
         outcome |= 1;
     }
-    reward_add_war_funds(g_action_target, g_action_target_data->gil_change, ITEM_ID_NOTHING);
-    reward_apply_exp_change(g_action_target, g_action_target_data->exp_change);
+    add_war_funds(g_action_target, g_action_target_data->gil_change, ITEM_ID_NOTHING);
+    apply_exp_change(g_action_target, g_action_target_data->exp_change);
     if (g_action_target_data->jp_change != 0) {
         apply_jp_change(g_action_target);
     }
@@ -5615,4 +5620,622 @@ static void apply_inflictions(s32 unit_id, s32 removal_only) {
         }
     }
     status_refresh_current(g_action_target);
+}
+
+/* action outcomes */
+
+/* Provisional: written only by the uncalled store_acting_unit_value; never read. */
+extern u8 g_action_acting_unit_value;
+
+/* The copy of g_action_mimic_attacker that ai_simulation_begin saves and ai_simulation_end restores. */
+extern action_mimic_attacker_t g_ai_mimic_attacker_backup;
+
+extern u8 g_action_ability_target_list[MAP_UNIT_SLOT_COUNT];
+
+/* Enter AI action simulation, save the current attacker and clear Hamedo state. */
+void ai_simulation_begin(void) {
+    g_action_state = ACTION_STATE_AI_SIMULATION;
+    g_reaction_hamedo_flag = 0;
+    mem_copy_byte_data_source_first(
+        &g_action_mimic_attacker, &g_ai_mimic_attacker_backup, sizeof(g_action_mimic_attacker));
+}
+
+/* End an AI simulation: copy the saved current-attacker block back and return
+ * the action state to execute. */
+void ai_simulation_end(void) {
+    g_action_state = ACTION_STATE_EXECUTE;
+    mem_copy_byte_data_source_first(
+        &g_ai_mimic_attacker_backup, &g_action_mimic_attacker, sizeof(g_action_mimic_attacker));
+}
+
+/* Current weather as seen by damage and movement rules: none when the map
+ * ignores weather (indoors), otherwise the weather script variable, with rain
+ * and storms moved to the matching snow values on a map flagged for snow. */
+s32 weather_get_effective(void) {
+    s32 weather = script_variable_get(SCRIPT_VAR_WEATHER);
+    u32 flags = g_weather_flags;
+
+    if (flags & WEATHER_FLAG_IGNORE_WEATHER) {
+        return WEATHER_NONE;
+    }
+    if (weather < WEATHER_RAIN) {
+        return weather;
+    }
+    if (flags & WEATHER_FLAG_SNOW) {
+        weather += WEATHER_SNOW_OFFSET;
+    }
+    return weather;
+}
+
+enum {
+    ABILITY_LEARN_ON_HIT_ROLL_MAXIMUM = 100,
+    ABILITY_LEARN_ON_HIT_ROW_BYTES = 3,
+    ABILITY_LEARN_ON_HIT_ABILITY_COUNT = 24
+};
+
+/* Find a unit that learns the ability it was just hit with.
+ *
+ * Only an ability flagged Learn on Hit qualifies, and nothing is learned when
+ * Hamedo pre-empted the action. Each unit other than the attacker that the
+ * action affected is marked LEARN_CHECKED; a non-monster without a
+ * reaction-preventing status learns the ability when it is in the unit's
+ * primary skillset and not yet learned in its current job, on a learn-rate
+ * roll out of 100. Returns the first learner's slot and writes the ability id
+ * through `ability_id`, or -1 when nobody learns it. */
+s32 ability_find_learn_on_hit_unit(s32 attacker_id, u16* ability_id) {
+    u8 known[ABILITY_LEARN_ON_HIT_ROW_BYTES];
+    ability_data_t* ability;
+    battle_unit_t* unit;
+    s32 i;
+    s32 j;
+    s32 row;
+    s32 byte_index;
+    s32 bit;
+    s32 k;
+    u8 skillset;
+
+    if (g_reaction_hamedo_flag != 0) {
+        return -1;
+    }
+    if (g_action_actor_used_ability_id == 0) {
+        return -1;
+    }
+
+    ability = &g_ability_data[g_action_actor_used_ability_id];
+    if (!(ability->type_flags & ABILITY_TYPE_FLAG_LEARN_ON_HIT)) {
+        return -1;
+    }
+
+    for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
+        if (attacker_id != i) {
+            unit = &g_battle_units[i];
+            if (unit->ability_outcome & UNIT_ABILITY_OUTCOME_AFFECTED) {
+                unit->ability_outcome = UNIT_ABILITY_OUTCOME_LEARN_CHECKED;
+                if (!(unit->unit_flags & UNIT_FLAG_MONSTER)
+                    && status_has_any_in_check_set(unit, STATUS_CHECK_SET_PREVENT_REACTION) == 0) {
+                    skillset = unit->primary_skillset;
+                    row = unit->job_id;
+                    if (row < JOB_ID_SQUIRE) {
+                        row = 0;
+                    } else {
+                        row = row - JOB_ID_SQUIRE;
+                    }
+                    for (k = 0; k < ABILITY_LEARN_ON_HIT_ROW_BYTES; k++) {
+                        known[k] = unit->career.learned_abilities[row][k];
+                    }
+
+                    /* Ability j of the skillset is learned when bit 7 - j % 8 of
+                     * byte j / 8 of the job's row is set. */
+                    for (j = 0; j < ABILITY_LEARN_ON_HIT_ABILITY_COUNT; j++) {
+                        byte_index = j / 8;
+                        bit = 0x80 >> (j - byte_index * 8);
+                        if (known[byte_index] & bit) {
+                            continue;
+                        }
+                        if ((skillset_get_ability_id(skillset, j) & 0xffff) != g_action_actor_used_ability_id) {
+                            continue;
+                        }
+                        if (random_roll_pass_fail(ABILITY_LEARN_ON_HIT_ROLL_MAXIMUM, ability->learn_rate) == 0) {
+                            *ability_id = g_action_actor_used_ability_id;
+                            return i;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return -1;
+}
+
+/* Learn-on-hit: mark the acting unit's used ability as learned in the unit's
+ * current job.
+ *
+ * Walks the 24 abilities of the unit's primary skillset; each one whose id equals
+ * g_action_actor_used_ability_id and is not yet learned gets its bit set
+ * (MSB first, three bytes per job). A job below Squire uses job slot 0. The
+ * learned bits are tested on a copy taken before the walk. */
+void ability_learn_used(battle_unit_t* unit) {
+    u8 learned[ABILITY_LEARN_ON_HIT_ROW_BYTES];
+    u8 skillset;
+    s32 job;
+    s32 i;
+    s32 byte_index;
+    s32 mask;
+    u8* base;
+    u8* learned_byte;
+
+    job = unit->job_id;
+    skillset = unit->primary_skillset;
+    if (job < JOB_ID_SQUIRE) {
+        job = 0;
+    } else {
+        job -= JOB_ID_SQUIRE;
+    }
+    /* Three learned-ability bytes per job, from learned_abilities (0x99). */
+    for (i = 0; i < ABILITY_LEARN_ON_HIT_ROW_BYTES; i++) {
+        learned[i] = unit->career.learned_abilities[job][i];
+    }
+    i = 0;
+    /* Row, unit, then field offset: `learned_abilities[job]` reorders the address sum. */
+    base = (u8*)(((job * 3) + (s32)unit) + offsetof(battle_unit_t, career.learned_abilities));
+    do {
+        byte_index = i / 8;
+        mask = 0x80 >> (i - (byte_index * 8));
+        if (!(learned[byte_index] & mask)) {
+            if ((u16)skillset_get_ability_id(skillset, i) == g_action_actor_used_ability_id) {
+                /* `base[byte_index] |= mask` emits different code. */
+                learned_byte = base + byte_index;
+                *learned_byte = mask | *learned_byte;
+            }
+        }
+        i += 1;
+    } while (i < SKILLSET_ABILITY_LIST_COUNT);
+}
+
+/* Pass a status change on to the unit's display flags
+ * (status_queue_display_flag_change), but only while an action is
+ * executing: previews and AI simulations change no display state.
+ *
+ * status_id is the status handler index (status id + 1). */
+void status_queue_display_flag_change_if_executing(s32 status_id, s32 change_type, s32 battle_unit_id) {
+    if (g_action_state == ACTION_STATE_EXECUTE) {
+        status_queue_display_flag_change(status_id, change_type, battle_unit_id);
+    }
+}
+
+/* Give a player-team unit one of item (Steal, Catch, an unbroken Draw Out katana, a treasure
+ * chest): with 99 already in stock, the item becomes a quarter of its price in war funds instead.
+ * Items 0 and 0xFF, other teams and non-executing states do nothing. */
+s32 item_give(battle_unit_t* unit, u8 item) {
+    if (g_action_state != ACTION_STATE_EXECUTE) {
+        return 0;
+    }
+    if ((unit->initial_team_flags & UNIT_TEAM_MASK) != UNIT_TEAM_BLUE) {
+        return 0;
+    }
+    if (item == ITEM_ID_NOTHING) {
+        return 0;
+    }
+    if (item == ITEM_ID_NONE) {
+        return 0;
+    }
+    if (item_get_total_quantity(item, 1) >= 99) {
+        return add_war_funds(unit, 0, item);
+    }
+    g_item_quantities[item] += 1;
+    return 0;
+}
+
+/* Add total to the war funds, plus a quarter of the item's price when an item
+ * is given (item_give passes one the stock is full of). Only for
+ * a unit currently on the player team and only when executing; the funds stay
+ * within 0..99,999,999. Returns the amount added before that clamp. */
+static s32 add_war_funds(battle_unit_t* unit, s32 total, u8 item_id) {
+    s32 value;
+
+    if (g_action_state != ACTION_STATE_EXECUTE) {
+        return 0;
+    }
+    if (unit->team_flags & UNIT_TEAM_MASK) {
+        return 0;
+    }
+    if (item_id != ITEM_ID_NOTHING) {
+        total += g_item_primary_data[item_id].price >> 2;
+    }
+    value = script_variable_get(SCRIPT_VAR_WAR_FUNDS) + total;
+    if (value > EVENT_WAR_FUNDS_MAX) {
+        value = EVENT_WAR_FUNDS_MAX;
+    } else if (value < 0) {
+        value = 0;
+    }
+    script_variable_set(SCRIPT_VAR_WAR_FUNDS, value);
+    return total;
+}
+
+/* Apply an action result's EXP change when executing. Without ACTION_EXP_CHANGE_LOSS
+ * the amount is gained: EXP saturates at 255 and the level-up check runs. With it
+ * the low seven bits are lost, down to 0. */
+static void apply_exp_change(battle_unit_t* unit, u8 amount) {
+    s32 total;
+    u8 capped;
+    s16 reduced;
+
+    if (g_action_state != ACTION_STATE_EXECUTE) {
+        return;
+    }
+    if (!(amount & ACTION_EXP_CHANGE_LOSS)) {
+        total = unit->experience + amount;
+        capped = total;
+        if (total >= 0x100) {
+            capped = 0xFF;
+        }
+        unit->experience = capped;
+        if (battle_unit_try_level_up(unit) != 0) {
+            if (unit->battle_unit_id == g_action_actor_id) {
+                g_action_work.level_gained_flag = 1;
+            }
+        }
+    } else {
+        reduced = unit->experience - (amount & ACTION_EXP_CHANGE_VALUE_MASK);
+        if (reduced < 0) {
+            reduced = 0;
+        }
+        unit->experience = reduced;
+    }
+}
+
+/* Resolve a unit's status changes with the action state set to preview, so no
+ * display change is queued, then return to the execute state. */
+static void resolve_status_changes_in_preview(s32 unit_id, s32 removal_only) {
+    g_action_state = ACTION_STATE_PREVIEW;
+    status_resolve_unit_changes(unit_id, removal_only);
+    g_action_state = ACTION_STATE_EXECUTE;
+}
+
+/*
+ * Remove the statuses the unit's action marks for removal.
+ *
+ * Points g_action_target_data at the unit's action data. Only statuses
+ * the unit currently has are kept in the removal mask; each one gets its CT
+ * cleared and its display removal queued, then the bits are cleared from both
+ * the current and innate status sets.
+ */
+void status_apply_unit_action_removal(battle_unit_t* unit) {
+    s32 i;
+    s32 battle_unit_id;
+    s32 byte_index;
+    s32 mask;
+
+    g_action_target_data = &unit->action;
+    battle_unit_id = unit->battle_unit_id;
+    for (i = 0; i < STATUS_BYTE_COUNT; i++) {
+        g_action_target_data->status_changes.removal[i] &= unit->status_sets.current[i];
+    }
+    for (i = 0; i < STATUS_COUNT; i++) {
+        byte_index = i / 8;
+        mask = 0x80 >> (i & 7);
+        if (g_action_target_data->status_changes.removal[byte_index] & mask) {
+            status_set_ct(unit, i, 0);
+            status_queue_display_flag_change_if_executing(
+                STATUS_HANDLER_INDEX(i), STATUS_DISPLAY_CHANGE_REMOVE, battle_unit_id);
+        }
+    }
+    for (i = 0; i < STATUS_BYTE_COUNT; i++) {
+        unit->status_sets.current[i] &= ~g_action_target_data->status_changes.removal[i];
+        unit->status_sets.innate[i] &= ~g_action_target_data->status_changes.removal[i];
+    }
+}
+
+/* Remove a unit from the current ability's target list, shifting later entries down and filling
+ * the freed last slot with 0xFF. */
+static void remove_ability_target(s32 target_battle_unit_id) {
+    s32 i;
+
+    for (i = 0; i < MAP_UNIT_SLOT_COUNT; i++) {
+        if (g_action_ability_target_list[i] == (target_battle_unit_id & 0xFF)) {
+            for (; i < MAP_UNIT_SLOT_COUNT - 1; i++) {
+                g_action_ability_target_list[i] = g_action_ability_target_list[i + 1];
+            }
+            g_action_ability_target_list[MAP_UNIT_SLOT_COUNT - 1] = 0xFF;
+            return;
+        }
+    }
+}
+
+/* Copy 16 target ids into the current ability's target list. */
+void action_store_ability_targets(u8* src) {
+    s32 i;
+
+    for (i = 0; i < MAP_UNIT_SLOT_COUNT; i++) {
+        g_action_ability_target_list[i] = src[i];
+    }
+}
+
+/* Copy the current ability's 16-entry target list to `out` and return how many
+ * entries hold a unit (anything but 0xff). */
+s32 action_copy_ability_targets(u8* out) {
+    s32 count = 0;
+    s32 i;
+
+    for (i = 0; i < MAP_UNIT_SLOT_COUNT; i++) {
+        u8 target_id = g_action_ability_target_list[i];
+        *out++ = target_id;
+        if (target_id != 0xFF) {
+            count++;
+        }
+    }
+    return count;
+}
+
+/* Store value in g_action_acting_unit_value when unit_id is the acting unit of a primary
+ * (non-reaction) action. */
+static void store_acting_unit_value(s32 unit_id, s8 value) {
+    if (g_action_context == ACTION_CONTEXT_PRIMARY && unit_id == g_action_actor_id) {
+        g_action_acting_unit_value = value;
+    }
+}
+
+/* Random value 0..0x7FFF for the formulas while the action executes; previews and AI simulations
+ * get the midpoint 0x4000, so projected results use an average roll. */
+static s32 get_random(void) {
+    if (g_action_state != ACTION_STATE_EXECUTE) {
+        return 0x4000;
+    }
+    return rand();
+}
+
+/* Return 1 when a random value in [0, limit) is at least threshold, otherwise 0. */
+static s32 roll_random_at_least(s32 limit, s32 threshold) {
+    return (get_random() * limit) / 32768 >= threshold;
+}
+
+/* Empty. Called when the acting unit's own action has ended, with its stats and the quadrant
+ * (0 to 3) its sprite faces. */
+void action_post_action_facing_stub(battle_unit_t* unused_unit, s32 unused_facing) {
+}
+
+/* Record the acting unit's action for Mimes to copy: the action itself, the
+ * target's offset from the unit, the unit's facing, team and weapons.
+ *
+ * A Mime's own action is not recorded. For a tile target only the low byte of
+ * each coordinate is used. */
+void action_mimic_record(battle_unit_t* unit) {
+    battle_unit_t* target;
+    u8 x;
+    u8 y;
+
+    if (unit->job_id == JOB_ID_MIME) {
+        return;
+    }
+    action_command_copy(&unit->action_command, &g_action_mimic_attacker.action);
+    if (unit->action_command.targeting_type == TARGET_TYPE_UNIT) {
+        target = &g_battle_units[unit->action_command.target_id];
+        x = target->x;
+        y = target->position.y;
+    } else {
+        /* Only the low byte of the s16 target coordinates is read. */
+        x = unit->action_command.target_position.vx;
+        y = unit->action_command.target_position.vz;
+    }
+    g_action_mimic_attacker.target_delta_x = x - unit->x;
+    g_action_mimic_attacker.target_delta_y = y - unit->position.y;
+    g_action_mimic_attacker.facing = unit->position.facing;
+    g_action_mimic_attacker.team = unit->team_flags & UNIT_TEAM_MASK;
+    g_action_mimic_attacker.right_hand_weapon_id = unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON];
+    g_action_mimic_attacker.left_hand_weapon_id = unit->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON];
+    g_action_mimic_attacker.mimic_pending = 1;
+}
+
+/* Set up a Mime's copy of the recorded action (g_action_mimic_attacker).
+ * The Mime must share the actor's team, not be the actor and not be prevented
+ * from reacting; a default, Math Skill or monster ability flagged Cannot
+ * Mimic is refused. The Mime repeats the action from its own tile, with the
+ * target offset turned by its facing relative to the actor's, and takes the
+ * actor's weapons.
+ *
+ * Returns 0 for an ineligible unit, -1 if targeting or preview fails, and 1
+ * on success. Targeting fails when the panel routine finds no target, or when
+ * the copied target tile is outside the ability's range; failed targeting or
+ * preview clears both borrowed weapon slots. The preview runs in the preview
+ * action state and then drops any charge, Jump or Performing it started.
+ *
+ * The menu type stays byte-sized, and the facing subtraction and action-field
+ * assignments retain the target's evaluation order. The tile index and saved
+ * action state share a temporary because their lifetimes do not overlap.
+ */
+s32 action_mimic_prepare(battle_unit_t* unit) {
+    action_command_t action;
+    action_command_t* current;
+    s32 x;
+    s32 y;
+    s32 layer;
+    s32 direction;
+    u8 menu_type;
+    s32 result;
+    s32 saved_state;
+    s32 weapon_id;
+    s32 unit_id;
+    s32 attacker_facing;
+    s32 ability_id;
+    s32 facing;
+
+    current = &g_action_mimic_attacker.action;
+    if (reaction_is_prevented(unit) != 0) {
+        return 0;
+    }
+    if ((unit->team_flags & UNIT_TEAM_MASK) != g_action_mimic_attacker.team) {
+        return 0;
+    }
+    if (unit->battle_unit_id == current->actor_id) {
+        return 0;
+    }
+    menu_type = g_command_menu_types_by_skillset[current->skillset_id];
+    /* The target loads the ability id signed (lh). */
+    ability_id = g_action_mimic_attacker.action.ability_id;
+    if (menu_type == ACTION_MENU_TYPE_DEFAULT || menu_type == ACTION_MENU_TYPE_MATH_SKILL
+        || menu_type == ACTION_MENU_TYPE_MONSTER) {
+        if (g_ability_range_data[ability_id].flags_3 & ABILITY_SECONDARY_FLAG_3_CANNOT_MIMIC) {
+            return 0;
+        }
+    }
+    /* Quarter turns from the actor's facing to the Mime's, kept non-negative by
+     * the extra 4; a Jump picks its landing layer by height (bit 8). */
+    facing = unit->position.facing;
+    attacker_facing = g_action_mimic_attacker.facing - 4;
+    direction = facing - attacker_facing;
+    if (menu_type == ACTION_MENU_TYPE_JUMP) {
+        direction |= 0x100;
+    }
+    if (target_resolve_rotated_offset_layer(unit, g_action_mimic_attacker.target_delta_x,
+            g_action_mimic_attacker.target_delta_y, direction, &x, &y, &layer)
+        != 0) {
+        return -1;
+    }
+    action_command_copy(current, &action);
+    action.targeting_type = TARGET_TYPE_TILE;
+    action.actor_id = unit->battle_unit_id;
+    unit_id = unit->battle_unit_id;
+    action.target_position.vx = x;
+    action.target_position.vy = layer;
+    weapon_id = g_action_mimic_attacker.right_hand_weapon_id;
+    action.target_position.vz = y;
+    action.target_id = unit_id;
+    unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON] = weapon_id;
+    unit->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON] = g_action_mimic_attacker.left_hand_weapon_id;
+    result = target_set_range_for_action(&action);
+    /* A byte flag test retains the original compound-condition scheduling. */
+    if (result == TARGET_PANELS_INVALID || result == TARGET_PANELS_NONE
+        || (result < TARGET_PANELS_NO_TARGETING
+            && !((*(u8*)&g_map_tile_data[saved_state = (layer << 8) + (g_map_terrain_width * y) + x]
+                         .ceiling_depth_and_marks)
+                & MAP_TILE_FLAG_ABILITY_RANGE))) {
+        unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON] = ITEM_ID_NONE;
+        unit->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON] = ITEM_ID_NONE;
+        return -1;
+    }
+    saved_state = g_action_state;
+    g_action_state = ACTION_STATE_PREVIEW;
+    result = action_prepare(&action, &unit->action_command, 1);
+    unit->charged_ability_ct = 0xff;
+    status_change_unit_flag(unit, 0,
+        STATUS_BYTE_MASK(STATUS_ID_CHARGING) | STATUS_BYTE_MASK(STATUS_ID_JUMP)
+            | STATUS_BYTE_MASK(STATUS_ID_PERFORMING),
+        STATUS_REMOVE);
+    g_action_state = saved_state;
+    if (result < 0) {
+        unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON] = ITEM_ID_NONE;
+        unit->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON] = ITEM_ID_NONE;
+        return -1;
+    }
+    return 1;
+}
+
+/* Rotate a tile offset around the unit and select the destination's terrain
+ * layer.
+ *
+ * The low two bits of `flags` turn (dx, dy) by that many quarter turns. Returns
+ * -1 when the rotated offset leaves the map or lands where both layers are
+ * blocked; otherwise 0 with `*out_layer` selecting the upper (1) or lower (0)
+ * terrain layer. With one layer blocked the other is chosen. Bit 8 of `flags`
+ * picks the higher layer outright; otherwise the layer nearer the height of the
+ * unit's own tile wins, ties going to the higher one. An upper-layer tile sits
+ * 0x100 entries after its lower-layer tile in g_map_tile_data.
+ */
+s32 target_resolve_rotated_offset_layer(
+    battle_unit_t* unit, s32 dx, s32 dy, s32 flags, s32* out_x, s32* out_y, s32* out_layer) {
+    map_tile_t* current;
+    map_tile_t* lower;
+    map_tile_t* upper;
+    s32 index;
+    s32 upper_index;
+    s32 lower_distance;
+    s32 upper_distance;
+    s32 previous;
+    u8 current_height;
+    u8 lower_height;
+    /* The upper tile's blocked bit, then its height: one byte variable, which is
+     * why the first test of the bit keeps its andi 0xff. */
+    u8 upper_value;
+
+    switch (flags & 3) {
+    case 1:
+        previous = dx;
+        dx = dy;
+        dy = -previous;
+        break;
+    case 2:
+        dx = -dx;
+        dy = -dy;
+        break;
+    case 3:
+        previous = dx;
+        dx = -dy;
+        dy = previous;
+        break;
+    }
+    *out_x = unit->x + dx;
+    *out_y = unit->position.y + dy;
+    if (*out_x < 0 || *out_x >= g_map_terrain_width) {
+        return -1;
+    }
+    if (*out_y < 0 || *out_y >= g_map_terrain_depth) {
+        return -1;
+    }
+    current = &g_map_tile_data[battle_unit_get_tile_index(unit)];
+    index = g_map_terrain_width * *out_y + *out_x;
+    upper_index = index + 0x100;
+    upper = &g_map_tile_data[upper_index];
+    lower = &g_map_tile_data[index];
+    upper_value = upper->flags.blocked;
+    if (lower->flags.blocked) {
+        if (upper_value != 0) {
+            return -1;
+        }
+        *out_layer = 1;
+        return 0;
+    }
+    if (upper_value != 0) {
+        *out_layer = 0;
+        return 0;
+    }
+    upper_value = upper->height;
+    current_height = current->height;
+    lower_height = lower->height;
+    if (flags & 0x100) {
+        if (upper_value < lower_height) {
+            *out_layer = 0;
+            return 0;
+        }
+        *out_layer = 1;
+        return 0;
+    }
+    if (lower_height > current_height) {
+        lower_distance = lower_height - current_height;
+    } else {
+        lower_distance = current_height - lower_height;
+    }
+    if (upper_value > current_height) {
+        upper_distance = upper_value - current_height;
+    } else {
+        upper_distance = current_height - upper_value;
+    }
+    if (upper_distance < lower_distance) {
+        *out_layer = 1;
+        return 0;
+    }
+    if (lower_distance < upper_distance) {
+        *out_layer = 0;
+        return 0;
+    }
+    if (upper_value < lower_height) {
+        *out_layer = 0;
+    } else {
+        *out_layer = 1;
+    }
+    return 0;
+}
+
+/* Return the saved action's ability. Nothing in the game calls it. */
+static s16 get_saved_ability(void) {
+    return g_action_saved_command.ability_id;
 }

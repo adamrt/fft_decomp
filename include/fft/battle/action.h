@@ -252,7 +252,6 @@ void action_start_target_response(map_unit_t* attacker, map_unit_t* target);
 s32 action_map_unit_start_target_response(s32 map_unit_id);
 void action_store_ability_targets(u8* src);
 s32 action_copy_ability_targets(u8* out);
-void action_remove_ability_target(s32 target_battle_unit_id);
 void action_post_action_facing_stub(battle_unit_t* unused_unit, s32 unused_facing);
 
 /* Preview action calculation entry run on the main stack. */

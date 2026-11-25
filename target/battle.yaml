@@ -92,7 +92,6 @@ units:
   - {name: turn_order, source: src/battle/calc/clock.c, data: [{addr: 0x8018f8b0, size: 21, hash: c90232586b801f95}]}
   - {name: terrain_data, source: src/battle/calc/terrain.c}
   - {name: formulas, source: src/battle/calc/formulas.c, data: [{addr: 0x8018f600, size: 12, hash: 9b134ab1d56154c2}, {addr: 0x8018f60c, size: 5, hash: d7f2b411424619e0}, {addr: 0x8018f614, size: 400, hash: c0407e5e2ef637ad}], bss: [{addr: 0x801938c0, size: 80, hash: 5b6fb58e61fa4759}]}
-  - {name: action_outcomes, source: src/battle/calc/outcomes.c, data: [{addr: 0x80193868, size: 16, hash: 374708fff7719dd5}], bss: [{addr: 0x8019387c, size: 1, hash: 6e340b9cffb37a98}]}
   - {name: ai_commands, source: src/battle/ai/turn.c, data: [{addr: 0x8019f368, size: 20, hash: de47c9b27eb8d300}, {addr: 0x8019f37c, size: 4, hash: df3f619804a92fdb}, {addr: 0x8019f380, size: 4, hash: df3f619804a92fdb}, {addr: 0x8019f384, size: 4, hash: df3f619804a92fdb}, {addr: 0x8019f388, size: 4, hash: df3f619804a92fdb}, {addr: 0x8019f38c, size: 4, hash: df3f619804a92fdb}, {addr: 0x8019f390, size: 4, hash: df3f619804a92fdb}, {addr: 0x8019f394, size: 4, hash: df3f619804a92fdb}], bss: [{addr: 0x801a0d94, size: 48, hash: 17b0761f87b081d5}]}
   - {name: ai_abilities, source: src/battle/ai/abilities.c}
   - {name: ai_origins, source: src/battle/ai/evaluation.c, data: [{addr: 0x8019f2f8, size: 16, hash: 8a352b5f0c84f16a}, {addr: 0x8019f308, size: 80, hash: 296c781af2dde231}, {addr: 0x8019f358, size: 8, hash: f331c25044999bf9}], bss: [{addr: 0x8019f398, size: 4, hash: df3f619804a92fdb}, {addr: 0x8019f39c, size: 4, hash: df3f619804a92fdb}, {addr: 0x8019f3a0, size: 4, hash: df3f619804a92fdb}, {addr: 0x8019f3a4, size: 4, hash: df3f619804a92fdb}, {addr: 0x8019f3a8, size: 4, hash: df3f619804a92fdb}]}
@@ -1629,28 +1628,28 @@ functions:
   - {addr: 0x8018e1b0, size: 152, name: update_control_status, hash: 0fa45d3d5c21d978, unit: formulas}
   - {addr: 0x8018e248, size: 200, name: apply_removals, hash: a5d7d939d7c7bf82, unit: formulas}
   - {addr: 0x8018e310, size: 724, name: apply_inflictions, hash: 7bf5667111fecdad, unit: formulas}
-  - {addr: 0x8018e5e4, size: 68, name: ai_simulation_begin, hash: fe5832bd488feff2, unit: action_outcomes}
-  - {addr: 0x8018e628, size: 56, name: ai_simulation_end, hash: e8fd203a8ad070a3, unit: action_outcomes}
-  - {addr: 0x8018e660, size: 88, name: weather_get_effective, hash: 83cb512131bff44c, unit: action_outcomes}
-  - {addr: 0x8018e6b8, size: 500, name: ability_find_learn_on_hit_unit, hash: 78408e9469d00e1a, unit: action_outcomes}
-  - {addr: 0x8018e8ac, size: 272, name: ability_learn_used, hash: 98bc0928423ea1a9, unit: action_outcomes}
-  - {addr: 0x8018e9bc, size: 44, name: status_queue_display_flag_change_if_executing, hash: ae28f5eb0645fce2, unit: action_outcomes}
-  - {addr: 0x8018e9e8, size: 176, name: item_give, hash: a77514b9289587a0, unit: action_outcomes}
-  - {addr: 0x8018ea98, size: 184, name: reward_add_war_funds, hash: 9c493bc4b6f1f741, unit: action_outcomes}
-  - {addr: 0x8018eb50, size: 192, name: reward_apply_exp_change, hash: 5311cbc14afdaaa7, unit: action_outcomes}
-  - {addr: 0x8018ec10, size: 52, name: status_resolve_unit_changes_in_preview, hash: 002f07784cca673d, unit: action_outcomes}
-  - {addr: 0x8018ec44, size: 312, name: status_apply_unit_action_removal, hash: c2817a2420e40cea, unit: action_outcomes}
-  - {addr: 0x8018ed7c, size: 124, name: action_remove_ability_target, hash: fef366c43dc1920b, unit: action_outcomes}
-  - {addr: 0x8018edf8, size: 44, name: action_store_ability_targets, hash: dd705760435fb9b2, unit: action_outcomes}
-  - {addr: 0x8018ee24, size: 68, name: action_copy_ability_targets, hash: 1f3bc2c9e57d42cf, unit: action_outcomes}
-  - {addr: 0x8018ee68, size: 56, name: action_store_acting_unit_value, hash: 2547dcc0dde673ee, unit: action_outcomes}
-  - {addr: 0x8018eea0, size: 56, name: formula_get_random, hash: 37dd909945e49420, unit: action_outcomes}
-  - {addr: 0x8018eed8, size: 84, name: formula_roll_random_at_least, hash: c99dd3d0cdcbbc3a, unit: action_outcomes}
-  - {addr: 0x8018ef2c, size: 8, name: action_post_action_facing_stub, hash: 6d64edf91449c1b1, unit: action_outcomes}
-  - {addr: 0x8018ef34, size: 260, name: action_mimic_record, hash: bb46dff727b8a164, unit: action_outcomes}
-  - {addr: 0x8018f038, size: 632, name: action_mimic_prepare, hash: 25e4112e546a10b9, unit: action_outcomes}
-  - {addr: 0x8018f2b0, size: 536, name: target_resolve_rotated_offset_layer, hash: 372085b3eb1ac8b7, unit: action_outcomes}
-  - {addr: 0x8018f4c8, size: 16, name: action_get_saved_ability, hash: 773e1ab4afb742aa, unit: action_outcomes}
+  - {addr: 0x8018e5e4, size: 68, name: ai_simulation_begin, hash: fe5832bd488feff2, unit: formulas}
+  - {addr: 0x8018e628, size: 56, name: ai_simulation_end, hash: e8fd203a8ad070a3, unit: formulas}
+  - {addr: 0x8018e660, size: 88, name: weather_get_effective, hash: 83cb512131bff44c, unit: formulas}
+  - {addr: 0x8018e6b8, size: 500, name: ability_find_learn_on_hit_unit, hash: 78408e9469d00e1a, unit: formulas}
+  - {addr: 0x8018e8ac, size: 272, name: ability_learn_used, hash: 98bc0928423ea1a9, unit: formulas}
+  - {addr: 0x8018e9bc, size: 44, name: status_queue_display_flag_change_if_executing, hash: ae28f5eb0645fce2, unit: formulas}
+  - {addr: 0x8018e9e8, size: 176, name: item_give, hash: a77514b9289587a0, unit: formulas}
+  - {addr: 0x8018ea98, size: 184, name: add_war_funds, hash: 9c493bc4b6f1f741, unit: formulas}
+  - {addr: 0x8018eb50, size: 192, name: apply_exp_change, hash: 5311cbc14afdaaa7, unit: formulas}
+  - {addr: 0x8018ec10, size: 52, name: resolve_status_changes_in_preview, hash: 002f07784cca673d, unit: formulas}
+  - {addr: 0x8018ec44, size: 312, name: status_apply_unit_action_removal, hash: c2817a2420e40cea, unit: formulas}
+  - {addr: 0x8018ed7c, size: 124, name: remove_ability_target, hash: fef366c43dc1920b, unit: formulas}
+  - {addr: 0x8018edf8, size: 44, name: action_store_ability_targets, hash: dd705760435fb9b2, unit: formulas}
+  - {addr: 0x8018ee24, size: 68, name: action_copy_ability_targets, hash: 1f3bc2c9e57d42cf, unit: formulas}
+  - {addr: 0x8018ee68, size: 56, name: store_acting_unit_value, hash: 2547dcc0dde673ee, unit: formulas}
+  - {addr: 0x8018eea0, size: 56, name: get_random, hash: 37dd909945e49420, unit: formulas}
+  - {addr: 0x8018eed8, size: 84, name: roll_random_at_least, hash: c99dd3d0cdcbbc3a, unit: formulas}
+  - {addr: 0x8018ef2c, size: 8, name: action_post_action_facing_stub, hash: 6d64edf91449c1b1, unit: formulas}
+  - {addr: 0x8018ef34, size: 260, name: action_mimic_record, hash: bb46dff727b8a164, unit: formulas}
+  - {addr: 0x8018f038, size: 632, name: action_mimic_prepare, hash: 25e4112e546a10b9, unit: formulas}
+  - {addr: 0x8018f2b0, size: 536, name: target_resolve_rotated_offset_layer, hash: 372085b3eb1ac8b7, unit: formulas}
+  - {addr: 0x8018f4c8, size: 16, name: get_saved_ability, hash: 773e1ab4afb742aa, unit: formulas}
   - {addr: 0x80193e50, size: 936, name: ai_build_command, hash: 38386545cdedf7e9, unit: ai_commands}
   - {addr: 0x801941f8, size: 284, name: init_acting_unit, hash: 4666b95d2adad108, unit: ai_commands}
   - {addr: 0x80194314, size: 604, name: refresh_decision_flags, hash: ec5da9cdeda6771d, unit: ai_commands}
@@ -2766,9 +2765,9 @@ data:
   - {addr: 0x80193844, name: g_reward_enemy_level_sum}
   - {addr: 0x80193848, name: g_action_saved_command}
   - {addr: 0x80193860, name: g_action_canceled_statuses}
-  - {addr: 0x80193868, name: s_ability_target_list}
+  - {addr: 0x80193868, name: g_action_ability_target_list}
   - {addr: 0x80193878, name: g_reaction_distribute_target_count}
-  - {addr: 0x8019387c, name: s_action_acting_unit_value}
+  - {addr: 0x8019387c, name: g_action_acting_unit_value}
   - {addr: 0x80193880, name: g_unit_relocated_coords}
   - {addr: 0x80193898, name: g_reward_player_unit_fallen}
   - {addr: 0x8019389c, name: g_action_mimic_attacker}

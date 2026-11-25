@@ -23,11 +23,9 @@ typedef char action_reward_display_size_must_be_4[(sizeof(action_reward_display_
 
 s32 reward_apply_exp_and_jp(s32 unit_index, action_reward_display_t* display);
 s32 reward_apply_result_and_collect(battle_unit_t* unit, action_reward_display_t* rewards);
-void reward_apply_exp_change(battle_unit_t* unit, u8 amount);
 s32 reward_get_job_level(battle_unit_t* unit, s32 job_id, s32* out_slot);
 s32 reward_add_job_jp(s32 unit_index, s32 jp, s32 team, s32 slot);
 u8 reward_calculate_move_get_amount(const battle_unit_t* unit);
-s32 reward_add_war_funds(battle_unit_t* unit, s32 total, u8 item_id);
 
 /* war trophies and bonus money */
 /* War trophies and bonus money of the battle's units, filled by
