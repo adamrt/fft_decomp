@@ -24,9 +24,7 @@ units:
   - {name: game_loop, source: src/main/entry.c, data: [{addr: 0x800473a0, size: 1, hash: 4bf5122f344554c5}], bss: [{addr: 0x80047608, size: 4, hash: df3f619804a92fdb}]}
   - {name: startup, source: src/main/startup.c, data: [{addr: 0x8004d9b4, size: 4, hash: df3f619804a92fdb}], bss: [{addr: 0x8004e5b8, size: 4, hash: df3f619804a92fdb}]}
   - {name: system, source: src/main/system.c, data: [{addr: 0x80047080, size: 800, hash: 9ac66e2befd1621a}], bss: [{addr: 0x800459b8, size: 4, hash: df3f619804a92fdb}, {addr: 0x800459bc, size: 4, hash: df3f619804a92fdb}, {addr: 0x800459c0, size: 4, hash: df3f619804a92fdb}, {addr: 0x800459c4, size: 4, hash: df3f619804a92fdb}]}
-  - {name: system_handlers, source: src/main/system_handlers.c, data: [{addr: 0x8004c6c4, size: 4, hash: df3f619804a92fdb}]}
-  - {name: battle_otag, source: src/main/battle_otag.c}
-  - {name: save_state, source: src/main/save_state.c, rodata: [{addr: 0x800473b0, size: 4, hash: 27d9bda8887f41f6}], bss: [{addr: 0x8005771c, size: 1024, hash: 5f70bf18a0860070}]}
+  - {name: save_state, source: src/main/save_state.c, rodata: [{addr: 0x800473b0, size: 4, hash: 27d9bda8887f41f6}], data: [{addr: 0x8004c6c4, size: 4, hash: df3f619804a92fdb}], bss: [{addr: 0x8005771c, size: 1024, hash: 5f70bf18a0860070}]}
   - {name: zodiac_primitives, source: src/lib/menu/unit_view/zodiac_primitives.c}
   - {name: frame_graphics, source: src/main/frame_graphics.c, data: [{addr: 0x80047598, size: 8, hash: 37cd35309c7e000f}, {addr: 0x800475a0, size: 8, hash: 6590074fb72aab6f}, {addr: 0x800475a8, size: 8, hash: 1c46d0293ec224c0}]}
   - {name: world_overlay, source: src/main/world_overlay.c, profile: gcc-2.6.3_O2_aspsx-2.21, data: [{addr: 0x80059594, size: 280, hash: 1f6c9de2e555d5d5}]}
@@ -759,12 +757,12 @@ functions:
   - {addr: 0x80044954, size: 60, name: file_load_into_buffer_checked, hash: e4a2578d2206edfb, unit: system}
   - {addr: 0x80044990, size: 60, name: file_load_into_heap_checked, hash: f704f1ec47fb6ed5, unit: system}
   - {addr: 0x800449cc, size: 32, name: heap_release_block, hash: 68e41579281fa6e2, unit: system}
-  - {addr: 0x800449f8, size: 8, name: system_report, hash: 6d64edf91449c1b1, unit: system_handlers}
-  - {addr: 0x80044a00, size: 8, name: system_report_error, hash: 6d64edf91449c1b1, unit: system_handlers}
-  - {addr: 0x80044a08, size: 44, name: system_handle_error, hash: 0520ba9fd79942b9, unit: system_handlers}
-  - {addr: 0x80044a34, size: 44, name: system_handle_pointer_exception, hash: c49c56d6a872179f, unit: system_handlers}
-  - {addr: 0x80044a60, size: 28, name: gfx_get_battle_otag, hash: 0e1f986e004b6e64, unit: battle_otag}
-  - {addr: 0x80044a7c, size: 80, name: gfx_swap_render_buffers, hash: 676737da60ea151b, unit: battle_otag}
+  - {addr: 0x800449f8, size: 8, name: system_report, hash: 6d64edf91449c1b1, unit: save_state}
+  - {addr: 0x80044a00, size: 8, name: system_report_error, hash: 6d64edf91449c1b1, unit: save_state}
+  - {addr: 0x80044a08, size: 44, name: system_handle_error, hash: 0520ba9fd79942b9, unit: save_state}
+  - {addr: 0x80044a34, size: 44, name: system_handle_pointer_exception, hash: c49c56d6a872179f, unit: save_state}
+  - {addr: 0x80044a60, size: 28, name: gfx_get_battle_otag, hash: 0e1f986e004b6e64, unit: save_state}
+  - {addr: 0x80044a7c, size: 80, name: gfx_swap_render_buffers, hash: 676737da60ea151b, unit: save_state}
   - {addr: 0x80044acc, size: 156, name: save_init_state, hash: 57c6eff374a797aa, unit: save_state}
   - {addr: 0x80044b68, size: 56, name: overlay_call_battle_return_zero, hash: b6dd21cc43c9dca5, unit: save_state}
   - {addr: 0x80044ba0, size: 736, name: zodiac_build_sprite_polygon, hash: 37eac014a0b6e39f, source: src/lib/menu/unit_view/zodiac_sprite.c}
