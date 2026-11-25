@@ -711,6 +711,14 @@ s32 ai_simulate_and_score_action(void);
 void ai_classify_tile_pickup(void);
 
 /* facing */
+/* Only the four cardinal hints index the tile-delta table. */
+enum { AI_CARDINAL_DIRECTION_COUNT = 4 };
+
+/* Cardinal map-tile deltas stored as wrapping unsigned bytes. */
+typedef struct facing_tile_offsets {
+    u8 by_direction[AI_CARDINAL_DIRECTION_COUNT][2];
+} facing_tile_offsets_t;
+
 typedef enum ai_direction {
     AI_DIRECTION_SOUTH = 0,
     AI_DIRECTION_WEST = 1,
@@ -719,6 +727,8 @@ typedef enum ai_direction {
     AI_DIRECTION_OVERLAP = 4,
     AI_DIRECTION_CHOOSE_AT_WAIT = 5
 } ai_direction_e;
+
+extern facing_tile_offsets_t g_ai_facing_tile_offsets;
 
 s32 ai_choose_wait_facing(void);
 ai_direction_e ai_find_target_facing(const ai_coords_t* target, const ai_coords_t* origin);

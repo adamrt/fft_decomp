@@ -30,14 +30,6 @@ typedef enum tile_mask_mode {
 /* Baseline records include action/equipment data; simulated status uses the compact records. */
 typedef enum snapshot_mode { AI_SNAPSHOT_BASELINE = 0, AI_SNAPSHOT_SIMULATED_STATUS = 1 } snapshot_mode_e;
 
-/* Only the four cardinal hints index the tile-delta table. */
-enum { AI_CARDINAL_DIRECTION_COUNT = 4 };
-
-/* Cardinal map-tile deltas stored as wrapping unsigned bytes. */
-typedef struct facing_tile_offsets {
-    u8 by_direction[AI_CARDINAL_DIRECTION_COUNT][2];
-} facing_tile_offsets_t;
-
 static s32 s_ai_origin_self_target_stage;
 /* Origin masks, Math Skill iteration and facing offsets. */
 static s32 s_ai_math_skillset_index;
@@ -56,7 +48,7 @@ static s16 s_status_priority_weights[STATUS_COUNT]
     = { 0, -192, -192, -39, 0, 0, 0, 0, -116, -231, -64, -64, -90, -116, 0, -192, -7, 12, 51, 38, -39, -26, -52, -32,
           -26, 25, 25, 25, 19, -39, -90, 64, 6, -7, -64, -39, -39, -64, 25, -103 };
 
-static facing_tile_offsets_t s_facing_tile_offsets = { { { 0, 0xff }, { 0xff, 0 }, { 0, 1 }, { 1, 0 } } };
+facing_tile_offsets_t g_ai_facing_tile_offsets = { { { 0, 0xff }, { 0xff, 0 }, { 0, 1 }, { 1, 0 } } };
 
 static void build_monster_skill_mask(void);
 
@@ -88,8 +80,6 @@ static void finalize_origin_destination(void);
 
 static s32 find_unit_on_target_panel(void);
 
-static s32 is_facing_tile_rejected(const ai_coords_t* source, const ai_coords_t* target);
-
 static s32 can_unit_move_after_delay(s32 limit, s32 unit_id);
 
 static void restore_simulation_unit_state(snapshot_mode_e mode);
@@ -103,195 +93,6 @@ static void simulate_movement_pickup(void);
 static void simulate_strikes(action_command_t* action, s32 reaction_mode);
 
 static void take_next_origin(void);
-
-/* Copy byte_count bytes as 16-bit values (an odd last byte is dropped); the AI's
- * copier for its tile maps and action records. */
-void ai_mem_copy_u16_values(void* destination, const void* source, s32 byte_count) {
-    u16* dst = destination;
-    const u16* src = source;
-    s32 count = byte_count / 2;
-    s32 i;
-
-    for (i = 0; i < count; i++) {
-        *dst++ = *src++;
-    }
-}
-
-/* Copy len bytes from source to destination; nothing when len is 0 or less. */
-void ai_mem_copy_bytes(void* destination, const void* source, s32 len) {
-    u8* dst = destination;
-    const u8* src = source;
-    s32 end;
-
-    /* The end test compares the addresses as signed integers. */
-    if (len > 0) {
-        end = len + (s32)dst;
-        do {
-            *dst++ = *src++;
-        } while ((s32)dst < end);
-    }
-}
-
-/* Zero byte_count / 4 32-bit values starting at dst. */
-void ai_mem_zero_32bit_values(void* destination, s32 byte_count) {
-    s32* dst = destination;
-    s32 i;
-
-    byte_count /= 4;
-    for (i = 0; i < byte_count; i++) {
-        *dst++ = 0;
-    }
-}
-
-typedef union direction_viability {
-    u32 word;
-    u8 by_direction[AI_CARDINAL_DIRECTION_COUNT];
-} direction_viability_t;
-
-/* Separate locals change the stack slots and coordinate byte stores. */
-typedef struct wait_facing_work {
-    ai_coords_t target_coords;
-    u8 _unused_04[4];
-    direction_viability_t viability;
-    /* Read as viability.by_direction[AI_DIRECTION_OVERLAP] and never
-     * written, so it holds a leftover stack byte (QUIRKS.md). */
-    u8 past_viable_directions;
-} wait_facing_work_t;
-
-/*
- * Choose a facing hint for an AI-controlled unit's Wait command.
- *
- * A hint other than AI_DIRECTION_CHOOSE_AT_WAIT is returned as is. Otherwise
- * face the nearest imminent enemy whose direction is viable, trying each in
- * turn, then the nearest enemy of any kind; a direction is viable when its
- * adjacent tile is on the map, unblocked and not 3 or more higher (all four
- * are when none is). Failing that, keep the current facing if viable, else
- * the last viable direction. The original does not bounds-check the direction
- * lookup, so coincident source and target coordinates can read one byte past
- * the four-byte viability array.
- */
-s32 ai_choose_wait_facing(void) {
-    ai_workspace_t* ai = &g_ai_workspace_storage;
-    wait_facing_work_t work;
-    s32 direction;
-    s32 target_id;
-    s32 acting_unit_id;
-    s32 fallback_direction;
-    s32 tried_any_enemy;
-    s32 facing;
-
-    if (ai->selected_action.wait_facing_hint != AI_DIRECTION_CHOOSE_AT_WAIT)
-        return ai->selected_action.wait_facing_hint;
-
-    ai_copy_unit_coordinates(ai->acting_unit_id, &ai->acting_unit_coords);
-    for (direction = 0; direction < AI_CARDINAL_DIRECTION_COUNT; direction++) {
-        work.target_coords.fields.x
-            = ai->acting_unit_coords.fields.x + s_facing_tile_offsets.by_direction[direction][0];
-        work.target_coords.fields.y
-            = ai->acting_unit_coords.fields.y + s_facing_tile_offsets.by_direction[direction][1];
-        work.target_coords.fields.layer = 0;
-        if (is_facing_tile_rejected(&ai->acting_unit_coords, &work.target_coords) != 0) {
-            work.viability.by_direction[direction] = 0;
-        } else {
-            fallback_direction = direction;
-            work.viability.by_direction[direction] = 1;
-        }
-    }
-    if (work.viability.word == 0)
-        work.viability.word = 0x01010101;
-
-    for (target_id = 0; target_id < BATTLE_UNIT_SLOT_COUNT; target_id++) {
-        ai->targetability.live.unit_targetable[target_id] = 1;
-    }
-    tried_any_enemy = 0;
-    for (;;) {
-        acting_unit_id = ai->acting_unit_id;
-        target_id = ai_find_nearest_target(AI_NEAREST_IMMINENT_ENEMY);
-        if (acting_unit_id == target_id) {
-            target_id = ai_find_nearest_target(AI_NEAREST_ENEMY);
-            tried_any_enemy = 1;
-        }
-        ai_copy_unit_coordinates(target_id, &work.target_coords);
-        direction = ai_find_target_facing(&work.target_coords, &ai->acting_unit_coords);
-        if (work.viability.by_direction[direction] != 0)
-            return direction;
-        if (tried_any_enemy == 0) {
-            ai->targetability.live.unit_targetable[target_id] = 0;
-            continue;
-        }
-        facing = ai->acting_unit->position.facing;
-        if (work.viability.by_direction[facing] == 0)
-            return fallback_direction;
-        return facing;
-    }
-}
-
-/*
- * Reject a facing candidate outside the map or too far above the source.
- *
- * Return 1 for rejection and 0 otherwise. A blocked tile is also rejected.
- * Only the destination's lower layer is checked; a rise of 3 is rejected,
- * but descents are unrestricted. Slope and depth do not affect this test.
- */
-static s32 is_facing_tile_rejected(const ai_coords_t* source, const ai_coords_t* target) {
-    u8 x = target->fields.x;
-    u8 width = g_ai_workspace_storage.terrain_width;
-    u8 y;
-    map_tile_t* tile;
-
-    if (x >= width) {
-        return 1;
-    }
-    y = target->fields.y;
-    if (y >= g_ai_workspace_storage.terrain_depth || (tile = &g_map_tile_data[y * width + x])->flags.blocked) {
-        return 1;
-    }
-    return tile->height
-        - g_map_tile_data[(source->fields.layer * MAP_TILES_PER_LAYER) + source->fields.y * width + source->fields.x]
-              .height
-        >= 3;
-}
-
-/* Reset the selected action's ranking so it is no longer decided, which makes
- * the AI decide afresh on its next command. Called when a turn opens without a
- * scenario event and when a move is interrupted (failed teleport, crystal or
- * treasure pickup, triggered trap). */
-void ai_reset_selected_action(void) {
-    ai_reset_action_rank(&g_ai_workspace_storage.selected_action);
-}
-
-/*
- * Remember a triggered trap unless its tile is already in the cache.
- *
- * Current coordinates and selected-action defaults are updated even when the
- * list is full. Equality includes all four bytes; x == 0xff marks an empty slot.
- * The post-move trap path passes x/layer/y; this routine stores x/y/layer.
- */
-void ai_store_triggered_trap_coords(s32 x, s32 y, s32 level) {
-    ai_workspace_t* ai = &g_ai_workspace_storage;
-    s32 i;
-
-    g_ai_workspace_storage.considered_unit_coords.fields.x = x;
-    g_ai_workspace_storage.considered_unit_coords.fields.y = y;
-    g_ai_workspace_storage.considered_unit_coords.fields.layer = level;
-    g_ai_workspace_storage.considered_unit_coords.fields.zero = 0;
-    ai_reset_selected_action();
-    for (i = 0; i < AI_KNOWN_TRAP_COUNT; i++) {
-        if (ai->known_trap_coords[i].fields.x == 0xff) {
-            ai->known_trap_coords[i] = ai->considered_unit_coords;
-            break;
-        }
-        if (ai->known_trap_coords[i].word == ai->considered_unit_coords.word) {
-            break;
-        }
-    }
-}
-
-/* 1 once 325 scanlines have passed since the last vertical blank: the
- * pathfinding loops use it to yield for the frame. */
-s32 ai_pathfinding_budget_is_exhausted(void) {
-    return VSync(1) >= AI_PATHFIND_SCANLINE_LIMIT;
-}
 
 /*
  * Evaluate target alternatives for the considered ability.
@@ -1201,10 +1002,10 @@ static void build_monster_skill_mask(void) {
             + unit->position.y * ai->terrain_width + unit->x]
                      .height;
         for (direction = 0; direction < AI_CARDINAL_DIRECTION_COUNT; direction++) {
-            x = unit->x + s_facing_tile_offsets.by_direction[direction][0];
+            x = unit->x + g_ai_facing_tile_offsets.by_direction[direction][0];
             if (x < 0 || x >= ai->terrain_width)
                 continue;
-            y = unit->position.y + s_facing_tile_offsets.by_direction[direction][1];
+            y = unit->position.y + g_ai_facing_tile_offsets.by_direction[direction][1];
             if (y < 0 || y >= ai->terrain_depth)
                 continue;
             for (level = 0; level <= 0; level++) {

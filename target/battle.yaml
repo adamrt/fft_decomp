@@ -1714,14 +1714,14 @@ functions:
   - {addr: 0x8019a52c, size: 204, name: merge_weapon_attack_data, hash: 58abc0faa62c947c, unit: ai_abilities}
   - {addr: 0x8019a5f8, size: 1112, name: add_usable_abilities_from_skillset, hash: 5c08b128fe604338, unit: ai_abilities}
   - {addr: 0x8019aa50, size: 184, name: ai_ability_is_known, hash: 8145ae7b7ce5bc94, unit: ai_abilities}
-  - {addr: 0x8019ab08, size: 64, name: ai_mem_copy_u16_values, hash: da28d65667a643ff, unit: ai_origins}
-  - {addr: 0x8019ab48, size: 48, name: ai_mem_copy_bytes, hash: dd334a2332330457, unit: ai_origins}
-  - {addr: 0x8019ab78, size: 60, name: ai_mem_zero_32bit_values, hash: 26700038eda56a40, unit: ai_origins}
-  - {addr: 0x8019abb4, size: 448, name: ai_choose_wait_facing, hash: 973e56c289cb4289, unit: ai_origins}
-  - {addr: 0x8019ad74, size: 188, name: is_facing_tile_rejected, hash: 135a5e2ce5e9febf, unit: ai_origins}
-  - {addr: 0x8019ae30, size: 40, name: ai_reset_selected_action, hash: 9545f9d85017e9ff, unit: ai_origins}
-  - {addr: 0x8019ae58, size: 152, name: ai_store_triggered_trap_coords, hash: e691b9d21adf6ad3, unit: ai_origins}
-  - {addr: 0x8019aef0, size: 40, name: ai_pathfinding_budget_is_exhausted, hash: aff84ed05931c150, unit: ai_origins}
+  - {addr: 0x8019ab08, size: 64, name: ai_mem_copy_u16_values, hash: da28d65667a643ff, unit: ai_abilities}
+  - {addr: 0x8019ab48, size: 48, name: ai_mem_copy_bytes, hash: dd334a2332330457, unit: ai_abilities}
+  - {addr: 0x8019ab78, size: 60, name: ai_mem_zero_32bit_values, hash: 26700038eda56a40, unit: ai_abilities}
+  - {addr: 0x8019abb4, size: 448, name: ai_choose_wait_facing, hash: 973e56c289cb4289, unit: ai_abilities}
+  - {addr: 0x8019ad74, size: 188, name: is_facing_tile_rejected, hash: 135a5e2ce5e9febf, unit: ai_abilities}
+  - {addr: 0x8019ae30, size: 40, name: ai_reset_selected_action, hash: 9545f9d85017e9ff, unit: ai_abilities}
+  - {addr: 0x8019ae58, size: 152, name: ai_store_triggered_trap_coords, hash: e691b9d21adf6ad3, unit: ai_abilities}
+  - {addr: 0x8019aef0, size: 40, name: ai_pathfinding_budget_is_exhausted, hash: aff84ed05931c150, unit: ai_abilities}
   - {addr: 0x8019af18, size: 1012, name: ai_evaluate_considered_ability, hash: 963caa337e1e1c7a, unit: ai_origins, rodata: [{addr: 0x80193db0, size: 36, hash: 8a91fa7090317da7}]}
   - {addr: 0x8019b30c, size: 488, name: evaluate_self_target, hash: 98555857b62c3032, unit: ai_origins}
   - {addr: 0x8019b4f4, size: 444, name: ai_origin_is_allowed, hash: 81477fd3bef0c505, unit: ai_origins}
@@ -2782,7 +2782,7 @@ data:
   - {addr: 0x80193d44, name: g_action_actor_used_ability_id}
   - {addr: 0x8019f2f8, name: s_origin_range_row_masks}
   - {addr: 0x8019f308, name: s_status_priority_weights}
-  - {addr: 0x8019f358, name: s_facing_tile_offsets}
+  - {addr: 0x8019f358, name: g_ai_facing_tile_offsets}
   - {addr: 0x8019f360, name: g_ai_math_source_skillsets}
   - {addr: 0x8019f368, name: s_target_in_reach}
   - {addr: 0x8019f36c, name: s_target_reach}
