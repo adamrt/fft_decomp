@@ -23,7 +23,7 @@ units:
   - {name: hud, source: src/wldcore/map/hud.c}
   - {name: menu_levels, source: src/wldcore/menu_levels.c, data: [{addr: 0x8009e690, size: 228, hash: 27c8987b677b000d}, {addr: 0x8009e774, size: 228, hash: 17ce379e6bacf734}, {addr: 0x8009e858, size: 228, hash: 7a22627279b735fa}], bss: [{addr: 0x800d4584, size: 32, hash: 66687aadf862bd77}]}
   - {name: bar, source: src/wldcore/bar.c, data: [{addr: 0x800d09a0, size: 12, hash: 15ec7bf0b50732b4}], bss: [{addr: 0x800d457c, size: 4, hash: df3f619804a92fdb}]}
-  - {name: proposition_report, source: src/wldcore/proposition/report.c}
+  - {name: proposition_reports, source: src/wldcore/proposition_reports.c}
   - {name: proposition_results, source: src/wldcore/proposition/results.c, data: [{addr: 0x8009eb34, size: 8, hash: 8fa5f1b1c1b875fa}, {addr: 0x8009eb3c, size: 8, hash: 9785aa74f03e66b7}]}
   - {name: novel_menus, source: src/wldcore/novel/menus.c, bss: [{addr: 0x800d4900, size: 8, hash: af5570f5a1810b7a}]}
   - {name: brave_story_collections, source: src/wldcore/brave_story/collections.c, data: [{addr: 0x800d098c, size: 16, hash: 374708fff7719dd5}]}
@@ -192,19 +192,19 @@ functions:
   - {addr: 0x80076744, size: 328, name: proposition_resume_participants, hash: ea45271dfaf3e099, unit: bar}
   - {addr: 0x8007688c, size: 324, name: proposition_suspend_participants, hash: 0caaf7b1601583ee, unit: bar}
   - {addr: 0x800769d0, size: 1956, name: proposition_update_participants, hash: 0acd40dafba7b3a6, unit: bar}
-  - {addr: 0x80077174, size: 1016, name: proposition_open_returned_list, hash: c20b2597caaa9cdf, unit: proposition_report}
-  - {addr: 0x8007756c, size: 56, name: proposition_resume_returned_list, hash: a8fc925d11479518, unit: proposition_report}
-  - {addr: 0x800775a4, size: 20, name: proposition_suspend_returned_list, hash: 11034aa27eaa3095, unit: proposition_report}
-  - {addr: 0x800775b8, size: 524, name: proposition_update_returned_list_input, hash: f99bbe8731fd99ed, unit: proposition_report}
-  - {addr: 0x800777c4, size: 524, name: proposition_update_report_confirm, hash: d7ae5c2cd60eda40, unit: proposition_report}
-  - {addr: 0x800779d0, size: 508, name: open_report, hash: 23de2a03f9bc3c8b, unit: proposition_report}
-  - {addr: 0x80077bcc, size: 2576, name: proposition_update_report, hash: 8616ccc28fb800dc, unit: proposition_report, rodata: [{addr: 0x80067048, size: 404, hash: 44b703c9d00f32db}]}
-  - {addr: 0x800785dc, size: 1500, name: open_result, hash: 29f6d04787ac62bc, unit: proposition_report}
-  - {addr: 0x80078bb8, size: 1484, name: proposition_update_result, hash: 4e38f2d61a2876a3, unit: proposition_report}
-  - {addr: 0x80079184, size: 136, name: resolve_outcome, hash: 5ccfc9e2c90ecddd, unit: proposition_report}
-  - {addr: 0x8007920c, size: 484, name: select_reporter, hash: f7f721319ea832aa, unit: proposition_report}
-  - {addr: 0x800793f0, size: 224, name: proposition_adjust_message, hash: a81520df4d010d6e, unit: proposition_report}
-  - {addr: 0x800794d0, size: 244, name: update_report_message, hash: 4b01d85a59ee4969, unit: proposition_report}
+  - {addr: 0x80077174, size: 1016, name: proposition_open_returned_list, hash: c20b2597caaa9cdf, unit: proposition_reports}
+  - {addr: 0x8007756c, size: 56, name: proposition_resume_returned_list, hash: a8fc925d11479518, unit: proposition_reports}
+  - {addr: 0x800775a4, size: 20, name: proposition_suspend_returned_list, hash: 11034aa27eaa3095, unit: proposition_reports}
+  - {addr: 0x800775b8, size: 524, name: proposition_update_returned_list_input, hash: f99bbe8731fd99ed, unit: proposition_reports}
+  - {addr: 0x800777c4, size: 524, name: proposition_update_report_confirm, hash: d7ae5c2cd60eda40, unit: proposition_reports}
+  - {addr: 0x800779d0, size: 508, name: open_report, hash: 23de2a03f9bc3c8b, unit: proposition_reports}
+  - {addr: 0x80077bcc, size: 2576, name: proposition_update_report, hash: 8616ccc28fb800dc, unit: proposition_reports, rodata: [{addr: 0x80067048, size: 404, hash: 44b703c9d00f32db}]}
+  - {addr: 0x800785dc, size: 1500, name: open_result, hash: 29f6d04787ac62bc, unit: proposition_reports}
+  - {addr: 0x80078bb8, size: 1484, name: proposition_update_result, hash: 4e38f2d61a2876a3, unit: proposition_reports}
+  - {addr: 0x80079184, size: 136, name: resolve_outcome, hash: 5ccfc9e2c90ecddd, unit: proposition_reports}
+  - {addr: 0x8007920c, size: 484, name: select_reporter, hash: f7f721319ea832aa, unit: proposition_reports}
+  - {addr: 0x800793f0, size: 224, name: proposition_adjust_message, hash: a81520df4d010d6e, unit: proposition_reports}
+  - {addr: 0x800794d0, size: 244, name: update_report_message, hash: 4b01d85a59ee4969, unit: proposition_reports}
   - {addr: 0x800795c4, size: 604, name: proposition_update_participant_message, hash: ab80ad9223197797, unit: proposition_results, rodata: [{addr: 0x800671dc, size: 24, hash: f9c589d3d0cc9d4b}]}
   - {addr: 0x80079820, size: 36, name: get_job_category, hash: 2ff3de5323a524e3, unit: proposition_results}
   - {addr: 0x80079844, size: 1064, name: proposition_determine_success, hash: cf4e732c8358bf29, unit: proposition_results}
