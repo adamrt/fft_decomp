@@ -217,7 +217,6 @@ enum {
 void status_change_unit_flag(struct battle_unit* unit, s32 status_byte_index, u8 status_flag, s32 change_type);
 void status_refresh_current(struct battle_unit* unit);
 s32 status_set_ct(struct battle_unit* unit, s32 status_id, s32 removing);
-void status_init_unit(struct battle_unit* unit);
 void status_set_action_state(struct battle_unit* unit, u8 action_state);
 void status_clear_action_state(struct battle_unit* unit);
 s32 status_inflict_defending(s32 unit_id);

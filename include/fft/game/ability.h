@@ -25,7 +25,7 @@ enum {
     ABILITY_ID_REACTION_FIRST = 422,
     ABILITY_ID_SUPPORT_FIRST = 454,
     ABILITY_ID_MOVEMENT_FIRST = 486,
-    /* 0x1fe/0x1ff request a random R/S/M pick; battle_unit_select_rsm returns
+    /* 0x1fe/0x1ff request a random R/S/M pick; select_rsm returns
      * any smaller id unchanged. */
     ABILITY_ID_RANDOM_FIRST = 510
 };

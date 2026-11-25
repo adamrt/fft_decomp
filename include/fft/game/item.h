@@ -415,7 +415,7 @@ typedef enum weapon_flag {
 } weapon_flag_e;
 
 /* Weapon record selected by item_data_t.secondary_data_id. Offsets are fixed
- * by battle_unit_set_equipment_stats and set_encounter_equipment. */
+ * by set_equipment_stats and set_encounter_equipment. */
 typedef struct weapon_data {
     u8 range;      /* 0x00 */
     u8 flags;      /* 0x01; weapon_flag_e */

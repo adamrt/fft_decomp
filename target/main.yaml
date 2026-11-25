@@ -47,11 +47,7 @@ units:
   - {name: status_check_data, source: src/main/status_check_data.c}
   - {name: party, source: src/main/party.c}
   - {name: unit_data, source: src/main/game_tables.c, data: [{addr: 0x80066204, size: 48, hash: 17b0761f87b081d5}]}
-  - {name: unit_build, source: src/main/unit_init.c, data: [{addr: 0x80066200, size: 4, hash: df3f619804a92fdb}], bss: [{addr: 0x80066308, size: 1, hash: 6e340b9cffb37a98}]}
-  - {name: unit_generation, source: src/main/unit_loadout.c}
-  - {name: unit_stats, source: src/main/unit_stats.c}
-  - {name: job_progress, source: src/main/job_progress.c}
-  - {name: unit_state, source: src/main/unit_state.c}
+  - {name: battle_unit, source: src/main/battle_unit.c, data: [{addr: 0x80066200, size: 4, hash: df3f619804a92fdb}], bss: [{addr: 0x80066308, size: 1, hash: 6e340b9cffb37a98}]}
 
 libraries:
   - {id: crt_startup, addr: 0x80010a30, end: 0x80010ba8, kind: c-runtime, library: "Psy-Q C startup"}
@@ -820,71 +816,71 @@ functions:
   - {addr: 0x8005a72c, size: 344, name: ability_get_records, hash: efb4851817eeef88, unit: unit_data}
   - {addr: 0x8005a884, size: 32, name: item_get_data, hash: bf988aefe1ea3d13, unit: unit_data}
   - {addr: 0x8005a8a4, size: 48, name: job_get_data, hash: 510f01261d300e5f, unit: unit_data}
-  - {addr: 0x8005a8d4, size: 224, name: battle_unit_init_from_party_slot, hash: ae487841a96c8018, unit: unit_build}
-  - {addr: 0x8005a9b4, size: 332, name: battle_unit_init_from_encounter, hash: cf0a846da8422d88, unit: unit_build}
-  - {addr: 0x8005ab00, size: 72, name: finish_build, hash: 8c7f887045198aea, unit: unit_build}
-  - {addr: 0x8005ab48, size: 212, name: set_ramza_identity, hash: bcd6fe831cbd8c6e, unit: unit_build}
-  - {addr: 0x8005ac1c, size: 1052, name: set_encounter_data, hash: 3d79228140d99399, unit: unit_build}
-  - {addr: 0x8005b038, size: 152, name: init_encounter_party_member, hash: eea8ec3957bb934a, unit: unit_build}
-  - {addr: 0x8005b0d0, size: 484, name: copy_party_record, hash: 557d774ff311c66c, unit: unit_build}
-  - {addr: 0x8005b2b4, size: 588, name: set_encounter_jobs, hash: 82aa3022b3183bb2, unit: unit_build}
-  - {addr: 0x8005b500, size: 220, name: choose_unlocked_job, hash: b6d4c187979987c2, unit: unit_build}
-  - {addr: 0x8005b5dc, size: 452, name: copy_job_data, hash: 1bcef74070bd921e, unit: unit_build}
-  - {addr: 0x8005b7a0, size: 140, name: battle_unit_enable_rsm_flags, hash: cc4808dfe49cd9ec, unit: unit_build}
-  - {addr: 0x8005b82c, size: 84, name: set_rsm_flag, hash: e08afa389f906d8d, unit: unit_build}
-  - {addr: 0x8005b880, size: 496, name: calculate_base_stats, hash: 0715763bb40a644e, unit: unit_build, rodata: [{addr: 0x80059818, size: 20, hash: 7d8dcfa94afb51b6}]}
-  - {addr: 0x8005ba70, size: 832, name: set_encounter_abilities, hash: 7cf7a5b87413e65c, unit: unit_build}
-  - {addr: 0x8005bdb0, size: 64, name: set_monster_equipment, hash: f05ae65f8fd22982, unit: unit_build}
-  - {addr: 0x8005bdf0, size: 1164, name: set_encounter_equipment, hash: 3c68c7196313eb38, unit: unit_build}
-  - {addr: 0x8005c27c, size: 284, name: battle_unit_add_equippable_types, hash: a0da56e8a072742e, unit: unit_build}
-  - {addr: 0x8005c398, size: 560, name: battle_unit_set_equipment_stats, hash: 8bbdcd34209f742e, unit: unit_build}
-  - {addr: 0x8005c5c8, size: 804, name: battle_unit_set_equipment_attributes, hash: 692a362c43589a84, unit: unit_build}
-  - {addr: 0x8005c8ec, size: 152, name: battle_unit_apply_movement_bonuses, hash: bad416e1a3b09741, unit: unit_build}
-  - {addr: 0x8005c984, size: 588, name: store_names, hash: "5127461766844007", unit: unit_build}
-  - {addr: 0x8005cbd0, size: 148, name: party_calculate_highest_level, hash: 149c03a50c0d50b6, unit: unit_build}
-  - {addr: 0x8005cc64, size: 52, name: mem_copy_bytes_source_first, hash: 850c2fc16771314e, unit: unit_generation}
-  - {addr: 0x8005cc98, size: 476, name: battle_unit_generate_random_equipment, hash: 57273afe761c2134, unit: unit_generation}
-  - {addr: 0x8005ce74, size: 584, name: battle_unit_learn_job_abilities, hash: 64efa860cd5766d5, unit: unit_generation}
-  - {addr: 0x8005d0bc, size: 776, name: battle_unit_select_rsm, hash: 89c806b79390dc83, unit: unit_generation}
-  - {addr: 0x8005d3c4, size: 80, name: job_find_by_skillset, hash: 244d4a19cf67d067, unit: unit_generation}
-  - {addr: 0x8005d414, size: 92, name: status_init_unit, hash: f0c85edbe52a2b1f, unit: unit_stats}
-  - {addr: 0x8005d470, size: 96, name: init_timers, hash: 0e4864df799dfd4d, unit: unit_stats}
-  - {addr: 0x8005d4d0, size: 236, name: reconcile_statuses, hash: 5679f7c36927d2aa, unit: unit_stats}
-  - {addr: 0x8005d5bc, size: 36, name: battle_unit_refresh_formation_stats, hash: 727b9c3e9a4e4537, unit: unit_stats}
-  - {addr: 0x8005d5e0, size: 36, name: battle_unit_refresh_stats, hash: 7bc70d66d5844d85, unit: unit_stats}
-  - {addr: 0x8005d604, size: 36, name: battle_unit_init, hash: e0f928bf1cec31ac, unit: unit_stats}
-  - {addr: 0x8005d628, size: 600, name: refresh_stats, hash: 63ba1bc2ff5c9565, unit: unit_stats}
-  - {addr: 0x8005d880, size: 124, name: battle_unit_try_level_up, hash: c9c4daab4f1dc60b, unit: unit_stats}
-  - {addr: 0x8005d8fc, size: 276, name: party_unit_gain_levels, hash: f2ed58f59a7b8e9c, unit: unit_stats}
-  - {addr: 0x8005da10, size: 352, name: battle_unit_apply_level_growth, hash: ad37ee1e81a8715a, unit: unit_stats}
-  - {addr: 0x8005db70, size: 164, name: status_set_ct, hash: 43eec0cb2cc1750b, unit: unit_stats}
-  - {addr: 0x8005dc14, size: 308, name: job_calculate_unlocks, hash: 95e581bd15bc029e, unit: job_progress}
-  - {addr: 0x8005dd48, size: 400, name: job_add_proposition_jp, hash: dc7a826268ee417e, unit: job_progress}
-  - {addr: 0x8005ded8, size: 28, name: job_store_unlocks, hash: bbca0a6a5b33e332, unit: job_progress}
-  - {addr: 0x8005def4, size: 68, name: job_calculate_level, hash: 1efed41e13747f1b, unit: job_progress}
-  - {addr: 0x8005df38, size: 116, name: job_calculate_levels_from_jp, hash: 130fba93b82fa402, unit: job_progress}
-  - {addr: 0x8005dfac, size: 40, name: battle_unit_reset_state, hash: 7a195f61c0a1a1e6, unit: unit_state}
-  - {addr: 0x8005dfd4, size: 68, name: battle_unit_init_status_and_rewards, hash: ed3fe2370b8a89c1, unit: unit_state}
-  - {addr: 0x8005e018, size: 56, name: ability_get_range, hash: b65e2074178b867e, unit: unit_state}
-  - {addr: 0x8005e050, size: 56, name: ability_get_aoe, hash: 19fbd3e4b9bb0ee2, unit: unit_state}
-  - {addr: 0x8005e088, size: 68, name: battle_unit_set_sprite_identity, hash: 3c5d71a05f0eb639, unit: unit_state}
-  - {addr: 0x8005e0cc, size: 84, name: random_roll_pass_fail, hash: 4ddcd1c53620c436, unit: unit_state}
-  - {addr: 0x8005e120, size: 144, name: resolve_sprite_identity, hash: 77fff8afccf5df6b, unit: unit_state}
-  - {addr: 0x8005e1b0, size: 80, name: status_has_any_in_check_set, hash: 8b0638eb283dca01, unit: unit_state}
-  - {addr: 0x8005e200, size: 44, name: ability_get_learned, hash: f03d26c875a93271, unit: unit_state}
-  - {addr: 0x8005e22c, size: 40, name: action_command_copy, hash: 3a97060e78efbf69, unit: unit_state}
-  - {addr: 0x8005e254, size: 52, name: mem_copy_byte_data_source_first, hash: 850c2fc16771314e, unit: unit_state}
-  - {addr: 0x8005e288, size: 496, name: item_get_total_quantity, hash: 3e5d96728559f2cd, unit: unit_state}
-  - {addr: 0x8005e478, size: 112, name: battle_unit_init_position_and_rewards, hash: 9421b9d560e38650, unit: unit_state}
-  - {addr: 0x8005e4e8, size: 240, name: status_find_action_priority, hash: f0565f5aed12ad4b, unit: unit_state}
-  - {addr: 0x8005e5d8, size: 108, name: zodiac_calculate_sign, hash: 0042a97bca78c29a, unit: unit_state}
-  - {addr: 0x8005e644, size: 44, name: mem_zero, hash: 56f3e9bb00dabbd7, unit: unit_state}
-  - {addr: 0x8005e670, size: 92, name: battle_unit_record_casualty, hash: 42b35d6ac1f3c89f, unit: unit_state}
-  - {addr: 0x8005e6cc, size: 120, name: status_change_unit_flag, hash: dc7a2bc945f89882, unit: unit_state}
-  - {addr: 0x8005e744, size: 52, name: status_refresh_current, hash: a213e350e165866b, unit: unit_state}
-  - {addr: 0x8005e778, size: 48, name: battle_unit_set_ability_ct, hash: "3904255598531e38", unit: unit_state}
-  - {addr: 0x8005e7a8, size: 320, name: status_set_action_state, hash: a518a597cf1ee626, unit: unit_state, rodata: [{addr: 0x80059830, size: 36, hash: d297e0f6906b441c}]}
-  - {addr: 0x8005e8e8, size: 36, name: system_handle_battle_load_exception, hash: a531e47d7cc2ef0f, unit: unit_state}
+  - {addr: 0x8005a8d4, size: 224, name: battle_unit_init_from_party_slot, hash: ae487841a96c8018, unit: battle_unit}
+  - {addr: 0x8005a9b4, size: 332, name: battle_unit_init_from_encounter, hash: cf0a846da8422d88, unit: battle_unit}
+  - {addr: 0x8005ab00, size: 72, name: finish_build, hash: 8c7f887045198aea, unit: battle_unit}
+  - {addr: 0x8005ab48, size: 212, name: set_ramza_identity, hash: bcd6fe831cbd8c6e, unit: battle_unit}
+  - {addr: 0x8005ac1c, size: 1052, name: set_encounter_data, hash: 3d79228140d99399, unit: battle_unit}
+  - {addr: 0x8005b038, size: 152, name: init_encounter_party_member, hash: eea8ec3957bb934a, unit: battle_unit}
+  - {addr: 0x8005b0d0, size: 484, name: copy_party_record, hash: 557d774ff311c66c, unit: battle_unit}
+  - {addr: 0x8005b2b4, size: 588, name: set_encounter_jobs, hash: 82aa3022b3183bb2, unit: battle_unit}
+  - {addr: 0x8005b500, size: 220, name: choose_unlocked_job, hash: b6d4c187979987c2, unit: battle_unit}
+  - {addr: 0x8005b5dc, size: 452, name: copy_job_data, hash: 1bcef74070bd921e, unit: battle_unit}
+  - {addr: 0x8005b7a0, size: 140, name: enable_rsm_flags, hash: cc4808dfe49cd9ec, unit: battle_unit}
+  - {addr: 0x8005b82c, size: 84, name: set_rsm_flag, hash: e08afa389f906d8d, unit: battle_unit}
+  - {addr: 0x8005b880, size: 496, name: calculate_base_stats, hash: 0715763bb40a644e, unit: battle_unit, rodata: [{addr: 0x80059818, size: 20, hash: 7d8dcfa94afb51b6}]}
+  - {addr: 0x8005ba70, size: 832, name: set_encounter_abilities, hash: 7cf7a5b87413e65c, unit: battle_unit}
+  - {addr: 0x8005bdb0, size: 64, name: set_monster_equipment, hash: f05ae65f8fd22982, unit: battle_unit}
+  - {addr: 0x8005bdf0, size: 1164, name: set_encounter_equipment, hash: 3c68c7196313eb38, unit: battle_unit}
+  - {addr: 0x8005c27c, size: 284, name: add_equippable_types, hash: a0da56e8a072742e, unit: battle_unit}
+  - {addr: 0x8005c398, size: 560, name: set_equipment_stats, hash: 8bbdcd34209f742e, unit: battle_unit}
+  - {addr: 0x8005c5c8, size: 804, name: set_equipment_attributes, hash: 692a362c43589a84, unit: battle_unit}
+  - {addr: 0x8005c8ec, size: 152, name: apply_movement_bonuses, hash: bad416e1a3b09741, unit: battle_unit}
+  - {addr: 0x8005c984, size: 588, name: store_names, hash: "5127461766844007", unit: battle_unit}
+  - {addr: 0x8005cbd0, size: 148, name: party_calculate_highest_level, hash: 149c03a50c0d50b6, unit: battle_unit}
+  - {addr: 0x8005cc64, size: 52, name: mem_copy_bytes_source_first, hash: 850c2fc16771314e, unit: battle_unit}
+  - {addr: 0x8005cc98, size: 476, name: battle_unit_generate_random_equipment, hash: 57273afe761c2134, unit: battle_unit}
+  - {addr: 0x8005ce74, size: 584, name: learn_job_abilities, hash: 64efa860cd5766d5, unit: battle_unit}
+  - {addr: 0x8005d0bc, size: 776, name: select_rsm, hash: 89c806b79390dc83, unit: battle_unit}
+  - {addr: 0x8005d3c4, size: 80, name: job_find_by_skillset, hash: 244d4a19cf67d067, unit: battle_unit}
+  - {addr: 0x8005d414, size: 92, name: init_statuses, hash: f0c85edbe52a2b1f, unit: battle_unit}
+  - {addr: 0x8005d470, size: 96, name: init_timers, hash: 0e4864df799dfd4d, unit: battle_unit}
+  - {addr: 0x8005d4d0, size: 236, name: reconcile_statuses, hash: 5679f7c36927d2aa, unit: battle_unit}
+  - {addr: 0x8005d5bc, size: 36, name: battle_unit_refresh_formation_stats, hash: 727b9c3e9a4e4537, unit: battle_unit}
+  - {addr: 0x8005d5e0, size: 36, name: battle_unit_refresh_stats, hash: 7bc70d66d5844d85, unit: battle_unit}
+  - {addr: 0x8005d604, size: 36, name: battle_unit_init, hash: e0f928bf1cec31ac, unit: battle_unit}
+  - {addr: 0x8005d628, size: 600, name: refresh_stats, hash: 63ba1bc2ff5c9565, unit: battle_unit}
+  - {addr: 0x8005d880, size: 124, name: battle_unit_try_level_up, hash: c9c4daab4f1dc60b, unit: battle_unit}
+  - {addr: 0x8005d8fc, size: 276, name: party_unit_gain_levels, hash: f2ed58f59a7b8e9c, unit: battle_unit}
+  - {addr: 0x8005da10, size: 352, name: battle_unit_apply_level_growth, hash: ad37ee1e81a8715a, unit: battle_unit}
+  - {addr: 0x8005db70, size: 164, name: status_set_ct, hash: 43eec0cb2cc1750b, unit: battle_unit}
+  - {addr: 0x8005dc14, size: 308, name: job_calculate_unlocks, hash: 95e581bd15bc029e, unit: battle_unit}
+  - {addr: 0x8005dd48, size: 400, name: job_add_proposition_jp, hash: dc7a826268ee417e, unit: battle_unit}
+  - {addr: 0x8005ded8, size: 28, name: job_store_unlocks, hash: bbca0a6a5b33e332, unit: battle_unit}
+  - {addr: 0x8005def4, size: 68, name: job_calculate_level, hash: 1efed41e13747f1b, unit: battle_unit}
+  - {addr: 0x8005df38, size: 116, name: job_calculate_levels_from_jp, hash: 130fba93b82fa402, unit: battle_unit}
+  - {addr: 0x8005dfac, size: 40, name: reset_battle_state, hash: 7a195f61c0a1a1e6, unit: battle_unit}
+  - {addr: 0x8005dfd4, size: 68, name: battle_unit_init_status_and_rewards, hash: ed3fe2370b8a89c1, unit: battle_unit}
+  - {addr: 0x8005e018, size: 56, name: ability_get_range, hash: b65e2074178b867e, unit: battle_unit}
+  - {addr: 0x8005e050, size: 56, name: ability_get_aoe, hash: 19fbd3e4b9bb0ee2, unit: battle_unit}
+  - {addr: 0x8005e088, size: 68, name: battle_unit_set_sprite_identity, hash: 3c5d71a05f0eb639, unit: battle_unit}
+  - {addr: 0x8005e0cc, size: 84, name: random_roll_pass_fail, hash: 4ddcd1c53620c436, unit: battle_unit}
+  - {addr: 0x8005e120, size: 144, name: resolve_sprite_identity, hash: 77fff8afccf5df6b, unit: battle_unit}
+  - {addr: 0x8005e1b0, size: 80, name: status_has_any_in_check_set, hash: 8b0638eb283dca01, unit: battle_unit}
+  - {addr: 0x8005e200, size: 44, name: ability_get_learned, hash: f03d26c875a93271, unit: battle_unit}
+  - {addr: 0x8005e22c, size: 40, name: action_command_copy, hash: 3a97060e78efbf69, unit: battle_unit}
+  - {addr: 0x8005e254, size: 52, name: mem_copy_byte_data_source_first, hash: 850c2fc16771314e, unit: battle_unit}
+  - {addr: 0x8005e288, size: 496, name: item_get_total_quantity, hash: 3e5d96728559f2cd, unit: battle_unit}
+  - {addr: 0x8005e478, size: 112, name: battle_unit_init_position_and_rewards, hash: 9421b9d560e38650, unit: battle_unit}
+  - {addr: 0x8005e4e8, size: 240, name: status_find_action_priority, hash: f0565f5aed12ad4b, unit: battle_unit}
+  - {addr: 0x8005e5d8, size: 108, name: zodiac_calculate_sign, hash: 0042a97bca78c29a, unit: battle_unit}
+  - {addr: 0x8005e644, size: 44, name: mem_zero, hash: 56f3e9bb00dabbd7, unit: battle_unit}
+  - {addr: 0x8005e670, size: 92, name: battle_unit_record_casualty, hash: 42b35d6ac1f3c89f, unit: battle_unit}
+  - {addr: 0x8005e6cc, size: 120, name: status_change_unit_flag, hash: dc7a2bc945f89882, unit: battle_unit}
+  - {addr: 0x8005e744, size: 52, name: status_refresh_current, hash: a213e350e165866b, unit: battle_unit}
+  - {addr: 0x8005e778, size: 48, name: battle_unit_set_ability_ct, hash: "3904255598531e38", unit: battle_unit}
+  - {addr: 0x8005e7a8, size: 320, name: status_set_action_state, hash: a518a597cf1ee626, unit: battle_unit, rodata: [{addr: 0x80059830, size: 36, hash: d297e0f6906b441c}]}
+  - {addr: 0x8005e8e8, size: 36, name: system_handle_battle_load_exception, hash: a531e47d7cc2ef0f, unit: battle_unit}
 
 data:
   - {addr: 0x00000000, name: g_psyq_crt_constructor_count}

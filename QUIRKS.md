@@ -281,7 +281,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   system function opens entries 0x09, 0x0d, 0x16, 0x17 (the only way to 0x18)
   or the four no-act turn menus (0x20, 0x21, 0x32, 0x33), yet the confirm-move
   test rejects Move for 0x21 and 0x33.
-- `battle_unit_learn_job_abilities` sets the learned bit twice when the JP
+- `learn_job_abilities` sets the learned bit twice when the JP
   purchase succeeds: once in the purchase branch and again under
   `if (learned)`.
 - `battle_unit_apply_level_growth` calls `rand()` and discards the result; the

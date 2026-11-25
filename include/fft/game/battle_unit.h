@@ -310,7 +310,7 @@ typedef enum unit_attribute_index {
 enum { UNIT_TURN_CT_THRESHOLD = 100 };
 
 /* battle_unit_t.equipment_stats (0x03c-0x046), filled by
- * battle_unit_set_equipment_stats: each hand's weapon power and weapon evade
+ * set_equipment_stats: each hand's weapon power and weapon evade
  * (which battle counts only under Weapon Guard), then the physical evades of
  * the accessory, each hand's shield and the class, then the magic evades of
  * the accessory and each hand's shield. RIGHT_SHIELD comes from
@@ -663,19 +663,11 @@ void battle_unit_generate_raw_stats(battle_unit_t* unit);
 void battle_unit_copy_job_growths(battle_unit_t* unit);
 void battle_unit_init_status_and_rewards(battle_unit_t* unit, s32 clear_rewards);
 void battle_unit_init_position_and_rewards(battle_unit_t* unit, const struct entd_unit* entd);
-void battle_unit_learn_job_abilities(battle_unit_t* unit, s32 job_id, const struct entd_unit* entd);
-void battle_unit_reset_state(battle_unit_t* unit);
 void battle_unit_refresh_stats(battle_unit_t* unit);
 void battle_unit_refresh_formation_stats(battle_unit_t* unit);
-void battle_unit_set_equipment_attributes(battle_unit_t* unit, s32 level_up_check);
-void battle_unit_set_equipment_stats(battle_unit_t* unit);
-void battle_unit_add_equippable_types(battle_unit_t* unit);
 s32 battle_unit_generate_random_equipment(
     const battle_unit_t* unit, u8 item_type_flag, u8 weapon_flag_mask, u8 required_item_type);
-void battle_unit_apply_movement_bonuses(battle_unit_t* unit, s32 keep_hp_mp);
 u8 battle_unit_set_sprite_identity(battle_unit_t* unit, u8* palette);
-u16 battle_unit_select_rsm(const battle_unit_t* unit, u16 ability_id, s32 flags, const struct entd_unit* entd);
-void battle_unit_enable_rsm_flags(battle_unit_t* unit);
 void battle_unit_set_ability_ct(battle_unit_t* unit);
 s32 battle_unit_try_level_up(battle_unit_t* unit);
 void battle_unit_apply_level_growth(battle_unit_t* unit, s32 level_down);

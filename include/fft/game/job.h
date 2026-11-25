@@ -24,7 +24,7 @@ typedef char job_stat_growth_size_must_be_2[(sizeof(job_stat_growth_t) == 2) ? 1
 /*
  * 0x30-byte job record (g_job_data_pointer). The named fields are those copied
  * by copy_job_data, set_encounter_abilities and
- * battle_unit_set_equipment_stats into battle_unit_t.
+ * set_equipment_stats into battle_unit_t.
  */
 typedef struct job_data {
     u8 skillset;                       /* 0x00 */
