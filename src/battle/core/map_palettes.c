@@ -1,17 +1,142 @@
-/* Map palettes, background gradient, ambient light and darkness transitions, CLUT cycles, VRAM palette uploads and
- * unit palette modulation. */
+/* The colors of the battle scene: the tint overlay drawn over it, the map palettes, the background gradient, ambient
+ * light and darkness transitions, CLUT cycles, VRAM palette uploads and unit palette modulation. */
 
 #include "fft/battle/weather.h"
 #include "fft/game/battle_unit.h"
+#include "fft/gfx/fade.h"
 #include "fft/gfx/gfx.h"
 #include "fft/gfx/sprite.h"
 #include "fft/map/map.h"
 #include "fft/map/map_light.h"
 #include "fft/map/map_palette.h"
 #include "fft/map/map_unit.h"
+#include "fft/sys/system.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
+
+/* tint overlay */
+
+/* A tint color in 8.8 fixed point, stepped once per frame. */
+typedef struct tint_q8 {
+    u16 r;
+    u16 g;
+    u16 b;
+} tint_q8_t;
+typedef char tint_q8_size_must_be_6[sizeof(tint_q8_t) == 6 ? 1 : -1];
+
+/* Color-tint fade state. */
+extern rgb24_t g_fade_tint;
+extern rgb24_t g_fade_tint_backup;
+extern rgb24_t g_fade_tint_target;
+extern tint_q8_t g_fade_tint_value;
+extern tint_q8_t g_fade_tint_step;
+extern u16 g_fade_tint_fade_frames;
+extern RECT g_fade_tint_tex_window;
+
+/* No retail code calls it. */
+void fade_tint_clear(void) {
+    g_fade_tint.b = 0;
+    g_fade_tint.g = 0;
+    g_fade_tint.r = 0;
+}
+
+/* Saves the screen color modulation for
+ * fade_tint_restore. No retail code calls either. */
+void fade_tint_save(void) {
+    g_fade_tint_backup.r = g_fade_tint.r;
+    g_fade_tint_backup.g = g_fade_tint.g;
+    g_fade_tint_backup.b = g_fade_tint.b;
+}
+
+/* No retail code calls it. */
+void fade_tint_restore(void) {
+    g_fade_tint.r = g_fade_tint_backup.r;
+    g_fade_tint.g = g_fade_tint_backup.g;
+    g_fade_tint.b = g_fade_tint_backup.b;
+}
+
+/*
+ * Start a screen color-modulation fade towards (red, green, blue).
+ *
+ * The duration is scaled by the vsync interval; a fade that rounds to zero
+ * frames only records the target color, and a zero duration does nothing. The
+ * overlay draw mode is rebuilt with the given semi-transparency mode for both
+ * screen polarities.
+ */
+void fade_tint_start(u16 blend_mode, u16 red, u16 green, u16 blue, u16 duration) {
+    s16 frames;
+
+    if (duration) {
+        frames = duration / g_system_vsync_interval;
+        g_fade_tint_target.r = red;
+        g_fade_tint_target.g = green;
+        g_fade_tint_target.b = blue;
+        g_fade_tint_fade_frames = frames;
+        if (frames) {
+            g_fade_tint_value.r = g_fade_tint.r << 8;
+            g_fade_tint_value.g = g_fade_tint.g << 8;
+            g_fade_tint_value.b = g_fade_tint.b << 8;
+            g_fade_tint_step.r = ((g_fade_tint_target.r - g_fade_tint.r) << 8) / frames;
+            g_fade_tint_step.g = ((g_fade_tint_target.g - g_fade_tint.g) << 8) / frames;
+            g_fade_tint_step.b = ((g_fade_tint_target.b - g_fade_tint.b) << 8) / frames;
+            SetDrawMode(&g_fade_tint_draw_modes[0], 0, 0, blend_mode << 5, &g_fade_tint_tex_window);
+            g_fade_tint_draw_modes[1] = g_fade_tint_draw_modes[0];
+        }
+    }
+}
+
+/* Advance the screen color-modulation fade by one frame: each channel's Q8
+ * accumulator takes its step and the color in effect its integer part, and the
+ * last frame lands exactly on the target color.
+ *
+ * The fade state (0x800961c4..0x800961e1) holds the target color, the color in
+ * effect, the Q8 accumulator and per-frame Q8 step per channel, and the frames
+ * left. The bytes require the frame count and each channel's sum staged in
+ * locals. */
+void fade_tint_update(void) {
+    u16 count = g_fade_tint_fade_frames;
+    u16 remaining;
+    u16 red;
+    u16 green;
+    u16 blue;
+
+    if (count) {
+        remaining = count - 1;
+        g_fade_tint_fade_frames = remaining;
+        red = g_fade_tint_value.r + g_fade_tint_step.r;
+        g_fade_tint_value.r = red;
+        green = g_fade_tint_value.g + g_fade_tint_step.g;
+        g_fade_tint_value.g = green;
+        blue = g_fade_tint_value.b + g_fade_tint_step.b;
+        g_fade_tint_value.b = blue;
+        g_fade_tint.r = red >> 8;
+        g_fade_tint.g = green >> 8;
+        g_fade_tint.b = blue >> 8;
+        if (remaining == 0) {
+            g_fade_tint.r = g_fade_tint_target.r;
+            g_fade_tint.g = g_fade_tint_target.g;
+            g_fade_tint.b = g_fade_tint_target.b;
+        }
+    }
+}
+
+/* Queues the screen color-modulation overlay for this frame, the polygon and its
+ * draw mode of the current screen polarity, unless all three components are 0.
+ * `unused` reproduces the frame size. */
+void fade_tint_draw(void) {
+    char unused[24];
+
+    if (g_fade_tint.r | g_fade_tint.g | g_fade_tint.b) {
+        g_fade_tint_polygons[g_gfx_screen_polarity].r0 = g_fade_tint.r;
+        g_fade_tint_polygons[g_gfx_screen_polarity].g0 = g_fade_tint.g;
+        g_fade_tint_polygons[g_gfx_screen_polarity].b0 = g_fade_tint.b;
+        AddPrim(gfx_get_battle_otag(), &g_fade_tint_polygons[g_gfx_screen_polarity]);
+        AddPrim(gfx_get_battle_otag(), &g_fade_tint_draw_modes[g_gfx_screen_polarity]);
+    }
+}
+
+/* map palettes */
 
 extern u16 g_map_palette_modified_colors[MAP_CLUT_ROW_COUNT][MAP_CLUT_ROW_COLOR_COUNT]; /* [map_clut_row_e][color] */
 

@@ -32,7 +32,6 @@ units:
   - {name: sprite_evtchr, source: src/battle/core/evtchr.c}
   - {name: scene_commands, source: src/battle/core/scene_commands.c}
   - {name: map_init, source: src/battle/core/map_init.c, data: [{addr: 0x80094a3c, size: 4, hash: f26c70cd7165e29b}], bss: [{addr: 0x80096114, size: 4, hash: df3f619804a92fdb}]}
-  - {name: fade_tint, source: src/battle/core/screen_tint.c, bss: [{addr: 0x800961c8, size: 3, hash: 709e80c88487a241}]}
   - {name: map_palettes, source: src/battle/core/map_palettes.c, data: [{addr: 0x800956e4, size: 2016, hash: 0cd1d40758dc1bed}, {addr: 0x80095ec4, size: 504, hash: 40a6fe7cfd29ed44}], bss: [{addr: 0x800a1b10, size: 64, hash: f5a5fd42d16a2030}, {addr: 0x800a1b50, size: 32, hash: 66687aadf862bd77}, {addr: 0x800a1b70, size: 4, hash: df3f619804a92fdb}, {addr: 0x800a1b74, size: 32, hash: 66687aadf862bd77}, {addr: 0x800a1b94, size: 4, hash: df3f619804a92fdb}, {addr: 0x800a1b98, size: 80, hash: 5b6fb58e61fa4759}]}
   - {name: frame, source: src/battle/core/frame.c, rodata: [{addr: 0x800683b8, size: 8, hash: 00da4583f2609ee7}]}
   - {name: map, source: src/battle/map/map.c, rodata: [{addr: 0x800e6b30, size: 32, hash: e31d717320f9b9f0}, {addr: 0x800e6b50, size: 24, hash: d0bbc605e5913d31}, {addr: 0x800e6b68, size: 8, hash: 90a2249a9949ea6b}, {addr: 0x800e6b94, size: 8, hash: af5570f5a1810b7a}, {addr: 0x800e6b9c, size: 20, hash: 85addd39731a2b42}, {addr: 0x800e7160, size: 24, hash: 41378ca180141d59}], data: [{addr: 0x800f6cc8, size: 1, hash: 6e340b9cffb37a98}, {addr: 0x800f6ccc, size: 128, hash: 38723a2e5e8a17aa}, {addr: 0x800f6d4c, size: 72, hash: 834a709ba2534ebe}, {addr: 0x800f6d94, size: 32, hash: 66687aadf862bd77}, {addr: 0x800f6db4, size: 768, hash: ef115a0e0c15cdc4}, {addr: 0x800f70b4, size: 2100, hash: 8dd6c05a3a7cd764}, {addr: 0x800f78e8, size: 150, hash: 1d83518b897b14e2}, {addr: 0x800f7980, size: 4, hash: df3f619804a92fdb}, {addr: 0x800f7984, size: 4, hash: df3f619804a92fdb}, {addr: 0x800f7988, size: 4, hash: df3f619804a92fdb}, {addr: 0x800f798c, size: 4, hash: df3f619804a92fdb}, {addr: 0x800f7990, size: 4, hash: df3f619804a92fdb}, {addr: 0x800f7994, size: 36, hash: 6db65fd59fd356f6}, {addr: 0x800f79b8, size: 4, hash: df3f619804a92fdb}, {addr: 0x800f79bc, size: 4, hash: df3f619804a92fdb}, {addr: 0x800f79c0, size: 148, hash: 3b18c58c739716e7}, {addr: 0x800f7a54, size: 4, hash: df3f619804a92fdb}, {addr: 0x800f7a58, size: 4, hash: df3f619804a92fdb}, {addr: 0x800f7a5c, size: 4, hash: df3f619804a92fdb}, {addr: 0x800f7a60, size: 980, hash: b4614bfba5e527b1}, {addr: 0x800f7e34, size: 32, hash: 66687aadf862bd77}, {addr: 0x800f7e54, size: 10320, hash: 0ef0db5ecdc0b431}, {addr: 0x800fa6a4, size: 1, hash: 6e340b9cffb37a98}], bss: [{addr: 0x800f6854, size: 3, hash: 709e80c88487a241}]}
@@ -711,12 +710,12 @@ functions:
   - {addr: 0x8008e80c, size: 608, name: randomize_weather_from_calendar, hash: 4616ab864c85446b, unit: map_init, rodata: [{addr: 0x80068228, size: 56, hash: 7903bfd450f0089c}]}
   - {addr: 0x8008ea6c, size: 516, name: map_update_init_sequence, hash: 151dbf7d7975bac7, unit: map_init, rodata: [{addr: 0x80068260, size: 52, hash: 9c0ebd17a8d33713}]}
   - {addr: 0x8008ec70, size: 692, name: map_update_deployment_init_sequence, hash: 4129a506772c607d, unit: map_init, rodata: [{addr: 0x80068298, size: 52, hash: 4de1eba064a6e78b}]}
-  - {addr: 0x8008ef24, size: 32, name: fade_tint_clear, hash: a0ddcd4f150b9f59, unit: fade_tint}
-  - {addr: 0x8008ef44, size: 56, name: fade_tint_save, hash: 959d1b5984c24a3f, unit: fade_tint}
-  - {addr: 0x8008ef7c, size: 56, name: fade_tint_restore, hash: a1f45eb7a0a238fb, unit: fade_tint}
-  - {addr: 0x8008efb4, size: 380, name: fade_tint_start, hash: 9f81148b82764d34, unit: fade_tint}
-  - {addr: 0x8008f130, size: 216, name: fade_tint_update, hash: fbbba96ddbce1e60, unit: fade_tint}
-  - {addr: 0x8008f208, size: 280, name: fade_tint_draw, hash: f9393c8efdc975fa, unit: fade_tint}
+  - {addr: 0x8008ef24, size: 32, name: fade_tint_clear, hash: a0ddcd4f150b9f59, unit: map_palettes}
+  - {addr: 0x8008ef44, size: 56, name: fade_tint_save, hash: 959d1b5984c24a3f, unit: map_palettes}
+  - {addr: 0x8008ef7c, size: 56, name: fade_tint_restore, hash: a1f45eb7a0a238fb, unit: map_palettes}
+  - {addr: 0x8008efb4, size: 380, name: fade_tint_start, hash: 9f81148b82764d34, unit: map_palettes}
+  - {addr: 0x8008f130, size: 216, name: fade_tint_update, hash: fbbba96ddbce1e60, unit: map_palettes}
+  - {addr: 0x8008f208, size: 280, name: fade_tint_draw, hash: f9393c8efdc975fa, unit: map_palettes}
   - {addr: 0x8008f320, size: 376, name: set_palette_components, hash: 57be6d1bd1f97cb2, unit: map_palettes}
   - {addr: 0x8008f498, size: 164, name: map_palette_set_colors, hash: e941bb76dabb2e46, unit: map_palettes}
   - {addr: 0x8008f53c, size: 256, name: map_palette_set_and_store_colors, hash: c59982ff42a360ae, unit: map_palettes}
@@ -2110,7 +2109,7 @@ data:
   - {addr: 0x800961bc, name: g_cursor_y}
   - {addr: 0x800961c0, name: s_cursor_repeat_counter}
   - {addr: 0x800961c4, name: g_fade_tint_target}
-  - {addr: 0x800961c8, name: s_fade_tint}
+  - {addr: 0x800961c8, name: g_fade_tint}
   - {addr: 0x800961cc, name: g_fade_tint_backup}
   - {addr: 0x800961d0, name: g_fade_tint_value}
   - {addr: 0x800961d8, name: g_fade_tint_step}
