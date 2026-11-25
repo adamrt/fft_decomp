@@ -8,8 +8,7 @@ source_dir: src/main
 profile: gcc-2.6.3_O2_aspsx-2.34
 
 units:
-  - {name: file_requests, source: src/main/file_requests.c, data: [{addr: 0x8004eaf4, size: 36, hash: 6db65fd59fd356f6}]}
-  - {name: loading_draw_message, source: src/main/loading_screen.c, data: [{addr: 0x80032a68, size: 16, hash: 374708fff7719dd5}]}
+  - {name: cd_file, source: src/main/cd_file.c, profile: gcc-2.6.3_O2_aspsx-2.21, data: [{addr: 0x8004eaf4, size: 36, hash: 6db65fd59fd356f6}]}
   - {name: suzuki_smd_lifecycle, source: src/lib/suzuki/smd_lifecycle.c}
   - {name: suzuki_sfx, source: src/lib/suzuki/sfx.c}
   - {name: suzuki_smd_controls, source: src/lib/suzuki/smd_controls.c}
@@ -57,12 +56,12 @@ functions:
   - {addr: 0x80010b40, size: 104, name: __do_global_dtors, hash: 30e458972df14eda, source: src/platform/psyq/crt/__do_global_dtors.c}
   - {addr: 0x80011bb0, size: 16, name: system_store_stack_pointer, hash: 972f7e917252ee42, source: src/main/stack_save.s, asm: "Stores sp for system_restore_game_loop_stack; ordinary C cannot read sp."}
   - {addr: 0x80011bc0, size: 16, name: system_restore_game_loop_stack, hash: 8b9c9cab30efada8, source: src/main/stack_restore.s, asm: "Stack-replacing ABI tail transfer to system_run_game_loop; ordinary C cannot assign sp."}
-  - {addr: 0x80011bd0, size: 36, name: file_request_read_quiet, hash: 323354187cbfd5ba, unit: file_requests}
-  - {addr: 0x80011bf4, size: 484, name: file_request_read, hash: 2289317868ab7dd4, unit: file_requests}
-  - {addr: 0x80011dd8, size: 64, name: file_cd_pause, hash: 5c3ad6653948cd8e, unit: file_requests}
-  - {addr: 0x80011e18, size: 32, name: file_cd_reset, hash: c344f4d9ad5576c9, unit: file_requests}
-  - {addr: 0x80011e38, size: 488, name: file_poll_load, hash: ca5b82052b8097de, profile: gcc-2.6.3_O2_aspsx-2.21, source: src/main/cd_read.c, rodata: [{addr: 0x80010014, size: 28, hash: 9b7ef4304058db91}]}
-  - {addr: 0x80012020, size: 212, name: loading_message_draw, hash: dd193b96065424a5, unit: loading_draw_message}
+  - {addr: 0x80011bd0, size: 36, name: file_request_read_quiet, hash: 323354187cbfd5ba, unit: cd_file}
+  - {addr: 0x80011bf4, size: 484, name: file_request_read, hash: 2289317868ab7dd4, unit: cd_file}
+  - {addr: 0x80011dd8, size: 64, name: file_cd_pause, hash: 5c3ad6653948cd8e, unit: cd_file}
+  - {addr: 0x80011e18, size: 32, name: file_cd_reset, hash: c344f4d9ad5576c9, unit: cd_file}
+  - {addr: 0x80011e38, size: 488, name: file_poll_load, hash: ca5b82052b8097de, unit: cd_file, rodata: [{addr: 0x80010014, size: 28, hash: 9b7ef4304058db91}]}
+  - {addr: 0x80012020, size: 212, name: draw_loading_message, hash: dd193b96065424a5, unit: cd_file}
   - {addr: 0x800120f4, size: 120, name: suzuki_smd_create_music, hash: d51ce846ff988935, unit: suzuki_smd_lifecycle}
   - {addr: 0x8001216c, size: 96, name: suzuki_smd_unload_music, hash: b1f952085d1aa481, unit: suzuki_smd_lifecycle}
   - {addr: 0x800121cc, size: 8, name: suzuki_smd_noop_1, hash: 6d64edf91449c1b1, unit: suzuki_smd_lifecycle}
@@ -1170,7 +1169,7 @@ data:
   - {addr: 0x80032a5c, name: g_suzuki_sound_root_counter_2_event}
   - {addr: 0x80032a60, name: g_suzuki_sound_sfx_music}
   - {addr: 0x80032a64, name: g_suzuki_sound_heap_end}
-  - {addr: 0x80032a68, name: s_loading_otags}
+  - {addr: 0x80032a68, name: g_loading_otags}
   - {addr: 0x80032a78, name: g_psyq_etc_pad_buttons}
   - {addr: 0x80032a7c, name: g_psyq_cd_sync_result}
   - {addr: 0x80032a84, name: g_psyq_cd_ready_result}

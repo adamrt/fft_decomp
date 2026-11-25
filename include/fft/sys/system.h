@@ -131,7 +131,6 @@ extern s32 g_loading_display_frame_counter;
 void loading_message_build(u32 visible, s32 x, s32 y);
 void loading_message_build_offset(u32 visible);
 void loading_message_append_to_otag(u32* otag);
-void loading_message_draw(void);
 
 /* OPEN main loop */
 /* Bits of g_system_runtime_flags. */
