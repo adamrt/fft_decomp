@@ -130,6 +130,7 @@ type compiledFunction struct {
 type compiledModule struct {
 	functions []compiledFunction
 	unitData  [][]compiledDataSpan // indexed by moduleSpec.Units, emitted once per unit
+	unitErrs  []error              // a unit's own failure; members also carry it
 }
 
 // compileModule compiles the selected functions of one module (all when
@@ -139,6 +140,7 @@ func (p project) compileModule(config *projectConfig, resolver symbolResolver, m
 	results := &compiledModule{
 		functions: make([]compiledFunction, len(m.Functions)),
 		unitData:  make([][]compiledDataSpan, len(m.Units)),
+		unitErrs:  make([]error, len(m.Units)),
 	}
 	jobs, err := toolJobs()
 	if err != nil {
@@ -173,7 +175,9 @@ func (p project) compileModule(config *projectConfig, resolver symbolResolver, m
 		queue = append(queue, index)
 	}
 	for unitIndex := range m.Units {
-		if unitSelected[m.Units[unitIndex].Name] {
+		// A table unit has no member to select it; a full compile builds it.
+		tables := only == nil && len(m.unitMembers(m.Units[unitIndex].Name)) == 0
+		if unitSelected[m.Units[unitIndex].Name] || tables {
 			queue = append(queue, -unitIndex-1)
 		}
 	}
@@ -193,7 +197,7 @@ func (p project) compileModule(config *projectConfig, resolver symbolResolver, m
 					results.functions[index].sections, results.functions[index].err = p.compileFunction(resolver, m, &m.Functions[index], workDir)
 					p.progress.step()
 				} else {
-					results.unitData[-index-1] = p.compileUnit(config, resolver, m, &m.Units[-index-1], workDir, results.functions, indexOf)
+					results.unitData[-index-1], results.unitErrs[-index-1] = p.compileUnit(config, resolver, m, &m.Units[-index-1], workDir, results.functions, indexOf)
 				}
 				if compileSlots != nil {
 					<-compileSlots
@@ -221,42 +225,42 @@ func (p project) compileEntry(config *projectConfig, resolver symbolResolver, m 
 	for index := range m.Functions {
 		indexOf[m.Functions[index].Name] = index
 	}
-	p.compileUnit(config, resolver, m, m.unit(f.Unit), workDir, results, indexOf)
+	_, _ = p.compileUnit(config, resolver, m, m.unit(f.Unit), workDir, results, indexOf)
 	result := results[indexOf[f.Name]]
 	return result.sections, result.err
 }
 
 // compileUnit compiles one configured unit once and hands each member its
 // slice of the merged sections, or the unit's error. The unit-owned data is
-// returned separately so the module build can emit it once.
-func (p project) compileUnit(config *projectConfig, resolver symbolResolver, m *moduleSpec, unit *unitDef, workDir string, results []compiledFunction, indexOf map[string]int) []compiledDataSpan {
+// returned separately so the module build can emit it once, with the unit's
+// error, which a table unit has no member to carry.
+func (p project) compileUnit(config *projectConfig, resolver symbolResolver, m *moduleSpec, unit *unitDef, workDir string, results []compiledFunction, indexOf map[string]int) ([]compiledDataSpan, error) {
 	members := m.unitMembers(unit.Name)
 	step := func() {
 		if p.progress != nil {
 			p.progress.step()
 		}
 	}
-	setError := func(err error) {
+	setError := func(err error) error {
+		err = fmt.Errorf("unit %s: %w", unit.Name, err)
 		for _, f := range members {
-			results[indexOf[f.Name]].err = fmt.Errorf("unit %s: %w", unit.Name, err)
+			results[indexOf[f.Name]].err = err
 			step()
 		}
+		return err
 	}
 	instance, err := m.unitInstance(config, unit.Name)
 	if err != nil {
-		setError(err)
-		return nil
+		return nil, setError(err)
 	}
 	source := filepath.Join(p.root, filepath.FromSlash(unit.Source))
 	sections, err := p.compileUnitInstance(resolver, instance, source, filepath.Join(workDir, "units", unit.Name))
 	if err != nil {
-		setError(err)
-		return nil
+		return nil, setError(err)
 	}
 	memberResults, problems := compareUnitSections(instance, sections)
 	if len(problems) > 0 {
-		setError(errors.New(strings.Join(problems, "; ")))
-		return nil
+		return nil, setError(errors.New(strings.Join(problems, "; ")))
 	}
 	text := sections[".text"]
 	for _, result := range memberResults {
@@ -274,7 +278,7 @@ func (p project) compileUnit(config *projectConfig, resolver symbolResolver, m *
 		results[indexOf[f.Name]].sections = slices
 		step()
 	}
-	return sliceUnitOwnedData(instance, sections)
+	return sliceUnitOwnedData(instance, sections), nil
 }
 
 // functionLinker returns f's source path and the linker script that binds the
@@ -470,6 +474,9 @@ func (p project) buildModule(config *projectConfig, resolver symbolResolver, m *
 	}
 	for index := range m.Units {
 		unit := &m.Units[index]
+		if results.unitErrs[index] != nil {
+			return "", fmt.Errorf("compile %w", results.unitErrs[index])
+		}
 		if err := writeUnitOwnedData(m, unit, results.unitData[index], want, got); err != nil {
 			return "", err
 		}
@@ -770,6 +777,12 @@ func (p project) checkCommand(args []string) error {
 			}
 			functions++
 			bytesChecked += f.Size
+		}
+		for unitIndex := range m.Units {
+			// Members already report their unit's failure; a table unit has none.
+			if err := checks[index].results.unitErrs[unitIndex]; err != nil && len(m.unitMembers(m.Units[unitIndex].Name)) == 0 {
+				problems = append(problems, fmt.Sprintf("%s: %v", m.ID, err))
+			}
 		}
 	}
 	if len(problems) > 0 {

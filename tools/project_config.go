@@ -959,9 +959,13 @@ func (p project) validateProjectConfig(config *projectConfig) error {
 				fail("%s: source must be a .c file under src/", where)
 			}
 			members := m.unitMembers(unit.Name)
-			if len(members) == 0 {
-				fail("%s has no member functions", where)
+			// A table unit defines data only, as the original's table objects did.
+			if len(members) == 0 && len(unit.Data)+len(unit.Rodata)+len(unit.Bss) == 0 {
+				fail("%s has no member functions and owns no data", where)
 				continue
+			}
+			if len(members) == 0 {
+				unitSources[unit.Source] = true
 			}
 			if unit.Profile != "" {
 				if _, ok := compilerProfileNamed(unit.Profile); !ok {

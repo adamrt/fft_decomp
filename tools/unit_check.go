@@ -44,6 +44,10 @@ type unitSpec struct {
 	functions []string
 	rodata    []rodataSpec // tables the unit defines itself
 	instances []unitInstanceYAML
+	// tables marks a configured unit that defines only data: a table object
+	// with no functions, compiled with the unit's or the module's profile.
+	tables  bool
+	profile string
 }
 
 func loadUnitSpec(root, path string) (*unitSpec, error) {
@@ -153,8 +157,10 @@ func resolveUnitInstance(config *projectConfig, spec *unitSpec, instance unitIns
 	if names == nil {
 		names = spec.functions
 	}
-	if err := uniqueSymbols(names); err != nil {
-		return nil, fmt.Errorf("%s: instance %s: %w", spec.name, m.ID, err)
+	if len(names) > 0 || !spec.tables {
+		if err := uniqueSymbols(names); err != nil {
+			return nil, fmt.Errorf("%s: instance %s: %w", spec.name, m.ID, err)
+		}
 	}
 	if instance.OriginalUnit != "" {
 		if len(spec.rodata) != 0 {
@@ -215,10 +221,20 @@ func resolveUnitInstance(config *projectConfig, spec *unitSpec, instance unitIns
 	for _, span := range spec.rodata {
 		unit.rodata = append(unit.rodata, span)
 	}
-	unit.addr = unit.members[0].Addr
-	profileName, err := unitProfile(spec, m, unit.members)
-	if err != nil {
-		return nil, err
+	var profileName string
+	if len(unit.members) > 0 {
+		unit.addr = unit.members[0].Addr
+		if profileName, err = unitProfile(spec, m, unit.members); err != nil {
+			return nil, err
+		}
+	} else {
+		profileName = spec.profile
+		if profileName == "" {
+			profileName = m.Profile
+		}
+		if _, ok := compilerProfileNamed(profileName); !ok {
+			return nil, fmt.Errorf("%s: unknown compiler profile %q", spec.name, profileName)
+		}
 	}
 	if instance.Profile != "" && instance.Profile != profileName {
 		return nil, fmt.Errorf("%s: instance %s asserts profile %s but its functions use %s", spec.name, m.ID, instance.Profile, profileName)
@@ -252,7 +268,8 @@ func (m *moduleSpec) unitInstance(config *projectConfig, name string) (*unitInst
 	for _, f := range m.unitMembers(name) {
 		functions = append(functions, f.Name)
 	}
-	spec := &unitSpec{name: unit.Name, source: unit.Source, functions: functions, rodata: unit.Rodata}
+	spec := &unitSpec{name: unit.Name, source: unit.Source, functions: functions, rodata: unit.Rodata, profile: unit.Profile,
+		tables: len(functions) == 0 && len(unit.Data)+len(unit.Rodata)+len(unit.Bss) > 0}
 	instance, err := resolveUnitInstance(config, spec, unitInstanceYAML{Module: m.ID})
 	if err != nil {
 		return nil, err
@@ -386,7 +403,9 @@ func unitLinkerScriptSkipping(unit *unitInstance, bindings map[string]uint32, as
 		// word storage section alignment 16 even without a 16-byte directive.
 		fmt.Fprintf(&script, "  .bss 0x%x : SUBALIGN(4) { *(.bss) }\n", unit.bss[0].Addr)
 	}
-	fmt.Fprintf(&script, "  .text 0x%x : SUBALIGN(4) { *(.text) }\n", unit.addr)
+	if len(unit.members) > 0 {
+		fmt.Fprintf(&script, "  .text 0x%x : SUBALIGN(4) { *(.text) }\n", unit.addr)
+	}
 	script.WriteString("  /DISCARD/ : { *(.reginfo) *(.pdr) *(.comment) *(.gnu.attributes) *(.MIPS.abiflags) }\n}\n")
 	if assert {
 		for _, f := range unit.members {

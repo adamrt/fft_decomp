@@ -70,8 +70,16 @@ func validateBSSOriginal(m *moduleSpec, spans []rodataSpec, image []byte, hashes
 func validateTrialBSSEnvelope(unit *unitInstance) error {
 	m := *unit.module
 	m.Units = append([]unitDef(nil), m.Units...)
+	// The unit's own row: a member's unit, or a table unit's name (a scratch
+	// spec's name matches no configured unit).
+	owner := ""
+	if len(unit.members) > 0 {
+		owner = unit.members[0].Unit
+	} else if unit.spec != nil && unit.spec.tables {
+		owner = unit.spec.name
+	}
 	for i := range m.Units {
-		if len(unit.members) == 0 || m.Units[i].Name != unit.members[0].Unit {
+		if m.Units[i].Name != owner {
 			continue
 		}
 		var keep []rodataSpec
