@@ -40,8 +40,5 @@ s32 heap_free(void* allocation);
 void heap_release_block(void* allocation);
 void* heap_reserve_at(void* allocation, u32 size);
 void heap_clear_game_table(void);
-void* heap_smd_alloc(u32 size);
-s32 heap_smd_free(void* allocation);
-void heap_smd_clear_table(void);
 
 #endif

@@ -300,7 +300,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   then start the text thread anyway, relying on close not returning.
 - `heap_free`: the clearing loop stops at the first page byte that differs
   from the allocation id, not at the end of the 64-entry
-  `s_heap_game_allocator_table`; an allocation that reaches the last page
+  `g_heap_game_allocator_table`; an allocation that reaches the last page
   reads on into `g_gfx_draw_envs` and clears its bytes while they match.
 - `map_update_load`: the four texture quarter files load at
   `buffer + 0x8000 * (n + 1)`, while `dispatch_gns_resource` uploads
@@ -677,7 +677,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
 - `music_start_load_into_free_slot` allocates the SMD block before
   it requests the read; when `file_request_read_bytes` refuses (loader
   busy) it reports `SYSTEM_ERROR_SMD_LOAD` and returns 0 without freeing
-  the block. `music_start_load_into_slot` (no caller) does the same.
+  the block. `start_music_load_into_slot` (no caller) does the same.
 - `menu_alloc_memory` checks the end of BATTLE's 53-page or WORLD's
   112-page arena before accepting a free run, so no positive allocation
   includes the last page. It marks pages before claiming one of 16 records;

@@ -122,10 +122,8 @@ void file_cd_ready_callback(u8 event, u8* result);
 
 /* Blocking byte-count loads use the same whole-sector rule. Heap loads allocate
  * size bytes, even when a partial final sector would remain unread. */
-void* file_load_into_buffer(int sector, u32 size, void* destination);
 void* file_load_into_buffer_checked(int sector, int size, void* destination);
 void* file_load_into_heap_checked(int sector, int size);
-struct suzuki_smd_header* file_load_smd(int sector, u32 size);
 
 /* loading helpers */
 void file_load_sync(s32 lba, s32 size, void* destination);

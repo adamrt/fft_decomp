@@ -23,10 +23,7 @@ units:
   - {name: suzuki_driver, source: src/lib/suzuki/driver.c, bss: [{addr: 0x80032a3c, size: 4, hash: df3f619804a92fdb}, {addr: 0x80032a40, size: 2, hash: 96a296d224f285c6}]}
   - {name: game_loop, source: src/main/entry.c, data: [{addr: 0x800473a0, size: 1, hash: 4bf5122f344554c5}], bss: [{addr: 0x80047608, size: 4, hash: df3f619804a92fdb}]}
   - {name: startup, source: src/main/startup.c, data: [{addr: 0x8004d9b4, size: 4, hash: df3f619804a92fdb}], bss: [{addr: 0x8004e5b8, size: 4, hash: df3f619804a92fdb}]}
-  - {name: system_callbacks, source: src/main/system_callbacks.c, bss: [{addr: 0x800459b8, size: 4, hash: df3f619804a92fdb}, {addr: 0x800459bc, size: 4, hash: df3f619804a92fdb}, {addr: 0x800459c0, size: 4, hash: df3f619804a92fdb}, {addr: 0x800459c4, size: 4, hash: df3f619804a92fdb}]}
-  - {name: sound_requests, source: src/main/sound_requests.c, data: [{addr: 0x80047080, size: 800, hash: 9ac66e2befd1621a}], bss: [{addr: 0x8004599c, size: 4, hash: df3f619804a92fdb}]}
-  - {name: heap, source: src/main/heap.c, data: [{addr: 0x8004e9d4, size: 64, hash: f5a5fd42d16a2030}], bss: [{addr: 0x8004e5c0, size: 16, hash: 374708fff7719dd5}]}
-  - {name: file_loading, source: src/main/file_loading.c}
+  - {name: system, source: src/main/system.c, data: [{addr: 0x80047080, size: 800, hash: 9ac66e2befd1621a}], bss: [{addr: 0x800459b8, size: 4, hash: df3f619804a92fdb}, {addr: 0x800459bc, size: 4, hash: df3f619804a92fdb}, {addr: 0x800459c0, size: 4, hash: df3f619804a92fdb}, {addr: 0x800459c4, size: 4, hash: df3f619804a92fdb}]}
   - {name: system_handlers, source: src/main/system_handlers.c, data: [{addr: 0x8004c6c4, size: 4, hash: df3f619804a92fdb}]}
   - {name: battle_otag, source: src/main/battle_otag.c}
   - {name: save_state, source: src/main/save_state.c, rodata: [{addr: 0x800473b0, size: 4, hash: 27d9bda8887f41f6}], bss: [{addr: 0x8005771c, size: 1024, hash: 5f70bf18a0860070}]}
@@ -710,58 +707,58 @@ functions:
   - {addr: 0x80042d18, size: 188, name: present_caption_frame, hash: 18f2c8600c046389, unit: startup}
   - {addr: 0x80042dd4, size: 904, name: fade_in_caption, hash: 1ce397677ccb4bb6, unit: startup, rodata: [{addr: 0x80040924, size: 8, hash: af5570f5a1810b7a}]}
   - {addr: 0x8004315c, size: 896, name: fade_out_caption, hash: 588fa5761ae61f7b, unit: startup, rodata: [{addr: 0x80040924, size: 8, hash: af5570f5a1810b7a}]}
-  - {addr: 0x800434dc, size: 208, name: system_vsync_callback, hash: a0172ee6d97c1bfd, unit: system_callbacks}
-  - {addr: 0x800435ac, size: 8, name: system_draw_sync_callback, hash: 6d64edf91449c1b1, unit: system_callbacks}
-  - {addr: 0x800435b4, size: 8, name: file_cd_ready_callback, hash: 6d64edf91449c1b1, unit: system_callbacks}
-  - {addr: 0x800435bc, size: 8, name: file_cd_read_callback, hash: 6d64edf91449c1b1, unit: system_callbacks}
-  - {addr: 0x800435c4, size: 156, name: music_load_into_slot, hash: dc882519778a9dfe, unit: sound_requests}
-  - {addr: 0x80043660, size: 168, name: music_load_into_free_slot, hash: 185c9e9bb1bb9c55, unit: sound_requests}
-  - {addr: 0x80043708, size: 8, name: music_is_loading, hash: 207819bf4ebe3078, unit: sound_requests}
-  - {addr: 0x80043710, size: 200, name: music_start_load_into_slot, hash: d068d9f896a5379b, unit: sound_requests}
-  - {addr: 0x800437d8, size: 248, name: music_start_load_into_free_slot, hash: 0b6f75c1755d440b, unit: sound_requests}
-  - {addr: 0x800438d0, size: 136, name: music_poll_scenario_load, hash: 96a506be6e381a11, unit: sound_requests}
-  - {addr: 0x80043958, size: 104, name: music_load_scenario_and_wait, hash: 793faa58744c23db, unit: sound_requests}
-  - {addr: 0x800439c0, size: 120, name: music_unload_scenario_slot, hash: c92064cadd7628ae, unit: sound_requests}
-  - {addr: 0x80043a38, size: 88, name: music_stop, hash: 6b4c533ed48aaf0e, unit: sound_requests}
-  - {addr: 0x80043a90, size: 180, name: music_play_slot, hash: 69069da0383341dc, unit: sound_requests}
-  - {addr: 0x80043b44, size: 16, name: music_get_current_slot, hash: ed983cc491943ec8, unit: sound_requests}
-  - {addr: 0x80043b54, size: 76, name: music_set_volume, hash: a1d1ea2b032eb3a5, unit: sound_requests}
-  - {addr: 0x80043ba0, size: 72, name: music_restore_volume, hash: 12aee3665cc12e32, unit: sound_requests}
-  - {addr: 0x80043be8, size: 84, name: music_set_target_volume, hash: 1f57d764fcc9219d, unit: sound_requests}
-  - {addr: 0x80043c3c, size: 76, name: music_fade_tempo_scale, hash: 12d3ddf3f76e80af, unit: sound_requests}
-  - {addr: 0x80043c88, size: 76, name: music_fade_pitch_shift, hash: 0997b09f98b20f70, unit: sound_requests}
-  - {addr: 0x80043cd4, size: 76, name: music_fade_balance_shift, hash: e8a9fa6318c8a42b, unit: sound_requests}
-  - {addr: 0x80043d20, size: 96, name: music_play_tune, hash: 66e21780561ddd1d, unit: sound_requests}
-  - {addr: 0x80043d80, size: 96, name: music_fade_out_tune, hash: bb2b40daa06f22bf, unit: sound_requests}
-  - {addr: 0x80043de0, size: 288, name: music_update_tunes, hash: 46f151791fb86bc2, unit: sound_requests}
-  - {addr: 0x80043f00, size: 56, name: music_unload_all, hash: 8a55c4911959dc2e, unit: sound_requests}
-  - {addr: 0x80043f38, size: 24, name: music_get_by_slot, hash: 006705ceb0b16735, unit: sound_requests}
-  - {addr: 0x80043f50, size: 56, name: music_unload_current_scenario, hash: 00e6b4c7c08d9437, unit: sound_requests}
-  - {addr: 0x80043f88, size: 112, name: music_set_track, hash: 990c6633acf74e71, unit: sound_requests}
-  - {addr: 0x80043ff8, size: 32, name: sound_play_sfx, hash: 5460a41510478fdd, unit: sound_requests}
-  - {addr: 0x80044018, size: 32, name: sound_play_sfx_on_free_channel, hash: 93a986ea943c5d65, unit: sound_requests}
-  - {addr: 0x80044038, size: 40, name: sound_play_background, hash: d3b2bdc64299c755, unit: sound_requests}
-  - {addr: 0x80044060, size: 44, name: sound_replay_background, hash: d4b1a5bec31f46a3, unit: sound_requests}
-  - {addr: 0x8004408c, size: 64, name: sound_set_sfx_volume, hash: 17e97804797bfd75, unit: sound_requests}
-  - {addr: 0x800440cc, size: 40, name: sound_stop_all_sfx, hash: c0c1ba34c9724590, unit: sound_requests}
-  - {addr: 0x800440f4, size: 52, name: sound_stop_sfx, hash: 21e1e455590397bf, unit: sound_requests}
-  - {addr: 0x80044128, size: 44, name: sound_stop_background, hash: 47c3d337927a07ec, unit: sound_requests}
-  - {addr: 0x80044154, size: 360, name: sound_init, hash: ba9b164dee501015, unit: sound_requests}
-  - {addr: 0x800442bc, size: 200, name: heap_smd_alloc, hash: a37ef45a15eb4c27, unit: heap}
-  - {addr: 0x80044384, size: 108, name: heap_smd_free, hash: 1d3fc00bb5ccc417, unit: heap}
-  - {addr: 0x800443f0, size: 36, name: heap_smd_clear_table, hash: 86fdd143dae92bbd, unit: heap}
-  - {addr: 0x80044414, size: 200, name: heap_alloc, hash: 6367212638bc921c, unit: heap}
-  - {addr: 0x800444dc, size: 292, name: heap_reserve_at, hash: bb2cd7a4ddd3dc36, unit: heap}
-  - {addr: 0x80044600, size: 112, name: heap_free, hash: 51b9936a5ea34c17, unit: heap}
-  - {addr: 0x80044670, size: 36, name: heap_clear_game_table, hash: baa90df5f4fd6324, unit: heap}
-  - {addr: 0x80044694, size: 52, name: file_request_read_bytes, hash: 0a87b13dd21b6135, unit: file_loading}
-  - {addr: 0x800446c8, size: 16, name: file_get_load_state, hash: 2bf2cd79d5e3b972, unit: file_loading}
-  - {addr: 0x800446d8, size: 228, name: file_load_smd, hash: 7c3adb54cd59bad4, unit: file_loading}
-  - {addr: 0x800447bc, size: 228, name: load_into_heap, hash: a436e8832314d2f3, unit: file_loading}
-  - {addr: 0x800448a0, size: 180, name: file_load_into_buffer, hash: 9da2049c8a2e24ac, unit: file_loading}
-  - {addr: 0x80044954, size: 60, name: file_load_into_buffer_checked, hash: e4a2578d2206edfb, unit: file_loading}
-  - {addr: 0x80044990, size: 60, name: file_load_into_heap_checked, hash: f704f1ec47fb6ed5, unit: file_loading}
-  - {addr: 0x800449cc, size: 32, name: heap_release_block, hash: 68e41579281fa6e2, unit: file_loading}
+  - {addr: 0x800434dc, size: 208, name: system_vsync_callback, hash: a0172ee6d97c1bfd, unit: system}
+  - {addr: 0x800435ac, size: 8, name: system_draw_sync_callback, hash: 6d64edf91449c1b1, unit: system}
+  - {addr: 0x800435b4, size: 8, name: file_cd_ready_callback, hash: 6d64edf91449c1b1, unit: system}
+  - {addr: 0x800435bc, size: 8, name: file_cd_read_callback, hash: 6d64edf91449c1b1, unit: system}
+  - {addr: 0x800435c4, size: 156, name: music_load_into_slot, hash: dc882519778a9dfe, unit: system}
+  - {addr: 0x80043660, size: 168, name: music_load_into_free_slot, hash: 185c9e9bb1bb9c55, unit: system}
+  - {addr: 0x80043708, size: 8, name: music_is_loading, hash: 207819bf4ebe3078, unit: system}
+  - {addr: 0x80043710, size: 200, name: start_music_load_into_slot, hash: d068d9f896a5379b, unit: system}
+  - {addr: 0x800437d8, size: 248, name: music_start_load_into_free_slot, hash: 0b6f75c1755d440b, unit: system}
+  - {addr: 0x800438d0, size: 136, name: music_poll_scenario_load, hash: 96a506be6e381a11, unit: system}
+  - {addr: 0x80043958, size: 104, name: load_scenario_music_and_wait, hash: 793faa58744c23db, unit: system}
+  - {addr: 0x800439c0, size: 120, name: music_unload_scenario_slot, hash: c92064cadd7628ae, unit: system}
+  - {addr: 0x80043a38, size: 88, name: music_stop, hash: 6b4c533ed48aaf0e, unit: system}
+  - {addr: 0x80043a90, size: 180, name: music_play_slot, hash: 69069da0383341dc, unit: system}
+  - {addr: 0x80043b44, size: 16, name: get_current_music_slot, hash: ed983cc491943ec8, unit: system}
+  - {addr: 0x80043b54, size: 76, name: music_set_volume, hash: a1d1ea2b032eb3a5, unit: system}
+  - {addr: 0x80043ba0, size: 72, name: music_restore_volume, hash: 12aee3665cc12e32, unit: system}
+  - {addr: 0x80043be8, size: 84, name: music_set_target_volume, hash: 1f57d764fcc9219d, unit: system}
+  - {addr: 0x80043c3c, size: 76, name: fade_music_tempo_scale, hash: 12d3ddf3f76e80af, unit: system}
+  - {addr: 0x80043c88, size: 76, name: fade_music_pitch_shift, hash: 0997b09f98b20f70, unit: system}
+  - {addr: 0x80043cd4, size: 76, name: fade_music_balance_shift, hash: e8a9fa6318c8a42b, unit: system}
+  - {addr: 0x80043d20, size: 96, name: music_play_tune, hash: 66e21780561ddd1d, unit: system}
+  - {addr: 0x80043d80, size: 96, name: music_fade_out_tune, hash: bb2b40daa06f22bf, unit: system}
+  - {addr: 0x80043de0, size: 288, name: music_update_tunes, hash: 46f151791fb86bc2, unit: system}
+  - {addr: 0x80043f00, size: 56, name: music_unload_all, hash: 8a55c4911959dc2e, unit: system}
+  - {addr: 0x80043f38, size: 24, name: get_music_by_slot, hash: 006705ceb0b16735, unit: system}
+  - {addr: 0x80043f50, size: 56, name: music_unload_current_scenario, hash: 00e6b4c7c08d9437, unit: system}
+  - {addr: 0x80043f88, size: 112, name: music_set_track, hash: 990c6633acf74e71, unit: system}
+  - {addr: 0x80043ff8, size: 32, name: sound_play_sfx, hash: 5460a41510478fdd, unit: system}
+  - {addr: 0x80044018, size: 32, name: sound_play_sfx_on_free_channel, hash: 93a986ea943c5d65, unit: system}
+  - {addr: 0x80044038, size: 40, name: sound_play_background, hash: d3b2bdc64299c755, unit: system}
+  - {addr: 0x80044060, size: 44, name: sound_replay_background, hash: d4b1a5bec31f46a3, unit: system}
+  - {addr: 0x8004408c, size: 64, name: sound_set_sfx_volume, hash: 17e97804797bfd75, unit: system}
+  - {addr: 0x800440cc, size: 40, name: sound_stop_all_sfx, hash: c0c1ba34c9724590, unit: system}
+  - {addr: 0x800440f4, size: 52, name: sound_stop_sfx, hash: 21e1e455590397bf, unit: system}
+  - {addr: 0x80044128, size: 44, name: sound_stop_background, hash: 47c3d337927a07ec, unit: system}
+  - {addr: 0x80044154, size: 360, name: sound_init, hash: ba9b164dee501015, unit: system}
+  - {addr: 0x800442bc, size: 200, name: alloc_smd_block, hash: a37ef45a15eb4c27, unit: system}
+  - {addr: 0x80044384, size: 108, name: free_smd_block, hash: 1d3fc00bb5ccc417, unit: system}
+  - {addr: 0x800443f0, size: 36, name: clear_smd_table, hash: 86fdd143dae92bbd, unit: system}
+  - {addr: 0x80044414, size: 200, name: heap_alloc, hash: 6367212638bc921c, unit: system}
+  - {addr: 0x800444dc, size: 292, name: heap_reserve_at, hash: bb2cd7a4ddd3dc36, unit: system}
+  - {addr: 0x80044600, size: 112, name: heap_free, hash: 51b9936a5ea34c17, unit: system}
+  - {addr: 0x80044670, size: 36, name: heap_clear_game_table, hash: baa90df5f4fd6324, unit: system}
+  - {addr: 0x80044694, size: 52, name: file_request_read_bytes, hash: 0a87b13dd21b6135, unit: system}
+  - {addr: 0x800446c8, size: 16, name: file_get_load_state, hash: 2bf2cd79d5e3b972, unit: system}
+  - {addr: 0x800446d8, size: 228, name: load_smd_file, hash: 7c3adb54cd59bad4, unit: system}
+  - {addr: 0x800447bc, size: 228, name: load_into_heap, hash: a436e8832314d2f3, unit: system}
+  - {addr: 0x800448a0, size: 180, name: load_file_into_buffer, hash: 9da2049c8a2e24ac, unit: system}
+  - {addr: 0x80044954, size: 60, name: file_load_into_buffer_checked, hash: e4a2578d2206edfb, unit: system}
+  - {addr: 0x80044990, size: 60, name: file_load_into_heap_checked, hash: f704f1ec47fb6ed5, unit: system}
+  - {addr: 0x800449cc, size: 32, name: heap_release_block, hash: 68e41579281fa6e2, unit: system}
   - {addr: 0x800449f8, size: 8, name: system_report, hash: 6d64edf91449c1b1, unit: system_handlers}
   - {addr: 0x80044a00, size: 8, name: system_report_error, hash: 6d64edf91449c1b1, unit: system_handlers}
   - {addr: 0x80044a08, size: 44, name: system_handle_error, hash: 0520ba9fd79942b9, unit: system_handlers}
@@ -1243,7 +1240,7 @@ data:
   - {addr: 0x80045990, name: g_system_frame_pacing_suppressed}
   - {addr: 0x80045994, name: g_frame_counter}
   - {addr: 0x80045998, name: g_system_min_vsync_interval}
-  - {addr: 0x8004599c, name: s_sound_background_sfx_id}
+  - {addr: 0x8004599c, name: g_sound_background_sfx_id}
   - {addr: 0x800459a0, name: g_deploy_deployed_unit_map_coordinates}
   - {addr: 0x800459b8, name: g_save_play_time_frames}
   - {addr: 0x800459bc, name: g_save_play_time_seconds}
@@ -1302,10 +1299,10 @@ data:
   - {addr: 0x8004d9b8, name: g_sound_env_sed_data}
   - {addr: 0x8004e5b8, name: s_loading_frame_counter}
   - {addr: 0x8004e5bc, name: g_gfx_active_buffer_index}
-  - {addr: 0x8004e5c0, name: s_heap_smd_allocator_table}
+  - {addr: 0x8004e5c0, name: g_heap_smd_allocator_table}
   - {addr: 0x8004e5d0, name: g_scenario_event_finish_operations}
   - {addr: 0x8004e9d0, name: g_brave_story_replay_story_event_index}
-  - {addr: 0x8004e9d4, name: s_heap_game_allocator_table}
+  - {addr: 0x8004e9d4, name: g_heap_game_allocator_table}
   - {addr: 0x8004ea14, name: g_gfx_draw_envs}
   - {addr: 0x8004eacc, name: g_gfx_display_envs}
   - {addr: 0x8004eaf4, name: g_file_cd_state}
