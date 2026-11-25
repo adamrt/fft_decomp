@@ -378,7 +378,6 @@ void map_unit_update_display_for_script(u32 map_unit_id);
 s32 map_unit_get_sprite_height_by_battle_unit_id(u32 battle_unit_id);
 s32 map_unit_get_sprite_sheet_slot_by_battle_unit_id(u32 battle_unit_id);
 void map_unit_update_float_height(map_unit_t* unit);
-void map_unit_update_float_height_and_status_bubble(map_unit_t* unit);
 void map_unit_play_sfx(struct map_unit* unit, s32 sound_id);
 
 /* Set and clear the move_destination_t bits that suppress a unit's facing, movement-effect and

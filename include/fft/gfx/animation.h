@@ -24,13 +24,13 @@ enum { ANIMATION_SEQ_OPCODE_PREFIX = 0xff };
 typedef enum animation_seq_opcode {
     /* 0xbe-0xd2 and 0xd4 are unit commands: a weapon or effect sequence that uses one is an error. */
     ANIMATION_SEQ_OPCODE_STOP_POSITION_COPIES = 0xbe,
-    ANIMATION_SEQ_OPCODE_START_POSITION_COPIES = 0xbf, /* the trail of sprite_afterimage_draw */
+    ANIMATION_SEQ_OPCODE_START_POSITION_COPIES = 0xbf, /* the trail of draw_afterimage */
     ANIMATION_SEQ_OPCODE_WAIT_FOR_DISTORTION = 0xc0,   /* offset: jump while a distortion animation runs */
     ANIMATION_SEQ_OPCODE_START_DISTORTION = 0xc1,      /* distortion animation id - 2, timer */
     ANIMATION_SEQ_OPCODE_NOP = 0xc2,
     ANIMATION_SEQ_OPCODE_HIDE_ITEM = 0xc3,
     ANIMATION_SEQ_OPCODE_SET_ITEM_POSITION = 0xc4, /* x, y: signed offsets of the item sprite from the unit */
-    ANIMATION_SEQ_OPCODE_SHOW_ITEM = 0xc5,         /* draw the unit's item display (sprite_item_display_draw) */
+    ANIMATION_SEQ_OPCODE_SHOW_ITEM = 0xc5,         /* draw the unit's item display (draw_item_display) */
     ANIMATION_SEQ_OPCODE_WAIT_FOR_INPUT = 0xc6,    /* offset: jump while g_battle_window_closed is 0 */
     ANIMATION_SEQ_OPCODE_UNKNOWN_C7 = 0xc7,        /* two operands */
     ANIMATION_SEQ_OPCODE_UNKNOWN_C8 = 0xc8,        /* two operands */
@@ -238,7 +238,7 @@ void animation_update_status_changes(struct map_unit* unit);
 /* One row of the ability animation table, indexed by ability id: the ability's charge animation
  * set, its attack animation and the message shown when it hits. */
 typedef struct animation_ability_data {
-    u8 charge_animation_set_id; /* row of s_animation_ability_charge_sets */
+    u8 charge_animation_set_id; /* row of g_animation_ability_charge_sets */
     u8 attack_animation;        /* animation_e, or ANIMATION_ATTACK_USE_WEAPON or _USE_ITEM */
     u8 text_display; /* low byte of the message text id (0x1800 | this) shown when the ability hits; 0 none */
 } animation_ability_data_t;
@@ -256,7 +256,6 @@ void animation_start_ability_charge(struct map_unit* unit);
 void animation_start_ability_charge_hold(struct map_unit* unit);
 void animation_select_ability_attack(struct map_unit* attacker, struct map_unit* target);
 void animation_select_weapon_attack(struct map_unit* attacker, struct map_unit* target);
-void animation_set_shield_block_attacker(struct map_unit* attacker, struct map_unit* target);
 
 /* distortions */
 /* map_unit_t.distortion_animation_id: the motion that

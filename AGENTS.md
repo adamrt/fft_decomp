@@ -27,7 +27,9 @@ preserving every original byte.
   `build/`. Never commit game assets (graphics, sound, movies, text and script
   dumps) or text copied from outside references (wikis, guides, SDK sources).
   Data tables recovered while decompiling belong in source; write a table as
-  the rule that produces it when one reproduces every byte. A zero-filled
+  the rule that produces it when one reproduces every byte. A table outside
+  its unit's one data block (BATTLE pools some tables with other files')
+  stays an address label. A zero-filled
   buffer the original kept in `.data` needs an explicit `= {0}`.
 - Stage explicit paths and inspect the staged diff. Preserve pushed history;
   make coherent commits with short subject lines when the user authorizes them.

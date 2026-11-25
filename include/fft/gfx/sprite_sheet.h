@@ -226,34 +226,8 @@ typedef enum sprite_seq_type {
 
 extern sprite_sheet_data_t g_sprite_sheet_data[SPRITE_SHEET_ID_COUNT];
 
-s32 sprite_sheet_is_loaded(s16 spritesheet_id);
-u32 sprite_sheet_get_flying_flag(u32 spritesheet_id);
 s32 sprite_sheet_map_unit_get_height(u32 map_unit_id);
 void sprite_sheet_apply_status_change(struct map_unit* unit, s32 tile_effect_level);
-
-/* WEP.SPR weapon/item graphics: palette rows and texture-row placement. */
-typedef struct sprite_item_graphic {
-    u8 palettes;    /* 0x00; g_sprite_weapon_clut rows: high nibble for MAP_CLUT_ROW_ITEM_A, low for _B */
-    u8 texture_row; /* 0x01; top of the graphic on its texture page, in steps of 8 pixels */
-} sprite_item_graphic_t;
-typedef char sprite_item_graphic_size_must_be_2[(sizeof(sprite_item_graphic_t) == 2) ? 1 : -1];
-
-extern sprite_item_graphic_t g_sprite_item_graphic_data[146];
-
-/* frame and sequence tables */
-extern sprite_unit_shp_frame_tables_t g_sprite_unit_shp_frame_tables[5];
-extern sprite_native_unit_seq_table_t g_sprite_unit_seq_tables[5];
-extern sprite_unit_shp_frame_tables_t g_sprite_boss_shp_frame_tables;
-extern sprite_native_unit_seq_table_t g_sprite_boss_seq_tables;
-extern sprite_wep_eff_graphics_t g_sprite_weapon_graphics[2];
-extern sprite_wep_eff_graphics_t g_sprite_effect_graphics[1];
-
-sprite_unit_shp_frame_tables_t* sprite_sheet_get_unit_shp(u32 spritesheet_id);
-sprite_unit_seq_table_t* sprite_sheet_get_unit_seq(u32 spritesheet_id);
-sprite_weapon_shp_t* sprite_sheet_get_weapon_shp(u32 spritesheet_id);
-u8** sprite_sheet_get_weapon_seq(u32 spritesheet_id);
-sprite_weapon_shp_t* sprite_sheet_get_effect_shp(u32 unused_spritesheet_id);
-u8** sprite_sheet_get_effect_seq(u32 unused_spritesheet_id);
 
 /* VRAM slots */
 /* Texture pages stored in a sprite display record's tpage. */
@@ -295,8 +269,6 @@ enum {
 };
 
 extern sprite_sheet_slot_t g_sprite_sheet_slots[SPRITE_SHEET_SLOT_COUNT];
-
-s32 sprite_sheet_claim_slot(s16 spritesheet_id);
 
 /* EVTCHR slots */
 enum {

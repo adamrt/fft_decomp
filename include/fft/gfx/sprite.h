@@ -188,11 +188,9 @@ void sprite_display_set_part_semi_transparent(sprite_display_t* display, s32 par
 
 /* item display */
 void sprite_item_display_set_icon(struct map_unit* unit, u32 item_id);
-void sprite_item_display_draw(struct map_unit* unit);
 
 /* status bubbles */
 void sprite_status_bubble_update_active(struct map_unit* unit);
-void sprite_status_bubble_draw(struct map_unit* unit, const DVECTOR* unused_screen_coords);
 
 /* sprite blocks */
 /* graphic_type of a unit's sprite blocks: which sheet the block animates. */
@@ -255,8 +253,6 @@ void sprite_draw_units(void);
 
 /* afterimages */
 void sprite_afterimage_init(struct map_unit* unit);
-void sprite_afterimage_shift_and_fill(struct map_unit* unit);
-void sprite_afterimage_draw(struct map_unit* unit);
 
 /* shadows */
 void sprite_build_shadow_quad(struct map_unit* unit);
@@ -265,16 +261,6 @@ s32 sprite_map_unit_hide_shadow(u32 map_unit_id);
 s32 sprite_map_unit_show_shadow(u32 map_unit_id);
 
 /* palettes */
-/* First 21 OTHER.SPR palettes, copied together and selected by status sheet. */
-typedef struct sprite_other_palettes {
-    palette_t chicken[5];  /* 0x000 */
-    palette_t frog[5];     /* 0x0a0 */
-    palette_t crystal[6];  /* 0x140 */
-    palette_t treasure[5]; /* 0x200 */
-} sprite_other_palettes_t;
-typedef char sprite_other_palettes_size_must_be_672[sizeof(sprite_other_palettes_t) == 672 ? 1 : -1];
-
-extern sprite_other_palettes_t g_sprite_other_palettes;
 extern palette_t g_sprite_shadow_palette;
 
 void sprite_map_unit_reset_palette(u32 map_unit_id);

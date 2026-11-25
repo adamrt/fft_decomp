@@ -123,7 +123,7 @@ enum { ACTION_STATUS_DISPLAY_CAPACITY = 27 };
 /* Block view of the numeric display fields at map unit data 0x2bc..0x2cf,
  * taken as one pointer by the action result display builders
  * (build_next_result_display, build_next_exp_jp_or_failure_display
- * and result_animate_text). */
+ * and animate_result_text). */
 typedef struct action_result_display {
     u8 active;                     /* 0x00 */
     u8 _padding_01;                /* 0x01; aligns selector */
@@ -180,6 +180,5 @@ void result_prepare_display(map_unit_t* unit);
 s32 result_map_unit_prepare_display(s32 map_unit_id);
 void result_queue_exp_jp_display(struct map_unit* unit);
 void result_queue_charge_failure(map_unit_t* unit, s32 reason);
-void result_animate_text(map_unit_t* unit, const SVECTOR* screen_coords);
 
 #endif
