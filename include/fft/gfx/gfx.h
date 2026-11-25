@@ -249,7 +249,6 @@ extern s32 g_gfx_screen_polarity;
 
 u32* gfx_get_battle_otag(void);
 void gfx_swap_render_buffers(void);
-void gfx_reset_display(int width, int height, int projection, u8 red, u8 green, u8 blue);
 void gfx_load_debug_font(void);
 
 /* render buffers */

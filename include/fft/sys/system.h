@@ -119,9 +119,6 @@ extern s32 g_debug_font_print_enabled;
 /* boot */
 void boot_run_startup(void);
 void boot_reset_session(void);
-void boot_show_sceap_logo(void);
-void boot_fade_in_squaresoft_logo(void);
-void boot_fade_out_squaresoft_logo(void);
 
 /* 4 KB of zero words after the C start-up, run as no-ops; returns at once.
  * No C source: hand-written MIPS in the original, kept as original bytes through the `regions:` rows of

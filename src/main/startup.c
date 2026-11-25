@@ -1,12 +1,22 @@
-/* Power-on and fresh-session setup. The first boot starts the hardware and
- * shows both logos; later session resets reload the shared resources under
- * the Squaresoft logo. */
+/* Power-on and session setup in the resident executable: the GPU display and the Squaresoft and SCEA
+ * boot logos, hardware and shared-resource setup for the first boot and later session resets, ENTD
+ * loading and roster construction for an encounter, the new-game inventory and roster, and the
+ * Orbonne caption shown as a new game begins. BATTLE can replace the debug print font with
+ * EFC_FNT.TIM. The original compiled all of it as one object. */
 
+#include "fft/battle/encounter.h"
+#include "fft/game/battle_unit.h"
+#include "fft/game/entd.h"
+#include "fft/game/item.h"
+#include "fft/game/party.h"
 #include "fft/game/status.h"
 #include "fft/gfx/gfx.h"
 #include "fft/gfx/zodiac.h"
+#include "fft/menu/menu_screen.h"
 #include "fft/menu/menu_sort.h"
+#include "fft/script/script_variable.h"
 #include "fft/sys/file.h"
+#include "fft/sys/math.h"
 #include "fft/sys/memcard.h"
 #include "fft/sys/memory.h"
 #include "fft/sys/music.h"
@@ -18,8 +28,339 @@
 #include "psx/libcd.h"
 #include "psx/libetc.h"
 #include "psx/libgpu.h"
+#include "psx/libgte.h"
 #include "psx/libspu.h"
 #include "psx/types.h"
+
+/* display and boot logos */
+
+/* Low immediate byte of FntLoad's CLUT-Y addiu instruction. */
+extern u8 g_psyq_gpu_font_clut_y_offset_immediate;
+extern u32 g_boot_squaresoft_logo_image_words[180 * 16 / 2]; /* 180x16 16-bit pixels */
+
+/* Install EFC_FNT.TIM as the debug print font: load the built-in font at VRAM (0x280, 0) with its
+ * CLUT moved to row 0x7f, overwrite both with EFC_FNT.TIM (retrying until it reads) and open a
+ * 512-character print stream at (0x88, 0x10) as the dump font. */
+void gfx_load_debug_font(void) {
+    TIM_IMAGE image;
+    u32* data;
+    int loaded = 0;
+
+    g_psyq_gpu_font_clut_y_offset_immediate = 0x7f;
+    FntLoad(0x280, 0);
+
+    while (!loaded) {
+        data = file_load_into_heap_checked(DISC_SECTOR_BATTLE_EFC_FNT_TIM, 0x8800);
+        if (data != 0) {
+            if (OpenTIM(data) == 0 && ReadTIM(&image) != 0) {
+                LoadTPage(image.paddr, 0, 0, 0x280, 0, image.prect->w * 4, image.prect->h);
+                loaded = 1;
+                LoadClut2(image.caddr, 0x280, 0x7f);
+            }
+            heap_release_block(data);
+        } else {
+            VSync(0);
+            file_poll_load(&g_file_cd_state);
+        }
+    }
+
+    SetDumpFnt(FntOpen(0x88, 0x10, 0x100, 0x100, 0, 0x200));
+    DrawSync(0);
+    DrawSync(0);
+}
+
+/* Set up double-buffered drawing at width x height without restarting the GPU:
+ * the second buffer sits 240 lines below the first (a 480-line mode uses one),
+ * both draw environments clear to the given color, and the display is masked
+ * until the caller turns it on. image_rect is not used. */
+static void set_up_display(int width, int height, int projection, u8 red, u8 green, u8 blue) {
+    RECT image_rect = { 0, 0, 1024, 512 };
+    int second_y = height == 480 ? 0 : 240;
+
+    SetDispMask(0);
+    SetGeomOffset(width / 2, height / 2);
+    SetGeomScreen(projection);
+
+    SetDefDrawEnv(&g_gfx_draw_envs[0], 0, 0, width, height);
+    SetDefDispEnv(&g_gfx_display_envs[0], 0, second_y, width, height);
+    SetDefDrawEnv(&g_gfx_draw_envs[1], 0, second_y, width, height);
+    SetDefDispEnv(&g_gfx_display_envs[1], 0, 0, width, height);
+
+    g_gfx_draw_envs[0].dtd = g_gfx_draw_envs[1].dtd = 0;
+    g_gfx_draw_envs[0].isbg = g_gfx_draw_envs[1].isbg = 1;
+    setRGB0(&g_gfx_draw_envs[0], red, green, blue);
+    setRGB0(&g_gfx_draw_envs[1], red, green, blue);
+
+    PutDispEnv(&g_gfx_display_envs[g_gfx_screen_polarity]);
+    PutDrawEnv(&g_gfx_draw_envs[g_gfx_screen_polarity]);
+}
+
+/* Present one frame of the Squaresoft logo fade: swap the display buffers after VSync, upload the
+ * 180x16 logo at (70, 112) of the new draw buffer and draw the caller's fade list over it. Returns
+ * VSync's result. */
+static int draw_squaresoft_logo(u32* otag, u32* image) {
+    RECT destination;
+    int elapsed;
+
+    g_gfx_screen_polarity = g_gfx_screen_polarity == 0;
+    DrawSync(0);
+    elapsed = VSync(0);
+
+    PutDispEnv(&g_gfx_display_envs[g_gfx_screen_polarity]);
+    PutDrawEnv(&g_gfx_draw_envs[g_gfx_screen_polarity]);
+
+    destination.x = 70;
+    destination.y = g_gfx_draw_envs[g_gfx_screen_polarity].clip.y + 112;
+    destination.w = 180;
+    destination.h = 16;
+    LoadImage(&destination, image);
+
+    DrawOTag(otag);
+    FntFlush(-1);
+    return elapsed;
+}
+
+/* Fade in the Squaresoft logo from the image linked into the executable
+ * (g_boot_squaresoft_logo_image_words).
+ *
+ * A full-screen subtractive quad steps from 248 to 0 in 32 frames while
+ * draw_squaresoft_logo uploads the logo each frame. The logo stays on
+ * screen while the caller loads its files; boot_fade_out_squaresoft_logo
+ * removes it. */
+static void boot_fade_in_squaresoft_logo(void) {
+    POLY_F4 polygons[2];
+    DR_MODE draw_modes[2];
+    u32 otags[2][2];
+    /* SetDrawMode uses this as a texture window; zero selects the full window. */
+    RECT image_rect = { 0 };
+    /* Initialized here, not in a for loop: the bytes need the while loop over it. */
+    s16 intensity = 248;
+    int frame;
+    int buffer;
+
+    set_up_display(320, 240, 512, 0, 0, 0);
+
+    SetPolyF4(&polygons[0]);
+    setRGB0(&polygons[0], 0, 0, 0);
+    setXY4(&polygons[0], 0, 0, 320, 0, 0, 256, 320, 256);
+    SetSemiTrans(&polygons[0], 1);
+    polygons[1] = polygons[0];
+
+    SetDrawMode(&draw_modes[0], 0, 0, PSYQ_GPU_TPAGE_ABR_SUBTRACT, &image_rect);
+    draw_modes[1] = draw_modes[0];
+
+    image_rect.x = 0;
+    image_rect.y = 0;
+    image_rect.w = 256;
+    image_rect.h = 480;
+    ClearImage(&image_rect, 0, 0, 0);
+    DrawSync(0);
+    SetDispMask(1);
+
+    for (frame = 0; frame < 15; frame++) {
+        VSync(0);
+    }
+
+    while (intensity >= 0) {
+        buffer = g_gfx_screen_polarity;
+        ClearOTag(otags[buffer], 2);
+        /* Reversed indexing preserves the retail compiler's addu operand order. */
+        setRGB0(&g_gfx_screen_polarity[polygons], intensity, intensity, intensity);
+        AddPrim(otags[buffer], &polygons[g_gfx_screen_polarity]);
+        AddPrim(otags[buffer], &draw_modes[g_gfx_screen_polarity]);
+        draw_squaresoft_logo(otags[buffer], g_boot_squaresoft_logo_image_words);
+        intensity -= 8;
+    }
+
+    DrawSync(0);
+    DrawSync(0);
+}
+
+/* Fade out the Squaresoft logo that boot_fade_in_squaresoft_logo left
+ * on screen: the subtractive quad steps from 0 to 255 in 32 frames, then both
+ * display buffers are cleared. */
+static void boot_fade_out_squaresoft_logo(void) {
+    POLY_F4 polygons[2];
+    DR_MODE draw_modes[2];
+    u32 otags[2][2];
+    /* SetDrawMode uses this as a texture window; zero selects the full window. */
+    RECT image_rect = { 0 };
+    u32* otag_base;
+    /* Initialized here, not in a for loop: the bytes need the while loop over it. */
+    s16 intensity = 0;
+    int buffer;
+
+    SetPolyF4(&polygons[0]);
+    setRGB0(&polygons[0], 0, 0, 0);
+    setXY4(&polygons[0], 0, 0, 320, 0, 0, 256, 320, 256);
+    SetSemiTrans(&polygons[0], 1);
+    polygons[1] = polygons[0];
+
+    SetDrawMode(&draw_modes[0], 0, 0, PSYQ_GPU_TPAGE_ABR_SUBTRACT, &image_rect);
+    draw_modes[1] = draw_modes[0];
+    /* The bytes need this base pointer; indexing otags[buffer] is 12 bytes shorter. */
+    otag_base = otags[0];
+
+    while (intensity < 256) {
+        if (intensity >= 248) {
+            intensity = 255;
+        }
+
+        buffer = g_gfx_screen_polarity;
+        ClearOTag(otag_base + buffer * 2, 2);
+        setRGB0(&g_gfx_screen_polarity[polygons], intensity, intensity, intensity);
+        AddPrim(otag_base + buffer * 2, &polygons[g_gfx_screen_polarity]);
+        AddPrim(otag_base + buffer * 2, &draw_modes[g_gfx_screen_polarity]);
+        draw_squaresoft_logo(otag_base + buffer * 2, g_boot_squaresoft_logo_image_words);
+        intensity += 8;
+    }
+
+    DrawSync(0);
+    image_rect.x = 0;
+    image_rect.y = 0;
+    image_rect.w = 256;
+    image_rect.h = 480;
+    ClearImage(&image_rect, 0, 0, 0);
+    DrawSync(0);
+}
+
+/* Present one frame of the SCEAP.DAT fade: swap the display buffers after VSync,
+ * upload the 320x32 strip at line 104 of the new draw buffer and draw the
+ * caller's fade list over it. Returns VSync's result. */
+static int draw_sceap_logo(u32* otag, u32* image) {
+    RECT destination;
+    int elapsed;
+
+    g_gfx_screen_polarity = g_gfx_screen_polarity == 0;
+    DrawSync(0);
+    elapsed = VSync(0);
+
+    PutDispEnv(&g_gfx_display_envs[g_gfx_screen_polarity]);
+    PutDrawEnv(&g_gfx_draw_envs[g_gfx_screen_polarity]);
+
+    destination.x = 0;
+    destination.y = g_gfx_draw_envs[g_gfx_screen_polarity].clip.y + 104;
+    destination.w = 320;
+    destination.h = 32;
+    LoadImage(&destination, image);
+
+    DrawOTag(otag);
+    FntFlush(-1);
+    return elapsed;
+}
+
+/* Show the publisher's logo strip at power-on.
+ *
+ * Loads SCEAP.DAT (sector 198, a 320x32 16-bit image) to the high overlay address
+ * and switches to a 320x240 display. A full-screen subtractive black quad fades
+ * the strip in over 32 frames, it stays for 180 frames, and the same quad fades
+ * it out over 32; each frame uploads the image again through
+ * draw_sceap_logo. Both display buffers are cleared before and after. */
+static void boot_show_sceap_logo(void) {
+    POLY_F4 polygons[2];
+    DR_MODE draw_modes[2];
+    u32 otags[2][2];
+    /* SetDrawMode uses this as a texture window; zero selects the full window. */
+    RECT image_rect = { 0 };
+    u32* current_otag;
+    s16 intensity;
+    int frame;
+
+    set_up_display(320, 240, 512, 0, 0, 0);
+    file_load_into_buffer_checked(DISC_SECTOR_SCEAP_DAT, 0x5000, g_heap_high_overlay_load_address);
+
+    SetPolyF4(&polygons[0]);
+    setRGB0(&polygons[0], 0, 0, 0);
+    setXY4(&polygons[0], 0, 0, 320, 0, 0, 240, 320, 240);
+    SetSemiTrans(&polygons[0], 1);
+    polygons[1] = polygons[0];
+
+    SetDrawMode(&draw_modes[0], 0, 0, PSYQ_GPU_TPAGE_ABR_SUBTRACT, &image_rect);
+    draw_modes[1] = draw_modes[0];
+
+    image_rect.x = 0;
+    image_rect.y = 0;
+    image_rect.w = 320;
+    image_rect.h = 480;
+    ClearImage(&image_rect, 0, 0, 0);
+    DrawSync(0);
+    SetDispMask(1);
+
+    for (frame = 0; frame < 15; frame++) {
+        VSync(0);
+    }
+
+    for (intensity = 248; intensity >= 0; intensity -= 8) {
+        current_otag = otags[g_gfx_screen_polarity];
+        ClearOTag(current_otag, 2);
+        setRGB0(&g_gfx_screen_polarity[polygons], intensity, intensity, intensity);
+        AddPrim(current_otag, &polygons[g_gfx_screen_polarity]);
+        AddPrim(current_otag, &draw_modes[g_gfx_screen_polarity]);
+        draw_sceap_logo(current_otag, (u32*)g_heap_high_overlay_load_address);
+    }
+
+    for (frame = 0; frame < 180; frame++) {
+        VSync(0);
+    }
+
+    for (intensity = 0; intensity < 256; intensity += 8) {
+        if (intensity >= 248) {
+            intensity = 255;
+        }
+
+        current_otag = otags[g_gfx_screen_polarity];
+        ClearOTag(current_otag, 2);
+        setRGB0(&g_gfx_screen_polarity[polygons], intensity, intensity, intensity);
+        AddPrim(current_otag, &polygons[g_gfx_screen_polarity]);
+        AddPrim(current_otag, &draw_modes[g_gfx_screen_polarity]);
+        draw_sceap_logo(current_otag, (u32*)g_heap_high_overlay_load_address);
+    }
+
+    DrawSync(0);
+    image_rect.x = 0;
+    image_rect.y = 0;
+    image_rect.w = 320;
+    image_rect.h = 480;
+    ClearImage(&image_rect, 0, 0, 0);
+    DrawSync(0);
+}
+
+/* Restart the GPU and set up double-buffered drawing at width x height with the
+ * second buffer 240 lines below the first (an interlaced 480-line mode uses one).
+ *
+ * Unlike set_up_display this also calls ResetGraph(0) and InitGeom, clears
+ * the whole 1024x512 VRAM, loads the debug font at (640, 0) and opens a print
+ * stream, and leaves background clearing off. The display stays masked. */
+static void gfx_reset_display(int width, int height, int projection, u8 red, u8 green, u8 blue) {
+    RECT image_rect = { 0, 0, 1024, 512 };
+    int second_y = height == 480 ? 0 : 240;
+
+    SetDispMask(0);
+    ResetGraph(0);
+    InitGeom();
+    SetGeomOffset(width / 2, height / 2);
+    SetGeomScreen(projection);
+
+    SetDefDrawEnv(&g_gfx_draw_envs[0], 0, 0, width, height);
+    SetDefDispEnv(&g_gfx_display_envs[0], 0, second_y, width, height);
+    SetDefDrawEnv(&g_gfx_draw_envs[1], 0, second_y, width, height);
+    SetDefDispEnv(&g_gfx_display_envs[1], 0, 0, width, height);
+
+    g_gfx_draw_envs[0].dtd = g_gfx_draw_envs[1].dtd = 0;
+    g_gfx_draw_envs[0].isbg = g_gfx_draw_envs[1].isbg = 0;
+    setRGB0(&g_gfx_draw_envs[0], red, green, blue);
+    setRGB0(&g_gfx_draw_envs[1], red, green, blue);
+
+    ClearImage(&image_rect, 0, 0, 0);
+    DrawSync(0);
+    FntLoad(640, 0);
+    SetDumpFnt(FntOpen(40, 16, 512, 256, 0, 512));
+
+    PutDispEnv(&g_gfx_display_envs[g_gfx_screen_polarity]);
+    PutDrawEnv(&g_gfx_draw_envs[g_gfx_screen_polarity]);
+}
+
+/* startup */
 
 static s32 s_session_initialized = 0;
 
@@ -125,4 +466,326 @@ void boot_reset_session(void) {
     }
 
     s_session_initialized = 1;
+}
+
+/* encounters */
+
+/* Start loading the ENTD file that holds g_encounter_current_id into a new
+ * 0x14000-byte heap block (g_encounter_set). The four files cover 128 encounters
+ * each.
+ *
+ * Returns 1 once the read is queued, and also for encounter 0, which loads nothing.
+ * Returns 0 with the block freed when the loader is busy; the caller retries. */
+int encounter_start_file_load(void) {
+    int lba;
+    entd_file_t* entd_set;
+
+    if (g_encounter_current_id != 0) {
+        /* Each branch makes its own allocation: one shared call is 56 bytes shorter. */
+        if (g_encounter_current_id < ENTD2_FIRST_ENCOUNTER) {
+            entd_set = heap_alloc(sizeof(entd_file_t));
+            g_encounter_set = entd_set;
+            lba = DISC_SECTOR_BATTLE_ENTD1_ENT;
+        } else if (g_encounter_current_id < ENTD3_FIRST_ENCOUNTER) {
+            entd_set = heap_alloc(sizeof(entd_file_t));
+            g_encounter_set = entd_set;
+            lba = DISC_SECTOR_BATTLE_ENTD2_ENT;
+        } else if (g_encounter_current_id < ENTD4_FIRST_ENCOUNTER) {
+            entd_set = heap_alloc(sizeof(entd_file_t));
+            g_encounter_set = entd_set;
+            lba = DISC_SECTOR_BATTLE_ENTD3_ENT;
+        } else {
+            entd_set = heap_alloc(sizeof(entd_file_t));
+            g_encounter_set = entd_set;
+            lba = DISC_SECTOR_BATTLE_ENTD4_ENT;
+        }
+
+        if (file_request_read_bytes(lba, sizeof(entd_file_t), entd_set) != 0) {
+            heap_release_block(g_encounter_set);
+            return 0;
+        }
+    }
+    return 1;
+}
+
+/* Return the selected encounter in the loaded ENTD file: -1 when there
+ * is no selected encounter, NULL while the file is still loading. Encounter ids 0-127
+ * index the file directly; each further range of 128 ids (the last one
+ * open-ended) indexes it from its own base. */
+const entd_encounter_t* encounter_get_current(void) {
+    /* The bytes need the id read through this pointer; direct reads are 8 bytes shorter. */
+    int* encounter_id = &g_encounter_current_id;
+    int id;
+
+    if (*encounter_id == 0) {
+        return (const entd_encounter_t*)-1;
+    }
+    if (file_get_load_state() == 0) {
+        id = *encounter_id;
+        if (id < ENTD2_FIRST_ENCOUNTER) {
+            return &g_encounter_set->encounters[id];
+        }
+        return &g_encounter_set->encounters[id < ENTD3_FIRST_ENCOUNTER ? id - ENTD2_FIRST_ENCOUNTER
+                : id < ENTD4_FIRST_ENCOUNTER                           ? id - ENTD3_FIRST_ENCOUNTER
+                                                                       : id - ENTD4_FIRST_ENCOUNTER];
+    }
+    return 0;
+}
+
+/* Rebuild the party roster from an ENTD encounter: load its file (blocking),
+ * empty the roster, save its 16 unit slots through party_save_encounter_unit,
+ * and free the file. */
+void encounter_init_party(int encounter_id) {
+    const entd_encounter_t* entd;
+    int unit_id;
+
+    g_encounter_current_id = encounter_id;
+    while (encounter_start_file_load() == 0) {
+        VSync(0);
+        file_poll_load(&g_file_cd_state);
+    }
+
+    for (;;) {
+        entd = encounter_get_current();
+        if (entd == (const entd_encounter_t*)-1) {
+            break;
+        }
+        if (entd != 0) {
+            party_clear();
+            for (unit_id = 0; unit_id < ENTD_UNITS_PER_ENCOUNTER; unit_id++) {
+                party_save_encounter_unit(entd, unit_id, 0, 1);
+            }
+            heap_release_block(g_encounter_set);
+            break;
+        }
+        VSync(0);
+        file_poll_load(&g_file_cd_state);
+    }
+}
+
+/* new game */
+
+/* Empty the inventory, then stock the new-game consumables: five Potions, two each of Hi-Potion,
+ * Eye Drop and Phoenix Down, and one of each other basic restorative. */
+void item_init_new_game_inventory(void) {
+    s32 remaining;
+    u8* quantity;
+
+    /* The bytes need both counters; an indexed loop is 4 bytes shorter. */
+    for (remaining = ITEM_ID_COUNT - 1, quantity = &g_item_quantities[ITEM_ID_COUNT - 1]; remaining >= 0;
+        remaining--, quantity--) {
+        *quantity = 0;
+    }
+
+    g_item_quantities[ITEM_ID_POTION] = 5;
+    g_item_quantities[ITEM_ID_HI_POTION] = 2;
+    g_item_quantities[ITEM_ID_X_POTION] = 1;
+    g_item_quantities[ITEM_ID_ETHER] = 1;
+    g_item_quantities[ITEM_ID_HI_ETHER] = 1;
+    g_item_quantities[ITEM_ID_ELIXIR] = 1;
+    g_item_quantities[ITEM_ID_ANTIDOTE] = 1;
+    g_item_quantities[ITEM_ID_EYE_DROP] = 2;
+    g_item_quantities[ITEM_ID_ECHO_GRASS] = 1;
+    g_item_quantities[ITEM_ID_MAIDENS_KISS] = 1;
+    g_item_quantities[ITEM_ID_SOFT] = 1;
+    g_item_quantities[ITEM_ID_HOLY_WATER] = 1;
+    g_item_quantities[ITEM_ID_REMEDY] = 1;
+    g_item_quantities[ITEM_ID_PHOENIX_DOWN] = 2;
+}
+
+enum { STARTING_ENCOUNTER_ID = 254, STARTING_WAR_FUNDS = 2000 };
+
+/* Start a new roster: empty it, then generate Ramza alone (mode 0) or load the
+ * party from ENTD encounter 254 (mode 2); any other mode leaves it empty. The
+ * inventory is reset to the new-game stock and the war funds to 2000. */
+void party_init_new_game(int mode) {
+    menu_screen_init_world_text();
+    party_clear();
+
+    if (mode == PARTY_NEW_GAME_RAMZA) {
+        party_unit_generate(UNIT_GENERATION_TYPE_RAMZA);
+    } else if (mode == PARTY_NEW_GAME_ENCOUNTER) {
+        encounter_init_party(STARTING_ENCOUNTER_ID);
+    }
+
+    item_init_new_game_inventory();
+    script_variable_set(SCRIPT_VAR_WAR_FUNDS, STARTING_WAR_FUNDS);
+}
+
+/* vectors */
+
+/* Retail calls these out-of-line setters even though PsyQ provides the same stores. */
+
+/* Store x, y and z in an SVECTOR, truncated to 16 bits. */
+void vector_set_short(SVECTOR* vector, s32 x, s32 y, s32 z) {
+    setVector(vector, x, y, z);
+}
+
+/* Store x, y and z in a VECTOR. */
+void vector_set_long(VECTOR* vector, s32 x, s32 y, s32 z) {
+    setVector(vector, x, y, z);
+}
+
+/* new-game caption */
+
+/* A second copy of set_up_display in the original, for the Orbonne
+ * caption fades. Set up double-buffered drawing at width x height without
+ * restarting the GPU: the second buffer sits 240 lines below the first (a
+ * 480-line mode uses one), both draw environments clear to the given color,
+ * and the display is masked until the caller turns it on. image_rect is not
+ * used. */
+static void set_up_caption_display(int width, int height, int projection, u8 red, u8 green, u8 blue) {
+    RECT image_rect = { 0, 0, 1024, 512 };
+    int second_y = height == 480 ? 0 : 240;
+
+    SetDispMask(0);
+    SetGeomOffset(width / 2, height / 2);
+    SetGeomScreen(projection);
+
+    SetDefDrawEnv(&g_gfx_draw_envs[0], 0, 0, width, height);
+    SetDefDispEnv(&g_gfx_display_envs[0], 0, second_y, width, height);
+    SetDefDrawEnv(&g_gfx_draw_envs[1], 0, second_y, width, height);
+    SetDefDispEnv(&g_gfx_display_envs[1], 0, 0, width, height);
+
+    g_gfx_draw_envs[0].dtd = g_gfx_draw_envs[1].dtd = 0;
+    g_gfx_draw_envs[0].isbg = g_gfx_draw_envs[1].isbg = 1;
+    setRGB0(&g_gfx_draw_envs[0], red, green, blue);
+    setRGB0(&g_gfx_draw_envs[1], red, green, blue);
+
+    PutDispEnv(&g_gfx_display_envs[g_gfx_screen_polarity]);
+    PutDrawEnv(&g_gfx_draw_envs[g_gfx_screen_polarity]);
+}
+
+/* Present one frame for the Orbonne caption fades: swap the display buffers after VSync, draw otag
+ * and flush the debug print stream. Returns VSync's result. */
+static int present_caption_frame(u32* otag) {
+    /* Unused local retains the retail stack frame. */
+    RECT matching_stack_space;
+    int elapsed;
+
+    g_gfx_screen_polarity = g_gfx_screen_polarity == 0;
+    DrawSync(0);
+    elapsed = VSync(0);
+
+    PutDispEnv(&g_gfx_display_envs[g_gfx_screen_polarity]);
+    PutDrawEnv(&g_gfx_draw_envs[g_gfx_screen_polarity]);
+    DrawOTag(otag);
+    FntFlush(-1);
+    return elapsed;
+}
+
+/* Fade in a 256x24 caption strip on a black 256x240 screen.
+ *
+ * The strip is the texture at VRAM (896, 256) with its CLUT at (896, 287), drawn
+ * at y 116. A full-screen subtractive quad steps from 248 to 0 in 32 frames, each
+ * presented with present_caption_frame. No function in the tree calls this
+ * routine or new_game_fade_out_caption. */
+static void new_game_fade_in_caption(void) {
+    POLY_F4 fade_polygons[2];
+    DR_MODE draw_modes[2];
+    POLY_FT4 title_polygons[2];
+    u32 otags[2][2];
+    /* SetDrawMode uses this as a texture window; zero selects the full window. */
+    RECT image_rect = { 0 };
+    u32* current_otag;
+    /* Initialized here, not in a for loop: the bytes need the while loop over it. */
+    s16 intensity = 248;
+
+    set_up_caption_display(256, 240, 512, 0, 0, 0);
+
+    SetPolyF4(&fade_polygons[0]);
+    setRGB0(&fade_polygons[0], 0, 0, 0);
+    setXY4(&fade_polygons[0], 0, 0, 256, 0, 0, 256, 256, 256);
+    SetSemiTrans(&fade_polygons[0], 1);
+    fade_polygons[1] = fade_polygons[0];
+
+    SetDrawMode(&draw_modes[0], 0, 0, PSYQ_GPU_TPAGE_ABR_SUBTRACT, &image_rect);
+    draw_modes[1] = draw_modes[0];
+
+    setPolyFT4(&title_polygons[0]);
+    setRGB0(&title_polygons[0], 128, 128, 128);
+    setXY4(&title_polygons[0], 0, 116, 255, 116, 0, 140, 255, 140);
+    setUV4(&title_polygons[0], 0, 0, 255, 0, 0, 24, 255, 24);
+    SetSemiTrans(&title_polygons[0], 0);
+    title_polygons[0].tpage = GetTPage(0, 0, 896, 256);
+    title_polygons[0].clut = GetClut(896, 287);
+    title_polygons[1] = title_polygons[0];
+
+    image_rect.x = 0;
+    image_rect.y = 0;
+    image_rect.w = 256;
+    image_rect.h = 480;
+    ClearImage(&image_rect, 0, 0, 0);
+    DrawSync(0);
+    SetDispMask(1);
+
+    while (intensity >= 0) {
+        current_otag = otags[g_gfx_screen_polarity];
+        ClearOTag(current_otag, 2);
+        setRGB0(&fade_polygons[g_gfx_screen_polarity], intensity, intensity, intensity);
+        AddPrim(current_otag, &fade_polygons[g_gfx_screen_polarity]);
+        AddPrim(current_otag, &draw_modes[g_gfx_screen_polarity]);
+        AddPrim(current_otag, &title_polygons[g_gfx_screen_polarity]);
+        present_caption_frame(current_otag);
+        intensity -= 8;
+    }
+
+    DrawSync(0);
+    DrawSync(0);
+}
+
+/* Fade out the caption strip new_game_fade_in_caption shows: the
+ * subtractive quad steps from 0 to 255 in 32 frames over the same strip, then
+ * both display buffers are cleared. */
+static void new_game_fade_out_caption(void) {
+    POLY_F4 fade_polygons[2];
+    DR_MODE draw_modes[2];
+    POLY_FT4 title_polygons[2];
+    u32 otags[2][2];
+    /* SetDrawMode uses this as a texture window; zero selects the full window. */
+    RECT image_rect = { 0 };
+    u32* current_otag;
+    /* Initialized here, not in a for loop: the bytes need the while loop over it. */
+    s16 intensity = 0;
+
+    SetPolyF4(&fade_polygons[0]);
+    setRGB0(&fade_polygons[0], 0, 0, 0);
+    setXY4(&fade_polygons[0], 0, 0, 256, 0, 0, 256, 256, 256);
+    SetSemiTrans(&fade_polygons[0], 1);
+    fade_polygons[1] = fade_polygons[0];
+
+    SetDrawMode(&draw_modes[0], 0, 0, PSYQ_GPU_TPAGE_ABR_SUBTRACT, &image_rect);
+    draw_modes[1] = draw_modes[0];
+
+    setPolyFT4(&title_polygons[0]);
+    setRGB0(&title_polygons[0], 128, 128, 128);
+    setXY4(&title_polygons[0], 0, 116, 255, 116, 0, 140, 255, 140);
+    setUV4(&title_polygons[0], 0, 0, 255, 0, 0, 24, 255, 24);
+    SetSemiTrans(&title_polygons[0], 0);
+    title_polygons[0].tpage = GetTPage(0, 0, 896, 256);
+    title_polygons[0].clut = GetClut(896, 287);
+    title_polygons[1] = title_polygons[0];
+
+    while (intensity < 256) {
+        if (intensity >= 248) {
+            intensity = 255;
+        }
+
+        current_otag = otags[g_gfx_screen_polarity];
+        ClearOTag(current_otag, 2);
+        setRGB0(&fade_polygons[g_gfx_screen_polarity], intensity, intensity, intensity);
+        AddPrim(current_otag, &fade_polygons[g_gfx_screen_polarity]);
+        AddPrim(current_otag, &draw_modes[g_gfx_screen_polarity]);
+        AddPrim(current_otag, &title_polygons[g_gfx_screen_polarity]);
+        present_caption_frame(current_otag);
+        intensity += 8;
+    }
+
+    DrawSync(0);
+    image_rect.x = 0;
+    image_rect.y = 0;
+    image_rect.w = 256;
+    image_rect.h = 480;
+    ClearImage(&image_rect, 0, 0, 0);
+    DrawSync(0);
 }
